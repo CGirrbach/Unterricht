@@ -1,0 +1,205 @@
+<!-- lehrmaterial -->
+<!-- materialtyp: simulation -->
+<!-- sim_bearbeitung: pflicht -->
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Compiler oder Interpreter? Simulation 1BK1T B02</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"modus":"keiner","fehlerzeilen":[]},"loesungswerte":{"modus":"interpreter","fehlerzeilen":[3]},"quelle":"inf-schule.de, Interpreter und Compiler im Überblick (Fachkonzepte Compiler und Interpreter); C# für IT-Berufe, 5. Aufl. 2024, S. 17 (Pseudocode SCHREIBE AUF BILDSCHIRM)"}</script>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--rot:#B23A33;--rothell:#FBEDEB;--gruen:#2F7D62;--gruenhell:#EAF3EC;--grau:#5A666F;--linie:#9AA5AE;--hell:#F4F6F8}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#fff;font-size:17px;line-height:1.4}
+header{border-top:5px solid var(--kupfer);padding:12px 16px 8px;border-bottom:1px solid var(--ink)}
+header .reihe{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--kupfer);font-weight:700}
+header h1{margin:4px 0 0;font-size:22px}
+main{max-width:1100px;margin:0 auto;padding:12px 16px 40px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media (max-width:760px){main{grid-template-columns:1fr}}
+.karte{border:1.4px solid var(--ink);padding:12px 14px}
+.karte h2{font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--kupfer);margin:0 0 8px}
+.modus{display:flex;gap:10px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;border-radius:8px}
+.modus button{flex:1 1 140px;min-height:52px;border:2.5px solid var(--kupfer);background:#fff;color:var(--kupfer);font-weight:700;font-size:18px}
+.modus button.an{background:var(--kupfer);color:#fff}
+.zeile{display:flex;align-items:center;gap:8px;margin:6px 0;padding:4px 6px;border:2px solid transparent;border-radius:6px}
+.zeile .nr{width:1.6em;color:var(--grau);font-family:Consolas,'DejaVu Sans Mono',monospace}
+.zeile code{flex:1;font-family:Consolas,'DejaVu Sans Mono',monospace;font-size:15px;overflow-wrap:anywhere}
+.zeile code .falsch{color:var(--rot);font-weight:700;text-decoration:underline wavy var(--rot)}
+.zeile button.tipp{min-height:44px;min-width:44px;border:2px solid var(--linie);background:var(--hell);font-size:14px;padding:4px 8px}
+.zeile button.tipp.an{border-color:var(--rot);background:var(--rothell);color:var(--rot);font-weight:700}
+.zeile.pruefen{border-color:#D9C3AE;background:var(--kupferhell)}
+.zeile.ok{border-color:var(--gruen);background:var(--gruenhell)}
+.zeile.fehler{border-color:var(--rot);background:var(--rothell)}
+.start{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+.start button{min-height:52px;padding:0 22px;border:0;font-weight:700;font-size:18px}
+#los{background:var(--gruen);color:#fff}
+#los:disabled{background:#9BB8AE;cursor:default}
+#zurueck{background:#fff;color:var(--ink);border:2px solid var(--ink)!important}
+#konsole{background:#1A2530;color:#F4F6F8;font-family:Consolas,'DejaVu Sans Mono',monospace;min-height:150px;padding:10px 12px;white-space:pre-wrap;font-size:15px}
+#konsole .leer{color:#8a95a0}
+#protokoll{list-style:none;padding:0;margin:0;font-size:15px}
+#protokoll li{padding:4px 0;border-bottom:1px solid #E1E6EA}
+#protokoll li.rot{color:var(--rot);font-weight:700}
+#protokoll li.gruen{color:var(--gruen);font-weight:700}
+.zaehler{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.zaehler div{background:var(--hell);padding:6px 10px;border-radius:6px;font-size:15px}
+.hinweis{font-size:14px;color:var(--grau)}
+</style></head>
+<body>
+<header>
+ <div class="reihe">1BK1T Informationstechnik · C# · Block 02 · Simulation</div>
+ <h1>Compiler oder Interpreter?</h1>
+</header>
+<main>
+ <section class="karte">
+  <h2>1 · Wer übersetzt?</h2>
+  <div class="modus">
+   <button id="mCompiler" type="button">Compiler</button>
+   <button id="mInterpreter" type="button">Interpreter</button>
+  </div>
+  <p class="hinweis" id="modusText">Wählen Sie zuerst, ob ein Compiler oder ein Interpreter das Programm übersetzt.</p>
+  <h2 style="margin-top:14px">2 · Das Programm</h2>
+  <div id="programm"></div>
+  <p class="hinweis">Mit „Tippfehler“ machen Sie aus SCHREIBE ein SCHRIEBE. Diese Anweisung kennt der Rechner nicht.</p>
+  <div class="start">
+   <button id="los" type="button" disabled>Starten</button>
+   <button id="zurueck" type="button">Zurücksetzen</button>
+  </div>
+ </section>
+ <section class="karte">
+  <h2>3 · Was auf dem Bildschirm erscheint</h2>
+  <div id="konsole"><span class="leer">(noch nichts)</span></div>
+  <h2 style="margin-top:14px">4 · Was dabei geschieht</h2>
+  <ol id="protokoll"></ol>
+  <div class="zaehler">
+   <div>Starts: <b id="nStarts">0</b></div>
+   <div>Übersetzungsvorgänge: <b id="nUeber">0</b></div>
+  </div>
+ </section>
+</main>
+<script>
+(function(){
+  "use strict";
+  var TEXTE = ["Gerät: Wasserkocher Aqua 17", "Spannung: 230 V", "Leistung: 2200 W", "Fertig."];
+  var meta = JSON.parse(document.getElementById('sim-meta').textContent);
+  var modus = meta.startwerte.modus;             // "keiner" | "compiler" | "interpreter"
+  var fehler = {};                               // Zeilennummer -> true
+  var uebersetztFuer = null;                     // Stand, fuer den ein fertiges Programm vorliegt
+  var laeuft = false, starts = 0, ueber = 0, timer = null;
+  var langsam = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var $ = function(id){ return document.getElementById(id); };
+
+  function stand(){ return Object.keys(fehler).filter(function(k){return fehler[k];}).sort().join(','); }
+
+  function zeichneProgramm(){
+    var p = $('programm'); p.innerHTML = '';
+    TEXTE.forEach(function(t, i){
+      var n = i + 1, f = !!fehler[n];
+      var d = document.createElement('div'); d.className = 'zeile'; d.id = 'z' + n;
+      d.innerHTML = '<span class="nr">' + n + '</span><code>' +
+        (f ? '<span class="falsch">SCHRIEBE</span>' : 'SCHREIBE') + ' AUF BILDSCHIRM "' + t + '"</code>';
+      var b = document.createElement('button'); b.type = 'button';
+      b.className = 'tipp' + (f ? ' an' : ''); b.textContent = f ? 'Tippfehler ✓' : 'Tippfehler';
+      b.setAttribute('aria-pressed', f ? 'true' : 'false');
+      b.addEventListener('click', function(){ if (laeuft) return; fehler[n] = !fehler[n]; uebersetztFuer = null; zeichneProgramm(); });
+      d.appendChild(b); p.appendChild(d);
+    });
+  }
+  function setzeModus(m){
+    if (laeuft) return;
+    modus = m;
+    $('mCompiler').classList.toggle('an', m === 'compiler');
+    $('mInterpreter').classList.toggle('an', m === 'interpreter');
+    $('modusText').textContent = m === 'compiler'
+      ? 'Der Compiler übersetzt das ganze Programm, bevor irgendetwas läuft.'
+      : 'Der Interpreter übersetzt eine Anweisung und führt sie sofort aus, dann die nächste.';
+    $('los').disabled = false;
+  }
+  function protokoll(text, farbe){
+    var li = document.createElement('li'); li.textContent = text; if (farbe) li.className = farbe;
+    $('protokoll').appendChild(li);
+  }
+  function ausgeben(t){
+    var k = $('konsole'); if (k.querySelector('.leer')) k.textContent = '';
+    k.textContent += t + '\n';
+  }
+  function markiere(n, cls){
+    for (var i = 1; i <= TEXTE.length; i++) $('z' + i).classList.remove('pruefen');
+    if (n) { $('z' + n).classList.remove('ok','fehler','pruefen'); $('z' + n).classList.add(cls); }
+  }
+  function schritte(liste){
+    laeuft = true; $('los').disabled = true;
+    var i = 0;
+    (function weiter(){
+      if (i >= liste.length) { laeuft = false; $('los').disabled = false; return; }
+      liste[i++]();
+      timer = setTimeout(weiter, langsam ? 750 : 0);
+    })();
+  }
+  function start(){
+    if (modus === 'keiner' || laeuft) return;
+    starts++; $('nStarts').textContent = starts;
+    $('konsole').innerHTML = '<span class="leer">(noch nichts)</span>'; $('protokoll').innerHTML = '';
+    for (var i = 1; i <= TEXTE.length; i++) $('z' + i).classList.remove('ok','fehler','pruefen');
+    var s = [];
+    if (modus === 'compiler') {
+      if (uebersetztFuer === stand() && stand() === '') {
+        s.push(function(){ protokoll('Das Programm liegt schon übersetzt vor. Es startet sofort, ohne neue Übersetzung.', 'gruen'); });
+      } else {
+        s.push(function(){ ueber++; $('nUeber').textContent = ueber; protokoll('Der Compiler übersetzt das ganze Programm, Zeile für Zeile, bevor etwas läuft.'); });
+        var nFehler = 0;
+        TEXTE.forEach(function(t, k){
+          var n = k + 1;
+          s.push(function(){
+            markiere(n, fehler[n] ? 'fehler' : 'ok');
+            if (fehler[n]) { nFehler++; protokoll('Zeile ' + n + ': unbekannte Anweisung SCHRIEBE.', 'rot'); }
+            else protokoll('Zeile ' + n + ' übersetzt.');
+          });
+        });
+        s.push(function(){
+          if (nFehler) { uebersetztFuer = null; protokoll('Übersetzung abgebrochen: ' + nFehler + ' Fehler. Es ist kein Programm entstanden, nichts läuft.', 'rot'); }
+          else { uebersetztFuer = stand(); protokoll('Übersetzung fertig: Das Programm liegt jetzt als Datei vor.', 'gruen'); }
+        });
+      }
+      s.push(function(){
+        if (uebersetztFuer === null) return;
+        protokoll('Das übersetzte Programm läuft.');
+      });
+      TEXTE.forEach(function(t, k){
+        s.push(function(){ if (uebersetztFuer !== null) ausgeben(t); });
+      });
+    } else {
+      s.push(function(){ protokoll('Der Interpreter beginnt. Er übersetzt jede Anweisung erst, wenn sie an der Reihe ist.'); });
+      var halt = false;
+      TEXTE.forEach(function(t, k){
+        var n = k + 1;
+        s.push(function(){
+          if (halt) return;
+          ueber++; $('nUeber').textContent = ueber;
+          if (fehler[n]) { markiere(n, 'fehler'); protokoll('Zeile ' + n + ': unbekannte Anweisung SCHRIEBE. Das Programm hält hier an.', 'rot'); halt = true; }
+          else { markiere(n, 'ok'); protokoll('Zeile ' + n + ' übersetzt und sofort ausgeführt.'); ausgeben(t); }
+        });
+      });
+      s.push(function(){ if (!halt) protokoll('Programm zu Ende. Beim nächsten Start übersetzt der Interpreter alles wieder neu.', 'gruen'); });
+    }
+    schritte(s);
+    if (window.innerWidth < 760) $('konsole').scrollIntoView({behavior: langsam ? 'smooth' : 'auto', block: 'start'});
+  }
+  function zuruecksetzen(){
+    clearTimeout(timer); laeuft = false;
+    modus = meta.startwerte.modus; fehler = {}; uebersetztFuer = null; starts = 0; ueber = 0;
+    $('nStarts').textContent = 0; $('nUeber').textContent = 0;
+    $('mCompiler').classList.remove('an'); $('mInterpreter').classList.remove('an');
+    $('modusText').textContent = 'Wählen Sie zuerst, ob ein Compiler oder ein Interpreter das Programm übersetzt.';
+    $('los').disabled = true;
+    $('konsole').innerHTML = '<span class="leer">(noch nichts)</span>'; $('protokoll').innerHTML = '';
+    zeichneProgramm();
+  }
+  $('mCompiler').addEventListener('click', function(){ setzeModus('compiler'); });
+  $('mInterpreter').addEventListener('click', function(){ setzeModus('interpreter'); });
+  $('los').addEventListener('click', start);
+  $('zurueck').addEventListener('click', zuruecksetzen);
+  zuruecksetzen();
+})();
+</script>
+</body></html>
