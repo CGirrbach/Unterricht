@@ -1,0 +1,355 @@
+<!-- lehrmaterial -->
+<!-- materialtyp: simulation -->
+<!-- sim_bearbeitung: pflicht -->
+<!-- Block EG1-B11 · Elektrischer Widerstand R und Leitwert G (G = 1/R) -->
+<!-- NEUBAU 12.09.2026. Die Vorgaengerfassung hatte EIN Stellglied und KEIN eigenes Bild:
+     Als Kennlinie stand dort ein Buchausschnitt (`bild_fachkunde_S036_B02.png`), und das
+     Skript aenderte nur zwei Zahlen. Der alt-Text des Bildes behauptete trotzdem
+     „Ein Punkt wandert mit dem Regler auf der Kurve", das Arbeitsblatt „der gruene Punkt
+     faellt entlang der Kurve" — beides loeste die Datei nicht ein.
+     Gemessen mit `_werkzeuge/simulationen_messen.py`: 1 Stellglied, 0 Canvas, 0 SVG —
+     die einzige der 37 Simulationen, die Carlos Massstab nicht genuegte.
+
+     Ziel-Erkenntnis:
+     (1) G = 1/R ist ein KEHRWERT, keine Proportionalitaet. Die Kennlinie ist eine
+         HYPERBEL: doppelter Widerstand → halber Leitwert, nie „doppelter Leitwert".
+         Genau diese Fehlvorstellung nennt das Arbeitsblatt.
+     (2) ZWEI Leiter nebeneinander machen das Verhaeltnis sichtbar: stellt man R2 auf das
+         Doppelte von R1, liegt G2 auf der Haelfte von G1 — man muss es nicht glauben.
+     (3) Das Rohrbild macht „leitet gut" anschaulich: die Oeffnung ist der Leitwert.
+     (4) GRENZFAELLE, beide im Einstellbereich:
+           R = 1 Ω     → G = 1000 mS = 1 S   (sehr guter Leiter)
+           R = 10 kΩ   → G = 100 µS          (leitet fast nicht)
+         UNMOEGLICH und nachweislich nicht einstellbar: G = 0. Der Kehrwert wird nie null,
+         so gross man R auch macht — es gibt keinen vollkommenen Nichtleiter.
+     (5) NACHBAU DES BLATTES, alle Werte exakt treffbar (Rundungsregel siehe `runde`):
+           R = 4 Ω → 250 mS · 6 Ω → 166,7 mS · 8 Ω → 125 mS · 10 Ω → 100 mS
+           R = 25 Ω → 40 mS   ·   R = 1250 Ω → 0,8 mS
+     Startstellung: R1 = 15 Ω, R2 = 62 Ω (66,7 mS und 16,1 mS). Kein Blattwert, kein
+     glattes Verhaeltnis — die Erkenntnis wird nicht vorweggenommen; beide Regler stehen
+     bei 30 % und 45 % ihrer Spanne. -->
+<!-- BELEGE — Tabellenbuch 32. A., gedrucktTabellenbuch S. 30 „Ladung, Spannung, Stromstaerke,
+     Widerstand" (Seite am 11.09.2026 gerendert und abgelesen):
+       Formel 9 (gerahmt)   G = 1 / R        darunter ungerahmt: R = 1/G
+       Formel 7             U = R · I        Formel 8   I = U / R
+       Einheiten            [R] = Ω  ·  [G] = 1/Ω = S
+     ★ Die Einheit Siemens schreibt sich mit aufrechtem grossen S und ist NICHT die
+       Sekunde s — die Fehlvorstellung steht so im Arbeitsblatt. -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulation EG1-B11: Widerstand und Leitwert</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--rot:#B23A33;--hell:#F4F6F8;
+        --linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62;--blau:#2557A3}
+  html,body{margin:0;padding:0}
+  body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;
+       line-height:1.46;font-size:16px;padding:18px 14px 60px}
+  .wrap{max-width:960px;margin:0 auto;background:#fff;border:1px solid var(--linie);
+        box-shadow:0 6px 26px rgba(0,0,0,.10);padding:22px 24px 30px}
+  .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:9px 0;margin-bottom:16px}
+  .kopf .reihe{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--kupfer);font-weight:700}
+  .kopf h1{font-size:22px;margin:3px 0 2px}
+  .kopf .sub{font-size:13px;color:var(--grau)}
+  .box{border:1.2px solid var(--ink);padding:11px 14px;margin:14px 0;background:#fff}
+  .box .cap{display:block;font-size:12px;font-weight:700;letter-spacing:.09em;
+            text-transform:uppercase;color:var(--kupfer);margin-bottom:5px}
+  .box.sim{background:var(--kupferhell)}
+  .box.quelle{border:none;padding:0;margin:16px 0 0}
+  .box.quelle .cap{color:var(--grau)}
+  .quelle small{font-size:11.5px;color:var(--grau)}
+  i{font-style:italic} sub{font-size:.7em;vertical-align:-.25em} sup{font-size:.7em;vertical-align:.5em}
+  figure{margin:14px 0 0}
+  canvas.stage{width:100%;max-width:880px;height:auto;display:block;margin:6px auto 0;
+               border:1px solid var(--linie);background:#fff;touch-action:manipulation}
+  figcaption{font-size:11.5px;color:var(--grau);text-align:left;border-left:3px solid var(--kupfer);
+             padding:4px 0 4px 9px;margin-top:7px}
+  .regler{display:grid;grid-template-columns:1fr;gap:13px;margin:14px 0 4px}
+  @media(min-width:640px){.regler{grid-template-columns:1fr 1fr}}
+  .regler label{display:block;font-size:13.5px;font-weight:600;margin-bottom:3px}
+  .regler input[type=range]{width:100%;height:34px;accent-color:var(--kupfer)}
+  .wert{font-variant-numeric:tabular-nums;font-weight:700;color:var(--kupfer)}
+  table.ab{width:100%;border-collapse:collapse;margin-top:12px;font-size:14.5px}
+  table.ab th,table.ab td{border:1px solid var(--linie);padding:5px 8px;text-align:left}
+  table.ab th{background:var(--hell);font-size:12px;letter-spacing:.05em;text-transform:uppercase}
+  table.ab td.z{text-align:right;font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
+  @media(max-width:520px){table.ab{font-size:13px} table.ab th{letter-spacing:0;font-size:11px}
+    table.ab th,table.ab td{padding:4px 5px}}
+  .hinw{font-size:13px;color:var(--grau);margin-top:8px}
+  button.reset{font:inherit;font-size:14px;padding:9px 16px;border:1.4px solid var(--kupfer);
+               background:#fff;color:var(--kupfer);cursor:pointer;margin-top:12px;min-height:44px}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="kopf">
+    <div class="reihe">E1EG · Grundlagen Elektrotechnik · Lernfeld&nbsp;1 · Block&nbsp;11</div>
+    <h1>Widerstand und Leitwert</h1>
+    <div class="sub">Selbst bedienbar · <i>G</i> = 1 / <i>R</i></div>
+  </div>
+
+  <div class="box sim">
+    <span class="cap">So bedienen Sie die Simulation</span>
+    <p>Sie stellen <b>zwei Leiter</b> ein. Im Bild sehen Sie beide als <b>Rohr</b>: je weiter
+    die Öffnung, desto besser leitet er. Daneben (auf dem Handy darunter) liegt die <b>Kennlinie</b>
+    <i>G</i>&nbsp;=&nbsp;1/<i>R</i> mit beiden Punkten. Versuchen Sie, <b>R</b><sub>2</sub>
+    auf das <b>Doppelte</b> von <b>R</b><sub>1</sub> zu stellen, und achten Sie darauf,
+    was mit <i>G</i><sub>2</sub> geschieht.</p>
+  </div>
+
+  <figure>
+    <script type="application/json" id="sim-meta">{"startwerte":{"R1":15,"R2":62},"loesungswerte":{"R2":30}}</script>
+    <canvas class="stage" id="cLeit" width="880" height="440"
+      data-quelle="Schema (kein Buchbild): Rohrmodell fuer den Leitwert und Kennlinie G = 1/R nach Tabellenbuch S. 30, Formel 9; Kurvenform wie Tabellenbuch S. 30, Bild Leitwert und Widerstand"
+      aria-label="Zwei Rohre übereinander: ihre Öffnung entspricht dem Leitwert des jeweiligen Leiters, das weitere Rohr leitet besser. Daneben die Kennlinie: waagerecht der Widerstand, senkrecht der Leitwert; die Kurve fällt als Hyperbel ab, und auf ihr liegen die beiden eingestellten Punkte."></canvas>
+    <figcaption>Die Kennlinie ist eine <b>Hyperbel</b>, keine Gerade. Verdoppeln Sie den
+    Widerstand, so <b>halbiert</b> sich der Leitwert, der Punkt rutscht nach rechts und
+    zugleich nach unten.</figcaption>
+  </figure>
+
+  <div class="regler">
+    <div>
+      <label for="rR1">Leiter&nbsp;1, Widerstand <i>R</i><sub>1</sub>: <span class="wert" id="wR1">15 Ω</span></label>
+      <input id="rR1" type="range" min="0" max="400" value="118" step="1" aria-label="Widerstand des ersten Leiters, 1 Ohm bis 10 Kiloohm">
+    </div>
+    <div>
+      <label for="rR2">Leiter&nbsp;2, Widerstand <i>R</i><sub>2</sub>: <span class="wert" id="wR2">62 Ω</span></label>
+      <input id="rR2" type="range" min="0" max="400" value="179" step="1" aria-label="Widerstand des zweiten Leiters, 1 Ohm bis 10 Kiloohm">
+    </div>
+  </div>
+  <button class="reset" id="bReset" type="button">Zurücksetzen</button>
+
+  <table class="ab">
+    <tr><th>Größe</th><th>Rechnung</th><th style="text-align:right">Leiter&nbsp;1</th>
+        <th style="text-align:right">Leiter&nbsp;2</th></tr>
+    <tr><td>Widerstand <i>R</i></td><td>eingestellt</td>
+        <td class="z" id="aR1">15 Ω</td><td class="z" id="aR2">62 Ω</td></tr>
+    <tr><td><b>Leitwert <i>G</i> = 1/<i>R</i></b></td>
+        <td>Tabellenbuch S.&nbsp;30, Formel&nbsp;9</td>
+        <td class="z" id="aG1">66,7 mS</td><td class="z" id="aG2">16,1 mS</td></tr>
+    <tr><td>Probe: <i>R</i> = 1/<i>G</i></td><td>Formel umgestellt</td>
+        <td class="z" id="aP1">15 Ω</td><td class="z" id="aP2">62 Ω</td></tr>
+  </table>
+  <p class="hinw" id="hDeut">Stellen Sie <i>R</i><sub>2</sub> auf das Doppelte von <i>R</i><sub>1</sub>.</p>
+
+  <div class="box quelle">
+    <span class="cap">Woher die Werte stammen</span>
+    <small>Auf <b>Tabellenbuch S.&nbsp;30</b> („Ladung, Spannung, Stromstärke,
+    Widerstand“) steht <b>Formel&nbsp;9</b> <i>G</i>&nbsp;=&nbsp;1/<i>R</i>, unmittelbar
+    darunter ungerahmt <i>R</i>&nbsp;=&nbsp;1/<i>G</i>. Die Einheiten derselben Seite:
+    [<i>R</i>]&nbsp;=&nbsp;Ω und [<i>G</i>]&nbsp;=&nbsp;1/Ω&nbsp;=&nbsp;<b>S</b>.
+    Das Einheitenzeichen des Siemens ist das aufrechte große S (das kleine s ist die Sekunde).
+    Dieselbe Seite zeigt die Kennlinie im Bild „Leitwert und Widerstand“. Gerechnet wird hier ohne jeden weiteren Kennwert, der
+    Leitwert ist der reine Kehrwert des Widerstandes.</small>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  var START = {a:118, b:179};
+
+  function fmt(x,k){ return x.toFixed(k).replace(".",","); }
+  // ★ Ablesegenaue Rundung. Ein logarithmischer Regler trifft runde Werte nie exakt
+  //   (Stufe 60 ergibt 3,98 Ω); so gerundet sind ALLE Blattwerte treffbar:
+  //   4 · 6 · 8 · 10 · 25 · 1250 Ω.
+  function runde(R){
+    if(R < 10)   return Math.round(R*10)/10;
+    if(R < 100)  return Math.round(R);
+    if(R < 1000) return Math.round(R/10)*10;
+    return Math.round(R/50)*50;
+  }
+  function widerstand(stufe){ return runde(Math.pow(10, stufe/100)); }
+  // Drei tragende Stellen, ohne aufgefuellte Nullen (DIN 1333): 66,7 · 1 · 1,25 · 100
+  function sig3(x){
+    if(x === 0) return "0";
+    var k = Math.max(0, 2 - Math.floor(Math.log10(Math.abs(x) * 1.0000001)));
+    var t = fmt(x, k);
+    // nur Nullen HINTER dem Komma fallen weg; 100 bleibt 100
+    return t.indexOf(",") < 0 ? t : t.replace(/0+$/, "").replace(/,$/, "");
+  }
+  function rText(R){
+    if(R >= 1000) return sig3(R/1000) + " kΩ";
+    return sig3(R) + " Ω";
+  }
+  // Leitwert praefixgerecht, so wie es das Blatt verlangt (ENG-Anzeige).
+  function gText(G){
+    if(G >= 1)      return sig3(G) + " S";
+    if(G >= 1e-3)   return sig3(G*1e3) + " mS";
+    return sig3(G*1e6) + " µS";
+  }
+
+  // Runde Achsenteilung: Schritt 1, 2, 2,5 oder 5 mal Zehnerpotenz, etwa n Teile
+  function schritt(max, n){
+    var roh = max / n, p = Math.pow(10, Math.floor(Math.log10(roh))), q = roh / p;
+    return (q <= 1 ? 1 : q <= 2 ? 2 : q <= 2.5 ? 2.5 : q <= 5 ? 5 : 10) * p;
+  }
+  // Einheit einer Achse nach ihrem Endwert: [Faktor, Einheitenzeichen]
+  function gEinheit(Gmax){ return Gmax >= 1 ? [1,"S"] : Gmax >= 1e-3 ? [1e3,"mS"] : [1e6,"µS"]; }
+  function rEinheit(Rmax){ return Rmax >= 2000 ? [1e-3,"kΩ"] : [1,"Ω"]; }
+  function zahl(x){ var t = (Math.round(x*100)/100).toString().replace(".",","); return t; }
+
+  function rohr(g, x, y, br, anteil, farbe, name, R, G){
+    var hMax = 74, h = Math.max(3, hMax*anteil);
+    g.strokeStyle="#9AA5AE"; g.lineWidth=1.2;
+    g.strokeRect(x, y - hMax/2, br, hMax);              // Mantel
+    // ★ Der Mantel bekommt einen grauen Grund, die Oeffnung eine kraeftige Fuellung.
+    //   Ohne den Grund sah ein schmaler Querschnitt aus wie zwei Striche mit Spalt,
+    //   im Bild gesehen.
+    g.fillStyle="#F0F2F4"; g.fillRect(x+1, y - hMax/2 + 1, br-2, hMax-2);
+    g.fillStyle = farbe + "55";
+    g.fillRect(x+1, y - h/2, br-2, h);                  // freier Querschnitt
+    g.strokeStyle = farbe; g.lineWidth=2;
+    g.beginPath(); g.moveTo(x+1, y-h/2); g.lineTo(x+br-1, y-h/2);
+    g.moveTo(x+1, y+h/2); g.lineTo(x+br-1, y+h/2); g.stroke();
+    g.fillStyle="#1A2530"; g.font="bold 13.5px 'Noto Sans',sans-serif"; g.textAlign="left";
+    g.fillText(name, x, y - hMax/2 - 26);
+    g.font="13px 'Noto Sans',sans-serif"; g.fillStyle=farbe;
+    g.fillText("R = " + rText(R) + "   →   G = " + gText(G), x, y - hMax/2 - 9);
+  }
+
+  // Zwei Anordnungen: breit nebeneinander, schmal (Handy) untereinander mit 360 px Zeichenbreite
+  var BREIT = {w:880, h:440, titel:[24,24], r1:[40,130,300], r2:[40,300,300],
+               xl:470, xr:846, yo:80, yu:352, fuss:[[24,424]]};
+  var SCHMAL = {w:360, h:760, titel:[16,20], r1:[20,132,320], r2:[20,272,320],
+                xl:70, xr:338, yo:360, yu:640, fuss:[[16,712],[16,732]]};
+  function anordnung(c){
+    var L = (c.parentNode.clientWidth || 880) < 600 ? SCHMAL : BREIT;
+    if(c.width !== L.w || c.height !== L.h){ c.width = L.w; c.height = L.h; }
+    return L;
+  }
+
+  function zeichne(R1, R2, G1, G2){
+    var c = $("cLeit"), L = anordnung(c), g = c.getContext("2d");
+    g.clearRect(0,0,L.w,L.h); g.textBaseline="middle"; g.textAlign="left";
+    g.fillStyle="#5A666F"; g.font="13px 'Noto Sans',sans-serif";
+    if(L === SCHMAL){
+      g.fillText("Zwei Leiter im Vergleich:", L.titel[0], L.titel[1]);
+      g.fillText("die Öffnung des Rohrs steht für den Leitwert", L.titel[0], L.titel[1]+18);
+    } else {
+      g.fillText("Zwei Leiter im Vergleich: die Öffnung des Rohrs steht für den Leitwert", L.titel[0], L.titel[1]);
+    }
+
+    // ── die beiden Rohre, Oeffnung im Verhaeltnis der Leitwerte
+    var gMax = Math.max(G1, G2);
+    rohr(g, L.r1[0], L.r1[1], L.r1[2], G1/gMax, "#2557A3", "Leiter 1", R1, G1);
+    rohr(g, L.r2[0], L.r2[1], L.r2[2], G2/gMax, "#B23A33", "Leiter 2", R2, G2);
+
+    // ── die Kennlinie G = 1/R
+    var xl=L.xl, xr=L.xr, yo=L.yo, yu=L.yu;
+    // ★ Bei 1 Ω gegen 10 kΩ waere die Achse 14 500 Ω breit und die Kurve ein Strich am
+    //   Rand. Der Ausschnitt folgt deshalb dem KLEINEREN Widerstand; was darueber liegt,
+    //   wird am rechten Rand als „außerhalb" markiert.
+    var Rmin = Math.min(R1, R2);
+    var Rroh = Math.min(Math.max(R1, R2)*1.45, Rmin*25);
+    // Achsen auf runde Endwerte (DIN 461: Groesse in Einheit, runde Teilung)
+    var re = rEinheit(Rroh), rs = schritt(Rroh*re[0], 4)/re[0], Rmax = Math.ceil(Rroh/rs)*rs;
+    var ge = gEinheit(gMax*1.18), gs = schritt(gMax*1.18*ge[0], 3)/ge[0], Gmax = Math.ceil(gMax*1.18/gs)*gs;
+    function X(R){ return xl + Math.min(R/Rmax,1)*(xr-xl); }
+    function Y(G){ return yu - Math.min(G/Gmax,1)*(yu-yo); }
+    g.strokeStyle="#1A2530"; g.lineWidth=1.6;
+    g.beginPath(); g.moveTo(xl,yo-12); g.lineTo(xl,yu); g.lineTo(xr,yu); g.stroke();
+    // Pfeile an den Achsen
+    g.fillStyle="#1A2530";
+    g.beginPath(); g.moveTo(xl,yo-20); g.lineTo(xl-5,yo-8); g.lineTo(xl+5,yo-8); g.closePath(); g.fill();
+    g.beginPath(); g.moveTo(xr+8,yu); g.lineTo(xr-4,yu-5); g.lineTo(xr-4,yu+5); g.closePath(); g.fill();
+    // Achsenbeschriftung „Groesse in Einheit"
+    g.fillStyle="#1A2530"; g.font="12.5px 'Noto Sans',sans-serif";
+    g.textAlign="left"; g.fillText("G in " + ge[1], xl+10, yo-18);
+    g.textAlign="right"; g.fillText("R in " + re[1], xr, yu+32);
+    // Teilung
+    g.font="11.5px 'Noto Sans',sans-serif"; g.fillStyle="#5A666F"; g.textAlign="center";
+    for(var Rt = rs; Rt <= Rmax + 1e-9; Rt += rs){
+      g.fillText(zahl(Rt*re[0]), X(Rt), yu+14);
+      g.strokeStyle="#C9CFD4"; g.lineWidth=1;
+      g.beginPath(); g.moveTo(X(Rt),yu); g.lineTo(X(Rt),yu+4); g.stroke();
+    }
+    g.textAlign="right";
+    for(var Gt = gs; Gt <= Gmax + 1e-12; Gt += gs){
+      g.fillText(zahl(Gt*ge[0]), xl-6, Y(Gt));
+      g.strokeStyle="#C9CFD4"; g.lineWidth=1;
+      g.beginPath(); g.moveTo(xl-3,Y(Gt)); g.lineTo(xl,Y(Gt)); g.stroke();
+    }
+    g.fillText("0", xl-6, yu);
+    g.textAlign="left";
+    // die Hyperbel
+    // ★ Der Pfad wird UNTERBROCHEN, wo die Kurve oben aus dem Bild laeuft. Der erste
+    //   Entwurf uebersprang solche Punkte und zog eine waagerechte Gerade am oberen
+    //   Rand entlang; die Hyperbel sah aus wie ein Plateau. Im Bild gesehen.
+    g.strokeStyle="#A34E0E"; g.lineWidth=2.4;
+    var offen = false;
+    for(var i=1;i<=300;i++){
+      var R = Rmax*i/300, y = Y(1/R);
+      if(1/R > Gmax){ if(offen){ g.stroke(); offen = false; } continue; }
+      if(!offen){ g.beginPath(); g.moveTo(X(R), y); offen = true; }
+      else g.lineTo(X(R), y);
+    }
+    if(offen) g.stroke();
+
+    [[R1,G1,"#2557A3","1"],[R2,G2,"#B23A33","2"]].forEach(function(p){
+      if(p[0] > Rmax){
+        // Punkt liegt rechts ausserhalb des Ausschnitts
+        g.fillStyle=p[2]; g.font="bold 12px 'Noto Sans',sans-serif"; g.textAlign="right";
+        // ★ Nicht auf der Achse: dort lief die Kurve durch die Beschriftung.
+        var yr = yo + 26;
+        g.beginPath(); g.moveTo(xr-2, yr); g.lineTo(xr-14, yr-6);
+        g.lineTo(xr-14, yr+6); g.closePath(); g.fill();
+        g.fillText("Leiter " + p[3] + " liegt weiter rechts", xr-20, yr);
+        g.textAlign="left";
+        return;
+      }
+      var x = X(p[0]), y = Y(p[1]);
+      g.strokeStyle = p[2]; g.lineWidth=1; g.setLineDash([4,4]);
+      g.beginPath(); g.moveTo(xl,y); g.lineTo(x,y); g.lineTo(x,yu); g.stroke();
+      g.setLineDash([]);
+      g.beginPath(); g.arc(x,y,6.5,0,6.2832); g.fillStyle=p[2]; g.fill();
+      g.fillStyle="#fff"; g.font="bold 10px 'Noto Sans',sans-serif"; g.textAlign="center";
+      g.fillText(p[3], x, y+1); g.textAlign="left";
+    });
+    g.fillStyle="#5A666F"; g.font="12.5px 'Noto Sans',sans-serif";
+    g.fillText("Kennlinie G = 1/R", xl, yu+32);
+
+    // ── Fusszeile
+    g.fillStyle="#2F7D62"; g.font="12.5px 'Noto Sans',sans-serif";
+    if(L.fuss.length > 1){
+      g.fillText("Die Kurve trifft die Achse nie: G wird nie null,", L.fuss[0][0], L.fuss[0][1]);
+      g.fillText("einen vollkommenen Nichtleiter gibt es nicht.", L.fuss[1][0], L.fuss[1][1]);
+    } else {
+      g.fillText("Die Kurve trifft die Achse nie: so groß man R auch macht, G wird nie null; "
+               + "einen vollkommenen Nichtleiter gibt es nicht.", L.fuss[0][0], L.fuss[0][1]);
+    }
+  }
+
+  function tick(){
+    var R1 = widerstand(+$("rR1").value), R2 = widerstand(+$("rR2").value);
+    var G1 = 1/R1, G2 = 1/R2;
+    $("wR1").textContent = rText(R1); $("wR2").textContent = rText(R2);
+    $("aR1").textContent = rText(R1); $("aR2").textContent = rText(R2);
+    $("aG1").textContent = gText(G1); $("aG2").textContent = gText(G2);
+    $("aP1").textContent = rText(1/G1); $("aP2").textContent = rText(1/G2);
+    var v = R2/R1;
+    var satz;
+    if(Math.abs(v - 2) < 0.06){
+      satz = "R₂ ist das Doppelte von R₁, und G₂ ist genau die Hälfte von G₁. "
+           + "Das ist der Kehrwert.";
+    } else if(Math.abs(v - 1) < 0.03){
+      satz = "Beide Leiter sind gleich: gleicher Widerstand, gleicher Leitwert.";
+    } else {
+      satz = "R₂ ist das " + sig3(v) + "-Fache von R₁, G₂ das "
+           + sig3(G2/G1) + "-Fache von G₁. Die beiden Verhältnisse sind Kehrwerte "
+           + "voneinander.";
+    }
+    $("hDeut").textContent = satz;
+    zeichne(R1, R2, G1, G2);
+  }
+  ["rR1","rR2"].forEach(function(id){ $(id).addEventListener("input",tick); });
+  window.addEventListener("resize", tick);
+  $("bReset").addEventListener("click",function(){
+    // Startstellung R1 = 15 Ω, R2 = 62 Ω. Kein Blattwert, kein glattes Verhaeltnis,
+    // die Erkenntnis „doppelt/halb" wird nicht vorweggenommen.
+    $("rR1").value=START.a; $("rR2").value=START.b; tick();
+  });
+  tick();
+})();
+</script>
