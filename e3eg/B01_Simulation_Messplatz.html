@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>B01 Simulation: Messplatz Beleuchtungsstromkreis</title>
+<!-- lehrmaterial -->
+<!-- materialtyp: simulation -->
+<!-- sim_bearbeitung: pflicht -->
+<script type="application/json" id="sim-meta">
+{"startwerte": {"n": 30, "cosphi": 0.65},
+ "loesungswerte": {"n": 20, "cosphi": 0.5},
+ "weitere_loesungswerte": {"n": [20, 26, 48], "cosphi": [1.0, 0.9, 0.7, 0.5]},
+ "bereich": {"n": [0, 60], "cosphi": [0.3, 1.0]},
+ "gekoppelt": "02_Arbeitsblatt.html, Aufgabe 2 und 3",
+ "ziel_erkenntnis": "Bei gleicher Wirkleistung steigt die Stromstaerke, wenn der Wirkfaktor sinkt; die Energie zum Verbraucher und die pendelnde Blindenergie belegen denselben Leiter."}
+</script>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--rot:#B23A33;--rothell:#FBEDEB;--hell:#F4F6F8;
+ --linie:#9AA5AE;--gruen:#2F7D62;--gruenhell:#EAF3EC;--grau:#5A666F;--blau:#1E88C8;--magenta:#D4006E}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:"Noto Sans",system-ui,Arial,sans-serif;color:var(--ink);background:var(--hell);line-height:1.4}
+.wrap{max-width:980px;margin:0 auto;padding:0 12px 28px}
+header{border-top:6px solid var(--kupfer);background:#fff;border-bottom:1px solid var(--ink);padding:10px 12px 9px;margin:0 -12px 12px}
+header .reihe{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--kupfer);font-weight:700}
+header h1{font-size:20px;margin:2px 0 0}
+.karte{background:#fff;border:1.3px solid var(--ink);padding:10px 12px;margin:0 0 12px}
+.karte h2{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--kupfer);margin:0 0 6px}
+canvas{display:block;width:100%;height:auto;background:#fff;touch-action:pan-y}
+.legende{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;margin-top:6px}
+.legende span::before{content:"";display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+.legende .w::before{background:var(--kupfer)}.legende .b::before{background:var(--blau)}
+.legende .lu::before{background:var(--blau);border-radius:0;height:3px;vertical-align:4px}
+.legende .li::before{background:var(--magenta);border-radius:0;height:3px;vertical-align:4px}
+.legende .lp::before{background:var(--ink);border-radius:0;height:3px;vertical-align:4px}
+.geraete{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.geraet{border:1.6px solid var(--ink);background:var(--hell);padding:7px 3px;text-align:center;min-width:0}
+.geraet .name{font-size:clamp(8.6px,2.45vw,11.5px);letter-spacing:.02em;text-transform:uppercase;color:var(--grau);font-weight:700}
+.geraet .wert{font-family:"DejaVu Sans Mono",ui-monospace,monospace;font-size:clamp(17px,5vw,26px);font-weight:700;white-space:nowrap}
+.geraet .zeichen{font-size:13px;color:var(--grau)}
+.strom{margin-top:10px}
+.strom .skala{position:relative;height:30px;border:1.4px solid var(--ink);background:#fff;overflow:hidden}
+.strom .fuell{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--gruen);transition:width .15s linear}
+.strom .fuell.ueber{background:var(--rot)}
+.strom .marke{position:absolute;top:-2px;bottom:-2px;width:0;border-left:3px solid var(--ink)}
+.strom .zahlen{position:relative;height:18px;font-size:12px;color:var(--grau)}
+.strom .zahlen span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.meldung{margin-top:6px;font-size:14px;font-weight:700;padding:5px 8px;border:1.4px solid var(--gruen);background:var(--gruenhell)}
+.meldung.ueber{border-color:var(--rot);background:var(--rothell);color:var(--rot)}
+.regler{display:grid;grid-template-columns:1fr;gap:12px}
+.zeile label{display:flex;justify-content:space-between;align-items:baseline;font-size:15px;font-weight:700;margin-bottom:2px}
+.zeile label output{font-family:"DejaVu Sans Mono",ui-monospace,monospace;font-size:20px;color:var(--kupfer)}
+.zeile .bedien{display:grid;grid-template-columns:52px 1fr 52px;gap:8px;align-items:center}
+button{appearance:none;border:1.6px solid var(--ink);background:#fff;color:var(--ink);font-size:24px;font-weight:700;
+ height:52px;border-radius:6px;cursor:pointer}
+button:active{background:var(--kupferhell)}
+button.reset{font-size:15px;height:48px;padding:0 18px;border-color:var(--kupfer);color:var(--kupfer);width:100%}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:52px;background:transparent;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:10px;background:var(--linie);border-radius:5px}
+input[type=range]::-moz-range-track{height:10px;background:var(--linie);border-radius:5px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:36px;height:36px;border-radius:50%;background:var(--kupfer);border:3px solid #fff;box-shadow:0 0 0 1.6px var(--ink);margin-top:-13px}
+input[type=range]::-moz-range-thumb{width:32px;height:32px;border-radius:50%;background:var(--kupfer);border:3px solid #fff;box-shadow:0 0 0 1.6px var(--ink)}
+.hinweis{font-size:13px;color:var(--grau);margin:6px 0 0}
+@media(min-width:760px){.zwei{display:grid;grid-template-columns:1.25fr 1fr;gap:12px}.zwei .karte{margin-bottom:12px}}
+</style></head>
+<body><div class="wrap">
+<header><div class="reihe">E3EG · Block 1 · Simulation</div>
+<h1>Messplatz: Beleuchtungsstromkreis am 230-V-Netz</h1></header>
+
+<div class="karte">
+ <h2>Energiefluss auf der Zuleitung</h2>
+ <canvas id="fluss" width="960" height="250" aria-label="Energiefluss zwischen Erzeuger und Verbraucher" data-quelle="eigene Animation; Inhalt nach Europa Fachkunde Elektrotechnik, S. 141, Bild 1 (Blindleistung pendelt zwischen Erzeuger und Verbraucher) und S. 164, Bild 3a (Wirk- und Blindleistung auf demselben Weg). Was kein Buchbild leistet: die Abhängigkeit von den eingestellten Werten n und cos φ. Farben nach dem Hausformat (Kupfer = Wirkanteil, Blau = Blindanteil), nicht nach S. 164. Ein Paket steht für 150 W beziehungsweise 150 var (schmal 300); die Paketzahl zeigt P und Q, nicht die Stromstärke"></canvas>
+ <div class="legende"><span class="w">Wirkleistung: Energie läuft vom Erzeuger zum Verbraucher</span><span class="b">Blindleistung: Energie pendelt zwischen Erzeuger und Verbraucher</span></div>
+ <p class="hinweis">Ein Paket steht für <span id="paket">150 W beziehungsweise 150 var</span>. Die Stromstärke lesen Sie an der Anzeige ab, nicht an der Zahl der Pakete.</p>
+</div>
+
+<div class="zwei">
+<div>
+ <div class="karte">
+  <h2>Anzeigen der Messgeräte</h2>
+  <div class="geraete">
+   <div class="geraet"><div class="name">Spannungsmesser</div><div class="wert" id="aU">230 V</div><div class="zeichen"><i>U</i></div></div>
+   <div class="geraet"><div class="name">Strommesser</div><div class="wert" id="aI">13,85 A</div><div class="zeichen"><i>I</i></div></div>
+   <div class="geraet"><div class="name">Leistungsmesser</div><div class="wert" id="aP">2070 W</div><div class="zeichen"><i>P</i></div></div>
+  </div>
+  <div class="strom">
+   <div class="hinweis" style="margin:0 0 3px">Stromstärke in der Zuleitung, Marke beim Bemessungsstrom 16 A des Leitungsschutzschalters</div>
+   <div class="skala"><div class="fuell" id="fuell"></div><div class="marke" id="marke"></div></div>
+   <div class="zahlen" id="zahlen"></div>
+   <div class="meldung" id="meldung"></div>
+  </div>
+ </div>
+ <div class="karte">
+  <h2>Einstellen</h2>
+  <div class="regler">
+   <div class="zeile"><label for="rn"><span>Zahl der Leuchten <i>n</i></span><output id="on">30</output></label>
+    <div class="bedien"><button type="button" id="nm" aria-label="eine Leuchte weniger">&minus;</button>
+    <input type="range" id="rn" min="0" max="60" step="1" value="30">
+    <button type="button" id="np" aria-label="eine Leuchte mehr">+</button></div></div>
+   <div class="zeile"><label for="rc"><span>Wirkfaktor cos <i>φ</i> der Leuchten</span><output id="oc">0,65</output></label>
+    <div class="bedien"><button type="button" id="cm" aria-label="Wirkfaktor kleiner">&minus;</button>
+    <input type="range" id="rc" min="0.30" max="1.00" step="0.05" value="0.65">
+    <button type="button" id="cp" aria-label="Wirkfaktor größer">+</button></div></div>
+   <button type="button" class="reset" id="reset">Zurücksetzen auf die Startstellung</button>
+  </div>
+  <p class="hinweis">Jede Leuchte nimmt 69 W Wirkleistung auf: Lampe 58 W, Vorschaltgerät 11 W.</p>
+ </div>
+</div>
+<div class="karte">
+  <h2>Linienbild einer Periode</h2>
+  <canvas id="linie" width="520" height="400" aria-label="Linienbild von Spannung, Stromstärke und Leistung" data-quelle="eigene Zeichnung nach Europa Fachkunde Elektrotechnik, S. 141, Bild 1 (Linienbild u, i, p bei Phasenverschiebung); was kein Buchbild leistet: der Winkel folgt dem eingestellten Wirkfaktor"></canvas>
+  <div class="legende"><span class="lu">Spannung <i>u</i></span><span class="li">Stromstärke <i>i</i></span><span class="lp">Leistung <i>p</i> = <i>u</i> · <i>i</i></span></div>
+  <p class="hinweis">Helle Fläche über der Achse: Energie fließt zum Verbraucher. Graue Fläche unter der Achse: Energie fließt zurück zum Erzeuger.</p>
+</div>
+</div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var META = JSON.parse(document.getElementById('sim-meta').textContent);
+var START = META.startwerte;
+var U = 230, P_LEUCHTE = 69, I_N = 16, I_SKALA = 32;
+var rn = document.getElementById('rn'), rc = document.getElementById('rc');
+var ruhig = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function komma(x, stellen){ return x.toFixed(stellen).replace('.', ','); }
+
+/* Rechenmodell, belegt: P = n * 69 W (Fachkunde S. 143, Beispiel) ; S = P / cos phi (Tabellenbuch
+   S. 37, Formel 5 umgestellt) ; I = S / U (Tabellenbuch S. 37, neben Formel 1) ;
+   Q = S * sin phi (Tabellenbuch S. 37, Formel 4 umgestellt). */
+function modell(){
+  var n = parseInt(rn.value, 10), c = parseFloat(rc.value);
+  var P = n * P_LEUCHTE, S = P / c, I = S / U;
+  var phi = Math.acos(Math.min(1, c)), Q = S * Math.sin(phi);
+  return {n:n, c:c, P:P, S:S, I:I, Q:Q, phi:phi};
+}
+
+/* ---------- Anzeigen ---------- */
+var zahlen = document.getElementById('zahlen');
+[0,4,8,12,16,20,24,28,32].forEach(function(a){
+  var s = document.createElement('span'); s.style.left = (a / I_SKALA * 100) + '%';
+  s.textContent = a + (a === 32 ? ' A' : ''); if(a === 32) s.style.transform = 'translateX(-100%)';
+  zahlen.appendChild(s);
+});
+document.getElementById('marke').style.left = (I_N / I_SKALA * 100) + '%';
+
+function anzeigen(m){
+  document.getElementById('on').textContent = m.n;
+  document.getElementById('oc').textContent = komma(m.c, 2);
+  document.getElementById('aI').textContent = komma(m.I, 2) + ' A';
+  document.getElementById('aP').textContent = Math.round(m.P) + ' W';
+  var f = document.getElementById('fuell'), me = document.getElementById('meldung');
+  f.style.width = Math.min(100, m.I / I_SKALA * 100) + '%';
+  var ueber = m.I > I_N + 1e-9;
+  f.classList.toggle('ueber', ueber); me.classList.toggle('ueber', ueber);
+  me.textContent = ueber
+    ? 'Der Betriebsstrom ist größer als der Bemessungsstrom 16 A: nicht zulässig, der Stromkreis ist überlastet.'
+    : 'Der Betriebsstrom ist nicht größer als der Bemessungsstrom 16 A.';
+}
+
+/* ---------- Energiefluss ---------- */
+var cf = document.getElementById('fluss'), xf = cf.getContext('2d');
+function groesse(c, hoehe){
+  var dpr = window.devicePixelRatio || 1, w = c.clientWidth || 600;
+  c.width = Math.round(w * dpr); c.height = Math.round(hoehe * dpr); c.style.height = hoehe + 'px';
+  c.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
+  return w;
+}
+var FW = 600, FH = 250, schmal = false;
+function flussGroesse(){ schmal = (cf.clientWidth || 600) < 560; FH = schmal ? 210 : 250; FW = groesse(cf, FH);
+  document.getElementById('paket').textContent = schmal ? '300 W beziehungsweise 300 var' : '150 W beziehungsweise 150 var'; }
+function kasten(x, y, w, h, titel, unter){
+  xf.fillStyle = '#F5EBDF'; xf.strokeStyle = '#1A2530'; xf.lineWidth = 2;
+  xf.fillRect(x, y, w, h); xf.strokeRect(x, y, w, h);
+  xf.fillStyle = '#1A2530'; xf.textAlign = 'center';
+  xf.font = 'bold ' + (schmal ? 14 : 19) + 'px "Noto Sans",Arial,sans-serif';
+  xf.fillText(titel, x + w/2, y + h/2 - 2);
+  xf.font = (schmal ? 12.5 : 15) + 'px "Noto Sans",Arial,sans-serif'; xf.fillStyle = '#5A666F';
+  xf.fillText(unter, x + w/2, y + h/2 + (schmal ? 15 : 20));
+}
+function zeichneFluss(m, t){
+  var W = FW, H = FH;
+  xf.clearRect(0, 0, W, H);
+  var bw = schmal ? 96 : 150, r = schmal ? 5.5 : 8;
+  var yo = schmal ? 58 : 70, yu = schmal ? 150 : 180;
+  var x0 = bw + (schmal ? 10 : 40), x1 = W - bw - (schmal ? 10 : 40);      /* Leiterband */
+  kasten(2, yo - 10, bw, yu - yo + 20, 'Erzeuger', 'Netz 230 V');
+  kasten(W - bw - 2, yo - 10, bw, yu - yo + 20, 'Verbraucher', m.n + ' Leuchten');
+  /* der Leiter: EIN Band, das Wirk- und Blindanteil gemeinsam belegen */
+  xf.fillStyle = '#F4F6F8'; xf.strokeStyle = '#1A2530'; xf.lineWidth = 2;
+  xf.fillRect(bw + 2, yo, W - 2 * bw - 4, yu - yo); xf.strokeRect(bw + 2, yo, W - 2 * bw - 4, yu - yo);
+  xf.fillStyle = '#5A666F'; xf.font = (schmal ? 12.5 : 15) + 'px "Noto Sans",Arial,sans-serif'; xf.textAlign = 'center';
+  xf.fillText('Zuleitung: ein Leiter für beides', W / 2, yo - 14);
+  var L = x1 - x0, teiler = schmal ? 300 : 150;
+  /* Wirkanteil: Pakete laufen nach rechts. Anzahl folgt der Wirkleistung. */
+  var nw = Math.round(m.P / teiler), i, x, yw = yo + (yu - yo) * 0.3, yb = yo + (yu - yo) * 0.72;
+  xf.fillStyle = '#A34E0E';
+  for(i = 0; i < nw; i++){
+    x = x0 + ((i / Math.max(1, nw)) * L + t * (schmal ? 40 : 70)) % L;
+    xf.beginPath(); xf.arc(x, yw, r, 0, 6.2832); xf.fill();
+    xf.beginPath(); xf.moveTo(x + r * 1.5, yw); xf.lineTo(x + r * 0.6, yw - r * 0.62); xf.lineTo(x + r * 0.6, yw + r * 0.62); xf.closePath(); xf.fill();
+  }
+  /* Blindanteil: Pakete pendeln. Anzahl folgt der Blindleistung. */
+  var nb = Math.round(m.Q / teiler), amp = schmal ? 22 : 46, s = Math.sin(t * 2.4);
+  xf.fillStyle = '#1E88C8';
+  for(i = 0; i < nb; i++){
+    x = x0 + amp + (i + 0.5) / Math.max(1, nb) * (L - 2 * amp) + amp * s;
+    xf.beginPath(); xf.arc(x, yb, r, 0, 6.2832); xf.fill();
+  }
+  if(nb > 0){                                             /* Doppelpfeil als Zeichen des Pendelns */
+    var ym = yu + 24, hw = schmal ? 44 : 70, xa = W / 2 - hw, xb = W / 2 + hw;
+    xf.strokeStyle = '#1E88C8'; xf.fillStyle = '#1E88C8'; xf.lineWidth = 3;
+    xf.beginPath(); xf.moveTo(xa, ym); xf.lineTo(xb, ym); xf.stroke();
+    xf.beginPath(); xf.moveTo(xa - 12, ym); xf.lineTo(xa, ym - 7); xf.lineTo(xa, ym + 7); xf.closePath(); xf.fill();
+    xf.beginPath(); xf.moveTo(xb + 12, ym); xf.lineTo(xb, ym - 7); xf.lineTo(xb, ym + 7); xf.closePath(); xf.fill();
+  }
+  if(nw === 0 && nb === 0){
+    xf.fillStyle = '#5A666F'; xf.font = (schmal ? 13 : 16) + 'px "Noto Sans",Arial,sans-serif';
+    xf.fillText('keine Leuchte eingeschaltet', W / 2, (yo + yu) / 2 + 5);
+  }
+}
+
+/* ---------- Linienbild ---------- */
+var cl = document.getElementById('linie'), xl = cl.getContext('2d');
+function zeichneLinie(m){
+  var W = groesse(cl, 380), H = 380, xa = 50, xe = W - 24, y0 = H / 2 + 6, Ah = 140;
+  xl.clearRect(0, 0, W, H);
+  var k, al, u, i, p, x, y, N = 360;
+  function X(a){ return xa + a / 360 * (xe - xa); }
+  /* Flaechen der Leistung: ueber der Achse hell (zum Verbraucher), darunter grau (zurueck) */
+  var aktiv = m.n > 0;
+  if(aktiv){
+    for(k = 0; k < N; k++){
+      al = k; u = Math.sin(al * Math.PI / 180); i = Math.sin(al * Math.PI / 180 - m.phi); p = u * i;
+      xl.fillStyle = p >= 0 ? '#F5DFC8' : '#C9CED3';
+      xl.fillRect(X(al), p >= 0 ? y0 - p * Ah : y0, (xe - xa) / N + 1, Math.abs(p) * Ah);
+    }
+  }
+  /* Achsen nach DIN 461: Groesse und Einheit an jeder Achse */
+  xl.strokeStyle = '#1A2530'; xl.lineWidth = 2; xl.beginPath();
+  xl.moveTo(xa, 22); xl.lineTo(xa, H - 40); xl.moveTo(xa, y0); xl.lineTo(xe + 8, y0); xl.stroke();
+  xl.fillStyle = '#1A2530';
+  xl.beginPath(); xl.moveTo(xa, 12); xl.lineTo(xa - 6, 26); xl.lineTo(xa + 6, 26); xl.closePath(); xl.fill();
+  xl.beginPath(); xl.moveTo(xe + 18, y0); xl.lineTo(xe + 4, y0 - 6); xl.lineTo(xe + 4, y0 + 6); xl.closePath(); xl.fill();
+  xl.font = '14px "Noto Sans",Arial,sans-serif'; xl.textAlign = 'center';
+  [0, 90, 180, 270, 360].forEach(function(a){
+    xl.beginPath(); xl.moveTo(X(a), y0 - 5); xl.lineTo(X(a), y0 + 5); xl.stroke();
+  });
+  xl.textAlign = 'right'; xl.fillText('Drehwinkel α in °', xe + 14, H - 14);
+  xl.save(); xl.translate(18, H / 2 - 20); xl.rotate(-Math.PI / 2); xl.textAlign = 'center';
+  xl.fillText('u, i, p (ohne Maßstab)', 0, 0); xl.restore();
+  function kurve(f, farbe, breite){
+    xl.strokeStyle = farbe; xl.lineWidth = breite; xl.beginPath();
+    for(k = 0; k <= N; k++){ y = y0 - f(k * Math.PI / 180) * Ah; if(k === 0) xl.moveTo(X(k), y); else xl.lineTo(X(k), y); }
+    xl.stroke();
+  }
+  kurve(function(a){ return 0.62 * Math.sin(a); }, '#1E88C8', 3);
+  if(aktiv){
+    kurve(function(a){ return 0.82 * Math.sin(a - m.phi); }, '#D4006E', 3);
+    kurve(function(a){ return Math.sin(a) * Math.sin(a - m.phi); }, '#1A2530', 3.5);
+  }
+  /* Winkelmarken zuletzt, mit weissem Hof, damit Flaechen und Kurven sie nicht verdecken */
+  xl.font = '14px "Noto Sans",Arial,sans-serif'; xl.textAlign = 'center'; xl.lineJoin = 'round';
+  xl.strokeStyle = '#fff'; xl.lineWidth = 4; xl.fillStyle = '#1A2530';
+  [0, 90, 180, 270, 360].forEach(function(a){
+    var tx = X(a) + (a === 0 ? 14 : 0), ty = y0 + 22;
+    xl.strokeText(a + '°', tx, ty); xl.fillText(a + '°', tx, ty);
+  });
+}
+
+/* ---------- Ablauf ---------- */
+var t0 = null, laeuft = false;
+function bild(zeit){
+  if(t0 === null) t0 = zeit;
+  zeichneFluss(modell(), (zeit - t0) / 1000);
+  if(laeuft) window.requestAnimationFrame(bild);
+}
+function neu(){
+  var m = modell(); anzeigen(m); zeichneLinie(m);
+  if(ruhig) zeichneFluss(m, 0.65);
+}
+function setze(n, c){ rn.value = n; rc.value = c; neu(); }
+function schritt(el, d){
+  var v = parseFloat(el.value) + d * parseFloat(el.step);
+  v = Math.max(parseFloat(el.min), Math.min(parseFloat(el.max), v));
+  el.value = (el === rc) ? v.toFixed(2) : v; neu();
+}
+rn.addEventListener('input', neu); rc.addEventListener('input', neu);
+document.getElementById('nm').addEventListener('click', function(){ schritt(rn, -1); });
+document.getElementById('np').addEventListener('click', function(){ schritt(rn, +1); });
+document.getElementById('cm').addEventListener('click', function(){ schritt(rc, -1); });
+document.getElementById('cp').addEventListener('click', function(){ schritt(rc, +1); });
+document.getElementById('reset').addEventListener('click', function(){ setze(START.n, START.cosphi); });
+
+/* Die Regler oeffnen aus den STARTWERTEN, nie aus den Loesungswerten. */
+flussGroesse(); setze(START.n, START.cosphi);
+window.addEventListener('resize', function(){ flussGroesse(); neu(); });
+if(!ruhig){ laeuft = true; window.requestAnimationFrame(bild); }
+window.B01sim = {modell: modell, setze: setze};   /* fuer die Nachrechnung im Browser */
+})();
+</script>
+</body></html>
