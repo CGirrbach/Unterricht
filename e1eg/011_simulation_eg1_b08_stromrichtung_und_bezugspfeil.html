@@ -25,9 +25,10 @@
         POSITIVER Stromstaerke."
        „Eine positive Spannungsangabe bedeutet, dass die Richtung der Spannung (+ nach -)
         gleich der Bezugspfeilrichtung ist."
-     Dieselbe Seite zeigt unter „Strombezugspfeile" drei Bilder: einmal I = 1 A (Pfeil in
-     Stromrichtung), einmal I = -1 A (Pfeil dagegen) — genau die beiden Faelle, die diese
-     Simulation umschaltbar macht.
+     Dieselbe Seite zeigt unter „Strombezugspfeile" drei Bilder, in allen dreien zeigt der
+     Bezugspfeil nach rechts: einmal I = 1 A (Stromrichtung ebenfalls nach rechts), zweimal
+     I = -1 A (Stromrichtung nach links; der Bezugspfeil steht einmal ueber dem Widerstand, einmal
+     auf der Leitung). Am 24.09.2026 am Buchbild berichtigt (PRUEF2409b_Block_08, Befund 6).
      Schaltzeichen nach DIN EN 60617 (Tabellenbuch S. 86/87: Widerstand, Galvanisches
      Element). -->
 <meta charset="utf-8">
@@ -119,9 +120,11 @@
     <span class="cap">Woher die Festlegung stammt</span>
     <small>Im <b>Tabellenbuch auf S.&nbsp;43</b> („Bezugspfeile, Kirchhoff'sche Regeln,
     Spannungsteiler“) steht: <i>„Haben Stromrichtung und Bezugspfeil dieselbe Richtung, so
-    spricht man von positiver Stromstärke.“</i> Dieselbe Seite zeigt unter „Strombezugspfeile“ drei Bilder:
-    eines mit <i>I</i>&nbsp;=&nbsp;1&nbsp;A und zwei mit <i>I</i>&nbsp;=&nbsp;−1&nbsp;A (einmal ist der Bezugspfeil,
-    einmal die Stromrichtung umgedreht). Genau diese Fälle können Sie hier umschalten.
+    spricht man von positiver Stromstärke.“</i> Dieselbe Seite zeigt unter „Strombezugspfeile“ drei Bilder.
+    In allen dreien zeigt der <b>Bezugspfeil nach rechts</b>. Bei <i>I</i>&nbsp;=&nbsp;1&nbsp;A zeigt auch die
+    Stromrichtung nach rechts, bei den beiden Bildern mit <i>I</i>&nbsp;=&nbsp;−1&nbsp;A zeigt sie nach links,
+    also gegen den Bezugspfeil. Hier können Sie beides umkehren: die Stromrichtung (über die
+    Polung) und den Bezugspfeil.
     Schaltzeichen nach DIN&nbsp;EN&nbsp;60617 (Tabellenbuch S.&nbsp;86/87).</small>
   </div>
 </div>
@@ -133,6 +136,18 @@
   var polNormal=true, pfeilRechts=true, phase=0, laeuft=true;
   var ruhig = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // ★ 24.09.2026 (PRUEF2409b_Block_08, Kleinigkeit 13): das Formelzeichen I kursiv, wie in der Tabelle.
+  function textMitI(g, vor, nach, x, y, px){
+    var n = px + "px 'Noto Sans',sans-serif", k = "italic " + n;
+    g.font = n; g.fillText(vor, x, y); var w = g.measureText(vor).width;
+    g.font = k; g.fillText("I", x + w, y); var wi = g.measureText("I").width;
+    g.font = n; g.fillText(nach, x + w + wi, y);
+  }
+  function breiteMitI(g, vor, nach, px){
+    var n = px + "px 'Noto Sans',sans-serif", w;
+    g.font = n; w = g.measureText(vor).width + g.measureText(nach).width;
+    g.font = "italic " + n; return w + g.measureText("I").width;
+  }
   function pfeilZeichnen(g,x1,y,x2,farbe,txt,dick){
     g.strokeStyle=farbe; g.fillStyle=farbe; g.lineWidth=dick||2.4;
     g.beginPath(); g.moveTo(x1,y); g.lineTo(x2,y); g.stroke();
@@ -152,13 +167,15 @@
   //   Beschriftungen rund 4 px hoch. Unter 600 px Bildschirmbreite jetzt eine eigene Hochformat-Zeichnung
   //   (360 x 430), das Ergebnis steht unter dem Stromkreis.
   function lage(){
-    return window.innerWidth < 600
+    return window.innerWidth < 700
       ? {W:360,H:430,xl:62,xr:300,yo:118,yu:252,rx:40,ry:318,fuss:[392,412]}
       : {W:880,H:300,xl:130,xr:600,yo:104,yu:228,rx:654,ry:null,fuss:[278]};
   }
   function zeichne(c){
     var L=lage();
     if(c.width!==L.W || c.height!==L.H){ c.width=L.W; c.height=L.H; }
+    // Hochformat-Zeichnung hoechstens 430 px breit: im Querformat (640 px) sonst uebergross
+    c.style.maxWidth = L.W===360 ? "430px" : "880px";
     var g=c.getContext("2d"); g.clearRect(0,0,L.W,L.H);
     var xl=L.xl, xr=L.xr, yo=L.yo, yu=L.yu;
     g.font="14px 'Noto Sans',sans-serif";
@@ -200,17 +217,17 @@
     g.font="14px 'Noto Sans',sans-serif";
     // technische Stromrichtung (Plus -> Minus) — auf der oberen Leitung gegen die Elektronen
     var techR = plusOben;
-    pfeilZeichnen(g, techR?xl+26:xr-26, yo-44, techR?xr-26:xl+26, "#A34E0E",
-                  "technische Stromrichtung I", 2.6);
+    pfeilZeichnen(g, techR?xl+26:xr-26, yo-44, techR?xr-26:xl+26, "#A34E0E", null, 2.6);
+    g.fillStyle="#A34E0E";
+    textMitI(g, "technische Stromrichtung ", "", (xl+xr)/2 - breiteMitI(g, "technische Stromrichtung ", "", 14)/2, yo-57, 14);
     // Bezugspfeil
     pfeilZeichnen(g, pfeilRechts?xl+66:xr-66, yo+60, pfeilRechts?xr-66:xl+66, "#2F7D62",
                   "Bezugspfeil (frei gewählt)", 2.2);
     // Ergebnis rechts im freien Feld
     var I = (techR === pfeilRechts) ? 1 : -1;
     g.fillStyle = I>0 ? "#2F7D62" : "#B23A33";
-    g.font="30px 'Noto Sans',sans-serif";
     var ry = L.ry===null ? ym-4 : L.ry;
-    g.fillText("I = " + (I>0?"+":"−") + "1 A", L.rx, ry);
+    textMitI(g, "", " = " + (I>0?"+":"−") + "1 A", L.rx, ry, 30);
     g.font="13px 'Noto Sans',sans-serif"; g.fillStyle="#5A666F";
     if(L.ry===null){
       g.fillText("Pfeil und Strom:", L.rx, ry+26);
@@ -235,10 +252,17 @@
     $("aVergl").innerHTML   = I>0 ? "Pfeil <b>mit</b> der Stromrichtung"
                                   : "Pfeil <b>gegen</b> die Stromrichtung";
     $("aI").textContent     = (I>0?"+":"−") + "1 A";
-    $("hDeut").textContent  = I>0
-      ? "Pfeil und Stromrichtung stimmen überein, deshalb wird I positiv gezählt."
-      : "Der Pfeil zeigt gegen die Stromrichtung, deshalb ist I negativ. Am Strom selbst "
-        + "hat sich nichts geändert.";
+    // ★ 24.09.2026: „Am Strom selbst hat sich nichts geaendert" stand auch nach dem Umpolen da,
+    //   obwohl der Strom dann seine Richtung wechselt. Der Satz haengt jetzt von der Ursache ab.
+    $("hDeut").innerHTML = (polNormal && pfeilRechts)
+      ? "Pfeil und Stromrichtung stimmen überein, deshalb wird <i>I</i> positiv gezählt."
+      : (polNormal && !pfeilRechts)
+      ? "Nur der Pfeil ist umgedreht: Er zeigt gegen die Stromrichtung, deshalb ist <i>I</i> negativ. "
+        + "Am Strom selbst hat sich nichts geändert."
+      : (!polNormal && pfeilRechts)
+      ? "Die Polung ist umgedreht: Der Strom fließt jetzt andersherum, der Pfeil zeigt gegen ihn, "
+        + "deshalb ist <i>I</i> negativ."
+      : "Strom und Pfeil sind beide umgedreht und stimmen wieder überein, deshalb ist <i>I</i> positiv.";
     zeichne($("cKreis"));
   }
   function schleife(){
