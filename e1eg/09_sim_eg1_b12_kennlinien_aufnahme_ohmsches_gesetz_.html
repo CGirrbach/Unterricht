@@ -1,16 +1,7 @@
 <!-- lehrmaterial -->
 <!-- materialtyp: simulation -->
 <!-- sim_bearbeitung: pflicht -->
-<!-- EG1-B12 — Virtueller Messplatz „Kennlinien-Aufnahme (Ohmsches Gesetz)". Schale 4:
- volle, selbst bedienbare Simulation mit zwei Versuchsmodi, Parametervariation inkl.
- Grenzfaellen (U = 0 -> kein Strom; kleiner Widerstand -> grosser Strom), verifiziertem
- Rechenmodell I = U/R (gegen Handrechnung/Fachkunde S. 37 geprueft) und gekoppelten
- Entdeckungsaufgaben. Ziel-Erkenntnis: bei festem R ist I ~ U (Gerade durch den Nullpunkt),
- bei festem U ist I ~ 1/R (fallende Kurve); die steilere Gerade gehoert zum kleineren
- Widerstand -> Ohmsches Gesetz I = U/R. Modell/Messwerte 1:1 Europa-Fachkunde Elektrotechnik. Formelbeleg Tabellenbuch 32. A., S. 30, Formel 7.
- AUSSAGENLOSE Startstellung: U = 0 V (Regler auf Minimum), R = 2 Ohm (Minimum). Die
- Loesungswerte der gekoppelten Aufgabe (U = 6 V, R = 4 Ohm) stellt der Schueler SELBST ein.
- Anrede durchgehend Sie, kein Gendern. -->
+<!-- EG1-B12 · Kennlinien-Aufnahme zum Ohm'schen Gesetz. Belege: Tabellenbuch S. 30, Formel 7 und 8; Kennlinien nach Europa-Fachkunde S. 37, Bild 2 und 3 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>EG1-B12: Kennlinien-Aufnahme: Ohm'sches Gesetz zum Ausprobieren</title>
@@ -40,7 +31,7 @@ i{font-style:italic}.ziel{background:var(--kupferhell);border-left:5px solid var
  color:var(--ink);font:inherit;font-weight:700;padding:10px 12px;cursor:pointer;text-align:left;line-height:1.3}.modewahl button:last-child{border-right:0}.modewahl button[aria-pressed="true"]{background:var(--kupfer);color:#fff}.modewahl small{display:block;font-weight:400;font-size:12px;margin-top:2px;opacity:.9}.sim{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start;
  border:1.4px solid var(--ink);background:#fff;padding:16px;margin:12px 0}.sim .links{flex:1 1 380px;min-width:300px}.sim .rechts{flex:1 1 320px;min-width:280px}
 canvas{width:100%;height:auto;display:block;background:#fff}.leinwand{border:1px solid var(--linie)}.bildunterschrift{font-size:12px;color:var(--grau);margin:4px 0 0}.regler{display:flex;align-items:center;gap:12px;margin:10px 0 2px;flex-wrap:wrap}.regler label{font-weight:700;min-width:150px}.regler input[type=range]{flex:1 1 150px;height:24px;accent-color:var(--kupfer);cursor:pointer}.rval{font-weight:700;min-width:64px;text-align:right}.reglerhinweis{font-size:12px;color:var(--grau);margin:0 0 6px}.anzeige{font-size:28px;font-weight:700;margin:14px 0 4px;color:var(--ink)}.bruch{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;
- line-height:1.05;margin:0.12em;font-size:.6em}.bruch .z{border-bottom:1.6px solid currentColor;padding:0.35em}.bruch .n{padding:0.35em}.einheit{font-size:14px;font-weight:400;color:var(--grau);margin:0 0 8px}.tasten{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0 2px}
+ line-height:1.05;margin:0 .12em;font-size:.6em}.bruch .z{border-bottom:1.6px solid currentColor;padding:0 .35em}.bruch .n{padding:0 .35em}.einheit{font-size:14px;font-weight:400;color:var(--grau);margin:0 0 8px}.tasten{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0 2px}
 button.tk{font:inherit;font-weight:700;border:1.4px solid var(--ink);background:#fff;color:var(--ink);
  padding:8px 14px;cursor:pointer}
 button.tk:active{background:var(--kupferhell)}
@@ -76,12 +67,10 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen)}.loesung{margi
  role="img" aria-label="Messschaltung: ein Netzgerät treibt den Strom durch einen einstellbaren Widerstand. Ein Strommesser misst in Reihe die Stromstärke I, ein Spannungsmesser misst parallel die Spannung U. Bewegte Punkte zeigen den Stromfluss; ihre Geschwindigkeit wächst mit der Stromstärke."></canvas>
  <p class="bildunterschrift">Messschaltung: einstellbarer Widerstand, Strommesser in Reihe, Spannungsmesser parallel (Schaltzeichen nach DIN EN 60617).</p>
 
+ <!-- 24.09.2026: Die Anzeige rechnete I = U/R vor, bevor das Arbeitsblatt die Formel in Aufgabe 4 herleiten laesst. Jetzt zeigt sie nur, was der Strommesser misst; brZ/brN bleiben unsichtbar fuer das Skript. -->
  <div class="anzeige">
- <i>I</i> =
- <span class="bruch"><span class="z" id="brZ">0&nbsp;V</span><span class="n" id="brN">2&nbsp;Ω</span></span>
- = <span id="brI">0&nbsp;A</span>
+ Strommesser: <i>I</i> = <span id="brI">0&nbsp;A</span><span style="display:none"><span id="brZ">0&nbsp;V</span><span id="brN">2&nbsp;Ω</span></span>
  </div>
- <p class="einheit">Einheitenkontrolle: [<i>I</i>] = V/Ω = V/(V/A) = A.</p>
  </div>
 
  <div class="rechts">
@@ -168,18 +157,20 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen)}.loesung{margi
  </li>
  <li>
  <div class="projekt"><span class="cap">Anwendung</span>
- Ein Verbraucher zieht bei <i>U</i> = 10 V den Strom <i>I</i> = 2,5 A. Suchen Sie in <b>Versuch 2</b>
+ Durch einen Verbraucher fließt bei <i>U</i> = 10 V der Strom <i>I</i> = 2,5 A. Suchen Sie in <b>Versuch 2</b>
  (<i>U</i> = 10 V fest) den Widerstand, bei dem der Messplatz genau 2,5 A anzeigt. Rechnen Sie mit <i>R</i> = <i>U</i>/<i>I</i> nach.</div>
  <details><summary>Lösung anzeigen</summary>
  <div class="loesung">Bei <i>R</i> = 4 Ω zeigt der Messplatz 2,5 A. Nachrechnung: <i>R</i> = <i>U</i>/<i>I</i> = 10 V / 2,5 A = <b>4 Ω</b>.
  So bestimmen Sie aus einem gemessenen Betriebspunkt den Widerstand eines Verbrauchers, genau wie später
- den Widerstand der LED-Leuchte (12 V / 0,25 A → 48 Ω) auf dem Arbeitsblatt.</div>
+ den Widerstand einer Leuchte (12 V und 0,25 A ergeben 48 Ω) auf dem Arbeitsblatt.</div>
  </details>
  </li>
 </ol>
 
 
 
+<details class="formel-aufdecken">
+ <summary><b>Ergebnis anzeigen</b> (erst, wenn Sie in Aufgabe&nbsp;4 des Arbeitsblatts die Formel selbst gefunden haben)</summary>
 <div class="formel">
  <span class="cap">Das Ergebnis Ihrer Messungen: das Ohm'sche Gesetz (drei Grundformen)</span>
  <div class="formelzeile">
@@ -191,6 +182,7 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen)}.loesung{margi
  Eine <b>lineare (gerade) Kennlinie</b> kennzeichnet einen <b>Ohm'schen (linearen) Widerstand</b>.<br>
  Beleg: Tabellenbuch 32. A., S. 30, Formel 7 (Merkformel <i>U</i> = <i>R</i>·<i>I</i>; <i>I</i> = <i>U</i>/<i>R</i> = Formel 8). Andere Auflage? Tragen Sie ein: S. ____, Formel ____.</div>
 </div>
+</details>
 
 <div class="quelle">
  Die Simulation rechnet mit <i>I</i> = <i>U</i>/<i>R</i>; alle Messwerte sind mit der Hand nachgerechnet.
