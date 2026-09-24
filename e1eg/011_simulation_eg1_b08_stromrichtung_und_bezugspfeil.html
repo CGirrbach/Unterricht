@@ -1,6 +1,6 @@
 <!-- lehrmaterial -->
 <!-- materialtyp: simulation -->
-<!-- sim_bearbeitung: pflicht -->
+<!-- sim_bearbeitung: freiwillig -->
 <!-- Block EG1-B08 · Stromrichtung und Bezugspfeil -->
 <!-- Ziel-Erkenntnis:
      (1) Die ELEKTRONEN laufen im Aussenkreis von MINUS nach PLUS. Die TECHNISCHE
@@ -25,7 +25,7 @@
         POSITIVER Stromstaerke."
        „Eine positive Spannungsangabe bedeutet, dass die Richtung der Spannung (+ nach -)
         gleich der Bezugspfeilrichtung ist."
-     Dieselbe Seite zeigt unter „Strombezugspfeile" zwei Bilder: einmal I = 1 A (Pfeil in
+     Dieselbe Seite zeigt unter „Strombezugspfeile" drei Bilder: einmal I = 1 A (Pfeil in
      Stromrichtung), einmal I = -1 A (Pfeil dagegen) — genau die beiden Faelle, die diese
      Simulation umschaltbar macht.
      Schaltzeichen nach DIN EN 60617 (Tabellenbuch S. 86/87: Widerstand, Galvanisches
@@ -69,6 +69,8 @@
   .hinw{font-size:13px;color:var(--grau);margin-top:8px}
   button.reset{font:inherit;font-size:14px;padding:9px 16px;border:1.4px solid var(--linie);
                background:#fff;color:var(--grau);cursor:pointer;margin-top:12px;min-height:44px}
+  figure{margin:0}
+  @media (max-width:600px){ .wrap{padding:16px 12px 24px} }
   @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -97,7 +99,7 @@
     <script type="application/json" id="sim-meta">{"startwerte":{"polNormal":true,"pfeilRechts":true},"loesungswerte":{"pfeilRechts":false}}</script>
   <canvas class="stage" id="cKreis" width="880" height="300"
       data-quelle="Europa-Fachkunde S.32 Bild 1 (Stromrichtung im Stromkreis: technische Stromrichtung vs. Elektronenbewegung); Elektronen-Animation schematisch nach dieser Vorlage"
-      aria-label="Stromkreis: links eine Quelle mit Plus- und Minuspol, rechts ein Widerstand. Auf der oberen Leitung laufen blaue Punkte als Elektronen; darüber steht der kupferne Pfeil der technischen Stromrichtung, darunter der blaue Bezugspfeil. Rechts wird die Stromstärke mit Vorzeichen angezeigt."></canvas>
+      aria-label="Stromkreis: links eine Quelle mit Plus- und Minuspol, rechts ein Widerstand. Auf der oberen Leitung laufen blaue Punkte als Elektronen; darüber steht der kupferne Pfeil der technischen Stromrichtung, darunter der grüne Bezugspfeil. Rechts wird die Stromstärke mit Vorzeichen angezeigt."></canvas>
     <figcaption>Die Elektronen laufen von <b>Minus nach Plus</b>. Die technische
     Stromrichtung ist andersherum festgelegt, <b>von Plus nach Minus</b>.</figcaption>
   </figure>
@@ -117,9 +119,9 @@
     <span class="cap">Woher die Festlegung stammt</span>
     <small>Im <b>Tabellenbuch auf S.&nbsp;43</b> („Bezugspfeile, Kirchhoff'sche Regeln,
     Spannungsteiler“) steht: <i>„Haben Stromrichtung und Bezugspfeil dieselbe Richtung, so
-    spricht man von positiver Stromstärke.“</i> Dieselbe Seite zeigt zwei Bilder unter
-    „Strombezugspfeile“ eines mit <i>I</i>&nbsp;=&nbsp;1&nbsp;A, eines mit
-    <i>I</i>&nbsp;=&nbsp;−1&nbsp;A. Genau diese beiden Fälle können Sie hier umschalten.
+    spricht man von positiver Stromstärke.“</i> Dieselbe Seite zeigt unter „Strombezugspfeile“ drei Bilder:
+    eines mit <i>I</i>&nbsp;=&nbsp;1&nbsp;A und zwei mit <i>I</i>&nbsp;=&nbsp;−1&nbsp;A (einmal ist der Bezugspfeil,
+    einmal die Stromrichtung umgedreht). Genau diese Fälle können Sie hier umschalten.
     Schaltzeichen nach DIN&nbsp;EN&nbsp;60617 (Tabellenbuch S.&nbsp;86/87).</small>
   </div>
 </div>
@@ -146,9 +148,19 @@
   //   galvanisches Element nicht zu erkennen. Beim Ansehen gefunden.
   //   Jetzt: Kreis schmaler (xl 120 … xr 600), das Ergebnis steht RECHTS DANEBEN im
   //   freien Feld, die Quelle mit eng stehenden Strichen nach DIN EN 60617.
+  // ★ 24.09.2026 (Pruefbericht, Kleinigkeit 19): am 390-px-Handy war die Zeichnung nur 234 px breit,
+  //   Beschriftungen rund 4 px hoch. Unter 600 px Bildschirmbreite jetzt eine eigene Hochformat-Zeichnung
+  //   (360 x 430), das Ergebnis steht unter dem Stromkreis.
+  function lage(){
+    return window.innerWidth < 600
+      ? {W:360,H:430,xl:62,xr:300,yo:118,yu:252,rx:40,ry:318,fuss:[392,412]}
+      : {W:880,H:300,xl:130,xr:600,yo:104,yu:228,rx:654,ry:null,fuss:[278]};
+  }
   function zeichne(c){
-    var g=c.getContext("2d"); g.clearRect(0,0,880,300);
-    var xl=130, xr=600, yo=104, yu=228;
+    var L=lage();
+    if(c.width!==L.W || c.height!==L.H){ c.width=L.W; c.height=L.H; }
+    var g=c.getContext("2d"); g.clearRect(0,0,L.W,L.H);
+    var xl=L.xl, xr=L.xr, yo=L.yo, yu=L.yu;
     g.font="14px 'Noto Sans',sans-serif";
     g.strokeStyle="#1A2530"; g.lineWidth=2.4;
     // obere und untere Leitung
@@ -159,13 +171,13 @@
     // galvanisches Element: langer Strich = Pluspol (DIN EN 60617, Tabellenbuch S. 86)
     var plusOben = polNormal;
     var yPlus = plusOben ? ym-13 : ym+13, yMinus = plusOben ? ym+13 : ym-13;
-    g.lineWidth=4;  g.beginPath(); g.moveTo(xl-19,yPlus);  g.lineTo(xl+19,yPlus);  g.stroke();
-    g.lineWidth=2;  g.beginPath(); g.moveTo(xl-10,yMinus); g.lineTo(xl+10,yMinus); g.stroke();
+    g.lineWidth=2;  g.beginPath(); g.moveTo(xl-19,yPlus);  g.lineTo(xl+19,yPlus);  g.stroke();
+    g.lineWidth=5;  g.beginPath(); g.moveTo(xl-10,yMinus); g.lineTo(xl+10,yMinus); g.stroke();
     g.font="18px 'Noto Sans',sans-serif";
     g.fillStyle="#B23A33"; g.fillText("+", xl-40, yPlus+6);
     g.fillStyle="#2557A3"; g.fillText("−", xl-40, yMinus+7);
     g.fillStyle="#5A666F"; g.font="13px 'Noto Sans',sans-serif";
-    g.fillText("Quelle", xl-58, yo-14);
+    g.fillText("Quelle", Math.max(4, xl-58), yo-14);
     // rechte Seite mit dem Widerstand
     g.strokeStyle="#1A2530"; g.lineWidth=2.4;
     g.beginPath(); g.moveTo(xr,yo); g.lineTo(xr,ym-32); g.moveTo(xr,ym+32); g.lineTo(xr,yu); g.stroke();
@@ -197,13 +209,22 @@
     var I = (techR === pfeilRechts) ? 1 : -1;
     g.fillStyle = I>0 ? "#2F7D62" : "#B23A33";
     g.font="30px 'Noto Sans',sans-serif";
-    g.fillText("I = " + (I>0?"+":"−") + "1 A", 654, ym-4);
-    g.font="12.5px 'Noto Sans',sans-serif"; g.fillStyle="#5A666F";
-    g.fillText(I>0 ? "Pfeil und Strom:" : "Pfeil und Strom:", 654, ym+22);
-    g.fillText(I>0 ? "gleiche Richtung" : "entgegengesetzt", 654, ym+40);
-    g.fillStyle="#2F7D62"; g.font="12.5px 'Noto Sans',sans-serif";
-    g.fillText("Die Elektronen kümmert der Pfeil nicht, nur das Vorzeichen hängt von ihm ab.",
-               xl-58, 278);
+    var ry = L.ry===null ? ym-4 : L.ry;
+    g.fillText("I = " + (I>0?"+":"−") + "1 A", L.rx, ry);
+    g.font="13px 'Noto Sans',sans-serif"; g.fillStyle="#5A666F";
+    if(L.ry===null){
+      g.fillText("Pfeil und Strom:", L.rx, ry+26);
+      g.fillText(I>0 ? "gleiche Richtung" : "entgegengesetzt", L.rx, ry+44);
+    } else {
+      g.fillText("Pfeil und Strom: " + (I>0 ? "gleiche Richtung" : "entgegengesetzt"), L.rx, ry+26);
+    }
+    g.fillStyle="#2F7D62"; g.font="13px 'Noto Sans',sans-serif";
+    if(L.fuss.length===1){
+      g.fillText("Die Elektronen kümmert der Pfeil nicht, nur das Vorzeichen hängt von ihm ab.", xl-58, L.fuss[0]);
+    } else {
+      g.fillText("Die Elektronen kümmert der Pfeil nicht,", 12, L.fuss[0]);
+      g.fillText("nur das Vorzeichen hängt von ihm ab.", 12, L.fuss[1]);
+    }
   }
 
   function tick(){
@@ -231,6 +252,7 @@
     // Der Lehrbuchfall; die Erkenntnis entsteht erst beim Umschalten.
     polNormal = true; pfeilRechts = true; tick();
   });
+  window.addEventListener("resize", tick);
   tick();
   requestAnimationFrame(schleife);
 })();
