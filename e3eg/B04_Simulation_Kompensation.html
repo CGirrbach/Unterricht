@@ -1,0 +1,202 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>B04 Simulation: Kompensation eines Motors</title>
+<!-- lehrmaterial -->
+<!-- materialtyp: simulation -->
+<script type="application/json" id="sim-meta">
+{"block": "B04", "titel": "Kompensation eines Motors: Leistungszeigerbild und die drei Stroeme",
+ "startwerte": {"C": 0},
+ "loesungswerte": {"C": 66},
+ "weitere_stellungen": {"Aufgabe 5 a": 40, "Aufgabe 5 c kleinster Strom": 112},
+ "ziel_erkenntnis": "Der Kondensator liefert die Blindleistung, die der Motor braucht; sie pendelt zwischen Motor und Kondensator, das Netz liefert nur die Differenz. Der Strom in der Zuleitung sinkt, der Motorstrom bleibt. Zu viel Kondensator hilft nicht: ab etwa 112 uF steigt der Strom in der Zuleitung wieder.",
+ "quellen": "Rechenmodell Tabellenbuch S. 40, Formel 1, 3, 6; S. 37, Formel 1, 5, 6, 11; S. 328, Formel 6; Motor aus Rechenbuch S. 132, Aufgabe 1; Bildvorlagen im data-quelle der Zeichenflaeche"}
+</script>
+<style>
+:root{--kupfer:#A34E0E;--kupferhell:#F6EBE0;--ink:#1A2530;--grau:#5A666F;--linie:#C9D1D8;--hell:#F3F5F7;--gruen:#2F7D62;--blau:#1E88C8;--rot:#C0246B}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans",Arial,sans-serif;color:var(--ink);background:#fff;font-size:15px;line-height:1.45}
+.wrap{max-width:1000px;margin:0 auto;padding:12px 14px 24px}
+header .reihe{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--kupfer);font-weight:700}
+header h1{font-size:22px;margin:2px 0 10px;border-bottom:3px solid var(--kupfer);padding-bottom:6px}
+.karte{border:1.6px solid var(--ink);padding:10px 12px;margin-bottom:12px;background:#fff}
+.karte .cap{display:block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--kupfer);font-weight:700;margin-bottom:6px}
+canvas{width:100%;height:auto;display:block;background:#fff}
+.legende{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;margin-top:6px}
+.legende span::before{content:"";display:inline-block;width:18px;height:4px;margin-right:6px;vertical-align:middle;border-radius:2px}
+.legende .lp::before{background:var(--gruen)} .legende .ll::before{background:var(--kupfer)} .legende .lc::before{background:var(--blau)} .legende .ls::before{background:var(--rot)}
+.hinweis{font-size:13px;color:var(--grau);margin:6px 0 0}
+.zwei{display:block}
+@media(min-width:760px){.zwei{display:grid;grid-template-columns:1.25fr 1fr;gap:12px}.zwei .karte{margin-bottom:12px}}
+.anz{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.anz div{min-width:0;border:1.6px solid var(--ink);background:var(--hell);padding:6px 6px;text-align:center}
+.anz div.fest{background:#fff;border-style:dashed}
+.anz div small{display:block;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--grau);font-weight:700;overflow-wrap:anywhere}
+.anz div b{display:block;font-family:"DejaVu Sans Mono",ui-monospace,monospace;font-size:21px;letter-spacing:0;white-space:nowrap}
+.anz div i{font-size:12px;color:var(--grau)}
+.zeile{margin:8px 0 12px}
+.zeile label{display:flex;justify-content:space-between;font-weight:700;margin-bottom:4px}
+.zeile label output{font-family:"DejaVu Sans Mono",ui-monospace,monospace;font-size:20px;color:var(--kupfer)}
+.zeile .bedien{display:grid;grid-template-columns:52px 1fr 52px;gap:8px;align-items:center}
+button{appearance:none;border:1.6px solid var(--ink);background:#fff;color:var(--ink);font-size:24px;font-weight:700;height:52px;border-radius:6px;cursor:pointer}
+button:active{background:var(--kupferhell)}
+button.reset{font-size:15px;height:48px;padding:0 18px;border-color:var(--kupfer);color:var(--kupfer);width:100%}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:52px;background:transparent;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:10px;background:var(--linie);border-radius:5px}
+input[type=range]::-moz-range-track{height:10px;background:var(--linie);border-radius:5px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:36px;height:36px;border-radius:50%;background:var(--kupfer);border:3px solid #fff;box-shadow:0 0 0 1.6px var(--ink);margin-top:-13px}
+input[type=range]::-moz-range-thumb{width:32px;height:32px;border-radius:50%;background:var(--kupfer);border:3px solid #fff;box-shadow:0 0 0 1.6px var(--ink)}
+table.klein{border-collapse:collapse;font-size:13px;margin-top:8px;width:100%}
+table.klein th,table.klein td{border:1px solid var(--linie);padding:3px 6px;text-align:right}
+table.klein th{background:var(--hell);text-align:left;font-weight:700}
+table.klein td.mono{font-family:"DejaVu Sans Mono",ui-monospace,monospace}
+@media(max-width:480px){.anz{grid-template-columns:repeat(2,1fr)}.anz div b{font-size:19px}table.klein{font-size:11px}table.klein th,table.klein td{padding:2px 3px}}
+</style></head>
+<body><div class="wrap">
+<header><div class="reihe">E3EG · Block 4 · Simulation</div>
+<h1>Kompensation eines Motors: Leistungszeigerbild und die drei Ströme</h1></header>
+
+<div class="karte">
+<span class="cap">Leistungszeigerbild vor und nach der Kompensation, Ströme in Zuleitung, Motor und Kondensator</span>
+<canvas id="bild" width="960" height="400" data-quelle="eigene, steuerbare Zeichnung nach Europa Fachkunde Elektrotechnik, S. 164, Bild 2 (Zeigerbild der Leistungen bei Parallelkompensation) und Rechenbuch S. 132, Bild 1 (Parallelkompensation eines Motors: Strom in der Zuleitung); Rechenmodell Tabellenbuch S. 40, Formel 1, 3, 6, S. 37, Formel 1, 5, 6, 11 und S. 328, Formel 6. Was kein Buchbild leistet: Zeigerbild und Ströme folgen der eingestellten Kapazität"></canvas>
+<div class="legende"><span class="lp">Wirkleistung <i>P</i></span><span class="ll">induktive Blindleistung <i>Q</i><sub>L</sub> des Motors</span><span class="lc">kapazitive Blindleistung <i>Q</i><sub>C</sub></span><span class="ls">Scheinleistung <i>S</i><sub>1</sub> (vor) und <i>S</i><sub>2</sub> (nach)</span></div>
+<p class="hinweis">Zeigerbild: 1 Bildpunkt je 12,5 VA. Balken: Ströme in der Zuleitung, im Motor und im Kondensator, 1 Bildpunkt je 0,05 A. Der Motor ist fest: <i>P</i> = 1,6 kW, cos <i>φ</i><sub>1</sub> = 0,65, also <i>S</i><sub>1</sub> = 2461,5 VA, <i>Q</i><sub>L</sub> = 1870,6 var, <i>I</i> = 10,70 A.</p>
+</div>
+
+<div class="zwei">
+<div class="karte">
+<span class="cap">Anzeigen</span>
+<div class="anz">
+ <div><small>Blind&shy;widerstand</small><b id="aXC">…</b><i><i>X</i><sub>C</sub> = 1/(2π · <i>f</i> · <i>C</i>)</i></div>
+ <div><small>Strom im Kondensator</small><b id="aIC">…</b><i><i>I</i><sub>bC</sub> = <i>U</i>/<i>X</i><sub>C</sub></i></div>
+ <div><small>Blindleistung Kondensator</small><b id="aQC">…</b><i><i>Q</i><sub>C</sub> = <i>U</i> · <i>I</i><sub>bC</sub></i></div>
+ <div><small>Blindleistung im Netz</small><b id="aQ">…</b><i><i>Q</i><sub>L2</sub> = <i>Q</i><sub>L</sub> − <i>Q</i><sub>C</sub></i></div>
+ <div><small>Scheinleistung im Netz</small><b id="aS">…</b><i><i>S</i><sub>2</sub> = √(<i>P</i>² + <i>Q</i><sub>L2</sub>²)</i></div>
+ <div><small>Strom in der Zuleitung</small><b id="aI">…</b><i><i>I</i><sub>2</sub> = <i>S</i><sub>2</sub>/<i>U</i></i></div>
+ <div class="fest"><small>Strom im Motor</small><b id="aIM">…</b><i>bleibt</i></div>
+ <div><small>Wirkfaktor</small><b id="aC">…</b><i>cos <i>φ</i><sub>2</sub> = <i>P</i>/<i>S</i><sub>2</sub></i></div>
+</div>
+<table class="klein">
+<tr><th>Größe</th><th>ohne Kondensator</th><th>eingestellt</th></tr>
+<tr><th>Blindleistung aus dem Netz</th><td class="mono">1 871 var</td><td class="mono" id="tQ"></td></tr>
+<tr><th>Scheinleistung aus dem Netz</th><td class="mono">2 462 VA</td><td class="mono" id="tS"></td></tr>
+<tr><th>Strom in der Zuleitung</th><td class="mono">10,70 A</td><td class="mono" id="tI"></td></tr>
+<tr><th>Phasenverschiebungswinkel <i>φ</i></th><td class="mono">49,5°</td><td class="mono" id="tF"></td></tr>
+</table>
+</div>
+<div class="karte">
+<span class="cap">Einstellen</span>
+<div class="zeile"><label for="rc"><span>Kapazität <i>C</i> des Kondensators</span><output id="oc">0 µF</output></label>
+ <div class="bedien"><button type="button" id="cm" aria-label="Kapazität kleiner">&minus;</button><input type="range" id="rc" min="0" max="160" step="2" value="0"><button type="button" id="cp" aria-label="Kapazität größer">+</button></div></div>
+<button type="button" class="reset" id="reset">Zurücksetzen auf 0 µF (ohne Kondensator)</button>
+<p class="hinweis">Regler grob ziehen, dann mit − und + genau einstellen (2-µF-Schritte). Rechenmodell: <i>X</i><sub>C</sub> = 1/(2π · <i>f</i> · <i>C</i>); <i>I</i><sub>bC</sub> = <i>U</i>/<i>X</i><sub>C</sub>; <i>Q</i><sub>C</sub> = <i>U</i> · <i>I</i><sub>bC</sub> (Tabellenbuch S. 40, Formel 1, 3, 6; S. 37, Formel 6); <i>Q</i><sub>L2</sub> = <i>Q</i><sub>L</sub> − <i>Q</i><sub>C</sub> (S. 328, Formel 6); <i>S</i><sub>2</sub>, <i>I</i><sub>2</sub>, cos <i>φ</i><sub>2</sub> nach S. 37, Formel 11, 1, 5. Die Spannung ist fest 230 V, die Quelle ideal. Wird <i>Q</i><sub>L2</sub> negativ, liefert der Kondensator mehr Blindleistung, als der Motor braucht; die Anzeige sagt dann „kapazitiv“ (Block 6).</p>
+</div>
+</div>
+</div>
+<script>
+(function(){
+"use strict";
+var META = JSON.parse(document.getElementById('sim-meta').textContent), START = META.startwerte;
+var U = 230, F = 50, P = 1600, COS1 = 0.65;
+var S1 = P / COS1, QL = Math.sqrt(S1 * S1 - P * P), IM = S1 / U;
+var cv = document.getElementById('bild'), cx = cv.getContext('2d');
+var rc = document.getElementById('rc');
+var schmal = false;
+function komma(x, n){ return x.toFixed(n).replace('.', ','); }
+function tausend(x, n){ var s = komma(Math.abs(x), n); var t = s.split(','); t[0] = t[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' '); return (x < 0 ? '−' : '') + t.join(','); }
+function modell(){
+  var C = parseFloat(rc.value) * 1e-6, w = 2 * Math.PI * F;
+  var xc = C > 0 ? 1 / (w * C) : Infinity, ic = C > 0 ? U / xc : 0, qc = U * ic;
+  var q2 = QL - qc, s2 = Math.sqrt(P * P + q2 * q2), i2 = s2 / U, c2 = P / s2, phi2 = Math.atan2(q2, P);
+  return {C:C, xc:xc, ic:ic, qc:qc, q2:q2, s2:s2, i2:i2, c2:c2, phi2:phi2, phi1:Math.atan2(QL, P)};
+}
+function anzeigen(m){
+  document.getElementById('oc').textContent = Math.round(m.C * 1e6) + ' µF';
+  document.getElementById('aXC').textContent = isFinite(m.xc) ? (m.xc >= 1000 ? tausend(m.xc, 0) : komma(m.xc, 1)) + ' Ω' : '…';
+  document.getElementById('aIC').textContent = komma(m.ic, 2) + ' A';
+  document.getElementById('aQC').textContent = tausend(m.qc, 0) + ' var';
+  document.getElementById('aQ').textContent = tausend(m.q2, 0) + ' var' + (m.q2 < -0.5 ? ' kapazitiv' : '');
+  document.getElementById('aS').textContent = tausend(m.s2, 0) + ' VA';
+  document.getElementById('aI').textContent = komma(m.i2, 2) + ' A';
+  document.getElementById('aIM').textContent = komma(IM, 2) + ' A';
+  document.getElementById('aC').textContent = komma(m.c2, 3);
+  document.getElementById('tQ').textContent = tausend(m.q2, 0) + ' var';
+  document.getElementById('tS').textContent = tausend(m.s2, 0) + ' VA';
+  document.getElementById('tI').textContent = komma(m.i2, 2) + ' A';
+  document.getElementById('tF').textContent = komma(Math.abs(m.phi2) * 180 / Math.PI, 1) + '°' + (m.q2 < -0.5 ? ' kap.' : '');
+}
+/* Beschriftung immer linksbuendig, mit weissem Hof; Index kleiner und tiefer (Canvas kennt kein <sub>) */
+function halo(text, x, y, farbe, fett, groesse){
+  cx.textAlign = 'left'; cx.textBaseline = 'alphabetic';
+  cx.font = (fett ? 'bold ' : '') + (groesse || 18) + 'px "Noto Sans",Arial,sans-serif';
+  cx.lineWidth = 5; cx.strokeStyle = '#fff'; cx.lineJoin = 'round'; cx.strokeText(text, x, y);
+  cx.fillStyle = farbe; cx.fillText(text, x, y);
+}
+function haloIdx(text, idx, x, y, farbe, groesse){
+  halo(text, x, y, farbe, true, groesse); var w = cx.measureText(text).width;
+  cx.font = 'bold ' + Math.round((groesse || 18) * 0.67) + 'px "Noto Sans",Arial,sans-serif'; cx.lineWidth = 4; cx.strokeStyle = '#fff';
+  cx.strokeText(idx, x + w + 1, y + 5); cx.fillStyle = farbe; cx.fillText(idx, x + w + 1, y + 5);
+}
+function pfeil(x0, y0, x1, y1, farbe, breite, gestrichelt){
+  cx.strokeStyle = farbe; cx.fillStyle = farbe; cx.lineWidth = breite; cx.setLineDash(gestrichelt ? [8, 6] : []);
+  cx.beginPath(); cx.moveTo(x0, y0); cx.lineTo(x1, y1); cx.stroke(); cx.setLineDash([]);
+  var a = Math.atan2(y1 - y0, x1 - x0), l = 13;
+  if(Math.hypot(x1 - x0, y1 - y0) < 4) return;
+  cx.beginPath(); cx.moveTo(x1, y1); cx.lineTo(x1 - l * Math.cos(a - 0.4), y1 - l * Math.sin(a - 0.4));
+  cx.lineTo(x1 - l * Math.cos(a + 0.4), y1 - l * Math.sin(a + 0.4)); cx.closePath(); cx.fill();
+}
+/* Leistungszeigerbild: P waagerecht, Q_L nach oben, Q_C von der Spitze nach unten, S1 und S2; 1 Bildpunkt je 12,5 VA (k = 0,08) */
+function zeigerbild(m, x0, y0, g){
+  var k = 0.08, px = P * k, qly = QL * k, qcy = m.qc * k;
+  cx.strokeStyle = '#E3E7EA'; cx.lineWidth = 1;
+  cx.beginPath(); cx.moveTo(x0, y0); cx.lineTo(x0 + 260, y0); cx.moveTo(x0, y0 - 200); cx.lineTo(x0, y0 + 90); cx.stroke();
+  pfeil(x0, y0, x0 + px, y0, '#2F7D62', 5, false); halo('P', x0 + px / 2 - 6, y0 + g + 6, '#2F7D62', true, g);
+  pfeil(x0 + px, y0, x0 + px, y0 - qly, '#A34E0E', 4, false); haloIdx('Q', 'L', x0 + px + 8, y0 - qly / 2 + 6, '#A34E0E', g);
+  pfeil(x0, y0, x0 + px, y0 - qly, '#C0246B', 3, true); haloIdx('S', '1', x0 + px / 2 - 34, y0 - qly / 2 - 4, '#C0246B', g);
+  if(m.qc > 1){ pfeil(x0 + px, y0 - qly, x0 + px, y0 - qly + qcy, '#1E88C8', 4, false); haloIdx('Q', 'C', x0 + px + 8, y0 - qly + qcy / 2 + 6, '#1E88C8', g); }
+  var y2 = y0 - m.q2 * k;
+  pfeil(x0, y0, x0 + px, y2, '#C0246B', 5, false); haloIdx('S', '2', x0 + px / 2 + 4, y2 + (m.q2 >= 0 ? 24 : -10), '#C0246B', g);
+  cx.strokeStyle = '#1A2530'; cx.lineWidth = 2; cx.beginPath(); cx.arc(x0, y0, 54, -m.phi1, 0, false); cx.stroke();
+  haloIdx('φ', '1', x0 + 62 * Math.cos(m.phi1 / 2) - 4, y0 - 62 * Math.sin(m.phi1 / 2) + 6, '#1A2530', g);
+  if(Math.abs(m.phi2) > 0.05){ cx.beginPath(); cx.arc(x0, y0, 36, Math.min(0, -m.phi2), Math.max(0, -m.phi2), false); cx.stroke();
+    haloIdx('φ', '2', x0 + 44 * Math.cos(m.phi2 / 2) - 4, y0 - 44 * Math.sin(m.phi2 / 2) + 6, '#1A2530', g); }
+  halo('Leistungszeigerbild', x0, y0 - 212, '#5A666F', true, g - 3);
+}
+/* Drei Strombalken: Zuleitung, Motor, Kondensator; 1 Bildpunkt je 0,05 A (12 A = 240 px) */
+function balken(m, bx, by, g){
+  var k = 20, w = 62, abst = 96, werte = [[m.i2, 'Zuleitung', '#C0246B'], [IM, 'Motor', '#A34E0E'], [m.ic, 'Kondensator', '#1E88C8']];
+  cx.strokeStyle = '#1A2530'; cx.lineWidth = 2; cx.beginPath(); cx.moveTo(bx - 10, by); cx.lineTo(bx + 3 * abst, by); cx.stroke();
+  cx.strokeStyle = '#E3E7EA'; cx.lineWidth = 1;
+  for(var a = 2; a <= 12; a += 2){ cx.beginPath(); cx.moveTo(bx - 10, by - a * k); cx.lineTo(bx + 3 * abst, by - a * k); cx.stroke();
+    cx.fillStyle = '#5A666F'; cx.font = (g - 5) + 'px "Noto Sans",Arial,sans-serif'; cx.textAlign = 'right'; cx.fillText(a + ' A', bx - 14, by - a * k + 5); }
+  cx.textAlign = 'left';
+  werte.forEach(function(v, j){ var h = Math.min(v[0], 12.5) * k, x = bx + j * abst;
+    cx.fillStyle = v[2]; cx.fillRect(x, by - h, w, h);
+    halo(komma(v[0], 2) + ' A', x - 4, by - h - 8, v[2], true, g - 2);
+    halo(v[1], x - 6, by + g + 4, '#1A2530', false, g - 4); });
+  halo('Ströme (Effektivwerte)', bx - 10, by - 12 * k - 30, '#5A666F', true, g - 3);
+}
+function zeichne(m){
+  var W = cv.width, H = cv.height; cx.clearRect(0, 0, W, H);
+  if(schmal){ zeigerbild(m, 60, 330, 22); balken(m, 90, 700, 22); }
+  else { zeigerbild(m, 60, 300, 18); balken(m, 560, 330, 18); }
+}
+function masse(){
+  var s = window.innerWidth < 600;
+  if(s !== schmal || !cv.dataset.fertig){
+    schmal = s; cv.dataset.fertig = '1';
+    if(schmal){ cv.width = 480; cv.height = 760; } else { cv.width = 960; cv.height = 400; }
+  }
+}
+function neu(){ masse(); var m = modell(); anzeigen(m); zeichne(m); }
+function setze(C){ rc.value = C; neu(); }
+function schritt(d){ var v = parseFloat(rc.value) + d * parseFloat(rc.step); rc.value = Math.max(parseFloat(rc.min), Math.min(parseFloat(rc.max), v)); neu(); }
+rc.addEventListener('input', neu);
+document.getElementById('cm').addEventListener('click', function(){ schritt(-1); });
+document.getElementById('cp').addEventListener('click', function(){ schritt(+1); });
+document.getElementById('reset').addEventListener('click', function(){ setze(START.C); });
+window.addEventListener('resize', neu);
+setze(START.C);
+window.B04sim = {modell: modell, setze: setze};
+})();
+</script>
+</body></html>
