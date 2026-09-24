@@ -1,0 +1,217 @@
+<!-- lehrmaterial -->
+<!-- materialtyp: simulation -->
+<!-- sim_bearbeitung: pflicht -->
+<!-- EG1-B13 · Leiterwiderstand am Messplatz. Stoffwerte Tabellenbuch S. 559; Rechenmodell Tabellenbuch S. 30, Formel 12. Baunotizen: 010_simulation_eg1_b13_leiterwiderstand_werkstoff_laenge_querschnitt.baunotizen.md -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EG1-B13: Leiterwiderstand messen: Werkstoff, Länge, Querschnitt</title>
+
+<script type="application/json" id="sim-meta">
+{
+ "block": "EG1-B13",
+ "thema": "Leiterwiderstand: Werkstoff, Laenge und Querschnitt am Messplatz",
+ "modell": "R = rho*l/A (Tabellenbuch S. 30, Formel 12)",
+ "quelle": "Stoffwerte Tabellenbuch 32. A., S. 559",
+ "startwerte": { "stoff": "Kupfer", "l": 40, "A": 6 },
+ "loesungswerte": { "l": 1, "A": 1 }
+}
+</script>
+
+<style>:root{
+ --ink:#1A2530; --kupfer:#A34E0E; --kupferhell:#F5EBDF; --rot:#B23A33;
+ --gruen:#2F7D62; --gruenhell:#EAF3EC; --linie:#9AA5AE; --grau:#5A666F; --hell:#F4F6F8;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:"Noto Sans",system-ui,Arial,sans-serif;color:var(--ink);line-height:1.45;background:#f4f6f8;
+ padding:18px 14px 40px;max-width:980px;margin:0 auto}
+.kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0 10px;margin-bottom:14px}
+.kopf .reihe{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--kupfer);font-weight:700}
+.kopf h1{font-size:22px;margin:4px 0 0}
+p{margin:8px 0}
+i{font-style:italic}
+.ziel,.methode{background:var(--kupferhell);border-left:5px solid var(--kupfer);padding:10px 14px;margin:12px 0}
+.ziel .cap,.methode .cap{font-weight:700;color:var(--kupfer);display:block;margin-bottom:2px}
+.sim{border:1.4px solid var(--ink);background:#fff;padding:16px;margin:12px 0}
+.stoffe{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 10px}
+.stoffe button{font:inherit;font-size:15px;padding:9px 14px;min-height:44px;cursor:pointer;
+ border:1.4px solid var(--linie);background:#fff;color:var(--ink)}
+.stoffe button[aria-pressed="true"]{border-color:var(--kupfer);background:var(--kupferhell);color:var(--kupfer);font-weight:700}
+canvas{width:100%;height:auto;display:block;background:#fff;border:1px solid var(--linie);touch-action:manipulation}
+.bildunterschrift{font-size:12.5px;color:var(--grau);margin:4px 0 0}
+.anzeige{font-size:28px;font-weight:700;margin:12px 0 2px}
+.regler{display:flex;align-items:center;gap:12px;margin:10px 0 2px;flex-wrap:wrap}
+.regler label{font-weight:700;min-width:170px}
+.regler input[type=range]{flex:1 1 160px;height:44px;accent-color:var(--kupfer);cursor:pointer}
+.rval{font-weight:700;min-width:74px;text-align:right;font-variant-numeric:tabular-nums}
+.tasten{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 2px}
+button.tk{font:inherit;font-weight:700;border:1.4px solid var(--rot);background:#fff;color:var(--rot);
+ padding:8px 14px;min-height:44px;cursor:pointer}
+table.ab{border-collapse:collapse;margin-top:12px;font-size:15px}
+table.ab th,table.ab td{border:1px solid var(--linie);padding:6px 10px;text-align:left}
+table.ab th{background:var(--hell);font-size:12.5px;letter-spacing:.04em;text-transform:uppercase}
+table.ab td.z{text-align:right;font-variant-numeric:tabular-nums}
+details{margin-top:14px;border:1px solid var(--linie);padding:6px 10px;background:#fff}
+details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2px;min-height:44px}
+.formel{background:#fff;border:1.6px solid var(--kupfer);border-left:6px solid var(--kupfer);padding:12px 16px;margin:10px 0}
+.formel .cap{font-weight:700;color:var(--kupfer);display:block;margin-bottom:6px}
+.formelzeile{font-size:22px;margin:6px 0}
+.bruch{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;line-height:1.05;margin:0 .12em;font-size:.62em}
+.bruch .z{border-bottom:1.6px solid currentColor;padding:0 .35em}
+.bruch .n{padding:0 .35em}
+.quelle{font-size:13px;color:var(--grau);border-left:3px solid var(--kupfer);padding-left:10px;margin-top:20px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="kopf">
+ <div class="reihe">E1EG · Lernfeld 1 · Gleichstrom-Grundlagen · Block EG1-B13</div>
+ <h1>Leiterwiderstand messen: Werkstoff, Länge, Querschnitt</h1>
+</div>
+
+<div class="ziel">
+ <span class="cap">Das sollen Sie hier selbst herausfinden</span>
+ Wovon hängt der Widerstand eines Drahtes ab? Sie wählen den <b>Werkstoff</b>, stellen die <b>Länge</b> und den
+ <b>Querschnitt</b> ein und lesen den Widerstand am Messgerät ab. Die Aufträge stehen auf dem Arbeitsblatt
+ (Aufgabe&nbsp;2 bis 4).
+</div>
+
+<div class="methode">
+ <span class="cap">So bedienen Sie den Messplatz</span>
+ Tippen Sie einen Werkstoff an und stellen Sie Länge und Querschnitt mit den Reglern ein. Das Widerstandsmessgerät
+ zeigt den Widerstand des Drahtes. Sagen Sie jedes Ergebnis zuerst voraus, dann messen Sie. Mit
+ <b>„Zurücksetzen“</b> kehren Sie zur Grundstellung zurück. Arbeiten Sie zu zweit: einer stellt ein, einer protokolliert.
+</div>
+
+<div class="sim">
+ <div class="stoffe" id="stoffe" role="group" aria-label="Werkstoff wählen"></div>
+ <canvas id="cDraht" width="960" height="440"
+  aria-label="Ein Draht ist zwischen zwei Klemmen eines Widerstandsmessgeraets eingespannt. Die gezeichnete Laenge waechst mit der eingestellten Laenge, die Dicke mit dem Querschnitt. Das Messgeraet zeigt den Widerstand."></canvas>
+ <p class="bildunterschrift">Schematisch, nicht maßstäblich: länger heißt länger gezeichnet, größerer Querschnitt heißt dicker gezeichnet.</p>
+ <div class="anzeige">Widerstandsmessgerät: <i>R</i> = <span id="aR">0,119&nbsp;Ω</span></div>
+ <div class="regler">
+  <label for="rL">Drahtlänge <i>l</i></label>
+  <input id="rL" type="range" min="1" max="100" value="40" step="1" aria-label="Länge in Meter">
+  <span class="rval" id="wL">40 m</span>
+ </div>
+ <div class="regler">
+  <label for="rA">Querschnitt <i>A</i></label>
+  <input id="rA" type="range" min="0.5" max="10" value="6" step="0.5" aria-label="Querschnitt in Quadratmillimeter">
+  <span class="rval" id="wA">6 mm²</span>
+ </div>
+ <div class="tasten"><button class="tk" id="bReset" type="button">Zurücksetzen</button></div>
+ <table class="ab">
+  <tr><th>Werkstoff</th><th>spezifischer Widerstand <i>ϱ</i> (Tabellenbuch S.&nbsp;559)</th></tr>
+  <tr><td id="aStoff">Kupfer</td><td class="z" id="aRho">0,0178&nbsp;Ω·mm²/m</td></tr>
+ </table>
+</div>
+
+<details class="ergebnis-aufdecken">
+ <summary><b>Ergebnis anzeigen</b> (erst, wenn Sie in Aufgabe&nbsp;5 des Arbeitsblatts die Formel selbst zusammengesetzt haben)</summary>
+ <div class="formel">
+  <span class="cap">Leiterwiderstand (Tabellenbuch S.&nbsp;30, Formel&nbsp;12)</span>
+  <div class="formelzeile"><i>R</i> = <span class="bruch"><span class="z"><i>ϱ</i> · <i>l</i></span><span class="n"><i>A</i></span></span></div>
+  <p id="aNach">Nachrechnung der Einstellung: …</p>
+ </div>
+</details>
+
+<div class="quelle">Stoffwerte bei 20&nbsp;°C aus dem Tabellenbuch S.&nbsp;559 („Stoffwerte“, Spalte <i>ϱ</i><sub>20</sub>). Alle Messwerte sind mit der Hand nachgerechnet.</div>
+
+<script>
+(function(){
+ "use strict";
+ var $ = function(id){ return document.getElementById(id); };
+ // Stoffwerte Tabellenbuch S. 559, Spalte rho20 in Ohm·mm²/m
+ var STOFFE = [{n:"Kupfer",rho:0.0178,f:"#C9722B"},{n:"Aluminium",rho:0.0278,f:"#A9B3BA"},
+               {n:"Silber",rho:0.0167,f:"#C4CACF"},{n:"Gold",rho:0.022,f:"#D6B34A"},
+               {n:"Konstantan",rho:0.49,f:"#8E7C63"}];
+ var START = {stoff:0, l:40, A:6};
+ var gewaehlt = START.stoff;
+ function komma(s){ return String(s).replace('.', ','); }
+ function drei(x){ // drei geltende Ziffern, wie ein Messgeraet
+   var s = x.toPrecision(3);
+   if(s.indexOf('e') >= 0) s = x.toFixed(5);
+   return komma(s);
+ }
+ function zahl(x){ return komma(String(Math.round(x*100)/100)); }
+ // Schrift waechst am schmalen Bildschirm mit (Zeichenflaeche 480 logische Pixel)
+ var fs = 1;
+ function schrift(){ var w = $('cDraht').clientWidth || 480; fs = Math.max(1, Math.min(1.6, 460 / w)); }
+ function f(px){ return Math.round(px * fs); }
+ var cv = $('cDraht'), ctx;
+ function setup(){
+   var dpr = Math.min(window.devicePixelRatio || 1, 2);
+   cv.width = Math.round(480 * dpr); cv.height = Math.round(220 * dpr);
+   ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+ }
+ function sym(z, rest, x, y, px, gew){   // kursives Formelzeichen, dann aufrechter Rest
+   ctx.textAlign = 'left';
+   ctx.font = gew + 'italic ' + px + 'px "Noto Sans",Arial'; ctx.fillText(z, x, y);
+   var w = ctx.measureText(z).width;
+   ctx.font = gew + px + 'px "Noto Sans",Arial'; ctx.fillText(rest, x + w + 1, y);
+ }
+ function breite(z, rest, px, gew){
+   ctx.font = gew + 'italic ' + px + 'px "Noto Sans",Arial'; var w = ctx.measureText(z).width;
+   ctx.font = gew + px + 'px "Noto Sans",Arial'; return w + 1 + ctx.measureText(rest).width;
+ }
+ function zeichne(s, l, A, R){
+   ctx.clearRect(0, 0, 480, 220);
+   var x0 = 40, xmax = 440, laenge = 40 + (xmax - x0 - 40) * (l / 100);
+   var dicke = 3 + 22 * (A / 10), y = 120;
+   // Messgeraet oben
+   ctx.strokeStyle = '#1A2530'; ctx.lineWidth = 2; ctx.fillStyle = '#fff';
+   ctx.beginPath(); ctx.arc(240, 42, 22, 0, 2*Math.PI); ctx.fill(); ctx.stroke();
+   ctx.fillStyle = '#1A2530'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+   ctx.font = 'bold ' + f(18) + 'px "Noto Sans",Arial'; ctx.fillText('Ω', 240, 43);
+   ctx.textBaseline = 'alphabetic';
+   // Messleitungen zu den Klemmen
+   var xl = x0, xr = x0 + laenge;
+   // links waagerecht aus dem Geraet, rechts nach unten und dann waagerecht: die Leitungen kreuzen sich nie
+   ctx.lineWidth = 1.6; ctx.beginPath();
+   ctx.moveTo(218, 42); ctx.lineTo(xl, 42); ctx.lineTo(xl, y - dicke/2 - 8);
+   ctx.moveTo(240, 64); ctx.lineTo(240, 80); ctx.lineTo(xr, 80); ctx.lineTo(xr, y - dicke/2 - 8);
+   ctx.stroke();
+   // Draht
+   ctx.fillStyle = s.f; ctx.fillRect(xl, y - dicke/2, laenge, dicke);
+   ctx.strokeStyle = '#1A2530'; ctx.lineWidth = 1.2; ctx.strokeRect(xl, y - dicke/2, laenge, dicke);
+   // Klemmen
+   ctx.fillStyle = '#1A2530';
+   ctx.fillRect(xl - 4, y - dicke/2 - 10, 8, dicke + 20); ctx.fillRect(xr - 4, y - dicke/2 - 10, 8, dicke + 20);
+   // Beschriftung linksbuendig unter dem Draht; Formelzeichen kursiv (DIN 1338)
+   ctx.font = f(13) + 'px "Noto Sans",Arial'; ctx.fillStyle = '#5A666F'; ctx.textAlign = 'left';
+   ctx.fillText(s.n, xl, y + dicke/2 + 24);
+   sym('l', ' = ' + zahl(l) + ' m', xl, y + dicke/2 + 44, f(13), '');
+   sym('A', ' = ' + zahl(A) + ' mm²', xl, y + dicke/2 + 62, f(13), '');
+   ctx.fillStyle = '#A34E0E';
+   var br = breite('R', ' = ' + drei(R) + ' Ω', f(15), 'bold ');
+   sym('R', ' = ' + drei(R) + ' Ω', 240 - br/2, 16, f(15), 'bold ');
+ }
+ function tick(){
+   var s = STOFFE[gewaehlt], l = +$('rL').value, A = +$('rA').value;
+   var R = s.rho * l / A;
+   $('wL').textContent = zahl(l) + ' m';
+   $('wA').textContent = zahl(A) + ' mm²';
+   $('aR').innerHTML = drei(R) + '&nbsp;Ω';
+   $('aStoff').textContent = s.n;
+   $('aRho').innerHTML = komma(String(s.rho)) + '&nbsp;Ω·mm²/m';
+   $('aNach').innerHTML = 'Nachrechnung der Einstellung: <i>R</i> = ' + komma(String(s.rho)) + ' Ω·mm²/m · ' + zahl(l) +
+     ' m : ' + zahl(A) + ' mm² = ' + drei(R) + ' Ω';
+   Array.prototype.forEach.call($('stoffe').children, function(b, i){
+     b.setAttribute('aria-pressed', i === gewaehlt ? 'true' : 'false'); });
+   zeichne(s, l, A, R);
+ }
+ STOFFE.forEach(function(s, i){
+   var b = document.createElement('button');
+   b.type = 'button'; b.textContent = s.n; b.setAttribute('aria-pressed', 'false');
+   b.addEventListener('click', function(){ gewaehlt = i; tick(); });
+   $('stoffe').appendChild(b);
+ });
+ ['rL', 'rA'].forEach(function(id){ ['input', 'change'].forEach(function(ev){ $(id).addEventListener(ev, tick); }); });
+ $('bReset').addEventListener('click', function(){
+   $('rL').value = START.l; $('rA').value = START.A; gewaehlt = START.stoff; tick();
+ });
+ window.addEventListener('resize', function(){ schrift(); setup(); tick(); });
+ // Startstellung aus den startwerten (40 m, 6 mm², Kupfer), nicht aus den loesungswerten
+ $('rL').value = START.l; $('rA').value = START.A;
+ schrift(); setup(); tick();
+})();
+</script>
