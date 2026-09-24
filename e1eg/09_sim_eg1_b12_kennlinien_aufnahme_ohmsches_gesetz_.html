@@ -30,7 +30,8 @@ p{margin:8px 0}
 i{font-style:italic}.ziel{background:var(--kupferhell);border-left:5px solid var(--kupfer);padding:10px 14px;margin:12px 0}.ziel .cap{font-weight:700;color:var(--kupfer);display:block;margin-bottom:2px}.modewahl{display:flex;flex-wrap:wrap;gap:0;margin:14px 0 4px;border:1.4px solid var(--ink)}.modewahl button{flex:1 1 240px;border:0;border-right:1.4px solid var(--ink);background:#fff;
  color:var(--ink);font:inherit;font-weight:700;padding:10px 12px;cursor:pointer;text-align:left;line-height:1.3}.modewahl button:last-child{border-right:0}.modewahl button[aria-pressed="true"]{background:var(--kupfer);color:#fff}.modewahl small{display:block;font-weight:400;font-size:12px;margin-top:2px;opacity:.9}.sim{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start;
  border:1.4px solid var(--ink);background:#fff;padding:16px;margin:12px 0}.sim .links{flex:1 1 380px;min-width:300px}.sim .rechts{flex:1 1 320px;min-width:280px}
-canvas{width:100%;height:auto;display:block;background:#fff}.leinwand{border:1px solid var(--linie)}.bildunterschrift{font-size:12px;color:var(--grau);margin:4px 0 0}.regler{display:flex;align-items:center;gap:12px;margin:10px 0 2px;flex-wrap:wrap}.regler label{font-weight:700;min-width:150px}.regler input[type=range]{flex:1 1 150px;height:44px;accent-color:var(--kupfer);cursor:pointer}.rval{font-weight:700;min-width:64px;text-align:right}.reglerhinweis{font-size:12px;color:var(--grau);margin:0 0 6px}.anzeige{font-size:28px;font-weight:700;margin:14px 0 4px;color:var(--ink)}.bruch{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;
+canvas{width:100%;height:auto;display:block;background:#fff}.leinwand{border:1px solid var(--linie)}.bildunterschrift{font-size:12px;color:var(--grau);margin:4px 0 0}.regler{display:flex;align-items:center;gap:12px;margin:10px 0 2px;flex-wrap:wrap}.regler label{font-weight:700;min-width:150px}.regler input[type=range]{flex:1 1 150px;height:44px;accent-color:var(--kupfer);cursor:pointer}.rval{font-weight:700;min-width:64px;text-align:right}.reglerhinweis{font-size:12px;color:var(--grau);margin:0 0 6px}.anzeige{font-size:28px;font-weight:700;margin:14px 0 4px;color:var(--ink);min-height:2.6em}
+@media (max-width:420px){.anzeige{font-size:22px;min-height:1.4em;white-space:nowrap}}.bruch{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;
  line-height:1.05;margin:0 .12em;font-size:.6em}.bruch .z{border-bottom:1.6px solid currentColor;padding:0 .35em}.bruch .n{padding:0 .35em}.einheit{font-size:14px;font-weight:400;color:var(--grau);margin:0 0 8px}.tasten{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0 2px}
 button.tk{font:inherit;font-weight:700;border:1.4px solid var(--ink);background:#fff;color:var(--ink);
  padding:8px 14px;cursor:pointer;min-height:44px}
@@ -55,9 +56,9 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
 
 <div class="modewahl" role="group" aria-label="Versuch auswählen">
  <button id="mV1" type="button" aria-pressed="true">Versuch 1, <i>R</i> fest, <i>U</i> verändern
- <small>Kennlinie <i>I</i> = f(<i>U</i>)</small></button>
+ <small>Kennlinie <i>I</i> = f(<i>U</i>), <i>I</i> in Abhängigkeit von <i>U</i></small></button>
  <button id="mV2" type="button" aria-pressed="false">Versuch 2, <i>U</i> fest, <i>R</i> verändern
- <small>Kennlinie <i>I</i> = f(<i>R</i>)</small></button>
+ <small>Kennlinie <i>I</i> = f(<i>R</i>), <i>I</i> in Abhängigkeit von <i>R</i></small></button>
 </div>
 
 <div class="sim">
@@ -102,8 +103,7 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
 <div class="merk">
  <span class="cap">Beobachten Sie beim Bedienen</span>
  Wird <i>U</i> größer, laufen die Punkte im Stromkreis schneller, der Strommesser zeigt mehr an.
- Bei <i>U</i> = 0 V stehen sie still: <b>ohne Spannung kein Strom</b>. Ein <b>kleinerer</b> Widerstand ergibt
- bei gleicher Spannung einen <b>größeren</b> Strom (die Punkte laufen schneller, die Gerade wird steiler).
+ Bei <i>U</i> = 0 V stehen sie still: <b>ohne Spannung kein Strom</b>. Die Lösungen unten öffnen Sie erst, wenn Sie Aufgabe&nbsp;4 des Arbeitsblatts bearbeitet haben.
 </div>
 
 <h2>Entdeckungsaufgaben am Messplatz</h2>
@@ -128,8 +128,8 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
  </details>
  </li>
  <li>
- <b>Zwei Geraden vergleichen.</b> Nehmen Sie mit <i>R</i> = 10 Ω die Messpunkte bei 2 V, 6 V und 10 V auf
- (löschen Sie die Punkte nicht). Welche der beiden Geraden ist <b>steiler</b>, und zu welchem Widerstand gehört sie?
+ <b>Zwei Kennlinien vergleichen.</b> Nehmen Sie mit <i>R</i> = 10 Ω die Messpunkte bei 2 V, 6 V und 10 V auf
+ (löschen Sie die Punkte nicht). Welche der beiden Kennlinien ist <b>steiler</b>, und zu welchem Widerstand gehört sie?
  <details><summary>Lösung anzeigen</summary>
  <div class="loesung">Die Gerade für <i>R</i> = 4 Ω ist <b>steiler</b> und gehört zum <b>kleineren</b> Widerstand.
  Durch den kleineren Widerstand fließt bei gleicher Spannung ein <b>größerer</b> Strom (bei <i>U</i> = 10 V:
@@ -138,7 +138,7 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
  </li>
  <li>
  <b>Zusatz, Grenzfall <i>U</i> = 0 V.</b> Stellen Sie die Spannung auf 0 V. Was zeigt der Strommesser, und wie
- bewegen sich die Ladungsträger im Stromkreis?
+ bewegen sich die Punkte im Stromkreis?
  <details><summary>Lösung anzeigen</summary>
  <div class="loesung">Der Strommesser zeigt <i>I</i> = 0 A. Die Punkte stehen still, es fließt <b>kein Strom</b>.
  Ohne Spannung fehlt der Antrieb: die Spannung ist die Ursache, der Strom die Wirkung. (Der Nullpunkt ist der
@@ -170,7 +170,7 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
  </div>
  <div class="kontrolle">[<i>I</i>] = V/Ω = A &nbsp;·&nbsp; [<i>R</i>] = V/A = Ω &nbsp;·&nbsp; [<i>U</i>] = Ω·A = V.
  Eine <b>lineare (gerade) Kennlinie</b> kennzeichnet einen <b>Ohm'schen (linearen) Widerstand</b>.<br>
- Beleg: Tabellenbuch S.&nbsp;30, Formel&nbsp;7 (Merkformel <i>U</i> = <i>R</i>·<i>I</i>) und Formel&nbsp;8 (<i>I</i> = <span class="bruch"><span class="z"><i>U</i></span><span class="n"><i>R</i></span></span>). Andere Auflage? Tragen Sie ein: S. ____, Formel ____.</div>
+ Beleg: Tabellenbuch S.&nbsp;30, Formel&nbsp;7 (Merkformel <i>U</i> = <i>R</i>·<i>I</i>) und Formel&nbsp;8 (<i>I</i> = <span class="bruch"><span class="z"><i>U</i></span><span class="n"><i>R</i></span></span>).</div>
 </div>
 <div class="projekt"><span class="cap">Anwendung</span>
  Durch einen Verbraucher fließt bei <i>U</i> = 10 V der Strom <i>I</i> = 2,5 A. Suchen Sie in <b>Versuch 2</b>
@@ -183,7 +183,7 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
 </details>
 
 <div class="quelle">
- Alle Messwerte sind mit der Hand nachgerechnet (Europa-Fachkunde S.&nbsp;37, Versuch&nbsp;1 und 2).
+ Alle Messwerte sind mit der Hand nachgerechnet.
 </div>
 
 <script>
@@ -202,7 +202,7 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
  var mode = 'v1'; // 'v1' = I=f(U) bei festem R; 'v2' = I=f(R) bei festem U
  var pointsV1 = []; // {R, U, I}
  var pointsV2 = []; // {U, R, I}
- var farben = ['#A34E0E','#2F7D62','#B23A33','#3A6EA5','#7A5C99','#4B7F52'];
+ var farben = ['#A34E0E','#3A6EA5','#B23A33','#7A5C99','#8A6D1F','#4B4B4B']; // kein Gruen: Gruen ist der aktuelle Messpunkt (K9)
  var reduziert = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
  // ---- Zahlformat (formeldarstellung: Dezimalkomma, keine Nullen auffuellen) ----
