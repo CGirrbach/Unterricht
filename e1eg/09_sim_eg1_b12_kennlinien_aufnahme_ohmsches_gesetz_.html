@@ -1,0 +1,467 @@
+<!-- lehrmaterial -->
+<!-- materialtyp: simulation -->
+<!-- sim_bearbeitung: pflicht -->
+<!-- EG1-B12 — Virtueller Messplatz „Kennlinien-Aufnahme (Ohmsches Gesetz)". Schale 4:
+ volle, selbst bedienbare Simulation mit zwei Versuchsmodi, Parametervariation inkl.
+ Grenzfaellen (U = 0 -> kein Strom; kleiner Widerstand -> grosser Strom), verifiziertem
+ Rechenmodell I = U/R (gegen Handrechnung/Fachkunde S. 37 geprueft) und gekoppelten
+ Entdeckungsaufgaben. Ziel-Erkenntnis: bei festem R ist I ~ U (Gerade durch den Nullpunkt),
+ bei festem U ist I ~ 1/R (fallende Kurve); die steilere Gerade gehoert zum kleineren
+ Widerstand -> Ohmsches Gesetz I = U/R. Modell/Messwerte 1:1 Europa-Fachkunde Elektrotechnik. Formelbeleg Tabellenbuch 32. A., S. 30, Formel 7.
+ AUSSAGENLOSE Startstellung: U = 0 V (Regler auf Minimum), R = 2 Ohm (Minimum). Die
+ Loesungswerte der gekoppelten Aufgabe (U = 6 V, R = 4 Ohm) stellt der Schueler SELBST ein.
+ Anrede durchgehend Sie, kein Gendern. -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EG1-B12: Kennlinien-Aufnahme: Ohm'sches Gesetz zum Ausprobieren</title>
+
+<script type="application/json" id="sim-meta">
+{
+ "block": "EG1-B12",
+ "thema": "Ohm'sches Gesetz: Kennlinien-Aufnahme (Messreihe I = f(U) und I = f(R))",
+ "modell": "I = U/R, R = U/I, U = R*I",
+ "quelle": "Europa-Fachkunde Elektrotechnik; Formelbeleg Tabellenbuch 32. A., S. 30, Formel 7",
+ "startwerte": { "U": 0, "R": 2 },
+ "loesungswerte": { "U": 6, "R": 4 }
+}
+</script>
+
+<style>:root{
+ --ink:#1A2530; --kupfer:#A34E0E; --kupferhell:#F5EBDF; --rot:#B23A33;
+ --gruen:#2F7D62; --gruenhell:#EAF3EC; --karo:#A9C2D6; --linie:#9AA5AE; --grau:#5A666F;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:"Noto Sans",system-ui,Arial,sans-serif;color:var(--ink);
+ line-height:1.45;background:#f4f6f8;padding:18px;max-width:1000px;margin:0 auto}.kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0 10px;margin-bottom:14px}.kopf .reihe{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--kupfer);font-weight:700}.kopf h1{font-size:22px;margin:4px 0 0}
+h2{font-size:17px;color:var(--kupfer);margin:22px 0 8px}
+p{margin:8px 0}
+i{font-style:italic}.ziel{background:var(--kupferhell);border-left:5px solid var(--kupfer);padding:10px 14px;margin:12px 0}.ziel .cap{font-weight:700;color:var(--kupfer);display:block;margin-bottom:2px}.modewahl{display:flex;flex-wrap:wrap;gap:0;margin:14px 0 4px;border:1.4px solid var(--ink)}.modewahl button{flex:1 1 240px;border:0;border-right:1.4px solid var(--ink);background:#fff;
+ color:var(--ink);font:inherit;font-weight:700;padding:10px 12px;cursor:pointer;text-align:left;line-height:1.3}.modewahl button:last-child{border-right:0}.modewahl button[aria-pressed="true"]{background:var(--kupfer);color:#fff}.modewahl small{display:block;font-weight:400;font-size:12px;margin-top:2px;opacity:.9}.sim{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start;
+ border:1.4px solid var(--ink);background:#fff;padding:16px;margin:12px 0}.sim .links{flex:1 1 380px;min-width:300px}.sim .rechts{flex:1 1 320px;min-width:280px}
+canvas{width:100%;height:auto;display:block;background:#fff}.leinwand{border:1px solid var(--linie)}.bildunterschrift{font-size:12px;color:var(--grau);margin:4px 0 0}.regler{display:flex;align-items:center;gap:12px;margin:10px 0 2px;flex-wrap:wrap}.regler label{font-weight:700;min-width:150px}.regler input[type=range]{flex:1 1 150px;height:24px;accent-color:var(--kupfer);cursor:pointer}.rval{font-weight:700;min-width:64px;text-align:right}.reglerhinweis{font-size:12px;color:var(--grau);margin:0 0 6px}.anzeige{font-size:28px;font-weight:700;margin:14px 0 4px;color:var(--ink)}.bruch{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;
+ line-height:1.05;margin:0.12em;font-size:.6em}.bruch .z{border-bottom:1.6px solid currentColor;padding:0.35em}.bruch .n{padding:0.35em}.einheit{font-size:14px;font-weight:400;color:var(--grau);margin:0 0 8px}.tasten{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0 2px}
+button.tk{font:inherit;font-weight:700;border:1.4px solid var(--ink);background:#fff;color:var(--ink);
+ padding:8px 14px;cursor:pointer}
+button.tk:active{background:var(--kupferhell)}
+button.tk.reset{border-color:var(--rot);color:var(--rot)}.merk{background:var(--gruenhell);border-left:5px solid var(--gruen);padding:9px 13px;margin:14px 0;font-size:15px}.merk .cap{font-weight:700;color:var(--gruen);display:block;margin-bottom:2px}.projekt{background:var(--kupferhell);border-left:5px solid var(--kupfer);padding:8px 12px;margin:8px 0}.projekt .cap{font-weight:700;color:var(--kupfer)}.achtung{background:#FBEBE9;border-left:5px solid var(--rot);padding:10px 14px;margin:14px 0}.achtung .cap{font-weight:700;color:var(--rot);display:block;margin-bottom:2px}.formel{background:#fff;border:1.6px solid var(--kupfer);border-left:6px solid var(--kupfer);padding:12px 16px;margin:14px 0}.formel .cap{font-weight:700;color:var(--kupfer);display:block;margin-bottom:6px}.formelzeile{font-size:22px;display:flex;flex-wrap:wrap;gap:26px;align-items:center;margin:6px 0}.formelzeile .bruch{font-size:.55em}.kontrolle{font-size:14px;color:var(--grau);margin-top:8px}.methode{background:var(--kupferhell);border-left:5px solid var(--kupfer);padding:10px 14px;margin:14px 0}.methode .cap{font-weight:700;color:var(--kupfer);display:block;margin-bottom:2px}
+
+ol.aufg{padding-left:22px}
+ol.aufg li{margin:14px 0}
+details{margin-top:6px;border:1px solid var(--linie);padding:6px 10px;background:#fff}
+details summary{cursor:pointer;font-weight:700;color:var(--gruen)}.loesung{margin-top:6px;color:var(--gruen)}.quelle{font-size:13px;color:var(--grau);border-left:3px solid var(--kupfer);padding-left:10px;margin-top:20px}
+</style>
+
+<div class="kopf">
+ <div class="reihe">E1EG · Lernfeld 1 · Gleichstrom-Grundlagen · Block EG1-B12</div>
+ <h1>Kennlinien-Aufnahme: das Ohm'sche Gesetz selbst messen</h1>
+</div>
+
+<div class="ziel">
+ <span class="cap">Das sollen Sie hier selbst herausfinden</span>
+ Sie nehmen zwei Messreihen auf und sehen sich die Kennlinien an. <b>Wie ändert sich die Stromstärke <i>I</i>, wenn Sie bei festem Widerstand die Spannung <i>U</i> verändern?</b> <b>Und wie, wenn Sie bei fester Spannung den Widerstand <i>R</i> verändern?</b> Welche Kennlinie gehört zum größeren Widerstand, und welche Formel verbindet die drei Größen?
+</div>
+
+<div class="modewahl" role="group" aria-label="Versuch auswählen">
+ <button id="mV1" type="button" aria-pressed="true">Versuch 1, <i>R</i> fest, <i>U</i> verändern
+ <small>Kennlinie <i>I</i> = f(<i>U</i>): ist <i>I</i> ∼ <i>U</i>?</small></button>
+ <button id="mV2" type="button" aria-pressed="false">Versuch 2, <i>U</i> fest, <i>R</i> verändern
+ <small>Kennlinie <i>I</i> = f(<i>R</i>): ist <i>I</i> ∼ 1/<i>R</i>?</small></button>
+</div>
+
+<div class="sim">
+ <div class="links">
+ <canvas id="cCircuit" class="leinwand" width="960" height="600"
+ data-quelle="FK S.37 Bild 1 (Messschaltung Ohmsches Gesetz: einstellbarer Widerstand, Strommesser in Reihe, Spannungsmesser parallel; Schaltzeichen DIN EN 60617)"
+ role="img" aria-label="Messschaltung: ein Netzgerät treibt den Strom durch einen einstellbaren Widerstand. Ein Strommesser misst in Reihe die Stromstärke I, ein Spannungsmesser misst parallel die Spannung U. Bewegte Punkte zeigen den Stromfluss; ihre Geschwindigkeit wächst mit der Stromstärke."></canvas>
+ <p class="bildunterschrift">Messschaltung: einstellbarer Widerstand, Strommesser in Reihe, Spannungsmesser parallel (Schaltzeichen nach DIN EN 60617).</p>
+
+ <div class="anzeige">
+ <i>I</i> =
+ <span class="bruch"><span class="z" id="brZ">0&nbsp;V</span><span class="n" id="brN">2&nbsp;Ω</span></span>
+ = <span id="brI">0&nbsp;A</span>
+ </div>
+ <p class="einheit">Einheitenkontrolle: [<i>I</i>] = V/Ω = V/(V/A) = A.</p>
+ </div>
+
+ <div class="rechts">
+ <div class="regler">
+ <label for="rU">Spannung <i>U</i> am Netzgerät</label>
+ <input id="rU" type="range" min="0" max="10" value="0" step="0.5" aria-label="Spannung U in Volt">
+ <span class="rval" id="rUval">0 V</span>
+ </div>
+ <div class="regler">
+ <label for="rR">Widerstand <i>R</i> (einstellbar)</label>
+ <input id="rR" type="range" min="2" max="12" value="2" step="1" aria-label="Widerstand R in Ohm">
+ <span class="rval" id="rRval">2 Ω</span>
+ </div>
+ <p class="reglerhinweis" id="reglerhinweis">Versuch 1: Halten Sie <i>R</i> fest und verändern Sie nur <i>U</i>.</p>
+
+ <canvas id="cPlot" class="leinwand" width="840" height="600"
+ data-quelle="FK S.37 Bild 2 (Kennlinie I=f(U), Gerade durch Nullpunkt) und Bild 3 (Kennlinie I=f(R), fallende Kurve)"
+ role="img" aria-label="Kennliniendiagramm. Waagerechte Achse und senkrechte Achse mit Stromstärke I in Ampere. Der grüne Punkt zeigt den aktuellen Messwert; aufgenommene Messpunkte werden als farbige Kennlinie eingetragen."></canvas>
+ <p class="bildunterschrift" id="plotUnterschrift"><i>I</i>-<i>U</i>-Diagramm. Grüner Punkt = aktueller Messwert.</p>
+
+ <div class="tasten">
+ <button class="tk" id="btnRec" type="button">Messpunkt aufnehmen</button>
+ <button class="tk" id="btnClear" type="button">Punkte löschen</button>
+ <button class="tk reset" id="btnReset" type="button">Zurücksetzen</button>
+ </div>
+ </div>
+</div>
+
+<div class="merk">
+ <span class="cap">Beobachten Sie beim Bedienen</span>
+ Wird <i>U</i> größer, laufen die Punkte im Stromkreis schneller, der Strommesser zeigt mehr an.
+ Bei <i>U</i> = 0 V stehen sie still: <b>ohne Spannung kein Strom</b>. Ein <b>kleinerer</b> Widerstand ergibt
+ bei gleicher Spannung einen <b>größeren</b> Strom (die Punkte laufen schneller, die Gerade wird steiler).
+</div>
+
+<h2>Entdeckungsaufgaben am Messplatz</h2>
+
+<div class="methode">
+ <span class="cap">So bedienen Sie den Messplatz</span>
+ Stellen Sie <i>U</i> und <i>R</i> mit den Reglern ein, lesen Sie <i>I</i> an der Anzeige und am Strommesser ab
+ und tippen Sie auf <b>„Messpunkt aufnehmen“</b>, um den Wert ins Diagramm zu übertragen. Mit <b>„Punkte löschen“</b>
+ räumen Sie das Diagramm, mit <b>„Zurücksetzen“</b> kehren Sie zur Grundstellung (<i>U</i> = 0 V) zurück.
+ Arbeiten Sie zu zweit: einer stellt ein, einer protokolliert.
+</div>
+
+<ol class="aufg">
+ <li>
+ <b>Versuch 1, <i>I</i> ∼ <i>U</i> prüfen.</b> Wählen Sie oben <b>Versuch 1</b> und stellen Sie <i>R</i> = 4 Ω fest ein.
+ Fahren Sie <i>U</i> nacheinander auf 2, 4, 6, 8 und 10 V und nehmen Sie jedes Mal einen Messpunkt auf.
+ Welche Stromstärke zeigt der Messplatz bei <i>U</i> = 6 V? Welche Form hat die Kennlinie?
+ <details><summary>Lösung anzeigen</summary>
+ <div class="loesung">Bei <i>U</i> = 6 V und <i>R</i> = 4 Ω zeigt der Messplatz <i>I</i> = 6 V / 4 Ω = <b>1,5 A</b>.
+ Die fünf Messpunkte liegen auf einer <b>Geraden durch den Nullpunkt</b>: verdoppelt man <i>U</i>, so verdoppelt
+ sich <i>I</i>, die Stromstärke ist <b>proportional</b> zur Spannung (<i>I</i> ∼ <i>U</i>).</div>
+ </details>
+ </li>
+ <li>
+ <b>Zwei Geraden vergleichen.</b> Nehmen Sie die Messreihe aus Aufgabe 1 noch einmal mit <i>R</i> = 10 Ω auf
+ (löschen Sie die Punkte nicht). Welche der beiden Geraden ist <b>steiler</b>, und zu welchem Widerstand gehört sie?
+ <details><summary>Lösung anzeigen</summary>
+ <div class="loesung">Die Gerade für <i>R</i> = 4 Ω ist <b>steiler</b> und gehört zum <b>kleineren</b> Widerstand.
+ Durch den kleineren Widerstand fließt bei gleicher Spannung ein <b>größerer</b> Strom (bei <i>U</i> = 10 V:
+ 2,5 A gegenüber 1,0 A). Merksatz: <b>steilere Kennlinie = kleinerer Widerstand</b>.</div>
+ </details>
+ </li>
+ <li>
+ <b>Grenzfall <i>U</i> = 0 V.</b> Stellen Sie die Spannung auf 0 V. Was zeigt der Strommesser, und wie
+ bewegen sich die Ladungsträger im Stromkreis?
+ <details><summary>Lösung anzeigen</summary>
+ <div class="loesung">Der Strommesser zeigt <i>I</i> = 0 A. Die Punkte stehen still, es fließt <b>kein Strom</b>.
+ Ohne Spannung fehlt der Antrieb: die Spannung ist die Ursache, der Strom die Wirkung. (Der Nullpunkt ist der
+ gemeinsame Anfangspunkt jeder <i>I</i>-<i>U</i>-Geraden.)</div>
+ </details>
+ </li>
+ <li>
+ <b>Versuch 2, <i>I</i> ∼ 1/<i>R</i> prüfen.</b> Wechseln Sie zu <b>Versuch 2</b>, stellen Sie <i>U</i> = 10 V fest
+ ein und nehmen Sie für <i>R</i> = 2, 4, 6, 8 und 10 Ω je einen Messpunkt auf. Welche Form hat diese Kennlinie,
+ und wie ändert sich <i>I</i>, wenn <i>R</i> wächst?
+ <details><summary>Lösung anzeigen</summary>
+ <div class="loesung">Die Messpunkte ergeben eine <b>fallende, gekrümmte Kurve</b> (keine Gerade!). Je größer <i>R</i>,
+ desto kleiner <i>I</i>: <i>R</i> = 2 Ω → 5,0 A; 4 Ω → 2,5 A; 6 Ω → 1,67 A; 8 Ω → 1,25 A; 10 Ω → 1,0 A.
+ Die Stromstärke ist dem Widerstand <b>umgekehrt proportional</b> (<i>I</i> ∼ 1/<i>R</i>).</div>
+ </details>
+ </li>
+ <li>
+ <div class="projekt"><span class="cap">Anwendung</span>
+ Ein Verbraucher zieht bei <i>U</i> = 10 V den Strom <i>I</i> = 2,5 A. Suchen Sie in <b>Versuch 2</b>
+ (<i>U</i> = 10 V fest) den Widerstand, bei dem der Messplatz genau 2,5 A anzeigt. Rechnen Sie mit <i>R</i> = <i>U</i>/<i>I</i> nach.</div>
+ <details><summary>Lösung anzeigen</summary>
+ <div class="loesung">Bei <i>R</i> = 4 Ω zeigt der Messplatz 2,5 A. Nachrechnung: <i>R</i> = <i>U</i>/<i>I</i> = 10 V / 2,5 A = <b>4 Ω</b>.
+ So bestimmen Sie aus einem gemessenen Betriebspunkt den Widerstand eines Verbrauchers, genau wie später
+ den Widerstand der LED-Leuchte (12 V / 0,25 A → 48 Ω) auf dem Arbeitsblatt.</div>
+ </details>
+ </li>
+</ol>
+
+
+
+<div class="formel">
+ <span class="cap">Das Ergebnis Ihrer Messungen: das Ohm'sche Gesetz (drei Grundformen)</span>
+ <div class="formelzeile">
+ <span><i>I</i> = <span class="bruch"><span class="z"><i>U</i></span><span class="n"><i>R</i></span></span></span>
+ <span><i>R</i> = <span class="bruch"><span class="z"><i>U</i></span><span class="n"><i>I</i></span></span></span>
+ <span><i>U</i> = <i>R</i> · <i>I</i></span>
+ </div>
+ <div class="kontrolle">[<i>I</i>] = V/Ω = A &nbsp;·&nbsp; [<i>R</i>] = V/A = Ω &nbsp;·&nbsp; [<i>U</i>] = Ω·A = V.
+ Eine <b>lineare (gerade) Kennlinie</b> kennzeichnet einen <b>Ohm'schen (linearen) Widerstand</b>.<br>
+ Beleg: Tabellenbuch 32. A., S. 30, Formel 7 (Merkformel <i>U</i> = <i>R</i>·<i>I</i>; <i>I</i> = <i>U</i>/<i>R</i> = Formel 8). Andere Auflage? Tragen Sie ein: S. ____, Formel ____.</div>
+</div>
+
+<div class="quelle">
+ Die Simulation rechnet mit <i>I</i> = <i>U</i>/<i>R</i>; alle Messwerte sind mit der Hand nachgerechnet.
+</div>
+
+<script>
+(function(){
+ "use strict";
+ var U = document.getElementById('rU'), R = document.getElementById('rR');
+ if(!U ||!R) return;
+ var uval = document.getElementById('rUval'), rval = document.getElementById('rRval');
+ var brZ = document.getElementById('brZ'), brN = document.getElementById('brN'), brI = document.getElementById('brI');
+ var hinweis = document.getElementById('reglerhinweis');
+ var mV1 = document.getElementById('mV1'), mV2 = document.getElementById('mV2');
+ var btnRec = document.getElementById('btnRec'), btnClear = document.getElementById('btnClear'), btnReset = document.getElementById('btnReset');
+ var plotCap = document.getElementById('plotUnterschrift');
+
+ var START = { U: 0, R: 2 };
+ var mode = 'v1'; // 'v1' = I=f(U) bei festem R; 'v2' = I=f(R) bei festem U
+ var pointsV1 = []; // {R, U, I}
+ var pointsV2 = []; // {U, R, I}
+ var farben = ['#A34E0E','#2F7D62','#B23A33','#3A6EA5','#7A5C99','#4B7F52'];
+ var reduziert = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+ // ---- Zahlformat (formeldarstellung: Dezimalkomma, keine Nullen auffuellen) ----
+ function komma(s){ return String(s).replace('.', ','); }
+ function fmt(x, dec){
+ var v = Math.round(x * Math.pow(10,dec)) / Math.pow(10,dec);
+ var s = v.toFixed(dec);
+ if(s.indexOf('.') >= 0){ s = s.replace(/0+$/,'').replace(/\.$/,''); }
+ return komma(s);
+ }
+ function strom(u,r){ return u / r; } // verifiziertes Modell I = U/R
+
+ // ---- Canvas mit Device-Pixel-Ratio scharf einrichten ----
+ function setup(cv, wl, hl){
+ var dpr = Math.min(window.devicePixelRatio || 1, 2);
+ cv.width = Math.round(wl * dpr); cv.height = Math.round(hl * dpr);
+ var ctx = cv.getContext('2d'); ctx.scale(dpr, dpr);
+ ctx._wl = wl; ctx._hl = hl;
+ return ctx;
+ }
+ var cctx = setup(document.getElementById('cCircuit'), 480, 300);
+ var pctx = setup(document.getElementById('cPlot'), 420, 300);
+
+ // =================== STROMKREIS (animiert) ===================
+ // Rechteck-Schleife: links Netzgeraet, oben Strommesser, rechts einstellbarer Widerstand,
+ // parallel dazu ein Spannungsmesser. Bewegte Punkte = Stromfluss; Tempo ~ I.
+ var LX = 64, RX = 360, TY = 56, BY = 248; // Schleifen-Eckpunkte
+ var loop = [ {x:LX,y:TY}, {x:RX,y:TY}, {x:RX,y:BY}, {x:LX,y:BY} ];
+ var segs = [], perim = 0;
+ for(var si=0;si<loop.length;si++){
+ var a = loop[si], b = loop[(si+1)%loop.length];
+ var len = Math.hypot(b.x-a.x, b.y-a.y);
+ segs.push({a:a,b:b,len:len,start:perim}); perim += len;
+ }
+ function onLoop(d){ // Bogenlaenge -> Punkt
+ d = ((d % perim) + perim) % perim;
+ for(var i=0;i<segs.length;i++){
+ var s = segs[i];
+ if(d <= s.start + s.len){
+ var t = (d - s.start) / s.len;
+ return { x: s.a.x + (s.b.x-s.a.x)*t, y: s.a.y + (s.b.y-s.a.y)*t };
+ }
+ }
+ return loop[0];
+ }
+ var NDOTS = 16, phase = 0, lastT = 0;
+
+ function drawCircuit(){
+ var ctx = cctx, u = parseFloat(U.value), r = parseFloat(R.value), I = strom(u,r);
+ ctx.clearRect(0,0,ctx._wl,ctx._hl);
+
+ // Leiter (Schleife)
+ ctx.strokeStyle = '#1A2530'; ctx.lineWidth = 2.4; ctx.lineJoin = 'round';
+ ctx.beginPath(); ctx.moveTo(loop[0].x,loop[0].y);
+ for(var i=1;i<loop.length;i++) ctx.lineTo(loop[i].x,loop[i].y);
+ ctx.closePath(); ctx.stroke();
+
+ // bewegte Ladungstraeger
+ ctx.fillStyle = '#A34E0E';
+ for(var k=0;k<NDOTS;k++){
+ var p = onLoop(phase + k*perim/NDOTS);
+ ctx.beginPath(); ctx.arc(p.x, p.y, 3.4, 0, 2*Math.PI); ctx.fill();
+ }
+
+ // --- Netzgeraet (DC-Quelle) links ---
+ ctx.fillStyle = '#fff'; ctx.strokeStyle = '#1A2530'; ctx.lineWidth = 2.4;
+ ctx.fillRect(LX-26, 128, 52, 48); ctx.strokeRect(LX-26, 128, 52, 48);
+ ctx.lineWidth = 2;
+ ctx.beginPath(); ctx.moveTo(LX-14,146); ctx.lineTo(LX+14,146); ctx.stroke();
+ ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(LX-14,158); ctx.lineTo(LX+14,158); ctx.stroke();
+ ctx.setLineDash([]);
+ ctx.fillStyle = '#1A2530'; ctx.font = 'italic 14px "Noto Sans",Arial'; ctx.textAlign='center';
+ ctx.fillText('U', LX, 122);
+ ctx.font = '12px "Noto Sans",Arial'; ctx.fillStyle = '#5A666F';
+ ctx.textAlign='left';
+ ctx.fillText('Netzgerät', LX+32, 146);
+ ctx.fillText(fmt(u,1)+' V', LX+32, 162);
+ ctx.textAlign='center';
+
+ // --- Strommesser oben (Kreis mit A), in Reihe ---
+ ctx.fillStyle = '#fff'; ctx.strokeStyle = '#1A2530'; ctx.lineWidth = 2.4;
+ ctx.beginPath(); ctx.arc(212, TY, 18, 0, 2*Math.PI); ctx.fill(); ctx.stroke();
+ ctx.fillStyle = '#1A2530'; ctx.font = 'bold 15px "Noto Sans",Arial'; ctx.textAlign='center'; ctx.textBaseline='middle';
+ ctx.fillText('A', 212, TY);
+ ctx.textBaseline='alphabetic'; ctx.font = 'bold 13px "Noto Sans",Arial'; ctx.fillStyle = '#A34E0E';
+ ctx.fillText(fmt(I,2)+' A', 212, TY-24);
+
+ // --- einstellbarer Widerstand rechts (Rechteck mit Pfeil) ---
+ ctx.fillStyle = '#fff'; ctx.strokeStyle = '#1A2530'; ctx.lineWidth = 2.4;
+ ctx.fillRect(RX-13, 120, 26, 64); ctx.strokeRect(RX-13, 120, 26, 64);
+ ctx.beginPath(); ctx.moveTo(RX-22, 190); ctx.lineTo(RX+22, 114); ctx.stroke();
+ ctx.fillStyle = '#1A2530';
+ ctx.beginPath(); ctx.moveTo(RX+22,114); ctx.lineTo(RX+14,116); ctx.lineTo(RX+18,123); ctx.closePath(); ctx.fill();
+ ctx.font = 'italic 14px "Noto Sans",Arial'; ctx.textAlign='left';
+ ctx.fillText('R', RX+18, 150);
+ ctx.font = '12px "Noto Sans",Arial'; ctx.fillStyle = '#5A666F';
+ ctx.fillText(fmt(r,0)+' Ω', RX+18, 168);
+
+ // --- Spannungsmesser parallel zum Widerstand ---
+ ctx.strokeStyle = '#1A2530'; ctx.lineWidth = 2;
+ ctx.beginPath(); ctx.moveTo(RX,120); ctx.lineTo(432,120); ctx.lineTo(432,134); ctx.stroke();
+ ctx.beginPath(); ctx.moveTo(RX,184); ctx.lineTo(432,184); ctx.lineTo(432,170); ctx.stroke();
+ ctx.fillStyle = '#fff';
+ ctx.beginPath(); ctx.arc(432, 152, 18, 0, 2*Math.PI); ctx.fill(); ctx.stroke();
+ ctx.fillStyle = '#1A2530'; ctx.font = 'bold 15px "Noto Sans",Arial'; ctx.textAlign='center'; ctx.textBaseline='middle';
+ ctx.fillText('V', 432, 152);
+ ctx.textBaseline='alphabetic';
+
+ ctx.fillStyle = '#5A666F'; ctx.font = '12px "Noto Sans",Arial'; ctx.textAlign='left';
+ ctx.fillText('Messschaltung', 10, 288);
+ }
+
+ // =================== KENNLINIEN-DIAGRAMM ===================
+ var MX0 = 52, MY0 = 256, PW = 352, PH = 240; // Plotrahmen (Ursprung MX0/MY0)
+ function drawPlot(){
+ var ctx = pctx; ctx.clearRect(0,0,ctx._wl,ctx._hl);
+ var u = parseFloat(U.value), r = parseFloat(R.value), I = strom(u,r);
+ var xmax = (mode==='v1')? 10: 12, ymax = 5;
+ var xt = (mode==='v1')? [2,4,6,8,10]: [2,4,6,8,10,12];
+ var yt = [1,2,3,4,5];
+ function X(v){ return MX0 + v/xmax*PW; }
+ function Y(v){ return MY0 - v/ymax*PH; }
+
+ // Gitter + Skalenzahlen
+ ctx.strokeStyle = '#A9C2D6'; ctx.lineWidth = 1; ctx.font = '12px "Noto Sans",Arial';
+ ctx.fillStyle = '#5A666F'; ctx.textAlign='center';
+ xt.forEach(function(v){ ctx.beginPath(); ctx.moveTo(X(v),MY0); ctx.lineTo(X(v),MY0-PH); ctx.stroke();
+ ctx.fillText(v, X(v), MY0+16); });
+ ctx.textAlign='right';
+ yt.forEach(function(v){ ctx.beginPath(); ctx.moveTo(MX0,Y(v)); ctx.lineTo(MX0+PW,Y(v)); ctx.stroke();
+ ctx.fillText(komma(v), MX0-6, Y(v)+4); });
+
+ // Achsen mit Pfeil
+ ctx.strokeStyle = '#1A2530'; ctx.lineWidth = 2; ctx.fillStyle = '#1A2530';
+ ctx.beginPath(); ctx.moveTo(MX0,MY0); ctx.lineTo(MX0+PW+6,MY0); ctx.stroke();
+ ctx.beginPath(); ctx.moveTo(MX0,MY0); ctx.lineTo(MX0,MY0-PH-6); ctx.stroke();
+ ctx.beginPath(); ctx.moveTo(MX0+PW+6,MY0); ctx.lineTo(MX0+PW-4,MY0-5); ctx.lineTo(MX0+PW-4,MY0+5); ctx.closePath(); ctx.fill();
+ ctx.beginPath(); ctx.moveTo(MX0,MY0-PH-6); ctx.lineTo(MX0-5,MY0-PH+4); ctx.lineTo(MX0+5,MY0-PH+4); ctx.closePath(); ctx.fill();
+ // Achsentitel (DIN 461: Groesse in Einheit)
+ // Formelzeichen kursiv, Einheit aufrecht (DIN 1338); rechtsbuendig, damit nichts aus dem Bild laeuft
+ function titel(sym, rest, x, y){
+   ctx.textAlign='left';
+   ctx.font = '13px "Noto Sans",Arial'; var wr = ctx.measureText(rest).width;
+   ctx.font = 'italic 13px "Noto Sans",Arial'; var ws = ctx.measureText(sym).width;
+   ctx.fillText(sym, x - wr - ws, y);
+   ctx.font = '13px "Noto Sans",Arial'; ctx.fillText(rest, x - wr, y);
+ }
+ titel(mode==='v1'?'U':'R', ' in '+(mode==='v1'?'V':'Ω'), MX0+PW+6, MY0+30);
+ ctx.save(); ctx.translate(16, MY0-PH+6); ctx.rotate(-Math.PI/2);
+ titel('I', ' in A', 0, 0); ctx.restore();
+
+ // aufgenommene Messreihen (nach Serie gruppiert)
+ var groups = {};
+ if(mode==='v1'){
+ pointsV1.forEach(function(p){ (groups[p.R]=groups[p.R]||[]).push({x:p.U,y:p.I}); });
+ } else {
+ pointsV2.forEach(function(p){ (groups[p.U]=groups[p.U]||[]).push({x:p.R,y:p.I}); });
+ }
+ var keys = Object.keys(groups), gi = 0, legende = [];
+ keys.forEach(function(key){
+ var col = farben[gi % farben.length]; gi++;
+ var pts = groups[key].slice().sort(function(a,b){ return a.x-b.x; });
+ var line = (mode==='v1')? [{x:0,y:0}].concat(pts): pts; // v1: Gerade durch Nullpunkt
+ ctx.strokeStyle = col; ctx.lineWidth = 2.4; ctx.beginPath();
+ line.forEach(function(q,idx){ var xx=X(q.x), yy=Y(Math.min(q.y,ymax));
+ if(idx===0) ctx.moveTo(xx,yy); else ctx.lineTo(xx,yy); }); ctx.stroke();
+ ctx.fillStyle = col;
+ pts.forEach(function(q){ ctx.beginPath(); ctx.arc(X(q.x), Y(Math.min(q.y,ymax)), 3.6, 0, 2*Math.PI); ctx.fill(); });
+ legende.push({ col: col, txt: (mode==='v1'?('R = '+fmt(parseFloat(key),0)+' Ω'):('U = '+fmt(parseFloat(key),1)+' V')) });
+ });
+
+ // Legende
+ ctx.textAlign='left'; ctx.font = '12px "Noto Sans",Arial';
+ legende.forEach(function(e,idx){
+ var ly = MY0-PH+8 + idx*16;
+ ctx.fillStyle = e.col; ctx.fillRect(MX0+PW-92, ly-8, 12, 4);
+ ctx.fillStyle = '#1A2530'; ctx.fillText(e.txt, MX0+PW-76, ly-2);
+ });
+
+ // aktueller Messpunkt (gruen) mit Fuehrungslinien
+ var cx = (mode==='v1')? u: r, cy = Math.min(I, ymax);
+ var px = X(cx), py = Y(cy);
+ ctx.strokeStyle = '#2F7D62'; ctx.lineWidth = 1.4; ctx.setLineDash([5,4]);
+ ctx.beginPath(); ctx.moveTo(px,MY0); ctx.lineTo(px,py); ctx.stroke();
+ ctx.beginPath(); ctx.moveTo(MX0,py); ctx.lineTo(px,py); ctx.stroke();
+ ctx.setLineDash([]);
+ ctx.fillStyle = '#2F7D62'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+ ctx.beginPath(); ctx.arc(px, py, 6, 0, 2*Math.PI); ctx.fill(); ctx.stroke();
+ if(I > ymax){ ctx.fillStyle = '#B23A33'; ctx.font = '11px "Noto Sans",Arial'; ctx.textAlign='center';
+ ctx.fillText('↑ '+fmt(I,2)+' A', px, py-10); }
+ }
+
+ // =================== ANZEIGE / STEUERUNG ===================
+ function render(){
+ var u = parseFloat(U.value), r = parseFloat(R.value), I = strom(u,r);
+ uval.textContent = fmt(u,1) + ' V';
+ rval.textContent = fmt(r,0) + ' Ω';
+ brZ.innerHTML = fmt(u,1) + '&nbsp;V';
+ brN.innerHTML = fmt(r,0) + '&nbsp;Ω';
+ brI.innerHTML = fmt(I,2) + '&nbsp;A';
+ drawPlot();
+ }
+
+ function setMode(m){
+ mode = m;
+ mV1.setAttribute('aria-pressed', m==='v1'? 'true':'false');
+ mV2.setAttribute('aria-pressed', m==='v2'? 'true':'false');
+ hinweis.innerHTML = (m==='v1')? 'Versuch 1: Halten Sie <i>R</i> fest und verändern Sie nur <i>U</i>.': 'Versuch 2: Halten Sie <i>U</i> fest und verändern Sie nur <i>R</i>.';
+ plotCap.innerHTML = (m==='v1')? '<i>I</i>-<i>U</i>-Diagramm. Grüner Punkt = aktueller Messwert.': '<i>I</i>-<i>R</i>-Diagramm. Grüner Punkt = aktueller Messwert.';
+ render();
+ }
+
+ function record(){
+ var u = parseFloat(U.value), r = parseFloat(R.value), I = strom(u,r);
+ if(mode==='v1'){
+ pointsV1 = pointsV1.filter(function(p){ return!(p.R===r && p.U===u); });
+ pointsV1.push({ R:r, U:u, I:I });
+ } else {
+ pointsV2 = pointsV2.filter(function(p){ return!(p.U===u && p.R===r); });
+ pointsV2.push({ U:u, R:r, I:I });
+ }
+ render();
+ }
+
+ ['input','change'].forEach(function(ev){ U.addEventListener(ev, render); R.addEventListener(ev, render); });
+ mV1.addEventListener('click', function(){ setMode('v1'); });
+ mV2.addEventListener('click', function(){ setMode('v2'); });
+ btnRec.addEventListener('click', record);
+ btnClear.addEventListener('click', function(){
+ if(mode==='v1') pointsV1 = []; else pointsV2 = []; render();
+ });
+ btnReset.addEventListener('click', function(){
+ U.value = START.U; R.value = START.R;
+ pointsV1 = []; pointsV2 = []; setMode('v1');
+ });
+
+ // Animationsschleife (Punkte ~ Stromstaerke; reduzierte Bewegung -> stehende Punkte)
+ function tick(t){
+ if(!lastT) lastT = t;
+ var dt = (t - lastT)/1000; lastT = t;
+ var I = strom(parseFloat(U.value), parseFloat(R.value));
+ if(!reduziert) phase += I * 30 * dt; // px/s ~ I
+ drawCircuit();
+ requestAnimationFrame(tick);
+ }
+
+ // Startstellung: NEUTRAL (U = 0, R = 2) — aus startwerten, nicht aus loesungswerten.
+ U.value = START.U; R.value = START.R;
+ render();
+ requestAnimationFrame(tick);
+})();
+</script>
