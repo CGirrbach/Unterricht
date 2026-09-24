@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>B02 Simulation: Leistungsdreieck zweier Verbraucher</title>
+<!-- lehrmaterial -->
+<!-- materialtyp: simulation -->
+<!-- sim_bearbeitung: pflicht -->
+<script type="application/json" id="sim-meta">
+{"startwerte": {"pm": 1500, "cosphi": 0.75, "ph": 1500},
+ "loesungswerte": {"pm": 330, "cosphi": 0.65, "ph": 1000},
+ "weitere_loesungswerte": {"ph": [1600]},
+ "bereich": {"pm": [100, 3000], "cosphi": [0.30, 1.00], "ph": [0, 3000]},
+ "gekoppelt": "02_Arbeitsblatt.html, Aufgabe 5 e und f",
+ "ziel_erkenntnis": "Ein ohmscher Verbraucher verlaengert im Leistungsdreieck nur die Wirkleistungsseite: die Blindleistung bleibt, der Winkel wird kleiner, der Wirkfaktor der Anlage steigt ohne Kompensation, und die Stromstaerke in der Zuleitung steigt trotzdem."}
+</script>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--rot:#B23A33;--rothell:#FBEDEB;--hell:#F4F6F8;
+ --linie:#9AA5AE;--gruen:#2F7D62;--gruenhell:#EAF3EC;--grau:#5A666F;--blau:#1E88C8;--magenta:#D4006E}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:"Noto Sans",system-ui,Arial,sans-serif;color:var(--ink);background:var(--hell);line-height:1.4}
+.wrap{max-width:980px;margin:0 auto;padding:0 12px 28px}
+header{border-top:6px solid var(--kupfer);background:#fff;border-bottom:1px solid var(--ink);padding:10px 12px 9px;margin:0 -12px 12px}
+header .reihe{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--kupfer);font-weight:700}
+header h1{font-size:20px;margin:2px 0 0}
+.karte{background:#fff;border:1.3px solid var(--ink);padding:10px 12px;margin:0 0 12px}
+.karte h2{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--kupfer);margin:0 0 6px}
+canvas{display:block;width:100%;height:auto;background:#fff;touch-action:pan-y}
+.legende{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;margin-top:6px}
+.legende span::before{content:"";display:inline-block;width:14px;height:4px;margin-right:6px;vertical-align:3px}
+.legende .lh::before{background:var(--gruen)}.legende .lm::before{background:var(--kupfer)}
+.legende .lq::before{background:var(--blau)}.legende .ls::before{background:var(--ink)}
+.geraete{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.geraet{border:1.6px solid var(--ink);background:var(--hell);padding:7px 3px;text-align:center;min-width:0}
+.geraet .name{font-size:clamp(8.6px,2.45vw,11.5px);letter-spacing:.02em;text-transform:uppercase;color:var(--grau);font-weight:700}
+.geraet .wert{font-family:"DejaVu Sans Mono",ui-monospace,monospace;font-size:clamp(16px,4.6vw,24px);font-weight:700;white-space:nowrap}
+.geraet .zeichen{font-size:13px;color:var(--grau)}
+.regler{display:grid;grid-template-columns:1fr;gap:12px}
+.zeile label{display:flex;justify-content:space-between;align-items:baseline;font-size:15px;font-weight:700;margin-bottom:2px}
+.zeile label output{font-family:"DejaVu Sans Mono",ui-monospace,monospace;font-size:20px;color:var(--kupfer)}
+.zeile .bedien{display:grid;grid-template-columns:52px 1fr 52px;gap:8px;align-items:center}
+button{appearance:none;border:1.6px solid var(--ink);background:#fff;color:var(--ink);font-size:24px;font-weight:700;
+ height:52px;border-radius:6px;cursor:pointer}
+button:active{background:var(--kupferhell)}
+button.reset{font-size:15px;height:48px;padding:0 18px;border-color:var(--kupfer);color:var(--kupfer);width:100%}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:52px;background:transparent;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:10px;background:var(--linie);border-radius:5px}
+input[type=range]::-moz-range-track{height:10px;background:var(--linie);border-radius:5px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:36px;height:36px;border-radius:50%;background:var(--kupfer);border:3px solid #fff;box-shadow:0 0 0 1.6px var(--ink);margin-top:-13px}
+input[type=range]::-moz-range-thumb{width:32px;height:32px;border-radius:50%;background:var(--kupfer);border:3px solid #fff;box-shadow:0 0 0 1.6px var(--ink)}
+.hinweis{font-size:13px;color:var(--grau);margin:6px 0 0}
+table.klein{border-collapse:collapse;font-size:13px;margin-top:8px;width:100%}
+table.klein th,table.klein td{border:1px solid var(--linie);padding:3px 6px;text-align:right}
+table.klein th{background:var(--hell);text-align:left;font-weight:700}
+table.klein td.mono{font-family:"DejaVu Sans Mono",ui-monospace,monospace}
+@media(min-width:760px){.zwei{display:grid;grid-template-columns:1fr 1fr;gap:12px}.zwei .karte{margin-bottom:12px}}
+/* Schmale Handys: die Tabelle muss in die Karte passen */
+@media(max-width:480px){table.klein{font-size:11px}table.klein th,table.klein td{padding:2px 3px}}
+</style></head>
+<body><div class="wrap">
+<header><div class="reihe">E3EG · Block 2 · Simulation</div>
+<h1>Leistungsdreieck zweier Verbraucher an einer 230-V-Zuleitung</h1></header>
+
+<div class="karte">
+ <h2>Leistungsdreieck der Zuleitung, maßstäblich</h2>
+ <canvas id="dreieck" width="960" height="520" aria-label="Leistungsdreieck der Zuleitung: Wirkleistung des Heizlüfters und des Motors waagerecht, Blindleistung des Motors senkrecht, Scheinleistung als Hypotenuse" data-quelle="eigene Zeichnung; Aufbau nach Europa Rechenbuch Elektrotechnik, 20. Auflage, Lösungsband S. 123, Diagramm zu Aufgabe 121/4 (Heizkörper und Motor an einer Zuleitung) und Europa Fachkunde S. 142, Bild 2 (Leistungsdreieck). Was kein Buchbild leistet: das Dreieck folgt den eingestellten Werten, mit Achsen nach DIN 461"></canvas>
+ <div class="legende"><span class="lh">Heizlüfter: Wirkleistung <i>P</i><sub>H</sub></span><span class="lm">Motor: Wirkleistung <i>P</i><sub>M</sub> und Scheinleistung <i>S</i><sub>M</sub></span><span class="lq">Blindleistung <i>Q</i> (nur der Motor)</span><span class="ls">Scheinleistung <i>S</i> der Zuleitung</span></div>
+ <p class="hinweis">Der Maßstab passt sich den eingestellten Werten an; die Achsen tragen die Zahlen. Der Winkel <i>φ</i> am Ursprung gehört zur ganzen Anlage, der Winkel <i>φ</i><sub>M</sub> zum Motor allein.</p>
+</div>
+
+<div class="zwei">
+<div class="karte">
+  <h2>Anzeigen für die Zuleitung</h2>
+  <div class="geraete">
+   <div class="geraet"><div class="name">Scheinleistung</div><div class="wert" id="aS">0 VA</div><div class="zeichen"><i>S</i></div></div>
+   <div class="geraet"><div class="name">Stromstärke</div><div class="wert" id="aI">0 A</div><div class="zeichen"><i>I</i> bei 230 V</div></div>
+   <div class="geraet"><div class="name">Wirkfaktor</div><div class="wert" id="aC">0</div><div class="zeichen">cos <i>φ</i></div></div>
+  </div>
+  <table class="klein">
+   <tr><th>Größe</th><th>Motor</th><th>Heizlüfter</th><th>Zuleitung</th></tr>
+   <tr><th>Wirkleistung <i>P</i> in W</th><td class="mono" id="tPM">0</td><td class="mono" id="tPH">0</td><td class="mono" id="tP">0</td></tr>
+   <tr><th>Blindleistung <i>Q</i> in var</th><td class="mono" id="tQM">0</td><td class="mono">0</td><td class="mono" id="tQ">0</td></tr>
+   <tr><th>Scheinleistung <i>S</i> in VA</th><td class="mono" id="tSM">0</td><td class="mono" id="tSH">0</td><td class="mono" id="tS">0</td></tr>
+   <tr><th>Phasenverschiebungswinkel <i>φ</i></th><td class="mono" id="tFM">0°</td><td class="mono">0°</td><td class="mono" id="tF">0°</td></tr>
+  </table>
+</div>
+<div class="karte">
+  <h2>Einstellen</h2>
+  <div class="regler">
+   <div class="zeile"><label for="rpm"><span>Wirkleistung des Motors <i>P</i><sub>M</sub></span><output id="opm">1500 W</output></label>
+    <div class="bedien"><button type="button" id="pmm" aria-label="Motorleistung kleiner">&minus;</button>
+    <input type="range" id="rpm" min="100" max="3000" step="10" value="1500">
+    <button type="button" id="pmp" aria-label="Motorleistung größer">+</button></div></div>
+   <div class="zeile"><label for="rc"><span>Wirkfaktor des Motors cos <i>φ</i><sub>M</sub></span><output id="oc">0,75</output></label>
+    <div class="bedien"><button type="button" id="cm" aria-label="Wirkfaktor kleiner">&minus;</button>
+    <input type="range" id="rc" min="0.30" max="1.00" step="0.05" value="0.75">
+    <button type="button" id="cp" aria-label="Wirkfaktor größer">+</button></div></div>
+   <div class="zeile"><label for="rph"><span>Wirkleistung des Heizlüfters <i>P</i><sub>H</sub></span><output id="oph">1500 W</output></label>
+    <div class="bedien"><button type="button" id="phm" aria-label="Heizleistung kleiner">&minus;</button>
+    <input type="range" id="rph" min="0" max="3000" step="100" value="1500">
+    <button type="button" id="php" aria-label="Heizleistung größer">+</button></div></div>
+   <button type="button" class="reset" id="reset">Zurücksetzen auf die Startstellung</button>
+  </div>
+  <p class="hinweis">Der Heizlüfter nimmt nur Wirkleistung auf (cos <i>φ</i> = 1). Rechenmodell: <i>Q</i><sub>M</sub> = <i>P</i><sub>M</sub> · tan <i>φ</i><sub>M</sub>; <i>S</i> = √(<i>P</i>² + <i>Q</i>²); <i>I</i> = <i>S</i> / 230 V (Tabellenbuch S. 20, Formel 5; S. 37, Formel 1 und 11).</p>
+</div>
+</div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var META = JSON.parse(document.getElementById('sim-meta').textContent);
+var START = META.startwerte, U = 230;
+var rpm = document.getElementById('rpm'), rc = document.getElementById('rc'), rph = document.getElementById('rph');
+var cv = document.getElementById('dreieck'), cx = cv.getContext('2d');
+function komma(x, n){ return x.toFixed(n).replace('.', ','); }
+function tausend(x){ var s = String(Math.round(x)); return s.length > 4 ? s.slice(0, -3) + ' ' + s.slice(-3) : s; }
+function modell(){
+  var pm = parseFloat(rpm.value), c = parseFloat(rc.value), ph = parseFloat(rph.value);
+  var phiM = Math.acos(Math.min(1, c));                       /* Tabellenbuch S. 37, Formel 5, umgekehrt */
+  var qm = pm * Math.tan(phiM);                               /* Tabellenbuch S. 20, Formel 5: Q = P * tan phi */
+  var sm = Math.sqrt(pm * pm + qm * qm);                      /* S. 37, Formel 11 */
+  var p = pm + ph, q = qm, s = Math.sqrt(p * p + q * q);
+  var phi = Math.atan2(q, p);
+  return {pm:pm, c:c, ph:ph, phiM:phiM, qm:qm, sm:sm, p:p, q:q, s:s, phi:phi, cosphi:p / s, i:s / U};
+}
+function anzeigen(m){
+  document.getElementById('opm').textContent = tausend(m.pm) + ' W';
+  document.getElementById('oc').textContent = komma(m.c, 2);
+  document.getElementById('oph').textContent = tausend(m.ph) + ' W';
+  document.getElementById('aS').textContent = tausend(m.s) + ' VA';
+  document.getElementById('aI').textContent = komma(m.i, 2) + ' A';
+  document.getElementById('aC').textContent = komma(m.cosphi, 3);
+  document.getElementById('tPM').textContent = tausend(m.pm);
+  document.getElementById('tPH').textContent = tausend(m.ph);
+  document.getElementById('tP').textContent = tausend(m.p);
+  document.getElementById('tQM').textContent = komma(m.qm, 1);
+  document.getElementById('tQ').textContent = komma(m.q, 1);
+  document.getElementById('tSM').textContent = komma(m.sm, 1);
+  document.getElementById('tSH').textContent = tausend(m.ph);
+  document.getElementById('tS').textContent = komma(m.s, 1);
+  document.getElementById('tFM').textContent = komma(m.phiM * 180 / Math.PI, 1) + '°';
+  document.getElementById('tF').textContent = komma(m.phi * 180 / Math.PI, 1) + '°';
+}
+/* Zeichenflaeche: bei schmalen Bildschirmen weniger Hoehe */
+function groesse(){
+  var w = cv.clientWidth || 960; var h = w < 560 ? 420 : 520;
+  if(cv.width !== 960 || cv.height !== h){ cv.width = 960; cv.height = h; }
+}
+function halo(text, x, y, farbe, fett){
+  /* Beschriftung immer linksbuendig: die Achsenzahlen stellen textAlign um, das darf hier nicht nachwirken */
+  cx.textAlign = 'left'; cx.textBaseline = 'alphabetic';
+  cx.font = (fett ? 'bold ' : '') + '19px "Noto Sans",Arial,sans-serif';
+  cx.lineWidth = 5; cx.strokeStyle = '#fff'; cx.lineJoin = 'round'; cx.strokeText(text, x, y);
+  cx.fillStyle = farbe; cx.fillText(text, x, y);
+}
+/* Formelzeichen mit Index (P mit M): das Canvas kennt kein <sub>, der Index wird kleiner und tiefer gesetzt */
+function haloIdx(text, idx, x, y, farbe){
+  halo(text, x, y, farbe, true);
+  var w = cx.measureText(text).width;
+  cx.font = 'bold 12px "Noto Sans",Arial,sans-serif'; cx.lineWidth = 4; cx.strokeStyle = '#fff';
+  cx.strokeText(idx, x + w + 1, y + 5); cx.fillStyle = farbe; cx.fillText(idx, x + w + 1, y + 5);
+}
+function pfeil(x0, y0, x1, y1, farbe, breite, gestrichelt){
+  cx.strokeStyle = farbe; cx.fillStyle = farbe; cx.lineWidth = breite;
+  cx.setLineDash(gestrichelt ? [10, 8] : []);
+  cx.beginPath(); cx.moveTo(x0, y0); cx.lineTo(x1, y1); cx.stroke(); cx.setLineDash([]);
+  var a = Math.atan2(y1 - y0, x1 - x0), l = 14;
+  cx.beginPath(); cx.moveTo(x1, y1);
+  cx.lineTo(x1 - l * Math.cos(a - 0.4), y1 - l * Math.sin(a - 0.4));
+  cx.lineTo(x1 - l * Math.cos(a + 0.4), y1 - l * Math.sin(a + 0.4)); cx.closePath(); cx.fill();
+}
+function bogen(x, y, r, a0, a1, farbe, text, idx){
+  cx.strokeStyle = farbe; cx.lineWidth = 2.5; cx.setLineDash([]); cx.beginPath(); cx.arc(x, y, r, -a1, -a0, false); cx.stroke();
+  /* Winkelzeichen auf der Winkelhalbierenden, aber nie auf der Achse (bei kleinen Winkeln) */
+  var am = (a0 + a1) / 2, lx = x + (r + 16) * Math.cos(am) - 4, ly = Math.min(y - (r + 16) * Math.sin(am) + 7, y - 8);
+  if(idx) haloIdx(text, idx, lx, ly, farbe); else halo(text, lx, ly, farbe, true);
+}
+function zeichne(m){
+  groesse();
+  var W = cv.width, H = cv.height, L = 78, R = 28, T = 30, B = 52;
+  var pw = W - L - R, ph = H - T - B;
+  cx.clearRect(0, 0, W, H);
+  /* Massstab: das Dreieck muss in die Flaeche passen; Achsenbeschriftung traegt die Zahlen */
+  var pmax = Math.max(m.p * 1.1, 800), qmax = Math.max(m.q * 1.25, 400);
+  var k = Math.min(pw / pmax, ph / qmax);
+  var stufen = [100, 200, 500, 1000, 2000, 5000], schritt = 5000;
+  for(var i = 0; i < stufen.length; i++){ if(stufen[i] * k >= 46){ schritt = stufen[i]; break; } }
+  var x0 = L, y0 = H - B;
+  function X(v){ return x0 + v * k; } function Y(v){ return y0 - v * k; }
+  /* Gitter */
+  cx.strokeStyle = '#E3E7EA'; cx.lineWidth = 1;
+  for(var v = schritt; X(v) < W - R; v += schritt){ cx.beginPath(); cx.moveTo(X(v), T); cx.lineTo(X(v), y0); cx.stroke(); }
+  for(v = schritt; Y(v) > T; v += schritt){ cx.beginPath(); cx.moveTo(x0, Y(v)); cx.lineTo(W - R, Y(v)); cx.stroke(); }
+  /* Achsen nach DIN 461: Groesse und Einheit, Pfeile, Teilung */
+  cx.strokeStyle = '#1A2530'; cx.lineWidth = 2;
+  cx.beginPath(); cx.moveTo(x0, y0); cx.lineTo(W - R, y0); cx.moveTo(x0, y0); cx.lineTo(x0, T - 4); cx.stroke();
+  cx.fillStyle = '#1A2530';
+  cx.beginPath(); cx.moveTo(W - R + 6, y0); cx.lineTo(W - R - 8, y0 - 6); cx.lineTo(W - R - 8, y0 + 6); cx.closePath(); cx.fill();
+  cx.beginPath(); cx.moveTo(x0, T - 12); cx.lineTo(x0 - 6, T + 2); cx.lineTo(x0 + 6, T + 2); cx.closePath(); cx.fill();
+  cx.font = '15px "Noto Sans",Arial,sans-serif'; cx.fillStyle = '#5A666F'; cx.textAlign = 'center';
+  for(v = 0; X(v) < W - R - 20; v += schritt){ cx.beginPath(); cx.moveTo(X(v), y0 - 4); cx.lineTo(X(v), y0 + 4); cx.stroke(); cx.fillText(tausend(v), X(v), y0 + 21); }
+  cx.textAlign = 'right';
+  for(v = schritt; Y(v) > T + 10; v += schritt){ cx.beginPath(); cx.moveTo(x0 - 4, Y(v)); cx.lineTo(x0 + 4, Y(v)); cx.stroke(); cx.fillText(tausend(v), x0 - 8, Y(v) + 5); }
+  cx.textAlign = 'left'; cx.fillStyle = '#1A2530'; cx.font = 'bold 17px "Noto Sans",Arial,sans-serif';
+  cx.fillText('P in W', W - R - 62, y0 + 40);
+  cx.save(); cx.translate(22, T + 70); cx.rotate(-Math.PI / 2); cx.textAlign = 'center'; cx.fillText('Q in var', 0, 0); cx.restore();
+  /* Leistungsdreieck nach dem Loesungsband: erst P_H, dann P_M, Q senkrecht am Ende, S_M von der Nahtstelle, S vom Ursprung */
+  var xh = X(m.ph), xe = X(m.p), yq = Y(m.q);
+  /* Radien der Winkelboegen. Die P-Beschriftungen stehen UNTER der Achse (unter den Zahlen), damit sie
+     bei kurzen Strecken nicht mit den Winkelzeichen zusammenstossen (am Bild gesehen, 18.09.2026) */
+  var rS = Math.min(70, (xe - x0) * 0.35), rM = Math.min(46, (xe - xh) * 0.5);
+  if(m.ph > 0){ pfeil(x0, y0, xh, y0, '#2F7D62', 5, false); haloIdx('P', 'H', (x0 + xh) / 2 - 10, y0 + 42, '#2F7D62'); }
+  pfeil(xh, y0, xe, y0, '#A34E0E', 5, false); haloIdx('P', 'M', (xh + xe) / 2 - 10, y0 + 42, '#A34E0E');
+  if(m.q > 0.5){
+    pfeil(xe, y0, xe, yq, '#1E88C8', 5, false); halo('Q', xe + 10, (y0 + yq) / 2 + 6, '#1E88C8', true);
+    if(m.ph > 0){ pfeil(xh, y0, xe, yq, '#A34E0E', 2.5, true); haloIdx('S', 'M', (xh + xe) / 2 + 6, (y0 + yq) / 2 - 8, '#A34E0E'); }
+    pfeil(x0, y0, xe, yq, '#1A2530', 3.5, false); halo('S', (x0 + xe) / 2 - 28, (y0 + yq) / 2 - 6, '#1A2530', true);
+    bogen(x0, y0, rS, 0, m.phi, '#1A2530', 'φ');
+    if(m.ph > 0) bogen(xh, y0, rM, 0, m.phiM, '#A34E0E', 'φ', 'M');
+  } else {
+    halo('cos φ = 1: keine Blindleistung, das Dreieck ist eine Strecke; S = P', x0 + 20, T + 30, '#5A666F', false);
+  }
+}
+function neu(){ var m = modell(); anzeigen(m); zeichne(m); }
+function setze(pm, c, ph){ rpm.value = pm; rc.value = c; rph.value = ph; neu(); }
+function schritt(el, d){
+  var v = parseFloat(el.value) + d * parseFloat(el.step);
+  v = Math.max(parseFloat(el.min), Math.min(parseFloat(el.max), v));
+  el.value = (el === rc) ? v.toFixed(2) : Math.round(v); neu();
+}
+rpm.addEventListener('input', neu); rc.addEventListener('input', neu); rph.addEventListener('input', neu);
+document.getElementById('pmm').addEventListener('click', function(){ schritt(rpm, -1); });
+document.getElementById('pmp').addEventListener('click', function(){ schritt(rpm, +1); });
+document.getElementById('cm').addEventListener('click', function(){ schritt(rc, -1); });
+document.getElementById('cp').addEventListener('click', function(){ schritt(rc, +1); });
+document.getElementById('phm').addEventListener('click', function(){ schritt(rph, -1); });
+document.getElementById('php').addEventListener('click', function(){ schritt(rph, +1); });
+document.getElementById('reset').addEventListener('click', function(){ setze(START.pm, START.cosphi, START.ph); });
+/* Die Regler oeffnen aus den STARTWERTEN, nie aus den Loesungswerten. */
+setze(START.pm, START.cosphi, START.ph);
+window.addEventListener('resize', neu);
+window.B02sim = {modell: modell, setze: setze};
+})();
+</script>
+</body></html>
