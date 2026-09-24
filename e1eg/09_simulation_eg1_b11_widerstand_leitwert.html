@@ -67,7 +67,7 @@
   .regler{display:grid;grid-template-columns:1fr;gap:13px;margin:14px 0 4px}
   @media(min-width:640px){.regler{grid-template-columns:1fr 1fr}}
   .regler label{display:block;font-size:13.5px;font-weight:600;margin-bottom:3px}
-  .regler input[type=range]{width:100%;height:34px;accent-color:var(--kupfer)}
+  .regler input[type=range]{width:100%;height:44px;accent-color:var(--kupfer)}
   .wert{font-variant-numeric:tabular-nums;font-weight:700;color:var(--kupfer)}
   table.ab{width:100%;border-collapse:collapse;margin-top:12px;font-size:14.5px}
   table.ab th,table.ab td{border:1px solid var(--linie);padding:5px 8px;text-align:left}
@@ -101,10 +101,9 @@
     <script type="application/json" id="sim-meta">{"startwerte":{"R1":15,"R2":62},"loesungswerte":{"R2":30}}</script>
     <canvas class="stage" id="cLeit" width="880" height="440"
       data-quelle="Schema (kein Buchbild): Rohrmodell fuer den Leitwert und Kennlinie G = 1/R nach Tabellenbuch S. 30, Formel 9; Kurvenform wie Tabellenbuch S. 30, Bild Leitwert und Widerstand"
-      aria-label="Zwei Rohre übereinander: ihre Öffnung entspricht dem Leitwert des jeweiligen Leiters, das weitere Rohr leitet besser. Daneben die Kennlinie: waagerecht der Widerstand, senkrecht der Leitwert; die Kurve fällt als Hyperbel ab, und auf ihr liegen die beiden eingestellten Punkte."></canvas>
-    <figcaption>Die Kennlinie ist eine <b>Hyperbel</b>, keine Gerade. Verdoppeln Sie den
-    Widerstand, so <b>halbiert</b> sich der Leitwert, der Punkt rutscht nach rechts und
-    zugleich nach unten.</figcaption>
+      aria-label="Zwei Rohre übereinander: ihre Öffnung entspricht dem Leitwert des jeweiligen Leiters, das weitere Rohr leitet besser. Daneben die Kennlinie: waagerecht der Widerstand, senkrecht der Leitwert; die Kurve fällt gekrümmt ab, und auf ihr liegen die beiden eingestellten Punkte."></canvas>
+    <figcaption>Die Kennlinie ist eine <b>gekrümmte Kurve</b>, keine Gerade. Was geschieht mit dem
+    Leitwert, wenn Sie den Widerstand <b>verdoppeln</b>? Beobachten Sie, wohin der Punkt wandert.</figcaption>
   </figure>
 
   <div class="regler">
@@ -295,7 +294,7 @@
         var yr = yo + 26;
         g.beginPath(); g.moveTo(xr-2, yr); g.lineTo(xr-14, yr-6);
         g.lineTo(xr-14, yr+6); g.closePath(); g.fill();
-        g.fillText("Leiter " + p[3] + " liegt weiter rechts", xr-20, yr);
+        g.fillText("Leiter " + p[3] + " liegt weiter rechts (G = " + gText(p[1]) + ")", xr-20, yr);
         g.textAlign="left";
         return;
       }
@@ -313,11 +312,11 @@
     // ── Fusszeile
     g.fillStyle="#2F7D62"; g.font="12.5px 'Noto Sans',sans-serif";
     if(L.fuss.length > 1){
-      g.fillText("Die Kurve trifft die Achse nie: G wird nie null,", L.fuss[0][0], L.fuss[0][1]);
-      g.fillText("einen vollkommenen Nichtleiter gibt es nicht.", L.fuss[1][0], L.fuss[1][1]);
+      g.fillText("Machen Sie R sehr groß:", L.fuss[0][0], L.fuss[0][1]);
+      g.fillText("Wird G irgendwann null?", L.fuss[1][0], L.fuss[1][1]);
     } else {
-      g.fillText("Die Kurve trifft die Achse nie: so groß man R auch macht, G wird nie null; "
-               + "einen vollkommenen Nichtleiter gibt es nicht.", L.fuss[0][0], L.fuss[0][1]);
+      g.fillText("Machen Sie R sehr groß: Wird G irgendwann null? Sehen Sie in der Tabelle nach.",
+               L.fuss[0][0], L.fuss[0][1]);
     }
   }
 
