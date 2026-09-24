@@ -1,40 +1,9 @@
 <!-- lehrmaterial -->
 <!-- materialtyp: simulation -->
-<!-- sim_bearbeitung: pflicht -->
-<!-- Block EG1-B11 · Elektrischer Widerstand R und Leitwert G (G = 1/R) -->
-<!-- NEUBAU 12.09.2026. Die Vorgaengerfassung hatte EIN Stellglied und KEIN eigenes Bild:
-     Als Kennlinie stand dort ein Buchausschnitt (`bild_fachkunde_S036_B02.png`), und das
-     Skript aenderte nur zwei Zahlen. Der alt-Text des Bildes behauptete trotzdem
-     „Ein Punkt wandert mit dem Regler auf der Kurve", das Arbeitsblatt „der gruene Punkt
-     faellt entlang der Kurve" — beides loeste die Datei nicht ein.
-     Gemessen mit `_werkzeuge/simulationen_messen.py`: 1 Stellglied, 0 Canvas, 0 SVG —
-     die einzige der 37 Simulationen, die Carlos Massstab nicht genuegte.
+<!-- sim_bearbeitung: freiwillig -->
+<!-- Block EG1-B11 · Elektrischer Widerstand R und Leitwert G. Belege: Tabellenbuch S. 30, Formel 9; Kennlinie nach Europa-Fachkunde S. 36, Bild 2 -->
 
-     Ziel-Erkenntnis:
-     (1) G = 1/R ist ein KEHRWERT, keine Proportionalitaet. Die Kennlinie ist eine
-         HYPERBEL: doppelter Widerstand → halber Leitwert, nie „doppelter Leitwert".
-         Genau diese Fehlvorstellung nennt das Arbeitsblatt.
-     (2) ZWEI Leiter nebeneinander machen das Verhaeltnis sichtbar: stellt man R2 auf das
-         Doppelte von R1, liegt G2 auf der Haelfte von G1 — man muss es nicht glauben.
-     (3) Das Rohrbild macht „leitet gut" anschaulich: die Oeffnung ist der Leitwert.
-     (4) GRENZFAELLE, beide im Einstellbereich:
-           R = 1 Ω     → G = 1000 mS = 1 S   (sehr guter Leiter)
-           R = 10 kΩ   → G = 100 µS          (leitet fast nicht)
-         UNMOEGLICH und nachweislich nicht einstellbar: G = 0. Der Kehrwert wird nie null,
-         so gross man R auch macht — es gibt keinen vollkommenen Nichtleiter.
-     (5) NACHBAU DES BLATTES, alle Werte exakt treffbar (Rundungsregel siehe `runde`):
-           R = 4 Ω → 250 mS · 6 Ω → 166,7 mS · 8 Ω → 125 mS · 10 Ω → 100 mS
-           R = 25 Ω → 40 mS   ·   R = 1250 Ω → 0,8 mS
-     Startstellung: R1 = 15 Ω, R2 = 62 Ω (66,7 mS und 16,1 mS). Kein Blattwert, kein
-     glattes Verhaeltnis — die Erkenntnis wird nicht vorweggenommen; beide Regler stehen
-     bei 30 % und 45 % ihrer Spanne. -->
-<!-- BELEGE — Tabellenbuch 32. A., gedrucktTabellenbuch S. 30 „Ladung, Spannung, Stromstaerke,
-     Widerstand" (Seite am 11.09.2026 gerendert und abgelesen):
-       Formel 9 (gerahmt)   G = 1 / R        darunter ungerahmt: R = 1/G
-       Formel 7             U = R · I        Formel 8   I = U / R
-       Einheiten            [R] = Ω  ·  [G] = 1/Ω = S
-     ★ Die Einheit Siemens schreibt sich mit aufrechtem grossen S und ist NICHT die
-       Sekunde s — die Fehlvorstellung steht so im Arbeitsblatt. -->
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Simulation EG1-B11: Widerstand und Leitwert</title>
@@ -320,6 +289,7 @@
     }
   }
 
+  var bewegt = false;
   function tick(){
     var R1 = widerstand(+$("rR1").value), R2 = widerstand(+$("rR2").value);
     var G1 = 1/R1, G2 = 1/R2;
@@ -330,24 +300,26 @@
     var v = R2/R1;
     var satz;
     if(Math.abs(v - 2) < 0.06){
-      satz = "R₂ ist das Doppelte von R₁, und G₂ ist genau die Hälfte von G₁. "
+      satz = "<i>R</i><sub>2</sub> ist das Doppelte von <i>R</i><sub>1</sub>, und <i>G</i><sub>2</sub> ist genau die Hälfte von <i>G</i><sub>1</sub>. "
            + "Das ist der Kehrwert.";
     } else if(Math.abs(v - 1) < 0.03){
       satz = "Beide Leiter sind gleich: gleicher Widerstand, gleicher Leitwert.";
     } else {
-      satz = "R₂ ist das " + sig3(v) + "-Fache von R₁, G₂ das "
-           + sig3(G2/G1) + "-Fache von G₁. Die beiden Verhältnisse sind Kehrwerte "
+      satz = "<i>R</i><sub>2</sub> ist das " + sig3(v) + "-Fache von <i>R</i><sub>1</sub>, <i>G</i><sub>2</sub> das "
+           + sig3(G2/G1) + "-Fache von <i>G</i><sub>1</sub>. Die beiden Verhältnisse sind Kehrwerte "
            + "voneinander.";
     }
-    $("hDeut").textContent = satz;
+    // vor dem ersten Verstellen nichts deuten: die Erkenntnis soll der Schueler finden
+    if(!bewegt){ satz = "Verstellen Sie einen der beiden Regler und beobachten Sie, was mit den Leitwerten geschieht."; }
+    $("hDeut").innerHTML = satz;
     zeichne(R1, R2, G1, G2);
   }
-  ["rR1","rR2"].forEach(function(id){ $(id).addEventListener("input",tick); });
+  ["rR1","rR2"].forEach(function(id){ $(id).addEventListener("input",function(){ bewegt = true; tick(); }); });
   window.addEventListener("resize", tick);
   $("bReset").addEventListener("click",function(){
     // Startstellung R1 = 15 Ω, R2 = 62 Ω. Kein Blattwert, kein glattes Verhaeltnis,
     // die Erkenntnis „doppelt/halb" wird nicht vorweggenommen.
-    $("rR1").value=START.a; $("rR2").value=START.b; tick();
+    $("rR1").value=START.a; $("rR2").value=START.b; bewegt = false; tick();
   });
   tick();
 })();
