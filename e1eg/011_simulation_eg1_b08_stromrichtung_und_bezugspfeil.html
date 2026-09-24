@@ -1,0 +1,237 @@
+<!-- lehrmaterial -->
+<!-- materialtyp: simulation -->
+<!-- sim_bearbeitung: pflicht -->
+<!-- Block EG1-B08 · Stromrichtung und Bezugspfeil -->
+<!-- Ziel-Erkenntnis:
+     (1) Die ELEKTRONEN laufen im Aussenkreis von MINUS nach PLUS. Die TECHNISCHE
+         Stromrichtung ist umgekehrt festgelegt: von PLUS nach MINUS.
+     (2) Der BEZUGSPFEIL ist eine WAHL, keine Tatsache. Er legt nur fest, welche Richtung
+         als positiv gezaehlt wird.
+     (3) Das VORZEICHEN von I sagt etwas ueber das Verhaeltnis von Pfeil und Strom —
+         nicht ueber den Strom selbst. Dreht man den Pfeil um, wechselt das Vorzeichen;
+         die Elektronen laufen unveraendert weiter.
+     (4) Alle VIER Zustaende sind einstellbar und von Hand geprueft:
+           Polung normal    + Pfeil mit dem Strom   -> I = +1 A
+           Polung normal    + Pfeil gegen den Strom -> I = -1 A
+           Polung getauscht + Pfeil nach rechts     -> I = -1 A
+           Polung getauscht + Pfeil nach links      -> I = +1 A
+     Startstellung: Polung normal, Bezugspfeil in technischer Stromrichtung -> I = +1 A.
+     Das ist der LEHRBUCHFALL und zugleich der einzige, in dem nichts ueberrascht — die
+     Erkenntnis entsteht erst beim Umschalten. Deshalb ist er hier die Startstellung und
+     nicht die Loesung einer Aufgabe. -->
+<!-- BELEGE — Tabellenbuch 32. A., gedruckt Tabellenbuch S. 43 „Bezugspfeile, Kirchhoff'sche
+     Regeln, Spannungsteiler" (Seite gerendert und gelesen, nicht erinnert):
+       „Haben Stromrichtung und Bezugspfeil dieselbe Richtung, so spricht man von
+        POSITIVER Stromstaerke."
+       „Eine positive Spannungsangabe bedeutet, dass die Richtung der Spannung (+ nach -)
+        gleich der Bezugspfeilrichtung ist."
+     Dieselbe Seite zeigt unter „Strombezugspfeile" zwei Bilder: einmal I = 1 A (Pfeil in
+     Stromrichtung), einmal I = -1 A (Pfeil dagegen) — genau die beiden Faelle, die diese
+     Simulation umschaltbar macht.
+     Schaltzeichen nach DIN EN 60617 (Tabellenbuch S. 86/87: Widerstand, Galvanisches
+     Element). -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulation EG1-B08: Stromrichtung und Bezugspfeil</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--rot:#B23A33;--hell:#F4F6F8;
+        --linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62;--blau:#2557A3}
+  html,body{margin:0;padding:0}
+  body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;
+       line-height:1.46;font-size:16px;padding:18px 14px 60px}
+  .wrap{max-width:960px;margin:0 auto;background:#fff;border:1px solid var(--linie);
+        box-shadow:0 6px 26px rgba(0,0,0,.10);padding:22px 24px 30px}
+  .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:9px 0;margin-bottom:16px}
+  .kopf .reihe{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--kupfer);font-weight:700}
+  .kopf h1{font-size:22px;margin:3px 0 2px}
+  .kopf .sub{font-size:13px;color:var(--grau)}
+  .box{border:1.2px solid var(--ink);padding:11px 14px;margin:14px 0;background:#fff}
+  .box .cap{display:block;font-size:12px;font-weight:700;letter-spacing:.09em;
+            text-transform:uppercase;color:var(--kupfer);margin-bottom:5px}
+  .box.sim{background:var(--kupferhell)}
+  .box.quelle{border:none;padding:0;margin:16px 0 0}
+  .box.quelle .cap{color:var(--grau)}
+  .quelle small{font-size:11.5px;color:var(--grau)}
+  i{font-style:italic} sub{font-size:.7em;vertical-align:-.25em}
+  canvas.stage{width:100%;max-width:880px;height:auto;display:block;margin:6px auto 0;
+               border:1px solid var(--linie);background:#fff;touch-action:manipulation}
+  figcaption{font-size:11.5px;color:var(--grau);text-align:left;border-left:3px solid var(--kupfer);
+             padding:4px 0 4px 9px;margin-top:7px}
+  .knoepfe{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 2px}
+  .knoepfe button{font:inherit;font-size:14.5px;padding:11px 16px;min-height:44px;cursor:pointer;
+                  border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);font-weight:600}
+  .knoepfe button:hover{background:var(--kupferhell)}
+  table.ab{width:100%;border-collapse:collapse;margin-top:12px;font-size:14.5px}
+  table.ab th,table.ab td{border:1px solid var(--linie);padding:5px 8px;text-align:left}
+  table.ab th{background:var(--hell);font-size:12px;letter-spacing:.05em;text-transform:uppercase}
+  table.ab td.z{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+  .hinw{font-size:13px;color:var(--grau);margin-top:8px}
+  button.reset{font:inherit;font-size:14px;padding:9px 16px;border:1.4px solid var(--linie);
+               background:#fff;color:var(--grau);cursor:pointer;margin-top:12px;min-height:44px}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="kopf">
+    <div class="reihe">E1EG · Grundlagen Elektrotechnik · Lernfeld&nbsp;1 · Block&nbsp;8</div>
+    <h1>Stromrichtung und Bezugspfeil: woher das Vorzeichen kommt</h1>
+    <div class="sub">Selbst bedienbar · der Pfeil ist eine Wahl, der Strom nicht</div>
+  </div>
+
+  <div class="box sim">
+    <span class="cap">So bedienen Sie die Simulation</span>
+    <p>Die <b>blauen Punkte</b> sind die Elektronen, sehen Sie genau hin, wohin sie laufen.
+    Der <b>kupferne Pfeil</b> ist die technische Stromrichtung, der <b>grüne Pfeil</b>
+    darunter der <b>Bezugspfeil</b>. Mit den Knöpfen drehen Sie die <b>Polung</b> der Quelle
+    oder den <b>Bezugspfeil</b> um. Achten Sie darauf, <b>wann</b> sich das Vorzeichen von
+    <i>I</i> ändert, und wann die Elektronen ihre Richtung wechseln.</p>
+  </div>
+
+  <div class="knoepfe">
+    <button id="bPol" type="button">Polung der Quelle umdrehen</button>
+    <button id="bPfeil" type="button">Bezugspfeil umdrehen</button>
+  </div>
+
+  <figure>
+    <script type="application/json" id="sim-meta">{"startwerte":{"polNormal":true,"pfeilRechts":true},"loesungswerte":{"pfeilRechts":false}}</script>
+  <canvas class="stage" id="cKreis" width="880" height="300"
+      data-quelle="Europa-Fachkunde S.32 Bild 1 (Stromrichtung im Stromkreis: technische Stromrichtung vs. Elektronenbewegung); Elektronen-Animation schematisch nach dieser Vorlage"
+      aria-label="Stromkreis: links eine Quelle mit Plus- und Minuspol, rechts ein Widerstand. Auf der oberen Leitung laufen blaue Punkte als Elektronen; darüber steht der kupferne Pfeil der technischen Stromrichtung, darunter der blaue Bezugspfeil. Rechts wird die Stromstärke mit Vorzeichen angezeigt."></canvas>
+    <figcaption>Die Elektronen laufen von <b>Minus nach Plus</b>. Die technische
+    Stromrichtung ist andersherum festgelegt, <b>von Plus nach Minus</b>.</figcaption>
+  </figure>
+
+  <table class="ab">
+    <tr><th>Größe</th><th>Richtung</th><th style="text-align:right">Wert</th></tr>
+    <tr><td>Elektronenbewegung (physikalisch)</td><td id="aElek">nach links</td><td class="z">&nbsp;</td></tr>
+    <tr><td>technische Stromrichtung (Plus → Minus)</td><td id="aTech">nach rechts</td><td class="z">&nbsp;</td></tr>
+    <tr><td>Bezugspfeil (frei gewählt)</td><td id="aPfeil">nach rechts</td><td class="z">&nbsp;</td></tr>
+    <tr><td><b>Stromstärke <i>I</i></b></td><td id="aVergl">Pfeil <b>mit</b> der Stromrichtung</td>
+        <td class="z" id="aI">+1 A</td></tr>
+  </table>
+  <p class="hinw" id="hDeut">Drehen Sie den Bezugspfeil um und beobachten Sie die Elektronen.</p>
+  <button class="reset" id="bReset" type="button">Zurücksetzen</button>
+
+  <div class="box quelle">
+    <span class="cap">Woher die Festlegung stammt</span>
+    <small>Im <b>Tabellenbuch auf S.&nbsp;43</b> („Bezugspfeile, Kirchhoff'sche Regeln,
+    Spannungsteiler“) steht: <i>„Haben Stromrichtung und Bezugspfeil dieselbe Richtung, so
+    spricht man von positiver Stromstärke.“</i> Dieselbe Seite zeigt zwei Bilder unter
+    „Strombezugspfeile“ eines mit <i>I</i>&nbsp;=&nbsp;1&nbsp;A, eines mit
+    <i>I</i>&nbsp;=&nbsp;−1&nbsp;A. Genau diese beiden Fälle können Sie hier umschalten.
+    Schaltzeichen nach DIN&nbsp;EN&nbsp;60617 (Tabellenbuch S.&nbsp;86/87).</small>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  var polNormal=true, pfeilRechts=true, phase=0, laeuft=true;
+  var ruhig = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function pfeilZeichnen(g,x1,y,x2,farbe,txt,dick){
+    g.strokeStyle=farbe; g.fillStyle=farbe; g.lineWidth=dick||2.4;
+    g.beginPath(); g.moveTo(x1,y); g.lineTo(x2,y); g.stroke();
+    var r = x2>x1 ? 1 : -1;
+    g.beginPath(); g.moveTo(x2,y); g.lineTo(x2-12*r,y-7); g.lineTo(x2-12*r,y+7);
+    g.closePath(); g.fill();
+    if(txt){ g.font="14px 'Noto Sans',sans-serif";
+             g.fillText(txt, Math.min(x1,x2)+Math.abs(x2-x1)/2-g.measureText(txt).width/2, y-13); }
+  }
+
+  // ★ 11.09.2026 — die erste Fassung lief rechts aus der Flaeche („I = +1 A" und der
+  //   Erklaertext standen bei x > 730 und wurden abgeschnitten), und die Quelle war als
+  //   galvanisches Element nicht zu erkennen. Beim Ansehen gefunden.
+  //   Jetzt: Kreis schmaler (xl 120 … xr 600), das Ergebnis steht RECHTS DANEBEN im
+  //   freien Feld, die Quelle mit eng stehenden Strichen nach DIN EN 60617.
+  function zeichne(c){
+    var g=c.getContext("2d"); g.clearRect(0,0,880,300);
+    var xl=130, xr=600, yo=104, yu=228;
+    g.font="14px 'Noto Sans',sans-serif";
+    g.strokeStyle="#1A2530"; g.lineWidth=2.4;
+    // obere und untere Leitung
+    g.beginPath(); g.moveTo(xl,yo); g.lineTo(xr,yo); g.moveTo(xl,yu); g.lineTo(xr,yu); g.stroke();
+    // linke Seite mit der Quelle: Luecke fuer das Element
+    var ym=(yo+yu)/2;
+    g.beginPath(); g.moveTo(xl,yo); g.lineTo(xl,ym-13); g.moveTo(xl,ym+13); g.lineTo(xl,yu); g.stroke();
+    // galvanisches Element: langer Strich = Pluspol (DIN EN 60617, Tabellenbuch S. 86)
+    var plusOben = polNormal;
+    var yPlus = plusOben ? ym-13 : ym+13, yMinus = plusOben ? ym+13 : ym-13;
+    g.lineWidth=4;  g.beginPath(); g.moveTo(xl-19,yPlus);  g.lineTo(xl+19,yPlus);  g.stroke();
+    g.lineWidth=2;  g.beginPath(); g.moveTo(xl-10,yMinus); g.lineTo(xl+10,yMinus); g.stroke();
+    g.font="18px 'Noto Sans',sans-serif";
+    g.fillStyle="#B23A33"; g.fillText("+", xl-40, yPlus+6);
+    g.fillStyle="#2557A3"; g.fillText("−", xl-40, yMinus+7);
+    g.fillStyle="#5A666F"; g.font="13px 'Noto Sans',sans-serif";
+    g.fillText("Quelle", xl-58, yo-14);
+    // rechte Seite mit dem Widerstand
+    g.strokeStyle="#1A2530"; g.lineWidth=2.4;
+    g.beginPath(); g.moveTo(xr,yo); g.lineTo(xr,ym-32); g.moveTo(xr,ym+32); g.lineTo(xr,yu); g.stroke();
+    g.fillStyle="#fff"; g.fillRect(xr-17,ym-32,34,64);
+    g.strokeStyle="#1A2530"; g.lineWidth=2.2; g.strokeRect(xr-17,ym-32,34,64);
+    g.fillStyle="#1A2530"; g.font="15px 'Noto Sans',sans-serif"; g.fillText("R", xr-5, ym+6);
+    g.font="14px 'Noto Sans',sans-serif";
+    // Elektronen auf der OBEREN Leitung: von Minus nach Plus.
+    // Plus oben  -> sie laufen oben nach LINKS; Plus unten -> nach RECHTS.
+    var nachRechts = !plusOben;
+    for(var i=0;i<10;i++){
+      var q = (i/10 + (nachRechts ? phase : 1-phase)) % 1;
+      var x = xl + 10 + q*(xr-xl-20);
+      g.beginPath(); g.arc(x, yo, 5.5, 0, 6.2832);
+      g.fillStyle="#2557A3"; g.fill();
+      g.strokeStyle="#fff"; g.lineWidth=1.2; g.stroke();
+    }
+    g.fillStyle="#2557A3"; g.font="12.5px 'Noto Sans',sans-serif";
+    g.fillText("Elektronen: von Minus nach Plus", xl+8, yo+24);
+    g.font="14px 'Noto Sans',sans-serif";
+    // technische Stromrichtung (Plus -> Minus) — auf der oberen Leitung gegen die Elektronen
+    var techR = plusOben;
+    pfeilZeichnen(g, techR?xl+26:xr-26, yo-44, techR?xr-26:xl+26, "#A34E0E",
+                  "technische Stromrichtung I", 2.6);
+    // Bezugspfeil
+    pfeilZeichnen(g, pfeilRechts?xl+66:xr-66, yo+60, pfeilRechts?xr-66:xl+66, "#2F7D62",
+                  "Bezugspfeil (frei gewählt)", 2.2);
+    // Ergebnis rechts im freien Feld
+    var I = (techR === pfeilRechts) ? 1 : -1;
+    g.fillStyle = I>0 ? "#2F7D62" : "#B23A33";
+    g.font="30px 'Noto Sans',sans-serif";
+    g.fillText("I = " + (I>0?"+":"−") + "1 A", 654, ym-4);
+    g.font="12.5px 'Noto Sans',sans-serif"; g.fillStyle="#5A666F";
+    g.fillText(I>0 ? "Pfeil und Strom:" : "Pfeil und Strom:", 654, ym+22);
+    g.fillText(I>0 ? "gleiche Richtung" : "entgegengesetzt", 654, ym+40);
+    g.fillStyle="#2F7D62"; g.font="12.5px 'Noto Sans',sans-serif";
+    g.fillText("Die Elektronen kümmert der Pfeil nicht, nur das Vorzeichen hängt von ihm ab.",
+               xl-58, 278);
+  }
+
+  function tick(){
+    var techR = polNormal, I = (techR === pfeilRechts) ? 1 : -1;
+    $("aElek").textContent  = polNormal ? "nach links" : "nach rechts";
+    $("aTech").textContent  = techR ? "nach rechts" : "nach links";
+    $("aPfeil").textContent = pfeilRechts ? "nach rechts" : "nach links";
+    $("aVergl").innerHTML   = I>0 ? "Pfeil <b>mit</b> der Stromrichtung"
+                                  : "Pfeil <b>gegen</b> die Stromrichtung";
+    $("aI").textContent     = (I>0?"+":"−") + "1 A";
+    $("hDeut").textContent  = I>0
+      ? "Pfeil und Stromrichtung stimmen überein, deshalb wird I positiv gezählt."
+      : "Der Pfeil zeigt gegen die Stromrichtung, deshalb ist I negativ. Am Strom selbst "
+        + "hat sich nichts geändert.";
+    zeichne($("cKreis"));
+  }
+  function schleife(){
+    if(laeuft && !ruhig){ phase = (phase + 0.0035) % 1; zeichne($("cKreis")); }
+    requestAnimationFrame(schleife);
+  }
+  $("bPol").addEventListener("click", function(){ polNormal = !polNormal; tick(); });
+  $("bPfeil").addEventListener("click", function(){ pfeilRechts = !pfeilRechts; tick(); });
+  $("bReset").addEventListener("click", function(){
+    // Startstellung: Polung normal, Bezugspfeil in technischer Stromrichtung -> I = +1 A.
+    // Der Lehrbuchfall; die Erkenntnis entsteht erst beim Umschalten.
+    polNormal = true; pfeilRechts = true; tick();
+  });
+  tick();
+  requestAnimationFrame(schleife);
+})();
+</script>
