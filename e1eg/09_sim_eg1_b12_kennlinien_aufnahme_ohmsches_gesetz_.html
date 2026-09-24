@@ -30,17 +30,17 @@ p{margin:8px 0}
 i{font-style:italic}.ziel{background:var(--kupferhell);border-left:5px solid var(--kupfer);padding:10px 14px;margin:12px 0}.ziel .cap{font-weight:700;color:var(--kupfer);display:block;margin-bottom:2px}.modewahl{display:flex;flex-wrap:wrap;gap:0;margin:14px 0 4px;border:1.4px solid var(--ink)}.modewahl button{flex:1 1 240px;border:0;border-right:1.4px solid var(--ink);background:#fff;
  color:var(--ink);font:inherit;font-weight:700;padding:10px 12px;cursor:pointer;text-align:left;line-height:1.3}.modewahl button:last-child{border-right:0}.modewahl button[aria-pressed="true"]{background:var(--kupfer);color:#fff}.modewahl small{display:block;font-weight:400;font-size:12px;margin-top:2px;opacity:.9}.sim{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start;
  border:1.4px solid var(--ink);background:#fff;padding:16px;margin:12px 0}.sim .links{flex:1 1 380px;min-width:300px}.sim .rechts{flex:1 1 320px;min-width:280px}
-canvas{width:100%;height:auto;display:block;background:#fff}.leinwand{border:1px solid var(--linie)}.bildunterschrift{font-size:12px;color:var(--grau);margin:4px 0 0}.regler{display:flex;align-items:center;gap:12px;margin:10px 0 2px;flex-wrap:wrap}.regler label{font-weight:700;min-width:150px}.regler input[type=range]{flex:1 1 150px;height:24px;accent-color:var(--kupfer);cursor:pointer}.rval{font-weight:700;min-width:64px;text-align:right}.reglerhinweis{font-size:12px;color:var(--grau);margin:0 0 6px}.anzeige{font-size:28px;font-weight:700;margin:14px 0 4px;color:var(--ink)}.bruch{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;
+canvas{width:100%;height:auto;display:block;background:#fff}.leinwand{border:1px solid var(--linie)}.bildunterschrift{font-size:12px;color:var(--grau);margin:4px 0 0}.regler{display:flex;align-items:center;gap:12px;margin:10px 0 2px;flex-wrap:wrap}.regler label{font-weight:700;min-width:150px}.regler input[type=range]{flex:1 1 150px;height:44px;accent-color:var(--kupfer);cursor:pointer}.rval{font-weight:700;min-width:64px;text-align:right}.reglerhinweis{font-size:12px;color:var(--grau);margin:0 0 6px}.anzeige{font-size:28px;font-weight:700;margin:14px 0 4px;color:var(--ink)}.bruch{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;
  line-height:1.05;margin:0 .12em;font-size:.6em}.bruch .z{border-bottom:1.6px solid currentColor;padding:0 .35em}.bruch .n{padding:0 .35em}.einheit{font-size:14px;font-weight:400;color:var(--grau);margin:0 0 8px}.tasten{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0 2px}
 button.tk{font:inherit;font-weight:700;border:1.4px solid var(--ink);background:#fff;color:var(--ink);
- padding:8px 14px;cursor:pointer}
+ padding:8px 14px;cursor:pointer;min-height:44px}
 button.tk:active{background:var(--kupferhell)}
 button.tk.reset{border-color:var(--rot);color:var(--rot)}.merk{background:var(--gruenhell);border-left:5px solid var(--gruen);padding:9px 13px;margin:14px 0;font-size:15px}.merk .cap{font-weight:700;color:var(--gruen);display:block;margin-bottom:2px}.projekt{background:var(--kupferhell);border-left:5px solid var(--kupfer);padding:8px 12px;margin:8px 0}.projekt .cap{font-weight:700;color:var(--kupfer)}.achtung{background:#FBEBE9;border-left:5px solid var(--rot);padding:10px 14px;margin:14px 0}.achtung .cap{font-weight:700;color:var(--rot);display:block;margin-bottom:2px}.formel{background:#fff;border:1.6px solid var(--kupfer);border-left:6px solid var(--kupfer);padding:12px 16px;margin:14px 0}.formel .cap{font-weight:700;color:var(--kupfer);display:block;margin-bottom:6px}.formelzeile{font-size:22px;display:flex;flex-wrap:wrap;gap:26px;align-items:center;margin:6px 0}.formelzeile .bruch{font-size:.55em}.kontrolle{font-size:14px;color:var(--grau);margin-top:8px}.methode{background:var(--kupferhell);border-left:5px solid var(--kupfer);padding:10px 14px;margin:14px 0}.methode .cap{font-weight:700;color:var(--kupfer);display:block;margin-bottom:2px}
 
 ol.aufg{padding-left:22px}
 ol.aufg li{margin:14px 0}
 details{margin-top:6px;border:1px solid var(--linie);padding:6px 10px;background:#fff}
-details summary{cursor:pointer;font-weight:700;color:var(--gruen)}.loesung{margin-top:6px;color:var(--gruen)}.quelle{font-size:13px;color:var(--grau);border-left:3px solid var(--kupfer);padding-left:10px;margin-top:20px}
+details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2px;min-height:44px;box-sizing:border-box}.loesung{margin-top:6px;color:var(--gruen)}.quelle{font-size:13px;color:var(--grau);border-left:3px solid var(--kupfer);padding-left:10px;margin-top:20px}
 </style>
 
 <div class="kopf">
@@ -55,9 +55,9 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen)}.loesung{margi
 
 <div class="modewahl" role="group" aria-label="Versuch auswählen">
  <button id="mV1" type="button" aria-pressed="true">Versuch 1, <i>R</i> fest, <i>U</i> verändern
- <small>Kennlinie <i>I</i> = f(<i>U</i>): ist <i>I</i> ∼ <i>U</i>?</small></button>
+ <small>Kennlinie <i>I</i> = f(<i>U</i>)</small></button>
  <button id="mV2" type="button" aria-pressed="false">Versuch 2, <i>U</i> fest, <i>R</i> verändern
- <small>Kennlinie <i>I</i> = f(<i>R</i>): ist <i>I</i> ∼ 1/<i>R</i>?</small></button>
+ <small>Kennlinie <i>I</i> = f(<i>R</i>)</small></button>
 </div>
 
 <div class="sim">
@@ -88,7 +88,7 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen)}.loesung{margi
 
  <canvas id="cPlot" class="leinwand" width="840" height="600"
  data-quelle="FK S.37 Bild 2 (Kennlinie I=f(U), Gerade durch Nullpunkt) und Bild 3 (Kennlinie I=f(R), fallende Kurve)"
- role="img" aria-label="Kennliniendiagramm. Waagerechte Achse und senkrechte Achse mit Stromstärke I in Ampere. Der grüne Punkt zeigt den aktuellen Messwert; aufgenommene Messpunkte werden als farbige Kennlinie eingetragen."></canvas>
+ role="img" aria-label="Kennliniendiagramm. Waagerechte Achse und senkrechte Achse mit Stromstärke I in Ampere. Der grüne Punkt zeigt den aktuellen Messwert; aufgenommene Messpunkte werden als farbige Punkte eingetragen."></canvas>
  <p class="bildunterschrift" id="plotUnterschrift"><i>I</i>-<i>U</i>-Diagramm. Grüner Punkt = aktueller Messwert.</p>
 
  <div class="tasten">
@@ -118,17 +118,17 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen)}.loesung{margi
 
 <ol class="aufg">
  <li>
- <b>Versuch 1, <i>I</i> ∼ <i>U</i> prüfen.</b> Wählen Sie oben <b>Versuch 1</b> und stellen Sie <i>R</i> = 4 Ω fest ein.
+ <b>Versuch 1: Widerstand fest.</b> Wählen Sie oben <b>Versuch 1</b> und stellen Sie <i>R</i> = 4 Ω fest ein.
  Fahren Sie <i>U</i> nacheinander auf 2, 4, 6, 8 und 10 V und nehmen Sie jedes Mal einen Messpunkt auf.
  Welche Stromstärke zeigt der Messplatz bei <i>U</i> = 6 V? Welche Form hat die Kennlinie?
  <details><summary>Lösung anzeigen</summary>
- <div class="loesung">Bei <i>U</i> = 6 V und <i>R</i> = 4 Ω zeigt der Messplatz <i>I</i> = 6 V / 4 Ω = <b>1,5 A</b>.
- Die fünf Messpunkte liegen auf einer <b>Geraden durch den Nullpunkt</b>: verdoppelt man <i>U</i>, so verdoppelt
- sich <i>I</i>, die Stromstärke ist <b>proportional</b> zur Spannung (<i>I</i> ∼ <i>U</i>).</div>
+ <div class="loesung">Bei <i>U</i> = 6 V und <i>R</i> = 4 Ω zeigt der Messplatz <b>1,5 A</b>.
+ Die fünf Messpunkte liegen auf einer <b>Geraden durch den Nullpunkt</b>: Verdoppelt man <i>U</i>, so verdoppelt
+ sich <i>I</i>.</div>
  </details>
  </li>
  <li>
- <b>Zwei Geraden vergleichen.</b> Nehmen Sie die Messreihe aus Aufgabe 1 noch einmal mit <i>R</i> = 10 Ω auf
+ <b>Zwei Geraden vergleichen.</b> Nehmen Sie mit <i>R</i> = 10 Ω die Messpunkte bei 2 V, 6 V und 10 V auf
  (löschen Sie die Punkte nicht). Welche der beiden Geraden ist <b>steiler</b>, und zu welchem Widerstand gehört sie?
  <details><summary>Lösung anzeigen</summary>
  <div class="loesung">Die Gerade für <i>R</i> = 4 Ω ist <b>steiler</b> und gehört zum <b>kleineren</b> Widerstand.
@@ -137,7 +137,7 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen)}.loesung{margi
  </details>
  </li>
  <li>
- <b>Grenzfall <i>U</i> = 0 V.</b> Stellen Sie die Spannung auf 0 V. Was zeigt der Strommesser, und wie
+ <b>Zusatz, Grenzfall <i>U</i> = 0 V.</b> Stellen Sie die Spannung auf 0 V. Was zeigt der Strommesser, und wie
  bewegen sich die Ladungsträger im Stromkreis?
  <details><summary>Lösung anzeigen</summary>
  <div class="loesung">Der Strommesser zeigt <i>I</i> = 0 A. Die Punkte stehen still, es fließt <b>kein Strom</b>.
@@ -146,23 +146,13 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen)}.loesung{margi
  </details>
  </li>
  <li>
- <b>Versuch 2, <i>I</i> ∼ 1/<i>R</i> prüfen.</b> Wechseln Sie zu <b>Versuch 2</b>, stellen Sie <i>U</i> = 10 V fest
+ <b>Versuch 2: Spannung fest.</b> Wechseln Sie zu <b>Versuch 2</b>, stellen Sie <i>U</i> = 10 V fest
  ein und nehmen Sie für <i>R</i> = 2, 4, 6, 8 und 10 Ω je einen Messpunkt auf. Welche Form hat diese Kennlinie,
  und wie ändert sich <i>I</i>, wenn <i>R</i> wächst?
  <details><summary>Lösung anzeigen</summary>
  <div class="loesung">Die Messpunkte ergeben eine <b>fallende, gekrümmte Kurve</b> (keine Gerade!). Je größer <i>R</i>,
  desto kleiner <i>I</i>: <i>R</i> = 2 Ω → 5,0 A; 4 Ω → 2,5 A; 6 Ω → 1,67 A; 8 Ω → 1,25 A; 10 Ω → 1,0 A.
- Die Stromstärke ist dem Widerstand <b>umgekehrt proportional</b> (<i>I</i> ∼ 1/<i>R</i>).</div>
- </details>
- </li>
- <li>
- <div class="projekt"><span class="cap">Anwendung</span>
- Durch einen Verbraucher fließt bei <i>U</i> = 10 V der Strom <i>I</i> = 2,5 A. Suchen Sie in <b>Versuch 2</b>
- (<i>U</i> = 10 V fest) den Widerstand, bei dem der Messplatz genau 2,5 A anzeigt. Rechnen Sie mit <i>R</i> = <i>U</i>/<i>I</i> nach.</div>
- <details><summary>Lösung anzeigen</summary>
- <div class="loesung">Bei <i>R</i> = 4 Ω zeigt der Messplatz 2,5 A. Nachrechnung: <i>R</i> = <i>U</i>/<i>I</i> = 10 V / 2,5 A = <b>4 Ω</b>.
- So bestimmen Sie aus einem gemessenen Betriebspunkt den Widerstand eines Verbrauchers, genau wie später
- den Widerstand einer Leuchte (12 V und 0,25 A ergeben 48 Ω) auf dem Arbeitsblatt.</div>
+ Verdoppelt man <i>R</i>, so halbiert sich <i>I</i>.</div>
  </details>
  </li>
 </ol>
@@ -180,12 +170,20 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen)}.loesung{margi
  </div>
  <div class="kontrolle">[<i>I</i>] = V/Ω = A &nbsp;·&nbsp; [<i>R</i>] = V/A = Ω &nbsp;·&nbsp; [<i>U</i>] = Ω·A = V.
  Eine <b>lineare (gerade) Kennlinie</b> kennzeichnet einen <b>Ohm'schen (linearen) Widerstand</b>.<br>
- Beleg: Tabellenbuch S.&nbsp;30, Formel&nbsp;7 (Merkformel <i>U</i> = <i>R</i>·<i>I</i>) und Formel&nbsp;8 (<i>I</i> = <i>U</i>/<i>R</i>). Andere Auflage? Tragen Sie ein: S. ____, Formel ____.</div>
+ Beleg: Tabellenbuch S.&nbsp;30, Formel&nbsp;7 (Merkformel <i>U</i> = <i>R</i>·<i>I</i>) und Formel&nbsp;8 (<i>I</i> = <span class="bruch"><span class="z"><i>U</i></span><span class="n"><i>R</i></span></span>). Andere Auflage? Tragen Sie ein: S. ____, Formel ____.</div>
+</div>
+<div class="projekt"><span class="cap">Anwendung</span>
+ Durch einen Verbraucher fließt bei <i>U</i> = 10 V der Strom <i>I</i> = 2,5 A. Suchen Sie in <b>Versuch 2</b>
+ (<i>U</i> = 10 V fest) den Widerstand, bei dem der Messplatz genau 2,5 A anzeigt, und rechnen Sie mit
+ <i>R</i> = <span class="bruch"><span class="z"><i>U</i></span><span class="n"><i>I</i></span></span> nach.
+ <details><summary>Lösung anzeigen</summary>
+ <div class="loesung">Bei <i>R</i> = 4 Ω zeigt der Messplatz 2,5 A. Nachrechnung: <i>R</i> = <span class="bruch"><span class="z"><i>U</i></span><span class="n"><i>I</i></span></span> = <span class="bruch"><span class="z">10 V</span><span class="n">2,5 A</span></span> = <b>4 Ω</b>.</div>
+ </details>
 </div>
 </details>
 
 <div class="quelle">
- Die Simulation rechnet mit <i>I</i> = <i>U</i>/<i>R</i>; alle Messwerte sind mit der Hand nachgerechnet.
+ Alle Messwerte sind mit der Hand nachgerechnet (Europa-Fachkunde S.&nbsp;37, Versuch&nbsp;1 und 2).
 </div>
 
 <script>
@@ -225,6 +223,13 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen)}.loesung{margi
  ctx._wl = wl; ctx._hl = hl;
  return ctx;
  }
+ // ★ 24.09.2026 (PRUEF2409_Block_12, M4): bei 390 px landeten die Beschriftungen bei rund 8 px.
+ //   fs vergroessert jede Schrift, wenn die Zeichenflaeche schmaler als 440 px dargestellt wird.
+ var fs = 1;
+ function schrift(){ var w = document.getElementById('cCircuit').clientWidth || 480;
+   fs = Math.max(1, Math.min(1.5, 440 / w)); }
+ function f(px){ return Math.round(px * fs); }
+ schrift(); window.addEventListener('resize', function(){ schrift(); render(); });
  var cctx = setup(document.getElementById('cCircuit'), 480, 300);
  var pctx = setup(document.getElementById('cPlot'), 420, 300);
 
@@ -273,12 +278,17 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen)}.loesung{margi
  ctx.fillStyle = '#fff'; ctx.strokeStyle = '#1A2530'; ctx.lineWidth = 2.4;
  ctx.fillRect(LX-26, 128, 52, 48); ctx.strokeRect(LX-26, 128, 52, 48);
  ctx.lineWidth = 2;
- ctx.beginPath(); ctx.moveTo(LX-14,146); ctx.lineTo(LX+14,146); ctx.stroke();
- ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(LX-14,158); ctx.lineTo(LX+14,158); ctx.stroke();
+ ctx.beginPath(); ctx.moveTo(LX-14,152); ctx.lineTo(LX+14,152); ctx.stroke();
+ ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(LX-14,162); ctx.lineTo(LX+14,162); ctx.stroke();
  ctx.setLineDash([]);
- ctx.fillStyle = '#1A2530'; ctx.font = 'italic 14px "Noto Sans",Arial'; ctx.textAlign='center';
- ctx.fillText('U', LX, 122);
- ctx.font = '12px "Noto Sans",Arial'; ctx.fillStyle = '#5A666F';
+ // ★ 24.09.2026 (PRUEF2409_Block_12, K10): Schaltzeichen wie Fachkunde S. 37, Bild 1: G, Einstellpfeil, Pole
+ ctx.fillStyle = '#1A2530'; ctx.font = 'bold '+f(14)+'px "Noto Sans",Arial'; ctx.textAlign='center';
+ ctx.fillText('G', LX, 141);
+ // Einstellpfeil ueber die obere linke Ecke, Pole rechts neben dem Kasten (wie im Buchbild)
+ ctx.lineWidth = 1.8; ctx.beginPath(); ctx.moveTo(LX-44, 158); ctx.lineTo(LX-8, 114); ctx.stroke();
+ ctx.beginPath(); ctx.moveTo(LX-8,114); ctx.lineTo(LX-17,117); ctx.lineTo(LX-11,124); ctx.closePath(); ctx.fill();
+ ctx.font = 'bold '+f(14)+'px "Noto Sans",Arial'; ctx.fillText('+', LX+33, 126); ctx.fillText('−', LX+33, 190);
+ ctx.font = ''+f(12)+'px "Noto Sans",Arial'; ctx.fillStyle = '#5A666F';
  ctx.textAlign='left';
  ctx.fillText('Netzgerät', LX+32, 146);
  ctx.fillText(fmt(u,1)+' V', LX+32, 162);
@@ -287,9 +297,9 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen)}.loesung{margi
  // --- Strommesser oben (Kreis mit A), in Reihe ---
  ctx.fillStyle = '#fff'; ctx.strokeStyle = '#1A2530'; ctx.lineWidth = 2.4;
  ctx.beginPath(); ctx.arc(212, TY, 18, 0, 2*Math.PI); ctx.fill(); ctx.stroke();
- ctx.fillStyle = '#1A2530'; ctx.font = 'bold 15px "Noto Sans",Arial'; ctx.textAlign='center'; ctx.textBaseline='middle';
+ ctx.fillStyle = '#1A2530'; ctx.font = 'bold '+f(15)+'px "Noto Sans",Arial'; ctx.textAlign='center'; ctx.textBaseline='middle';
  ctx.fillText('A', 212, TY);
- ctx.textBaseline='alphabetic'; ctx.font = 'bold 13px "Noto Sans",Arial'; ctx.fillStyle = '#A34E0E';
+ ctx.textBaseline='alphabetic'; ctx.font = 'bold '+f(13)+'px "Noto Sans",Arial'; ctx.fillStyle = '#A34E0E';
  ctx.fillText(fmt(I,2)+' A', 212, TY-24);
 
  // --- einstellbarer Widerstand rechts (Rechteck mit Pfeil) ---
@@ -298,9 +308,9 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen)}.loesung{margi
  ctx.beginPath(); ctx.moveTo(RX-22, 190); ctx.lineTo(RX+22, 114); ctx.stroke();
  ctx.fillStyle = '#1A2530';
  ctx.beginPath(); ctx.moveTo(RX+22,114); ctx.lineTo(RX+14,116); ctx.lineTo(RX+18,123); ctx.closePath(); ctx.fill();
- ctx.font = 'italic 14px "Noto Sans",Arial'; ctx.textAlign='left';
+ ctx.font = 'italic '+f(14)+'px "Noto Sans",Arial'; ctx.textAlign='left';
  ctx.fillText('R', RX+18, 150);
- ctx.font = '12px "Noto Sans",Arial'; ctx.fillStyle = '#5A666F';
+ ctx.font = ''+f(12)+'px "Noto Sans",Arial'; ctx.fillStyle = '#5A666F';
  ctx.fillText(fmt(r,0)+' Ω', RX+18, 168);
 
  // --- Spannungsmesser parallel zum Widerstand ---
@@ -309,11 +319,12 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen)}.loesung{margi
  ctx.beginPath(); ctx.moveTo(RX,184); ctx.lineTo(432,184); ctx.lineTo(432,170); ctx.stroke();
  ctx.fillStyle = '#fff';
  ctx.beginPath(); ctx.arc(432, 152, 18, 0, 2*Math.PI); ctx.fill(); ctx.stroke();
- ctx.fillStyle = '#1A2530'; ctx.font = 'bold 15px "Noto Sans",Arial'; ctx.textAlign='center'; ctx.textBaseline='middle';
+ ctx.fillStyle = '#1A2530'; ctx.font = 'bold '+f(15)+'px "Noto Sans",Arial'; ctx.textAlign='center'; ctx.textBaseline='middle';
  ctx.fillText('V', 432, 152);
  ctx.textBaseline='alphabetic';
+ ctx.font = 'italic '+f(14)+'px "Noto Sans",Arial'; ctx.textAlign='left'; ctx.fillText('U', 455, 157);
 
- ctx.fillStyle = '#5A666F'; ctx.font = '12px "Noto Sans",Arial'; ctx.textAlign='left';
+ ctx.fillStyle = '#5A666F'; ctx.font = ''+f(12)+'px "Noto Sans",Arial'; ctx.textAlign='left';
  ctx.fillText('Messschaltung', 10, 288);
  }
 
@@ -329,7 +340,7 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen)}.loesung{margi
  function Y(v){ return MY0 - v/ymax*PH; }
 
  // Gitter + Skalenzahlen
- ctx.strokeStyle = '#A9C2D6'; ctx.lineWidth = 1; ctx.font = '12px "Noto Sans",Arial';
+ ctx.strokeStyle = '#A9C2D6'; ctx.lineWidth = 1; ctx.font = ''+f(12)+'px "Noto Sans",Arial';
  ctx.fillStyle = '#5A666F'; ctx.textAlign='center';
  xt.forEach(function(v){ ctx.beginPath(); ctx.moveTo(X(v),MY0); ctx.lineTo(X(v),MY0-PH); ctx.stroke();
  ctx.fillText(v, X(v), MY0+16); });
@@ -347,10 +358,10 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen)}.loesung{margi
  // Formelzeichen kursiv, Einheit aufrecht (DIN 1338); rechtsbuendig, damit nichts aus dem Bild laeuft
  function titel(sym, rest, x, y){
    ctx.textAlign='left';
-   ctx.font = '13px "Noto Sans",Arial'; var wr = ctx.measureText(rest).width;
-   ctx.font = 'italic 13px "Noto Sans",Arial'; var ws = ctx.measureText(sym).width;
+   ctx.font = ''+f(13)+'px "Noto Sans",Arial'; var wr = ctx.measureText(rest).width;
+   ctx.font = 'italic '+f(13)+'px "Noto Sans",Arial'; var ws = ctx.measureText(sym).width;
    ctx.fillText(sym, x - wr - ws, y);
-   ctx.font = '13px "Noto Sans",Arial'; ctx.fillText(rest, x - wr, y);
+   ctx.font = ''+f(13)+'px "Noto Sans",Arial'; ctx.fillText(rest, x - wr, y);
  }
  titel(mode==='v1'?'U':'R', ' in '+(mode==='v1'?'V':'Ω'), MX0+PW+6, MY0+30);
  ctx.save(); ctx.translate(16, MY0-PH+6); ctx.rotate(-Math.PI/2);
@@ -367,17 +378,15 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen)}.loesung{margi
  keys.forEach(function(key){
  var col = farben[gi % farben.length]; gi++;
  var pts = groups[key].slice().sort(function(a,b){ return a.x-b.x; });
- var line = (mode==='v1')? [{x:0,y:0}].concat(pts): pts; // v1: Gerade durch Nullpunkt
- ctx.strokeStyle = col; ctx.lineWidth = 2.4; ctx.beginPath();
- line.forEach(function(q,idx){ var xx=X(q.x), yy=Y(Math.min(q.y,ymax));
- if(idx===0) ctx.moveTo(xx,yy); else ctx.lineTo(xx,yy); }); ctx.stroke();
+ // ★ 24.09.2026 (PRUEF2409_Block_12, K10): nur die Messpunkte; die Linie zeichnen die Schueler selbst
+ //   (Arbeitsblatt Aufgabe 2 und 3), der Streckenzug gab Versuch 2 falsche Knicke.
  ctx.fillStyle = col;
- pts.forEach(function(q){ ctx.beginPath(); ctx.arc(X(q.x), Y(Math.min(q.y,ymax)), 3.6, 0, 2*Math.PI); ctx.fill(); });
+ pts.forEach(function(q){ ctx.beginPath(); ctx.arc(X(q.x), Y(Math.min(q.y,ymax)), 4.4, 0, 2*Math.PI); ctx.fill(); });
  legende.push({ col: col, txt: (mode==='v1'?('R = '+fmt(parseFloat(key),0)+' Ω'):('U = '+fmt(parseFloat(key),1)+' V')) });
  });
 
  // Legende
- ctx.textAlign='left'; ctx.font = '12px "Noto Sans",Arial';
+ ctx.textAlign='left'; ctx.font = ''+f(12)+'px "Noto Sans",Arial';
  legende.forEach(function(e,idx){
  var ly = MY0-PH+8 + idx*16;
  ctx.fillStyle = e.col; ctx.fillRect(MX0+PW-92, ly-8, 12, 4);
@@ -393,7 +402,7 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen)}.loesung{margi
  ctx.setLineDash([]);
  ctx.fillStyle = '#2F7D62'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
  ctx.beginPath(); ctx.arc(px, py, 6, 0, 2*Math.PI); ctx.fill(); ctx.stroke();
- if(I > ymax){ ctx.fillStyle = '#B23A33'; ctx.font = '11px "Noto Sans",Arial'; ctx.textAlign='center';
+ if(I > ymax){ ctx.fillStyle = '#B23A33'; ctx.font = ''+f(11)+'px "Noto Sans",Arial'; ctx.textAlign='center';
  ctx.fillText('↑ '+fmt(I,2)+' A', px, py-10); }
  }
 
