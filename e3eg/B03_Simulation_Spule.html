@@ -7,8 +7,8 @@
 {"block": "B03", "titel": "Spule an Wechselspannung: Zeigerbild und Linienbild",
  "startwerte": {"f": 60, "L": 500, "R": 100},
  "loesungswerte": {"f": 50, "L": 69, "R": 26},
- "ziel_erkenntnis": "Der Blindwiderstand waechst mit der Frequenz, der Wirkwiderstand nicht: bei doppelter Frequenz sinkt der Strom, aber nicht auf die Haelfte, und der Phasenverschiebungswinkel waechst; ohne Wirkwiderstand eilt der Strom um 90 Grad nach.",
- "quellen": "Tabellenbuch S. 40, Formel 1, 2, 4, 6, 7; S. 37, Formel 1, 3, 9; Fachkunde S. 135 Bild 3, S. 136 Bild 3, S. 137 Bild 1"}
+ "ziel_erkenntnis": "Der Blindwiderstand waechst mit der Frequenz, der Wirkwiderstand nicht: bei doppelter Frequenz sinkt der Strom, aber nicht auf die Haelfte, und der Phasenverschiebungswinkel waechst; ohne Wirkwiderstand eilt der Strom um 90 Grad nach, das Zeigerbild wird das der idealen Spule.",
+ "quellen": "Rechenmodell Tabellenbuch S. 40, Formel 1, 2, 4, 6, 7; S. 37, Formel 1, 3, 9; Bildvorlagen im data-quelle der Zeichenflaeche"}
 </script>
 <style>
 :root{--kupfer:#A34E0E;--kupferhell:#F6EBE0;--ink:#1A2530;--grau:#5A666F;--linie:#C9D1D8;--hell:#F3F5F7;--gruen:#2F7D62;--blau:#1E88C8;--rot:#C0246B}
@@ -27,9 +27,9 @@ canvas{width:100%;height:auto;display:block;background:#fff}
 .zwei{display:block}
 @media(min-width:760px){.zwei{display:grid;grid-template-columns:1fr 1fr;gap:12px}.zwei .karte{margin-bottom:12px}}
 .anz{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.anz div{border:1.6px solid var(--ink);background:var(--hell);padding:6px 8px;text-align:center}
-.anz div small{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--grau);font-weight:700}
-.anz div b{display:block;font-family:"DejaVu Sans Mono",ui-monospace,monospace;font-size:22px;letter-spacing:0}
+.anz div{min-width:0;border:1.6px solid var(--ink);background:var(--hell);padding:6px 6px;text-align:center}
+.anz div small{display:block;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--grau);font-weight:700;overflow-wrap:anywhere}
+.anz div b{display:block;font-family:"DejaVu Sans Mono",ui-monospace,monospace;font-size:22px;letter-spacing:0;white-space:nowrap}
 .anz div i{font-size:12px;color:var(--grau)}
 .zeile{margin:8px 0 12px}
 .zeile label{display:flex;justify-content:space-between;font-weight:700;margin-bottom:4px}
@@ -47,7 +47,7 @@ table.klein{border-collapse:collapse;font-size:13px;margin-top:8px;width:100%}
 table.klein th,table.klein td{border:1px solid var(--linie);padding:3px 6px;text-align:right}
 table.klein th{background:var(--hell);text-align:left;font-weight:700}
 table.klein td.mono{font-family:"DejaVu Sans Mono",ui-monospace,monospace}
-@media(max-width:480px){table.klein{font-size:11px}table.klein th,table.klein td{padding:2px 3px}.anz div b{font-size:18px}}
+@media(max-width:480px){.anz{grid-template-columns:repeat(2,1fr)}.anz div b{font-size:19px}table.klein{font-size:11px}table.klein th,table.klein td{padding:2px 3px}}
 </style></head>
 <body><div class="wrap">
 <header><div class="reihe">E3EG · Block 3 · Simulation</div>
@@ -55,9 +55,9 @@ table.klein td.mono{font-family:"DejaVu Sans Mono",ui-monospace,monospace}
 
 <div class="karte">
 <span class="cap">Zeigerbild und Linienbild von Strom und Spannung (230 V)</span>
-<canvas id="bild" width="960" height="400"></canvas>
+<canvas id="bild" width="960" height="400" data-quelle="eigene, steuerbare Zeichnung nach Europa Fachkunde Elektrotechnik, S. 135, Bild 3 b und c (ideale Spule), S. 136, Bild 3 (Spannungszeigerbild) und S. 137, Bild 1 (Linienbild); Rechenmodell Tabellenbuch S. 40, Formel 1, 2, 4, 6, 7 und S. 37, Formel 1, 3, 9. Was kein Buchbild leistet: Zeigerbild und Linienbild folgen den eingestellten Werten von f, L und R"></canvas>
 <div class="legende"><span class="li">Strom <i>I</i> (Bezugsgröße, waagerecht)</span><span class="lu">Spannung <i>U</i>, eilt um <i>φ</i> vor</span><span class="lw">Wirkspannung <i>U</i><sub>w</sub></span><span class="lb">Blindspannung <i>U</i><sub>bL</sub></span></div>
-<p class="hinweis">Zeigerlängen: Spannung und Strom haben eigene Maßstäbe (Stromzeiger 12 mm je Ampere, Spannungszeiger fest). Das Linienbild zeigt eine Periode; der Strom erreicht seinen Scheitel um <i>φ</i> später als die Spannung.</p>
+<p class="hinweis">Zeigerlängen: der Spannungszeiger ist fest, der Stromzeiger wächst mit der Stromstärke (15 Bildpunkte je Ampere); beide ohne gemeinsamen Maßstab. Das Linienbild zeigt eine Periode; der Strom erreicht seinen Scheitelwert um <i>φ</i> später als die Spannung.</p>
 </div>
 
 <div class="zwei">
@@ -67,7 +67,7 @@ table.klein td.mono{font-family:"DejaVu Sans Mono",ui-monospace,monospace}
  <div><small>Blindwiderstand</small><b id="aXL">…</b><i><i>X</i><sub>L</sub> = 2π · <i>f</i> · <i>L</i></i></div>
  <div><small>Scheinwiderstand</small><b id="aZ">…</b><i><i>Z</i> = √(<i>R</i>² + <i>X</i><sub>L</sub>²)</i></div>
  <div><small>Stromstärke</small><b id="aI">…</b><i><i>I</i> = 230 V / <i>Z</i></i></div>
- <div><small>Phasenverschiebungswinkel</small><b id="aF">…</b><i><i>φ</i> zwischen <i>U</i> und <i>I</i></i></div>
+ <div><small>Phasen&shy;verschiebungs&shy;winkel</small><b id="aF">…</b><i><i>φ</i> zwischen <i>U</i> und <i>I</i></i></div>
  <div><small>Wirkfaktor</small><b id="aC">…</b><i>cos <i>φ</i> = <i>R</i>/<i>Z</i></i></div>
  <div><small>Blindleistung</small><b id="aQ">…</b><i><i>Q</i><sub>L</sub> = <i>U</i> · <i>I</i> · sin <i>φ</i></i></div>
 </div>
@@ -88,7 +88,7 @@ table.klein td.mono{font-family:"DejaVu Sans Mono",ui-monospace,monospace}
 <div class="zeile"><label for="rr"><span>Wirkwiderstand <i>R</i></span><output id="or">100 Ω</output></label>
  <div class="bedien"><button type="button" id="rm" aria-label="Wirkwiderstand kleiner">&minus;</button><input type="range" id="rr" min="0" max="200" step="1" value="100"><button type="button" id="rp" aria-label="Wirkwiderstand größer">+</button></div></div>
 <button type="button" class="reset" id="reset">Zurücksetzen auf die Startstellung</button>
-<p class="hinweis">Rechenmodell: <i>X</i><sub>L</sub> = 2π · <i>f</i> · <i>L</i>; <i>Z</i> = √(<i>R</i>² + <i>X</i><sub>L</sub>²); <i>I</i> = <i>U</i>/<i>Z</i>; cos <i>φ</i> = <i>R</i>/<i>Z</i> (Tabellenbuch S. 40, Formel 1, 2, 4, 6, 7); <i>P</i>, <i>Q</i><sub>L</sub>, <i>S</i> nach Tabellenbuch S. 37, Formel 3, 9, 1. Die Spannung ist fest 230 V, die Spule wird als Reihenschaltung aus <i>R</i> und <i>X</i><sub>L</sub> gerechnet (Ersatzschaltung).</p>
+<p class="hinweis">Regler grob ziehen, dann mit − und + genau einstellen. Rechenmodell: <i>X</i><sub>L</sub> = 2π · <i>f</i> · <i>L</i>; <i>Z</i> = √(<i>R</i>² + <i>X</i><sub>L</sub>²); <i>I</i> = <i>U</i>/<i>Z</i>; cos <i>φ</i> = <i>R</i>/<i>Z</i> (Tabellenbuch S. 40, Formel 1, 2, 4, 6, 7); <i>P</i>, <i>Q</i><sub>L</sub>, <i>S</i> nach Tabellenbuch S. 37, Formel 3, 9, 1. Die Spannung ist fest 230 V, die Spule wird als Reihenschaltung aus <i>R</i> und <i>X</i><sub>L</sub> gerechnet (Ersatzschaltung). Die Spannungsquelle ist ideal; bei sehr kleinem <i>Z</i> zeigt das Modell Ströme, die kein Netz liefert.</p>
 </div>
 </div>
 </div>
@@ -98,6 +98,7 @@ table.klein td.mono{font-family:"DejaVu Sans Mono",ui-monospace,monospace}
 var META = JSON.parse(document.getElementById('sim-meta').textContent), START = META.startwerte, U = 230;
 var cv = document.getElementById('bild'), cx = cv.getContext('2d');
 var rf = document.getElementById('rf'), rl = document.getElementById('rl'), rr = document.getElementById('rr');
+var schmal = false;
 function komma(x, n){ return x.toFixed(n).replace('.', ','); }
 function tausend(x, n){ var s = komma(x, n); var t = s.split(','); t[0] = t[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' '); return t.join(','); }
 function modell(){
@@ -127,9 +128,9 @@ function halo(text, x, y, farbe, fett, groesse){
   cx.lineWidth = 5; cx.strokeStyle = '#fff'; cx.lineJoin = 'round'; cx.strokeText(text, x, y);
   cx.fillStyle = farbe; cx.fillText(text, x, y);
 }
-function haloIdx(text, idx, x, y, farbe){
-  halo(text, x, y, farbe, true); var w = cx.measureText(text).width;
-  cx.font = 'bold 12px "Noto Sans",Arial,sans-serif'; cx.lineWidth = 4; cx.strokeStyle = '#fff';
+function haloIdx(text, idx, x, y, farbe, groesse){
+  halo(text, x, y, farbe, true, groesse); var w = cx.measureText(text).width;
+  cx.font = 'bold ' + Math.round((groesse || 18) * 0.67) + 'px "Noto Sans",Arial,sans-serif'; cx.lineWidth = 4; cx.strokeStyle = '#fff';
   cx.strokeText(idx, x + w + 1, y + 5); cx.fillStyle = farbe; cx.fillText(idx, x + w + 1, y + 5);
 }
 function pfeil(x0, y0, x1, y1, farbe, breite, gestrichelt){
@@ -139,31 +140,30 @@ function pfeil(x0, y0, x1, y1, farbe, breite, gestrichelt){
   cx.beginPath(); cx.moveTo(x1, y1); cx.lineTo(x1 - l * Math.cos(a - 0.4), y1 - l * Math.sin(a - 0.4));
   cx.lineTo(x1 - l * Math.cos(a + 0.4), y1 - l * Math.sin(a + 0.4)); cx.closePath(); cx.fill();
 }
-function zeichne(m){
-  var W = cv.width, H = cv.height; cx.clearRect(0, 0, W, H);
-  /* Zeigerbild links: Ursprung unten links im linken Drittel */
-  var x0 = 60, y0 = 300, LU = 200, LI = Math.min(240, 12 * m.i);
+/* Zeigerbild: Ursprung (x0, y0); Spannungszeiger fest LU, Stromzeiger 15 Bildpunkte je Ampere (10,61 A ergibt 159) */
+function zeigerbild(m, x0, y0, LU, g){
+  var LI = Math.min(240, 15 * m.i);
   cx.strokeStyle = '#E3E7EA'; cx.lineWidth = 1;
-  cx.beginPath(); cx.moveTo(x0, y0); cx.lineTo(x0 + 270, y0); cx.moveTo(x0, y0); cx.lineTo(x0, 40); cx.stroke();
+  cx.beginPath(); cx.moveTo(x0, y0); cx.lineTo(x0 + 270, y0); cx.moveTo(x0, y0); cx.lineTo(x0, y0 - 260); cx.stroke();
   var ux = x0 + LU * Math.cos(m.phi), uy = y0 - LU * Math.sin(m.phi);
-  /* Teilspannungen als Dreieck: Uw entlang I, UbL senkrecht am Ende von Uw */
-  var wx = x0 + LU * Math.cos(m.phi) * Math.cos(m.phi), wy = y0;
-  pfeil(x0, y0, x0 + LU * m.c, y0, '#2F7D62', 3, false); haloIdx('U', 'w', x0 + LU * m.c / 2 - 12, y0 + 24, '#2F7D62');
-  if(m.phi > 0.02){ pfeil(x0 + LU * m.c, y0, x0 + LU * m.c, y0 - LU * Math.sin(m.phi), '#A34E0E', 3, true); haloIdx('U', 'bL', x0 + LU * m.c + 8, y0 - LU * Math.sin(m.phi) / 2 + 6, '#A34E0E'); }
-  pfeil(x0, y0, LI > 0 ? x0 + LI : x0 + 10, y0, '#C0246B', 5, false); halo('I', x0 + (LI || 10) + 8, y0 + 6, '#C0246B', true);
-  pfeil(x0, y0, ux, uy, '#1E88C8', 4, false); halo('U', ux + 8, uy - 4, '#1E88C8', true);
+  pfeil(x0, y0, x0 + LU * m.c, y0, '#2F7D62', 3, false);
+  if(m.c > 0.12) haloIdx('U', 'w', x0 + Math.max(LU * m.c - 34, 70), y0 - 8, '#2F7D62', g);
+  if(m.phi > 0.02){ pfeil(x0 + LU * m.c, y0, x0 + LU * m.c, y0 - LU * Math.sin(m.phi), '#A34E0E', 3, true); haloIdx('U', 'bL', x0 + LU * m.c + 8, y0 - LU * Math.sin(m.phi) / 2 + 6, '#A34E0E', g); }
+  pfeil(x0, y0, x0 + Math.max(LI, 6), y0, '#C0246B', 5, false); halo('I', x0 + Math.max(LI, 6) + 8, y0 + g + 6, '#C0246B', true, g);
+  pfeil(x0, y0, ux, uy, '#1E88C8', 4, false); halo('U', ux + 8, uy - 4, '#1E88C8', true, g);
   if(m.phi > 0.03){ cx.strokeStyle = '#1A2530'; cx.lineWidth = 2; cx.beginPath(); cx.arc(x0, y0, 56, -m.phi, 0, false); cx.stroke();
-    var am = m.phi / 2; halo('φ', x0 + 70 * Math.cos(am) - 5, Math.min(y0 - 70 * Math.sin(am) + 7, y0 - 8), '#1A2530', true); }
-  halo('Zeigerbild', x0, 24, '#5A666F', true, 15);
-  /* Linienbild rechts: eine Periode */
-  var lx = 400, ly = 200, lw = 520, A = 110;
+    var am = m.phi / 2; halo('φ', x0 + 70 * Math.cos(am) - 5, Math.min(y0 - 70 * Math.sin(am) + 7, y0 - 8), '#1A2530', true, g); }
+  halo('Zeigerbild', x0, y0 - 276, '#5A666F', true, g - 3);
+}
+/* Linienbild: eine Periode, Achse alpha in Grad, Ordinate u, i ohne Massstab */
+function linienbild(m, lx, ly, lw, A, g){
   cx.strokeStyle = '#E3E7EA'; cx.lineWidth = 1;
   for(var k = 1; k <= 4; k++){ cx.beginPath(); cx.moveTo(lx + lw * k / 4, ly - A - 20); cx.lineTo(lx + lw * k / 4, ly + A + 20); cx.stroke(); }
   cx.strokeStyle = '#1A2530'; cx.lineWidth = 2;
   cx.beginPath(); cx.moveTo(lx, ly); cx.lineTo(lx + lw + 16, ly); cx.moveTo(lx, ly + A + 20); cx.lineTo(lx, ly - A - 30); cx.stroke();
-  cx.fillStyle = '#5A666F'; cx.font = '14px "Noto Sans",Arial,sans-serif'; cx.textAlign = 'center';
+  cx.fillStyle = '#5A666F'; cx.font = (g - 4) + 'px "Noto Sans",Arial,sans-serif'; cx.textAlign = 'center';
   ['0', '90°', '180°', '270°', '360°'].forEach(function(t, j){ cx.fillText(t, lx + lw * j / 4, ly + A + 38); });
-  cx.textAlign = 'left'; cx.fillText('α', lx + lw + 4, ly + A + 38);
+  cx.textAlign = 'left'; cx.fillText('α', lx + lw + 30, ly + A + 38); cx.fillText('u, i', lx + 6, ly - A - 34);
   function kurve(amp, versatz, farbe, breite){
     cx.strokeStyle = farbe; cx.lineWidth = breite; cx.beginPath();
     for(var s = 0; s <= lw; s += 2){ var a = s / lw * 2 * Math.PI; var y = ly - amp * Math.sin(a - versatz); if(s === 0) cx.moveTo(lx + s, y); else cx.lineTo(lx + s, y); }
@@ -171,15 +171,33 @@ function zeichne(m){
   }
   kurve(A, 0, '#1E88C8', 3.5);
   kurve(A * 0.75, m.phi, '#C0246B', 3.5);
-  halo('u', lx + lw / 4 - 18, ly - A - 6, '#1E88C8', true);
-  var xi = lx + lw * (0.25 + m.phi / (2 * Math.PI)); halo('i', xi + 6, ly - A * 0.75 - 6, '#C0246B', true);
+  halo('u', lx + lw / 4 - 18, ly - A - 6, '#1E88C8', true, g);
+  var xi = lx + lw * (0.25 + m.phi / (2 * Math.PI)); halo('i', xi + 6, ly - A * 0.75 - 6, '#C0246B', true, g);
   if(m.phi > 0.03){ cx.strokeStyle = '#1A2530'; cx.lineWidth = 1.5; cx.setLineDash([4, 4]);
     cx.beginPath(); cx.moveTo(lx + lw / 4, ly - A - 24); cx.lineTo(lx + lw / 4, ly); cx.moveTo(xi, ly - A - 24); cx.lineTo(xi, ly); cx.stroke(); cx.setLineDash([]);
     cx.beginPath(); cx.moveTo(lx + lw / 4, ly - A - 24); cx.lineTo(xi, ly - A - 24); cx.stroke();
-    halo('φ = ' + komma(m.phi * 180 / Math.PI, 1) + '°', lx + lw / 4 + 4, ly - A - 30, '#1A2530', true, 14); }
-  halo('Linienbild (eine Periode)', lx, 24, '#5A666F', true, 15);
+    halo('φ = ' + komma(m.phi * 180 / Math.PI, 1) + '°', lx + lw / 4 + 4, ly - A - 30, '#1A2530', true, g - 4); }
+  halo('Linienbild (eine Periode)', lx, ly - A - 56, '#5A666F', true, g - 3);
 }
-function neu(){ var m = modell(); anzeigen(m); zeichne(m); }
+function zeichne(m){
+  var W = cv.width, H = cv.height; cx.clearRect(0, 0, W, H);
+  if(schmal){
+    /* Handy: Zeigerbild oben, Linienbild darunter; Schrift so gross, dass sie auf 360 px Bildschirmbreite lesbar bleibt */
+    zeigerbild(m, 60, 320, 200, 24);
+    linienbild(m, 40, 560, 380, 100, 24);
+  } else {
+    zeigerbild(m, 60, 300, 200, 18);
+    linienbild(m, 400, 200, 500, 110, 18);
+  }
+}
+function masse(){
+  var s = window.innerWidth < 600;
+  if(s !== schmal || !cv.dataset.fertig){
+    schmal = s; cv.dataset.fertig = '1';
+    if(schmal){ cv.width = 480; cv.height = 740; } else { cv.width = 960; cv.height = 400; }
+  }
+}
+function neu(){ masse(); var m = modell(); anzeigen(m); zeichne(m); }
 function setze(f, L, R){ rf.value = f; rl.value = L; rr.value = R; neu(); }
 function schritt(el, d){ var v = parseFloat(el.value) + d * parseFloat(el.step); el.value = Math.max(parseFloat(el.min), Math.min(parseFloat(el.max), v)); neu(); }
 [rf, rl, rr].forEach(function(el){ el.addEventListener('input', neu); });
@@ -190,6 +208,7 @@ document.getElementById('lp').addEventListener('click', function(){ schritt(rl, 
 document.getElementById('rm').addEventListener('click', function(){ schritt(rr, -1); });
 document.getElementById('rp').addEventListener('click', function(){ schritt(rr, +1); });
 document.getElementById('reset').addEventListener('click', function(){ setze(START.f, START.L, START.R); });
+window.addEventListener('resize', neu);
 setze(START.f, START.L, START.R);
 window.B03sim = {modell: modell, setze: setze};
 })();
