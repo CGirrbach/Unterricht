@@ -32,6 +32,9 @@ canvas{width:100%;height:auto;display:block;background:#fff}
 .anz div.fest{background:#fff;border-style:dashed}
 .anz div small{display:block;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--grau);font-weight:700;overflow-wrap:anywhere}
 .anz div b{display:block;font-family:"DejaVu Sans Mono",ui-monospace,monospace;font-size:21px;letter-spacing:0;white-space:nowrap}
+/* Der Zusatz „kapazitiv" steht in einer eigenen Zeile: angehaengt sprengte er das Feld und die
+   ganze Seite lief am Handy waagerecht ueber (Linse BLATT, 24.09.2026). */
+.anz div b .zus{display:block;font-family:inherit;font-size:12px;letter-spacing:.04em;color:var(--kupfer);white-space:normal}
 .anz div i{font-size:12px;color:var(--grau)}
 .zeile{margin:8px 0 12px}
 .zeile label{display:flex;justify-content:space-between;font-weight:700;margin-bottom:4px}
@@ -88,7 +91,7 @@ table.klein td.mono{font-family:"DejaVu Sans Mono",ui-monospace,monospace}
 <div class="zeile"><label for="rc"><span>Kapazität <i>C</i> des Kondensators</span><output id="oc">0 µF</output></label>
  <div class="bedien"><button type="button" id="cm" aria-label="Kapazität kleiner">&minus;</button><input type="range" id="rc" min="0" max="160" step="2" value="0"><button type="button" id="cp" aria-label="Kapazität größer">+</button></div></div>
 <button type="button" class="reset" id="reset">Zurücksetzen auf 0 µF (ohne Kondensator)</button>
-<p class="hinweis">Regler grob ziehen, dann mit − und + genau einstellen (2-µF-Schritte). Rechenmodell: <i>X</i><sub>C</sub> = 1/(2π · <i>f</i> · <i>C</i>); <i>I</i><sub>bC</sub> = <i>U</i>/<i>X</i><sub>C</sub>; <i>Q</i><sub>C</sub> = <i>U</i> · <i>I</i><sub>bC</sub> (Tabellenbuch S. 40, Formel 1, 3, 6; S. 37, Formel 6); <i>Q</i><sub>L2</sub> = <i>Q</i><sub>L</sub> − <i>Q</i><sub>C</sub> (S. 328, Formel 6); <i>S</i><sub>2</sub>, <i>I</i><sub>2</sub>, cos <i>φ</i><sub>2</sub> nach S. 37, Formel 11, 1, 5. Die Spannung ist fest 230 V, die Quelle ideal. Wird <i>Q</i><sub>L2</sub> negativ, liefert der Kondensator mehr Blindleistung, als der Motor braucht; die Anzeige sagt dann „kapazitiv“ (Block 6).</p>
+<p class="hinweis">Regler grob ziehen, dann mit − und + genau einstellen (2-µF-Schritte). Rechenmodell: <i>X</i><sub>C</sub> = 1/(2π · <i>f</i> · <i>C</i>); <i>I</i><sub>bC</sub> = <i>U</i>/<i>X</i><sub>C</sub>; <i>Q</i><sub>C</sub> = <i>U</i> · <i>I</i><sub>bC</sub> (Tabellenbuch S. 40, Formel 1, 3, 6; S. 37, Formel 6); <i>Q</i><sub>L2</sub> = <i>Q</i><sub>L</sub> − <i>Q</i><sub>C</sub> (S. 328, Formel 6); <i>S</i><sub>2</sub>, <i>I</i><sub>2</sub>, cos <i>φ</i><sub>2</sub> nach S. 37, Formel 11, 1, 5. Die Spannung ist fest 230 V, die Quelle ideal. Wird <i>Q</i><sub>L2</sub> negativ, liefert der Kondensator mehr Blindleistung, als der Motor braucht; die Anzeige schreibt dann „kapazitiv“ unter den Wert (Block 6).</p>
 </div>
 </div>
 </div>
@@ -114,7 +117,7 @@ function anzeigen(m){
   document.getElementById('aXC').textContent = isFinite(m.xc) ? (m.xc >= 1000 ? tausend(m.xc, 0) : komma(m.xc, 1)) + ' Ω' : '…';
   document.getElementById('aIC').textContent = komma(m.ic, 2) + ' A';
   document.getElementById('aQC').textContent = tausend(m.qc, 0) + ' var';
-  document.getElementById('aQ').textContent = tausend(m.q2, 0) + ' var' + (m.q2 < -0.5 ? ' kapazitiv' : '');
+  document.getElementById('aQ').innerHTML = tausend(m.q2, 0) + ' var' + (m.q2 < -0.5 ? '<span class="zus">kapazitiv</span>' : '');
   document.getElementById('aS').textContent = tausend(m.s2, 0) + ' VA';
   document.getElementById('aI').textContent = komma(m.i2, 2) + ' A';
   document.getElementById('aIM').textContent = komma(IM, 2) + ' A';
