@@ -1,0 +1,234 @@
+<!-- lehrmaterial -->
+<!-- materialtyp: simulation -->
+<!-- sim_bearbeitung: pflicht -->
+<!-- EG1-B15 · Energie-Messplatz (Neubau 25.09.2026): Spannung, Stromstaerke und Einschaltzeit einstellen, der Energiezaehler
+     zeigt die umgesetzte elektrische Arbeit, umschaltbar in Ws, Wh und kWh. Rechenmodell W = U*I*t (Europa-Fachkunde S. 43,
+     aus Tabellenbuch S. 30, Formel 6 und 1); 1 kWh = 3,6 MJ (Tabellenbuch S. 36). Die Formel steht hinter „Ergebnis anzeigen“.
+     Sicherung der alten Fassung: .vor_neubau2509 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EG1-B15: Elektrische Arbeit messen</title>
+
+<script type="application/json" id="sim-meta">
+{
+ "block": "EG1-B15",
+ "thema": "Elektrische Arbeit am Energiezaehler, Anzeige in Ws, Wh und kWh",
+ "modell": "W = U*I*t (Tabellenbuch S. 30, Formel 6 und 1 zusammengesetzt); 1 kWh = 3 600 000 Ws (Tabellenbuch S. 36)",
+ "quelle": "Tabellenbuch 32. A., S. 30 und S. 36",
+ "startwerte": { "U": 0, "I": 0, "t_min": 0, "einheit": "kWh" },
+ "loesungswerte": { "U": 230, "I": 2, "t_min": 30 }
+}
+</script>
+
+<style>:root{
+ --ink:#1A2530; --kupfer:#A34E0E; --kupferhell:#F5EBDF; --rot:#B23A33;
+ --gruen:#2F7D62; --gruenhell:#EAF3EC; --linie:#9AA5AE; --grau:#5A666F; --hell:#F4F6F8;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:"Noto Sans",system-ui,Arial,sans-serif;color:var(--ink);line-height:1.45;background:#f4f6f8;
+ padding:18px 14px 40px;max-width:980px;margin:0 auto}
+.kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0 10px;margin-bottom:14px}
+.kopf .reihe{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--kupfer);font-weight:700}
+.kopf h1{font-size:22px;margin:4px 0 0}
+p{margin:8px 0}
+i{font-style:italic}
+.ziel,.methode{background:var(--kupferhell);border-left:5px solid var(--kupfer);padding:10px 14px;margin:12px 0}
+.ziel .cap,.methode .cap{font-weight:700;color:var(--kupfer);display:block;margin-bottom:2px}
+.sim{border:1.4px solid var(--ink);background:#fff;padding:16px;margin:12px 0}
+.einheiten{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.einheiten span.l{font-weight:700;align-self:center;margin-right:4px}
+.einheiten button{font:inherit;font-size:15px;padding:9px 16px;min-height:44px;min-width:64px;cursor:pointer;
+ border:1.4px solid var(--linie);background:#fff;color:var(--ink)}
+.einheiten button[aria-pressed="true"]{border-color:var(--kupfer);background:var(--kupferhell);color:var(--kupfer);font-weight:700}
+canvas{width:100%;height:auto;display:block;background:#fff;border:1px solid var(--linie);touch-action:manipulation}
+.bildunterschrift{font-size:12.5px;color:var(--grau);margin:4px 0 0}
+.anzeige{font-size:28px;font-weight:700;margin:12px 0 2px;min-height:1.4em;white-space:nowrap}
+.anzeige .wert{white-space:nowrap}
+@media (max-width:420px){.anzeige{font-size:24px;white-space:normal;min-height:2.6em;line-height:1.3}.anzeige .lab{display:block;font-size:16px}}
+.regler{display:flex;align-items:center;gap:10px;margin:10px 0 2px;flex-wrap:wrap}
+.regler label{font-weight:700;min-width:170px}
+@media (max-width:520px){.regler label{flex:1 0 100%}}
+.regler input[type=range]{flex:1 1 140px;height:44px;accent-color:var(--kupfer);cursor:pointer}
+.rval{font-weight:700;min-width:74px;text-align:right;font-variant-numeric:tabular-nums}
+button.pm{font:inherit;font-size:20px;font-weight:700;min-width:44px;min-height:44px;border:1.4px solid var(--linie);background:#fff;color:var(--ink);cursor:pointer}
+.tasten{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 2px}
+button.tk{font:inherit;font-weight:700;border:1.4px solid var(--rot);background:#fff;color:var(--rot);
+ padding:8px 14px;min-height:44px;cursor:pointer}
+details{margin-top:14px;border:1px solid var(--linie);padding:6px 10px;background:#fff}
+details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2px;min-height:44px}
+.formel{background:#fff;border:1.6px solid var(--kupfer);border-left:6px solid var(--kupfer);padding:12px 16px;margin:10px 0}
+.formel .cap{font-weight:700;color:var(--kupfer);display:block;margin-bottom:6px}
+.formelzeile{font-size:22px;margin:6px 0}
+.quelle{font-size:13px;color:var(--grau);border-left:3px solid var(--kupfer);padding-left:10px;margin-top:20px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="kopf">
+ <div class="reihe">E1EG · Lernfeld 1 · Gleichstrom-Grundlagen · Block EG1-B15</div>
+ <h1>Elektrische Arbeit messen</h1>
+</div>
+
+<div class="ziel">
+ <span class="cap">Das sollen Sie hier selbst herausfinden</span>
+ Ein Heizwiderstand hängt über einen Energiezähler am Netzgerät. Wie groß ist die elektrische Arbeit, und wovon hängt sie ab? In welcher
+ Einheit zeigt man sie am besten an? Die Aufträge stehen auf dem Arbeitsblatt (Aufgabe&nbsp;3 und 4).
+</div>
+
+<div class="methode">
+ <span class="cap">So bedienen Sie den Messplatz</span>
+ Stellen Sie Spannung, Stromstärke und Einschaltzeit ein und lesen Sie den Energiezähler ab. Mit den Knöpfen <b>Ws</b>, <b>Wh</b> und
+ <b>kWh</b> wählen Sie die Einheit der Anzeige. Sagen Sie jedes Ergebnis zuerst voraus, dann messen Sie. Mit <b>„Zurücksetzen“</b>
+ kehren Sie zur Grundstellung zurück. Arbeiten Sie zu zweit: einer stellt ein, einer protokolliert.
+</div>
+
+<div class="sim">
+ <canvas id="cMess" data-quelle="eigene Darstellung: Netzgeraet, Energiezaehler und Heizwiderstand, Anschluss wie Europa-Fachkunde S. 43 (Elektrizitaetszaehler)" width="960" height="440"
+  aria-label="Ein Netzgeraet speist ueber einen Energiezaehler einen Heizwiderstand. Eine Uhr zeigt die Einschaltzeit, der Zaehler die umgesetzte Arbeit."></canvas>
+ <p class="bildunterschrift">Schematisch: Die Uhr zeigt die Einschaltzeit, das Zählwerk die umgesetzte elektrische Arbeit.</p>
+ <div class="einheiten" id="einheiten" role="group" aria-label="Einheit der Anzeige"><span class="l">Anzeige in:</span></div>
+ <div class="anzeige"><span class="lab">Energiezähler:</span> <span class="wert"><i>W</i> = <span id="aW">0&nbsp;kWh</span></span></div>
+ <div class="regler">
+  <label for="rU">Spannung <i>U</i></label>
+  <button class="pm" type="button" data-ziel="rU" data-schritt="-1" aria-label="Spannung 1 V kleiner">−</button>
+  <input id="rU" type="range" min="0" max="230" value="0" step="1" aria-label="Spannung in Volt">
+  <button class="pm" type="button" data-ziel="rU" data-schritt="1" aria-label="Spannung 1 V größer">+</button>
+  <span class="rval" id="wU">0 V</span>
+ </div>
+ <div class="regler">
+  <label for="rI">Stromstärke <i>I</i></label>
+  <button class="pm" type="button" data-ziel="rI" data-schritt="-0.1" aria-label="Stromstärke 0,1 A kleiner">−</button>
+  <input id="rI" type="range" min="0" max="10" value="0" step="0.1" aria-label="Stromstärke in Ampere">
+  <button class="pm" type="button" data-ziel="rI" data-schritt="0.1" aria-label="Stromstärke 0,1 A größer">+</button>
+  <span class="rval" id="wI">0 A</span>
+ </div>
+ <div class="regler">
+  <label for="rT">Einschaltzeit <i>t</i></label>
+  <button class="pm" type="button" data-ziel="rT" data-schritt="-5" aria-label="Zeit 5 min kürzer">−</button>
+  <input id="rT" type="range" min="0" max="600" value="0" step="5" aria-label="Zeit in Minuten">
+  <button class="pm" type="button" data-ziel="rT" data-schritt="5" aria-label="Zeit 5 min länger">+</button>
+  <span class="rval" id="wT">0 min</span>
+ </div>
+ <div class="tasten"><button class="tk" id="bReset" type="button">Zurücksetzen</button></div>
+</div>
+
+<details class="ergebnis-aufdecken">
+ <summary><b>Ergebnis anzeigen</b> (erst, wenn Sie Aufgabe&nbsp;3 und 4 des Arbeitsblatts bearbeitet haben)</summary>
+ <div class="formel">
+  <span class="cap">Elektrische Arbeit (Tabellenbuch S. 30, Formel 6 und 1)</span>
+  <div class="formelzeile"><i>W</i> = <i>U</i> · <i>I</i> · <i>t</i></div>
+  <p>1&nbsp;kWh = 1000&nbsp;Wh = 3&nbsp;600&nbsp;000&nbsp;Ws (Tabellenbuch S.&nbsp;36: 3,6&nbsp;MJ = 1&nbsp;kWh)</p>
+  <p id="aNach">Nachrechnung der Einstellung: …</p>
+ </div>
+</details>
+
+<div class="quelle">Die Rechnung setzt die Formeln des Tabellenbuchs S.&nbsp;30 zusammen; die Umrechnung der Einheiten steht auf S.&nbsp;36. Alle Anzeigen sind mit der Hand nachgerechnet.</div>
+
+<script>
+(function(){
+ "use strict";
+ var $ = function(id){ return document.getElementById(id); };
+ var START = {U:0, I:0, T:0, einheit:'kWh'};
+ var einheit = START.einheit;
+ var EINHEITEN = ['Ws', 'Wh', 'kWh'];
+ function komma(s){ return String(s).replace('.', ','); }
+ function gruppe(x){       // ganze Zahl mit schmalem Leerraum in Dreiergruppen
+   var s = String(Math.round(x)); return s.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+ }
+ function anzeigen(W_Wh){   // W in Wh -> Text in der gewaehlten Einheit
+   if(einheit === 'Ws') return gruppe(W_Wh * 3600) + '&nbsp;Ws';
+   if(einheit === 'Wh') return komma(W_Wh === 0 ? '0' : (W_Wh >= 100 ? W_Wh.toFixed(1) : W_Wh.toPrecision(4))) + '&nbsp;Wh';
+   var k = W_Wh / 1000;
+   return komma(k === 0 ? '0' : (k >= 1 ? k.toFixed(3) : k.toPrecision(4))) + '&nbsp;kWh';
+ }
+ function zahl(x, st){ return komma(String(Math.round(x * Math.pow(10, st)) / Math.pow(10, st))); }
+ var fs = 1;
+ function schrift(){ var w = $('cMess').clientWidth || 480; fs = Math.max(1, Math.min(1.6, 460 / w)); }
+ function f(px){ return Math.round(px * fs); }
+ var cv = $('cMess'), ctx;
+ function setup(){
+   var dpr = Math.min(window.devicePixelRatio || 1, 2);
+   cv.width = Math.round(480 * dpr); cv.height = Math.round(220 * dpr);
+   ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+ }
+ function sym(z, rest, x, y, px, gew){
+   ctx.textAlign = 'left';
+   ctx.font = gew + 'italic ' + px + 'px "Noto Sans",Arial'; ctx.fillText(z, x, y);
+   var w = ctx.measureText(z).width;
+   ctx.font = gew + px + 'px "Noto Sans",Arial'; ctx.fillText(rest, x + w + 1, y);
+ }
+ function zeichne(U, I, T, W_Wh){
+   ctx.clearRect(0, 0, 480, 220);
+   ctx.strokeStyle = '#1A2530'; ctx.lineWidth = 2; ctx.fillStyle = '#fff';
+   // Netzgeraet links
+   ctx.strokeRect(24, 70, 70, 80);
+   ctx.fillStyle = '#1A2530'; ctx.font = 'bold ' + f(15) + 'px "Noto Sans",Arial'; ctx.textAlign = 'center';
+   ctx.fillText('G', 59, 104); ctx.font = f(11) + 'px "Noto Sans",Arial'; ctx.fillText('Netzgerät', 59, 168);
+   ctx.beginPath(); ctx.moveTo(44, 124); ctx.lineTo(74, 124); ctx.moveTo(44, 130); ctx.lineTo(50, 130); ctx.moveTo(56, 130); ctx.lineTo(62, 130); ctx.moveTo(68, 130); ctx.lineTo(74, 130); ctx.stroke();
+   // Zaehler in der Mitte
+   ctx.fillStyle = '#FBF7EF'; ctx.fillRect(170, 36, 130, 110); ctx.strokeRect(170, 36, 130, 110);
+   ctx.fillStyle = '#1A2530'; ctx.font = 'bold ' + f(13) + 'px "Noto Sans",Arial'; ctx.fillText('kWh', 235, 56);
+   // Zaehlwerk: kWh mit drei Nachkommastellen, wie ein Rollenzaehlwerk
+   var k = komma((W_Wh / 1000).toFixed(3).padStart(8, '0'));
+   ctx.font = 'bold ' + f(15) + 'px "DejaVu Sans Mono",monospace';
+   var bw = Math.min(126, ctx.measureText(k).width + 12);
+   ctx.fillStyle = '#1A2530'; ctx.fillRect(235 - bw / 2, 68, bw, 30);
+   ctx.fillStyle = '#fff'; ctx.fillText(k, 235, 89, 120);
+   ctx.fillStyle = '#5A666F'; ctx.font = f(11) + 'px "Noto Sans",Arial'; ctx.fillText('Energiezähler', 235, 162);
+   // Heizwiderstand rechts, Beschriftung unter allen Leitungen
+   ctx.strokeStyle = '#1A2530'; ctx.strokeRect(372, 80, 26, 70);
+   ctx.fillStyle = I > 0 && U > 0 ? '#E8A06A' : '#fff'; ctx.fillRect(373, 81, 24, 68);
+   ctx.fillStyle = '#5A666F'; ctx.textAlign = 'center'; ctx.fillText('Heizwiderstand', 385, 204);
+   // Leitungen: oben zum oberen, unten zum unteren Anschluss des Widerstands
+   ctx.strokeStyle = '#1A2530'; ctx.lineWidth = 1.6; ctx.beginPath();
+   ctx.moveTo(94, 88); ctx.lineTo(170, 88); ctx.moveTo(94, 132); ctx.lineTo(170, 132);
+   ctx.moveTo(300, 60); ctx.lineTo(385, 60); ctx.lineTo(385, 80);
+   ctx.moveTo(300, 132); ctx.lineTo(350, 132); ctx.lineTo(350, 172); ctx.lineTo(385, 172); ctx.lineTo(385, 150);
+   ctx.stroke();
+   // Uhr oben rechts
+   var cx = 440, cy = 34, r = 22;
+   ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(cx, cy, r, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
+   var a = (T % 60) / 60 * 2 * Math.PI - Math.PI / 2;
+   ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + 16 * Math.cos(a), cy + 16 * Math.sin(a)); ctx.lineWidth = 2; ctx.stroke();
+   // Werte links oben, Formelzeichen kursiv
+   ctx.fillStyle = '#5A666F';
+   sym('U', ' = ' + zahl(U, 0) + ' V', 108, 30, f(13), '');
+   sym('I', ' = ' + zahl(I, 1) + ' A', 108, 50, f(13), '');
+   sym('t', ' = ' + zahl(T, 0) + ' min', 24, 204, f(13), '');
+ }
+ function tick(){
+   var U = +$('rU').value, I = +$('rI').value, T = +$('rT').value;
+   var W_Wh = U * I * T / 60;
+   $('wU').textContent = zahl(U, 0) + ' V';
+   $('wI').textContent = zahl(I, 1) + ' A';
+   $('wT').textContent = zahl(T, 0) + ' min';
+   $('aW').innerHTML = anzeigen(W_Wh);
+   $('aNach').innerHTML = 'Nachrechnung der Einstellung: <i>W</i> = ' + zahl(U, 0) + '&nbsp;V · ' + zahl(I, 1) + '&nbsp;A · ' +
+     zahl(T / 60, 4) + '&nbsp;h = ' + zahl(W_Wh, 3) + '&nbsp;Wh';
+   Array.prototype.forEach.call($('einheiten').querySelectorAll('button'), function(b){
+     b.setAttribute('aria-pressed', b.textContent === einheit ? 'true' : 'false'); });
+   zeichne(U, I, T, W_Wh);
+ }
+ EINHEITEN.forEach(function(e){
+   var b = document.createElement('button');
+   b.type = 'button'; b.textContent = e; b.setAttribute('aria-pressed', 'false');
+   b.addEventListener('click', function(){ einheit = e; tick(); });
+   $('einheiten').appendChild(b);
+ });
+ ['rU', 'rI', 'rT'].forEach(function(id){ ['input', 'change'].forEach(function(ev){ $(id).addEventListener(ev, tick); }); });
+ Array.prototype.forEach.call(document.querySelectorAll('button.pm'), function(b){
+   b.addEventListener('click', function(){
+     var el = $(b.getAttribute('data-ziel')), s = parseFloat(b.getAttribute('data-schritt'));
+     var v = Math.round((parseFloat(el.value) + s) * 10) / 10;
+     el.value = Math.max(parseFloat(el.min), Math.min(parseFloat(el.max), v)); tick();
+   });
+ });
+ $('bReset').addEventListener('click', function(){
+   $('rU').value = START.U; $('rI').value = START.I; $('rT').value = START.T; einheit = START.einheit; tick();
+ });
+ window.addEventListener('resize', function(){ schrift(); setup(); tick(); });
+ // Startstellung aus den startwerten (0 V, 0 A, 0 min), nicht aus den loesungswerten
+ $('rU').value = START.U; $('rI').value = START.I; $('rT').value = START.T;
+ schrift(); setup(); tick();
+})();
+</script>
