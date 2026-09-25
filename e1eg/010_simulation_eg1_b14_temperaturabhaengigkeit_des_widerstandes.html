@@ -19,7 +19,7 @@
 }
 </script>
 
-<style>:root{
+<style>.bruch{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;line-height:1.05;margin:0 .12em;font-size:.8em}.bruch .z{border-bottom:1.6px solid currentColor;padding:0 .35em}.bruch .n{padding:0 .35em}:root{
  --ink:#1A2530; --kupfer:#A34E0E; --kupferhell:#F5EBDF; --rot:#B23A33;
  --gruen:#2F7D62; --gruenhell:#EAF3EC; --linie:#9AA5AE; --grau:#5A666F; --hell:#F4F6F8;
 }
@@ -108,7 +108,7 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
  </div>
  <div class="tasten"><button class="tk" id="bReset" type="button">Zurücksetzen</button></div>
  <table class="ab">
-  <tr><th>Werkstoff</th><th>Temperaturkoeffizient <i>α</i> in 1/K (Tabellenbuch S.&nbsp;559)</th></tr>
+  <tr><th>Werkstoff</th><th>Temperaturkoeffizient <i>α</i> in <span class="bruch"><span class="z">1</span><span class="n">K</span></span> (Tabellenbuch S.&nbsp;559)</th></tr>
   <tr><td id="aStoff">Kupfer</td><td class="z" id="aAlpha">0,0039</td></tr>
  </table>
 </div>
@@ -117,7 +117,7 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
  <summary><b>Ergebnis anzeigen</b> (erst, wenn Sie in Aufgabe&nbsp;5 des Arbeitsblatts die Formel selbst zusammengesetzt haben)</summary>
  <div class="formel">
   <span class="cap">Widerstandsänderung (Tabellenbuch S. 29, Formel 10 und 11)</span>
-  <div class="formelzeile">Δ<i>R</i> = <i>α</i> · <i>R</i><sub>1</sub> · Δ<i>ϑ</i> &nbsp;&nbsp;&nbsp; <i>R</i><sub>2</sub> = <i>R</i><sub>1</sub> + Δ<i>R</i></div>
+  <div class="formelzeile"><span style="white-space:nowrap">Δ<i>R</i> = <i>α</i> · <i>R</i><sub>1</sub> · Δ<i>ϑ</i></span> &nbsp;&nbsp;&nbsp; <span style="white-space:nowrap"><i>R</i><sub>2</sub> = <i>R</i><sub>1</sub> + Δ<i>R</i></span></div>
   <p id="aNach">Nachrechnung der Einstellung: …</p>
  </div>
 </details>
@@ -214,9 +214,13 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
    $('aR').innerHTML = mess(R) + '&nbsp;Ω';
    $('aStoff').textContent = s.n;
    $('aAlpha').innerHTML = komma(String(s.a));
-   $('aNach').innerHTML = 'Nachrechnung der Einstellung: Δ<i>ϑ</i>&nbsp;=&nbsp;' + minus(ganz(t)) + '&nbsp;°C&nbsp;−&nbsp;20&nbsp;°C&nbsp;=&nbsp;' + minus(ganz(dt)) + '&nbsp;K; ' +
-     'Δ<i>R</i>&nbsp;=&nbsp;' + komma(String(s.a)) + '&nbsp;1/K&nbsp;·&nbsp;' + ganz(R1) + '&nbsp;Ω&nbsp;·&nbsp;' + minus(ganz(dt)) + '&nbsp;K&nbsp;=&nbsp;' + minus(mess(dR)) + '&nbsp;Ω; ' +
-     '<i>R</i><sub>2</sub>&nbsp;=&nbsp;' + mess(R) + '&nbsp;Ω';
+   // 25.09.2026 (PRUEF2509b_Block_14 N1, N2, N7): je Gleichung eine Zeile, Umbruch an den Rechenzeichen erlaubt,
+   // Einheit 1/K als echter Bruch, negativer Faktor in Klammern.
+   var PK = '<span class="bruch"><span class="z">1</span><span class="n">K</span></span>';
+   var dtF = dt < 0 ? '(' + minus(ganz(dt)) + '&nbsp;K)' : ganz(dt) + '&nbsp;K';
+   $('aNach').innerHTML = 'Nachrechnung der Einstellung:<br>Δ<i>ϑ</i> = ' + minus(ganz(t)) + '&nbsp;°C − 20&nbsp;°C = ' + minus(ganz(dt)) + '&nbsp;K<br>' +
+     'Δ<i>R</i> = ' + komma(String(s.a)) + '&nbsp;' + PK + ' · ' + ganz(R1) + '&nbsp;Ω · ' + dtF + ' = ' + minus(mess(dR)) + '&nbsp;Ω<br>' +
+     '<i>R</i><sub>2</sub> = ' + ganz(R1) + '&nbsp;Ω + ' + (dR < 0 ? '(' + minus(mess(dR)) + '&nbsp;Ω)' : mess(dR) + '&nbsp;Ω') + ' = ' + mess(R) + '&nbsp;Ω';
    Array.prototype.forEach.call($('stoffe').children, function(b, i){
      b.setAttribute('aria-pressed', i === gewaehlt ? 'true' : 'false'); });
    zeichne(s, R1, t, R);
