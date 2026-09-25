@@ -144,7 +144,12 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
  // 25.09.2026 (PRUEF2509e N1): Nachrechnung wie in B14. Geht der Wert in fuenf Nachkommastellen auf, steht er mit „=“;
  //   sonst die ersten fuenf geltenden Ziffern abgeschnitten mit „…“. Das gerundete Messergebnis folgt mit „≈“.
  function genau(x){
-   if (Math.abs(x * 1e5 - Math.round(x * 1e5)) < 1e-6) return {t: komma(String(Math.round(x * 1e5) / 1e5)), exakt: true};
+   // geht der Wert nach hoechstens neun Nachkommastellen auf, steht er ganz da (26.09.: vorher nur fuenf,
+   // dann stand etwa „0,0022250…“ mit „…“, obwohl nichts folgt)
+   for (var d = 0; d <= 9; d++) {
+     var p = Math.pow(10, d), n = Math.round(x * p);
+     if (Math.abs(x * p - n) < 1e-6) return {t: komma(String(n / p)), exakt: true};
+   }
    var k = 4 - Math.floor(Math.log10(x)), f = Math.pow(10, k);
    return {t: komma((Math.floor(x * f + 1e-9) / f).toFixed(k)) + '…', exakt: false};
  }
