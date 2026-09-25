@@ -1,0 +1,226 @@
+<!-- lehrmaterial -->
+<!-- materialtyp: simulation -->
+<!-- sim_bearbeitung: pflicht -->
+<!-- EG1-B17 · Wirkungsgrad-Messplatz (Neubau 25.09.2026): Ein Gleichstrommotor (24 V) treibt eine Bremse an. Die Belastung
+     bestimmt die abgegebene Leistung P_ab; der Leistungsmesser zeigt die aufgenommene Leistung P_zu. Bemessungsleistung des Motors 90 W. Modell der Verluste:
+     P_v = 20 W (Leerlauf: Reibung, Lueftung, Eisen) + P_ab^2/300 W (Wicklungserwaermung waechst mit der Belastung).
+     Zuschaltbar: ein Netzteil davor mit festem Wirkungsgrad 0,8. Formeln (Tabellenbuch S. 26, Formel 8, 9, 10) hinter „Ergebnis anzeigen“. -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EG1-B17: Wirkungsgrad messen</title>
+
+<script type="application/json" id="sim-meta">
+{
+ "block": "EG1-B17",
+ "thema": "Wirkungsgrad eines Motors bei verschiedener Belastung, Wirkungsgradkette Netzteil und Motor",
+ "modell": "P_v = 20 W + P_ab^2/300 W; P_zu = P_ab + P_v; eta = P_ab/P_zu; Netzteil eta_N = 0,8, P_Netz = P_zu/0,8 (Tabellenbuch S. 26, Formel 8, 9, 10)",
+ "quelle": "Tabellenbuch 32. A., S. 26",
+ "startwerte": { "P_ab": 0, "netzteil": false },
+ "loesungswerte": { "P_ab": 60, "netzteil": true }
+}
+</script>
+
+<style>.bruch{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;line-height:1.05;margin:0 .12em;font-size:.8em}.bruch .z{border-bottom:1.6px solid currentColor;padding:0 .35em}.bruch .n{padding:0 .35em}:root{
+ --ink:#1A2530; --kupfer:#A34E0E; --kupferhell:#F5EBDF; --rot:#B23A33;
+ --gruen:#2F7D62; --gruenhell:#EAF3EC; --linie:#9AA5AE; --grau:#5A666F; --hell:#F4F6F8;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:"Noto Sans",system-ui,Arial,sans-serif;color:var(--ink);line-height:1.45;background:#f4f6f8;
+ padding:18px 14px 40px;max-width:980px;margin:0 auto}
+.kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0 10px;margin-bottom:14px}
+.kopf .reihe{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--kupfer);font-weight:700}
+.kopf h1{font-size:22px;margin:4px 0 0}
+p{margin:8px 0}
+i{font-style:italic}
+.ziel,.methode{background:var(--kupferhell);border-left:5px solid var(--kupfer);padding:10px 14px;margin:12px 0}
+.ziel .cap,.methode .cap{font-weight:700;color:var(--kupfer);display:block;margin-bottom:2px}
+.sim{border:1.4px solid var(--ink);background:#fff;padding:16px;margin:12px 0}
+.wahl{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.wahl span.l{font-weight:700;align-self:center;margin-right:4px}
+.wahl button{font:inherit;font-size:15px;padding:9px 16px;min-height:44px;min-width:72px;cursor:pointer;
+ border:1.4px solid var(--linie);background:#fff;color:var(--ink)}
+.wahl button[aria-pressed="true"]{border-color:var(--kupfer);background:var(--kupferhell);color:var(--kupfer);font-weight:700}
+canvas{width:100%;height:auto;display:block;background:#fff;border:1px solid var(--linie);touch-action:manipulation}
+.bildunterschrift{font-size:12.5px;color:var(--grau);margin:4px 0 0}
+.anzeige{font-size:26px;font-weight:700;margin:10px 0 2px;min-height:1.4em;white-space:nowrap}
+.anzeige .wert{white-space:nowrap}
+@media (max-width:420px){.anzeige{font-size:22px;white-space:normal;min-height:2.6em;line-height:1.3}.anzeige .lab{display:block;font-size:16px}}
+.regler{display:flex;align-items:center;gap:10px;margin:10px 0 2px;flex-wrap:wrap}
+.regler label{font-weight:700;min-width:170px}
+@media (max-width:520px){.regler label{flex:1 0 100%}}
+.regler input[type=range]{flex:1 1 140px;height:44px;accent-color:var(--kupfer);cursor:pointer}
+.rval{font-weight:700;min-width:74px;text-align:right;font-variant-numeric:tabular-nums}
+button.pm{font:inherit;font-size:20px;font-weight:700;min-width:44px;min-height:44px;border:1.4px solid var(--linie);background:#fff;color:var(--ink);cursor:pointer}
+.tasten{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 2px}
+button.tk{font:inherit;font-weight:700;border:1.4px solid var(--rot);background:#fff;color:var(--rot);
+ padding:8px 14px;min-height:44px;cursor:pointer}
+details{margin-top:14px;border:1px solid var(--linie);padding:6px 10px;background:#fff}
+details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2px;min-height:44px}
+.formel{background:#fff;border:1.6px solid var(--kupfer);border-left:6px solid var(--kupfer);padding:12px 16px;margin:10px 0}
+.formel .cap{font-weight:700;color:var(--kupfer);display:block;margin-bottom:6px}
+.formelzeile{font-size:22px;margin:6px 0}
+.formelzeile span{white-space:nowrap;margin-right:1.4em}
+.schalter{display:flex;align-items:center;gap:10px;margin:10px 0}
+.schalter button{font:inherit;font-size:15px;padding:9px 16px;min-height:44px;cursor:pointer;border:1.4px solid var(--linie);background:#fff;color:var(--ink)}
+.schalter button[aria-pressed="true"]{border-color:var(--kupfer);background:var(--kupferhell);color:var(--kupfer);font-weight:700}
+.quelle{font-size:13px;color:var(--grau);border-left:3px solid var(--kupfer);padding-left:10px;margin-top:20px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="kopf">
+ <div class="reihe">E1EG · Lernfeld 1 · Gleichstrom-Grundlagen · Block EG1-B17</div>
+ <h1>Wirkungsgrad messen</h1>
+</div>
+
+<div class="ziel">
+ <span class="cap">Das sollen Sie hier selbst herausfinden</span>
+ Ein Gleichstrommotor treibt eine Bremse an. Wie viel der aufgenommenen Leistung kommt an der Welle an, und wie viel geht verloren?
+ Hängt der Anteil von der Belastung ab? Was geschieht, wenn vor dem Motor noch ein Netzteil hängt? Die Aufträge stehen auf dem
+ Arbeitsblatt (Aufgabe&nbsp;3 bis 5).
+</div>
+
+<div class="methode">
+ <span class="cap">So bedienen Sie den Messplatz</span>
+ Stellen Sie mit dem Regler oder den Knöpfen „−“ und „+“ die Belastung ein: So viel Leistung muss der Motor an der Bremse abgeben.
+ Auf dem Leistungsschild des Motors steht die Bemessungsleistung 90&nbsp;W; bei 150&nbsp;W ist er überlastet.
+ Der Leistungsmesser zeigt, wie viel Leistung der Motor dafür aufnimmt. Mit „Netzteil davor“ schalten Sie ein Netzteil vor den Motor;
+ dann zeigt ein zweiter Leistungsmesser die Leistung aus dem Netz. Sagen Sie jedes Ergebnis zuerst voraus, dann messen Sie.
+ Mit <b>„Zurücksetzen“</b> kehren Sie zur Grundstellung zurück. <b>Sozialform:</b> Partnerarbeit, einer stellt ein, einer protokolliert.
+ <b>Zeit:</b> rund 17&nbsp;min für Aufgabe&nbsp;3 bis 5. <b>Fertig, wenn</b> Aufgabe&nbsp;3 bis 5 des Arbeitsblatts ausgefüllt sind.
+</div>
+
+<div class="sim">
+ <canvas id="cMess" data-quelle="eigene Darstellung: Netz, Netzteil, Leistungsmesser, Gleichstrommotor, Bremse; Verluste als Waermepfeile" width="960" height="440"
+  aria-label="Links das Netz, auf Wunsch ein Netzteil, dann ein Leistungsmesser und ein Gleichstrommotor, der eine Bremse antreibt. Nach unten zweigen die Verluste als Waerme ab."></canvas>
+ <p class="bildunterschrift">Schematisch: Die Breite des Bandes zeigt die Leistung; was nach unten abzweigt, wird zu Wärme.</p>
+ <div class="schalter" role="group" aria-label="Netzteil vor dem Motor"><button id="bNetz" type="button" aria-pressed="false">Netzteil davor</button></div>
+ <div class="anzeige" id="zeileNetz" style="display:none"><span class="lab">Leistungsmesser am Netz:</span> <span class="wert"><i>P</i><sub>Netz</sub> = <span id="aNetz">0&nbsp;W</span></span></div>
+ <div class="anzeige"><span class="lab">Leistungsmesser am Motor:</span> <span class="wert"><i>P</i><sub>zu</sub> = <span id="aZu">0&nbsp;W</span></span></div>
+ <div class="anzeige"><span class="lab">Bremse (an der Welle):</span> <span class="wert"><i>P</i><sub>ab</sub> = <span id="aAb">0&nbsp;W</span></span></div>
+ <div class="regler">
+  <label for="rB">Belastung <i>P</i><sub>ab</sub></label>
+  <button class="pm" type="button" data-ziel="rB" data-schritt="-10" aria-label="Belastung 10 W kleiner">−</button>
+  <input id="rB" type="range" min="0" max="150" value="0" step="10" aria-label="abgegebene Leistung in Watt">
+  <button class="pm" type="button" data-ziel="rB" data-schritt="10" aria-label="Belastung 10 W größer">+</button>
+  <span class="rval" id="wB">0 W</span>
+ </div>
+ <div class="tasten"><button class="tk" id="bReset" type="button">Zurücksetzen</button></div>
+</div>
+
+<details class="ergebnis-aufdecken">
+ <summary><b>Ergebnis anzeigen</b> (erst, wenn Sie Aufgabe&nbsp;3 bis 5 des Arbeitsblatts bearbeitet haben)</summary>
+ <div class="formel">
+  <span class="cap">Verlustleistung und Wirkungsgrad (Tabellenbuch S. 26, Formel 8, 10 und 9)</span>
+  <div class="formelzeile"><span><i>P</i><sub>v</sub> = <i>P</i><sub>zu</sub> − <i>P</i><sub>ab</sub></span> <span><i>η</i> = <span class="bruch"><span class="z"><i>P</i><sub>ab</sub></span><span class="n"><i>P</i><sub>zu</sub></span></span></span> <span><i>η</i> = <i>η</i><sub>1</sub> · <i>η</i><sub>2</sub></span></div>
+  <p id="aNach">Nachrechnung der Einstellung: …</p>
+ </div>
+</details>
+
+<div class="quelle">Die Formeln stehen im Tabellenbuch S.&nbsp;26. Das Modell des Motors ist ausgedacht, seine Zahlen sind so gewählt, dass man gut rechnen kann; alle Anzeigen sind mit der Hand nachgerechnet.</div>
+
+<script>
+(function(){
+ "use strict";
+ var $ = function(id){ return document.getElementById(id); };
+ var START = {B:0, netz:false};
+ var ETA_N = 0.8, P0 = 20, K = 300;
+ var netz = START.netz;
+ function komma(s){ return String(s).replace('.', ','); }
+ function rund(x, st){ var f = Math.pow(10, st); return Math.round(x * f + 1e-9) / f; }
+ function zahl(x, st){ return komma(String(rund(x, st))); }
+ function watt(x){ return zahl(x, 2) + '&nbsp;W'; }
+ function wattT(x){ return zahl(x, 2) + ' W'; }
+ var fs = 1;
+ function schrift(){ var w = $('cMess').clientWidth || 480; fs = Math.max(1, Math.min(1.6, 460 / w)); }
+ function f(px){ return Math.round(px * fs); }
+ var cv = $('cMess'), ctx;
+ function setup(){
+   var dpr = Math.min(window.devicePixelRatio || 1, 2);
+   cv.width = Math.round(480 * dpr); cv.height = Math.round(220 * dpr);
+   ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+ }
+ function sym(z, idx, rest, x, y, px){
+   ctx.textAlign = 'left';
+   ctx.font = 'italic ' + px + 'px "Noto Sans",Arial'; ctx.fillText(z, x, y);
+   var w = ctx.measureText(z).width;
+   ctx.font = Math.round(px * 0.72) + 'px "Noto Sans",Arial'; ctx.fillText(idx, x + w, y + 3);
+   var w2 = ctx.measureText(idx).width;
+   ctx.font = px + 'px "Noto Sans",Arial'; ctx.fillText(rest, x + w + w2 + 2, y);
+ }
+ function band(x1, x2, y, h, farbe){ ctx.fillStyle = farbe; ctx.fillRect(x1, y - h / 2, x2 - x1, h); }
+ function zeichne(Pnetz, Pzu, Pab){
+   ctx.clearRect(0, 0, 480, 220);
+   var skala = 0.22;        // Bandbreite je Watt
+   var y = 86, xM = 300, xB = 440;
+   // Leistungsband: Netz -> (Netzteil) -> Motor -> Bremse; Verluste als Waermestreifen nach unten
+   if (netz) {
+     band(16, 110, y, Math.max(2, Pnetz * skala), '#F0C7A0');
+     band(110, xM - 30, y, Math.max(2, Pzu * skala), '#F0C7A0');
+     ctx.fillStyle = '#E8A0A0'; ctx.fillRect(122, y, Math.max(2, (Pnetz - Pzu) * skala), 104);
+   } else {
+     band(16, xM - 30, y, Math.max(2, Pzu * skala), '#F0C7A0');
+   }
+   band(xM + 30, xB, y, Math.max(2, Pab * skala), '#F0C7A0');
+   ctx.fillStyle = '#E8A0A0'; ctx.fillRect(xM + 14, y, Math.max(2, (Pzu - Pab) * skala), 104);
+   // Geraete
+   ctx.strokeStyle = '#1A2530'; ctx.lineWidth = 1.8; ctx.fillStyle = '#fff';
+   if (netz) { ctx.fillRect(84, y - 24, 48, 48); ctx.strokeRect(84, y - 24, 48, 48); }
+   ctx.beginPath(); ctx.arc(xM, y, 30, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
+   ctx.fillStyle = '#fff'; ctx.fillRect(xB - 18, y - 24, 32, 48); ctx.strokeRect(xB - 18, y - 24, 32, 48);
+   // Leistungsmesser auf dem Band, Wert darueber
+   function wm(x){ ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, y, 12, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
+     ctx.fillStyle = '#1A2530'; ctx.font = 'bold ' + f(11) + 'px "Noto Sans",Arial'; ctx.textAlign = 'center'; ctx.fillText('W', x, y + 4); }
+   if (netz) wm(50);
+   wm(214);
+   ctx.fillStyle = '#1A2530'; ctx.font = 'bold ' + f(15) + 'px "Noto Sans",Arial'; ctx.textAlign = 'center';
+   ctx.fillText('M', xM, y + 6);
+   ctx.font = f(11) + 'px "Noto Sans",Arial'; ctx.textAlign = 'center';
+   if (netz) { ctx.textAlign = 'right'; ctx.fillText('Netzteil', 118, y + 42); ctx.textAlign = 'center'; }
+   ctx.fillText('Motor', xM - 20, y + 46); ctx.fillText('Bremse', xB - 2, y + 42);
+   ctx.fillStyle = '#B23A33'; ctx.textAlign = 'left';
+   ctx.fillText('Wärme', xM + 22, 206);
+   if (netz) ctx.fillText('Wärme', 130, 206);
+   ctx.fillStyle = '#5A666F';
+   if (netz) sym('P', 'Netz', ' = ' + wattT(Pnetz), 16, 30, f(12));
+   sym('P', 'zu', ' = ' + wattT(Pzu), 180, 30, f(12));
+   sym('P', 'ab', ' = ' + wattT(Pab), 350, 30, f(12));
+ }
+ function tick(){
+   var Pab = +$('rB').value;
+   var Pv = P0 + Pab * Pab / K, Pzu = Pab + Pv, Pnetz = Pzu / ETA_N;
+   $('wB').textContent = zahl(Pab, 0) + ' W';
+   $('aZu').innerHTML = watt(Pzu);
+   $('aAb').innerHTML = watt(Pab);
+   $('aNetz').innerHTML = watt(Pnetz);
+   $('zeileNetz').style.display = netz ? '' : 'none';
+   $('bNetz').setAttribute('aria-pressed', netz ? 'true' : 'false');
+   var eta = Pab / Pzu;
+   var t = 'Nachrechnung der Einstellung: <i>P</i><sub>v</sub> = ' + zahl(Pzu, 2) + '&nbsp;W − ' + zahl(Pab, 0) + '&nbsp;W = ' + zahl(Pv, 2) + '&nbsp;W; ' +
+     '<i>η</i> = <span class="bruch"><span class="z">' + zahl(Pab, 0) + '&nbsp;W</span><span class="n">' + zahl(Pzu, 2) + '&nbsp;W</span></span> ' +
+     (Math.abs(eta * 1e4 - Math.round(eta * 1e4)) < 1e-6 ? '= ' : '≈ ') + zahl(eta, 4);
+   if (netz) {
+     var eg = Pab / Pnetz;
+     t += '; Netzteil <i>η</i><sub>N</sub> = <span class="bruch"><span class="z">' + zahl(Pzu, 2) + '&nbsp;W</span><span class="n">' + zahl(Pnetz, 2) + '&nbsp;W</span></span> = 0,8; ' +
+       'gesamt <i>η</i> = <span class="bruch"><span class="z">' + zahl(Pab, 0) + '&nbsp;W</span><span class="n">' + zahl(Pnetz, 2) + '&nbsp;W</span></span> ' +
+       (Math.abs(eg * 1e4 - Math.round(eg * 1e4)) < 1e-6 ? '= ' : '≈ ') + zahl(eg, 4) + ' = 0,8 · ' + zahl(eta, 4).replace(/$/, '') + (Math.abs(eta * 1e4 - Math.round(eta * 1e4)) < 1e-6 ? '' : '…');
+   }
+   $('aNach').innerHTML = t;
+   zeichne(Pnetz, Pzu, Pab);
+ }
+ $('bNetz').addEventListener('click', function(){ netz = !netz; tick(); });
+ ['input', 'change'].forEach(function(ev){ $('rB').addEventListener(ev, tick); });
+ Array.prototype.forEach.call(document.querySelectorAll('button.pm'), function(b){
+   b.addEventListener('click', function(){
+     var el = $(b.getAttribute('data-ziel')), s = parseFloat(b.getAttribute('data-schritt'));
+     var v = Math.round(parseFloat(el.value) + s);
+     el.value = Math.max(parseFloat(el.min), Math.min(parseFloat(el.max), v)); tick();
+   });
+ });
+ $('bReset').addEventListener('click', function(){ netz = START.netz; $('rB').value = START.B; tick(); });
+ window.addEventListener('resize', function(){ schrift(); setup(); tick(); });
+ // Startstellung aus den startwerten (Leerlauf, ohne Netzteil), nicht aus den loesungswerten
+ $('rB').value = START.B;
+ schrift(); setup(); tick();
+})();
+</script>
