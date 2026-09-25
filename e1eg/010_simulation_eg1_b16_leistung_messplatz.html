@@ -1,0 +1,217 @@
+<!-- lehrmaterial -->
+<!-- materialtyp: simulation -->
+<!-- sim_bearbeitung: pflicht -->
+<!-- EG1-B16 · Leistungs-Messplatz (Neubau 25.09.2026): Widerstand waehlen, Spannung einstellen; Strommesser und Leistungsmesser
+     zeigen I und P. Rechenmodell I = U/R (Ohm'sches Gesetz, Tabellenbuch S. 30) und P = U*I (Tabellenbuch S. 36, Formel 1),
+     P = U^2/R (Formel 5), P = I^2*R (Formel 3). Die Formeln stehen hinter „Ergebnis anzeigen“. -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EG1-B16: Elektrische Leistung messen</title>
+
+<script type="application/json" id="sim-meta">
+{
+ "block": "EG1-B16",
+ "thema": "Elektrische Leistung am Leistungsmesser, Abhaengigkeit von der Spannung am festen Widerstand",
+ "modell": "I = U/R; P = U*I = U^2/R = I^2*R (Tabellenbuch S. 36, Formel 1, 3, 5)",
+ "quelle": "Tabellenbuch 32. A., S. 30 und S. 36",
+ "startwerte": { "R": 47, "U": 0 },
+ "loesungswerte": { "R": 100, "U": 2 }
+}
+</script>
+
+<style>.bruch{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;line-height:1.05;margin:0 .12em;font-size:.8em}.bruch .z{border-bottom:1.6px solid currentColor;padding:0 .35em}.bruch .n{padding:0 .35em}:root{
+ --ink:#1A2530; --kupfer:#A34E0E; --kupferhell:#F5EBDF; --rot:#B23A33;
+ --gruen:#2F7D62; --gruenhell:#EAF3EC; --linie:#9AA5AE; --grau:#5A666F; --hell:#F4F6F8;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:"Noto Sans",system-ui,Arial,sans-serif;color:var(--ink);line-height:1.45;background:#f4f6f8;
+ padding:18px 14px 40px;max-width:980px;margin:0 auto}
+.kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0 10px;margin-bottom:14px}
+.kopf .reihe{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--kupfer);font-weight:700}
+.kopf h1{font-size:22px;margin:4px 0 0}
+p{margin:8px 0}
+i{font-style:italic}
+.ziel,.methode{background:var(--kupferhell);border-left:5px solid var(--kupfer);padding:10px 14px;margin:12px 0}
+.ziel .cap,.methode .cap{font-weight:700;color:var(--kupfer);display:block;margin-bottom:2px}
+.sim{border:1.4px solid var(--ink);background:#fff;padding:16px;margin:12px 0}
+.wahl{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.wahl span.l{font-weight:700;align-self:center;margin-right:4px}
+.wahl button{font:inherit;font-size:15px;padding:9px 16px;min-height:44px;min-width:72px;cursor:pointer;
+ border:1.4px solid var(--linie);background:#fff;color:var(--ink)}
+.wahl button[aria-pressed="true"]{border-color:var(--kupfer);background:var(--kupferhell);color:var(--kupfer);font-weight:700}
+canvas{width:100%;height:auto;display:block;background:#fff;border:1px solid var(--linie);touch-action:manipulation}
+.bildunterschrift{font-size:12.5px;color:var(--grau);margin:4px 0 0}
+.anzeige{font-size:26px;font-weight:700;margin:10px 0 2px;min-height:1.4em;white-space:nowrap}
+.anzeige .wert{white-space:nowrap}
+@media (max-width:420px){.anzeige{font-size:22px;white-space:normal;min-height:2.6em;line-height:1.3}.anzeige .lab{display:block;font-size:16px}}
+.regler{display:flex;align-items:center;gap:10px;margin:10px 0 2px;flex-wrap:wrap}
+.regler label{font-weight:700;min-width:170px}
+@media (max-width:520px){.regler label{flex:1 0 100%}}
+.regler input[type=range]{flex:1 1 140px;height:44px;accent-color:var(--kupfer);cursor:pointer}
+.rval{font-weight:700;min-width:74px;text-align:right;font-variant-numeric:tabular-nums}
+button.pm{font:inherit;font-size:20px;font-weight:700;min-width:44px;min-height:44px;border:1.4px solid var(--linie);background:#fff;color:var(--ink);cursor:pointer}
+.tasten{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 2px}
+button.tk{font:inherit;font-weight:700;border:1.4px solid var(--rot);background:#fff;color:var(--rot);
+ padding:8px 14px;min-height:44px;cursor:pointer}
+details{margin-top:14px;border:1px solid var(--linie);padding:6px 10px;background:#fff}
+details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2px;min-height:44px}
+.formel{background:#fff;border:1.6px solid var(--kupfer);border-left:6px solid var(--kupfer);padding:12px 16px;margin:10px 0}
+.formel .cap{font-weight:700;color:var(--kupfer);display:block;margin-bottom:6px}
+.formelzeile{font-size:22px;margin:6px 0}
+.formelzeile span{white-space:nowrap;margin-right:1.4em}
+.quelle{font-size:13px;color:var(--grau);border-left:3px solid var(--kupfer);padding-left:10px;margin-top:20px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="kopf">
+ <div class="reihe">E1EG · Lernfeld 1 · Gleichstrom-Grundlagen · Block EG1-B16</div>
+ <h1>Elektrische Leistung messen</h1>
+</div>
+
+<div class="ziel">
+ <span class="cap">Das sollen Sie hier selbst herausfinden</span>
+ An einem Netzgerät hängt ein fester Widerstand, dazu ein Strommesser und ein Leistungsmesser. Wie hängt die Leistung mit Spannung
+ und Stromstärke zusammen? Was geschieht mit der Leistung, wenn Sie am selben Widerstand die Spannung verdoppeln? Die Aufträge stehen auf
+ dem Arbeitsblatt (Aufgabe&nbsp;3 und 4).
+</div>
+
+<div class="methode">
+ <span class="cap">So bedienen Sie den Messplatz</span>
+ Wählen Sie einen Widerstand und stellen Sie die Spannung mit dem Regler oder den Knöpfen „−“ und „+“ ein. Strommesser und
+ Leistungsmesser zeigen die Werte. Sagen Sie jedes Ergebnis zuerst voraus, dann messen Sie. Mit <b>„Zurücksetzen“</b> kehren Sie zur
+ Grundstellung zurück. <b>Sozialform:</b> Partnerarbeit, einer stellt ein, einer protokolliert. <b>Zeit:</b> rund 11&nbsp;min für Aufgabe&nbsp;3 und 4.
+ <b>Fertig, wenn</b> Aufgabe&nbsp;3 und 4 des Arbeitsblatts ausgefüllt sind.
+</div>
+
+<div class="sim">
+ <canvas id="cMess" data-quelle="eigene Darstellung: Netzgeraet, Strommesser in Reihe, Spannungsmesser parallel, Leistungsmesser mit Strom- und Spannungspfad, Widerstand" width="960" height="440"
+  aria-label="Ein Netzgeraet speist ueber einen Strommesser und einen Leistungsmesser einen Widerstand; ein Spannungsmesser liegt parallel zum Widerstand. Die Messgeraete zeigen Spannung, Stromstaerke und Leistung."></canvas>
+ <p class="bildunterschrift">Schematisch: Der Leistungsmesser misst mit seinem Strompfad die Stromstärke und mit seinem Spannungspfad die Spannung.</p>
+ <div class="wahl" id="widerstaende" role="group" aria-label="Widerstand wählen"><span class="l">Widerstand <i>R</i>:</span></div>
+ <div class="anzeige"><span class="lab">Strommesser:</span> <span class="wert"><i>I</i> = <span id="aI">0&nbsp;mA</span></span></div>
+ <div class="anzeige"><span class="lab">Leistungsmesser:</span> <span class="wert"><i>P</i> = <span id="aP">0&nbsp;mW</span></span></div>
+ <div class="regler">
+  <label for="rU">Spannung <i>U</i></label>
+  <button class="pm" type="button" data-ziel="rU" data-schritt="-0.5" aria-label="Spannung 0,5 V kleiner">−</button>
+  <input id="rU" type="range" min="0" max="24" value="0" step="0.5" aria-label="Spannung in Volt">
+  <button class="pm" type="button" data-ziel="rU" data-schritt="0.5" aria-label="Spannung 0,5 V größer">+</button>
+  <span class="rval" id="wU">0 V</span>
+ </div>
+ <div class="tasten"><button class="tk" id="bReset" type="button">Zurücksetzen</button></div>
+</div>
+
+<details class="ergebnis-aufdecken">
+ <summary><b>Ergebnis anzeigen</b> (erst, wenn Sie Aufgabe&nbsp;3 bis 5 des Arbeitsblatts bearbeitet haben)</summary>
+ <div class="formel">
+  <span class="cap">Elektrische Leistung (Tabellenbuch S. 36, Formel 1, 3 und 5)</span>
+  <div class="formelzeile"><span><i>P</i> = <i>U</i> · <i>I</i></span> <span><i>P</i> = <i>I</i>² · <i>R</i></span> <span><i>P</i> = <span class="bruch"><span class="z"><i>U</i>²</span><span class="n"><i>R</i></span></span></span></div>
+  <p id="aNach">Nachrechnung der Einstellung: …</p>
+ </div>
+</details>
+
+<div class="quelle">Die Stromstärke folgt aus dem Ohm'schen Gesetz (Tabellenbuch S.&nbsp;30), die Leistung aus Tabellenbuch S.&nbsp;36. Alle Anzeigen sind mit der Hand nachgerechnet.</div>
+
+<script>
+(function(){
+ "use strict";
+ var $ = function(id){ return document.getElementById(id); };
+ var START = {R:47, U:0};
+ var WIDERSTAENDE = [47, 100, 470];
+ var R = START.R;
+ function komma(s){ return String(s).replace('.', ','); }
+ function rund(x, st){ var f = Math.pow(10, st); return Math.round(x * f + 1e-9) / f; }
+ function zahl(x, st){ return komma(String(rund(x, st))); }
+ // Anzeige mit drei geltenden Ziffern: unter 1 in Milli (mA, mW), sonst in A oder W
+ function drei(x){ if(x === 0) return '0'; var p = x.toPrecision(3); return komma(String(+p)); }
+ function strom(I){ return I === 0 ? '0&nbsp;mA' : (I < 1 ? drei(I * 1000) + '&nbsp;mA' : drei(I) + '&nbsp;A'); }
+ function leistung(P){ return P === 0 ? '0&nbsp;mW' : (P < 1 ? drei(P * 1000) + '&nbsp;mW' : drei(P) + '&nbsp;W'); }
+ function stromT(I){ return I === 0 ? '0 mA' : (I < 1 ? drei(I * 1000) + ' mA' : drei(I) + ' A'); }
+ function leistungT(P){ return P === 0 ? '0 mW' : (P < 1 ? drei(P * 1000) + ' mW' : drei(P) + ' W'); }
+ var fs = 1;
+ function schrift(){ var w = $('cMess').clientWidth || 480; fs = Math.max(1, Math.min(1.6, 460 / w)); }
+ function f(px){ return Math.round(px * fs); }
+ var cv = $('cMess'), ctx;
+ function setup(){
+   var dpr = Math.min(window.devicePixelRatio || 1, 2);
+   cv.width = Math.round(480 * dpr); cv.height = Math.round(220 * dpr);
+   ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+ }
+ function sym(z, rest, x, y, px, gew){
+   ctx.textAlign = 'left';
+   ctx.font = gew + 'italic ' + px + 'px "Noto Sans",Arial'; ctx.fillText(z, x, y);
+   var w = ctx.measureText(z).width;
+   ctx.font = gew + px + 'px "Noto Sans",Arial'; ctx.fillText(rest, x + w + 1, y);
+ }
+ function messer(x, y, z){
+   ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, y, 15, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
+   ctx.fillStyle = '#1A2530'; ctx.font = 'bold ' + f(13) + 'px "Noto Sans",Arial'; ctx.textAlign = 'center'; ctx.fillText(z, x, y + 5);
+ }
+ function zeichne(U, I, P){
+   ctx.clearRect(0, 0, 480, 220);
+   ctx.strokeStyle = '#1A2530'; ctx.lineWidth = 1.6;
+   // Leitungen: oben von G ueber A und W zum Widerstand, unten zurueck
+   ctx.beginPath();
+   ctx.moveTo(59, 70); ctx.lineTo(59, 40); ctx.lineTo(400, 40); ctx.lineTo(400, 78);
+   ctx.moveTo(400, 150); ctx.lineTo(400, 182); ctx.lineTo(59, 182); ctx.lineTo(59, 150);
+   // Spannungspfad des Leistungsmessers nach unten
+   ctx.moveTo(250, 55); ctx.lineTo(250, 182);
+   // Spannungsmesser parallel zum Widerstand
+   ctx.moveTo(400, 58); ctx.lineTo(452, 58); ctx.lineTo(452, 96); ctx.moveTo(452, 126); ctx.lineTo(452, 164); ctx.lineTo(400, 164);
+   ctx.stroke();
+   // Netzgeraet
+   ctx.lineWidth = 2; ctx.fillStyle = '#fff'; ctx.fillRect(24, 70, 70, 80); ctx.strokeRect(24, 70, 70, 80);
+   ctx.fillStyle = '#1A2530'; ctx.font = 'bold ' + f(15) + 'px "Noto Sans",Arial'; ctx.textAlign = 'center';
+   ctx.fillText('G', 59, 104); ctx.font = f(11) + 'px "Noto Sans",Arial'; ctx.fillText('Netzgerät', 59, 168 + 30);
+   ctx.beginPath(); ctx.moveTo(44, 124); ctx.lineTo(74, 124); ctx.moveTo(44, 130); ctx.lineTo(50, 130); ctx.moveTo(56, 130); ctx.lineTo(62, 130); ctx.moveTo(68, 130); ctx.lineTo(74, 130); ctx.stroke();
+   // Messgeraete
+   ctx.lineWidth = 1.6; messer(160, 40, 'A'); messer(250, 40, 'W'); messer(452, 111, 'V');
+   // Widerstand, je heller die Leistung, desto waermer die Farbe
+   var t = Math.max(0, Math.min(1, P / 5));
+   ctx.fillStyle = 'rgb(' + Math.round(255 - 23 * t) + ',' + Math.round(255 - 95 * t) + ',' + Math.round(255 - 149 * t) + ')';
+   ctx.fillRect(388, 78, 24, 72); ctx.strokeRect(388, 78, 24, 72);
+   // Werte, Formelzeichen kursiv
+   ctx.fillStyle = '#5A666F';
+   // Beschriftungen in freie Flaechen: I links der Spannungspfad-Leitung, P und R rechts davon
+   sym('I', ' = ' + stromT(I), 112, 72, f(12), '');
+   sym('P', ' = ' + leistungT(P), 258, 72, f(12), '');
+   sym('R', ' = ' + R + ' Ω', 262, 140, f(13), '');
+   sym('U', ' = ' + zahl(U, 1) + ' V', 404, 206, f(12), '');
+ }
+ function tick(){
+   var U = +$('rU').value;
+   var I = U / R, P = U * I;
+   $('wU').textContent = zahl(U, 1) + ' V';
+   $('aI').innerHTML = strom(I);
+   $('aP').innerHTML = leistung(P);
+   // kleine Werte in Milli, drei Nachkommastellen; „=“ nur, wenn nichts gerundet ist
+   function nach(x, e){ var v = x < 1 ? x * 1000 : x, u = x < 1 ? 'm' + e : e;
+     return (Math.abs(v * 1e3 - Math.round(v * 1e3)) < 1e-6 ? '= ' : '≈ ') + zahl(v, 3) + '&nbsp;' + u; }
+   $('aNach').innerHTML = 'Nachrechnung der Einstellung: <i>I</i> = <span class="bruch"><span class="z"><i>U</i></span><span class="n"><i>R</i></span></span> = <span class="bruch"><span class="z">' + zahl(U, 1) + '&nbsp;V</span><span class="n">' + R +
+     '&nbsp;Ω</span></span> ' + nach(I, 'A') + '; <i>P</i> = <span class="bruch"><span class="z"><i>U</i>²</span><span class="n"><i>R</i></span></span> = ' +
+     '<span class="bruch"><span class="z">(' + zahl(U, 1) + '&nbsp;V)²</span><span class="n">' + R + '&nbsp;Ω</span></span> ' + nach(P, 'W');
+   Array.prototype.forEach.call($('widerstaende').querySelectorAll('button'), function(b){
+     b.setAttribute('aria-pressed', +b.getAttribute('data-r') === R ? 'true' : 'false'); });
+   zeichne(U, I, P);
+ }
+ WIDERSTAENDE.forEach(function(r){
+   var b = document.createElement('button');
+   b.type = 'button'; b.textContent = r + ' Ω'; b.setAttribute('data-r', r); b.setAttribute('aria-pressed', 'false');
+   b.addEventListener('click', function(){ R = r; tick(); });
+   $('widerstaende').appendChild(b);
+ });
+ ['input', 'change'].forEach(function(ev){ $('rU').addEventListener(ev, tick); });
+ Array.prototype.forEach.call(document.querySelectorAll('button.pm'), function(b){
+   b.addEventListener('click', function(){
+     var el = $(b.getAttribute('data-ziel')), s = parseFloat(b.getAttribute('data-schritt'));
+     var v = Math.round((parseFloat(el.value) + s) * 10) / 10;
+     el.value = Math.max(parseFloat(el.min), Math.min(parseFloat(el.max), v)); tick();
+   });
+ });
+ $('bReset').addEventListener('click', function(){ R = START.R; $('rU').value = START.U; tick(); });
+ window.addEventListener('resize', function(){ schrift(); setup(); tick(); });
+ // Startstellung aus den startwerten (47 Ohm, 0 V), nicht aus den loesungswerten
+ $('rU').value = START.U;
+ schrift(); setup(); tick();
+})();
+</script>
