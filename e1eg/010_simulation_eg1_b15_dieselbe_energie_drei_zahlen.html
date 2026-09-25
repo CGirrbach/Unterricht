@@ -20,7 +20,7 @@
 }
 </script>
 
-<style>:root{
+<style>.bruch{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;line-height:1.05;margin:0 .12em;font-size:.8em}.bruch .z{border-bottom:1.6px solid currentColor;padding:0 .35em}.bruch .n{padding:0 .35em}:root{
  --ink:#1A2530; --kupfer:#A34E0E; --kupferhell:#F5EBDF; --rot:#B23A33;
  --gruen:#2F7D62; --gruenhell:#EAF3EC; --linie:#9AA5AE; --grau:#5A666F; --hell:#F4F6F8;
 }
@@ -71,8 +71,8 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
 
 <div class="ziel">
  <span class="cap">Das sollen Sie hier selbst herausfinden</span>
- Ein Heizwiderstand hängt über einen Energiezähler am Netzgerät. Wie groß ist die elektrische Arbeit, und wovon hängt sie ab? In welcher
- Einheit zeigt man sie am besten an? Die Aufträge stehen auf dem Arbeitsblatt (Aufgabe&nbsp;3 und 4).
+ Ein Verbraucher hängt über einen Energiezähler am Netzgerät. Wie groß ist die elektrische Arbeit, und wovon hängt sie ab? In welcher
+ Einheit zeigt man sie am besten an? Spannung und Stromstärke stellen Sie hier unabhängig voneinander ein: Zu jeder Einstellung gehört ein anderer Verbraucher. Die Aufträge stehen auf dem Arbeitsblatt (Aufgabe&nbsp;3 und 4).
 </div>
 
 <div class="methode">
@@ -83,8 +83,8 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
 </div>
 
 <div class="sim">
- <canvas id="cMess" data-quelle="eigene Darstellung: Netzgeraet, Energiezaehler und Heizwiderstand, Anschluss wie Europa-Fachkunde S. 43 (Elektrizitaetszaehler)" width="960" height="440"
-  aria-label="Ein Netzgeraet speist ueber einen Energiezaehler einen Heizwiderstand. Eine Uhr zeigt die Einschaltzeit, der Zaehler die umgesetzte Arbeit."></canvas>
+ <canvas id="cMess" data-quelle="eigene Darstellung: Netzgeraet, Energiezaehler und Verbraucher, Anschluss wie Europa-Fachkunde S. 43 (Elektrizitaetszaehler)" width="960" height="440"
+  aria-label="Ein Netzgeraet speist ueber einen Energiezaehler einen Verbraucher. Eine Uhr zeigt die Einschaltzeit, der Zaehler die umgesetzte Arbeit."></canvas>
  <p class="bildunterschrift">Schematisch: Die Uhr zeigt die Einschaltzeit, das Zählwerk die umgesetzte elektrische Arbeit.</p>
  <div class="einheiten" id="einheiten" role="group" aria-label="Einheit der Anzeige"><span class="l">Anzeige in:</span></div>
  <div class="anzeige"><span class="lab">Energiezähler:</span> <span class="wert"><i>W</i> = <span id="aW">0&nbsp;kWh</span></span></div>
@@ -137,10 +137,12 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
  }
  function anzeigen(W_Wh){   // W in Wh -> Text in der gewaehlten Einheit
    if(einheit === 'Ws') return gruppe(W_Wh * 3600) + '&nbsp;Ws';
-   if(einheit === 'Wh') return komma(W_Wh === 0 ? '0' : (W_Wh >= 100 ? W_Wh.toFixed(1) : W_Wh.toPrecision(4))) + '&nbsp;Wh';
+   // 25.09.2026 (PRUEF2509_Block_15 K5): Wh mit Dreiergruppen, kWh mit drei Nachkommastellen wie im Blatt (0,230 kWh)
+   if(einheit === 'Wh') return (W_Wh === 0 ? '0' : (W_Wh >= 100 ? gruppeKomma(W_Wh, 1) : komma(W_Wh.toPrecision(4)))) + '&nbsp;Wh';
    var k = W_Wh / 1000;
-   return komma(k === 0 ? '0' : (k >= 1 ? k.toFixed(3) : k.toPrecision(4))) + '&nbsp;kWh';
+   return (k === 0 ? '0' : (k >= 0.001 ? gruppeKomma(k, 3) : komma(k.toPrecision(3)))) + '&nbsp;kWh';
  }
+ function gruppeKomma(x, st){ var t = x.toFixed(st).split('.'); return gruppe(+t[0]) + (t[1] ? ',' + t[1] : ''); }
  function zahl(x, st){ return komma(String(Math.round(x * Math.pow(10, st)) / Math.pow(10, st))); }
  var fs = 1;
  function schrift(){ var w = $('cMess').clientWidth || 480; fs = Math.max(1, Math.min(1.6, 460 / w)); }
@@ -175,10 +177,10 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
    ctx.fillStyle = '#1A2530'; ctx.fillRect(235 - bw / 2, 68, bw, 30);
    ctx.fillStyle = '#fff'; ctx.fillText(k, 235, 89, 120);
    ctx.fillStyle = '#5A666F'; ctx.font = f(11) + 'px "Noto Sans",Arial'; ctx.fillText('Energiezähler', 235, 162);
-   // Heizwiderstand rechts, Beschriftung unter allen Leitungen
+   // Verbraucher rechts, Beschriftung unter allen Leitungen
    ctx.strokeStyle = '#1A2530'; ctx.strokeRect(372, 80, 26, 70);
    ctx.fillStyle = I > 0 && U > 0 ? '#E8A06A' : '#fff'; ctx.fillRect(373, 81, 24, 68);
-   ctx.fillStyle = '#5A666F'; ctx.textAlign = 'center'; ctx.fillText('Heizwiderstand', 385, 204);
+   ctx.fillStyle = '#5A666F'; ctx.textAlign = 'center'; ctx.fillText('Verbraucher', 385, 204);
    // Leitungen: oben zum oberen, unten zum unteren Anschluss des Widerstands
    ctx.strokeStyle = '#1A2530'; ctx.lineWidth = 1.6; ctx.beginPath();
    ctx.moveTo(94, 88); ctx.lineTo(170, 88); ctx.moveTo(94, 132); ctx.lineTo(170, 132);
@@ -203,8 +205,10 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
    $('wI').textContent = zahl(I, 1) + ' A';
    $('wT').textContent = zahl(T, 0) + ' min';
    $('aW').innerHTML = anzeigen(W_Wh);
+   // K5: Zeit als Bruch T/60 h, nicht gerundet
+   var genau = Math.abs(W_Wh * 1000 - Math.round(W_Wh * 1000)) < 1e-6;
    $('aNach').innerHTML = 'Nachrechnung der Einstellung: <i>W</i> = ' + zahl(U, 0) + '&nbsp;V · ' + zahl(I, 1) + '&nbsp;A · ' +
-     zahl(T / 60, 4) + '&nbsp;h = ' + zahl(W_Wh, 3) + '&nbsp;Wh';
+     '<span class="bruch"><span class="z">' + zahl(T, 0) + '</span><span class="n">60</span></span>&nbsp;h ' + (genau ? '=' : '≈') + ' ' + gruppeKomma(W_Wh, 3).replace(/,?0+$/, '') + '&nbsp;Wh';
    Array.prototype.forEach.call($('einheiten').querySelectorAll('button'), function(b){
      b.setAttribute('aria-pressed', b.textContent === einheit ? 'true' : 'false'); });
    zeichne(U, I, T, W_Wh);
