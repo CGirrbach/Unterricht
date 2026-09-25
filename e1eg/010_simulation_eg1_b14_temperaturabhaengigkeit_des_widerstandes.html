@@ -1,0 +1,233 @@
+<!-- lehrmaterial -->
+<!-- materialtyp: simulation -->
+<!-- sim_bearbeitung: pflicht -->
+<!-- EG1-B14 · Widerstand und Temperatur am Messplatz (Neubau 25.09.2026). Temperaturkoeffizienten Tabellenbuch S. 559;
+     Rechenmodell Tabellenbuch S. 29, Formel 10, 11 und 13 (gilt fuer Temperaturdifferenzen unter 300 K). Die Anzeige zeigt nur den
+     Messwert; Formel und Nachrechnung stehen hinter „Ergebnis anzeigen“. Sicherung der alten Fassung: .vor_neubau2509 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EG1-B14: Widerstand und Temperatur messen</title>
+
+<script type="application/json" id="sim-meta">
+{
+ "block": "EG1-B14",
+ "thema": "Widerstand eines Drahtes bei verschiedenen Temperaturen am Messplatz",
+ "modell": "R2 = R1*(1 + alpha*(t2 - 20 °C)) (Tabellenbuch S. 29, Formel 10, 11, 13)",
+ "quelle": "Temperaturkoeffizienten Tabellenbuch 32. A., S. 559",
+ "startwerte": { "stoff": "Kupfer", "R1": 100, "t2": 20 },
+ "loesungswerte": { "t2": 60, "R1": 200 }
+}
+</script>
+
+<style>:root{
+ --ink:#1A2530; --kupfer:#A34E0E; --kupferhell:#F5EBDF; --rot:#B23A33;
+ --gruen:#2F7D62; --gruenhell:#EAF3EC; --linie:#9AA5AE; --grau:#5A666F; --hell:#F4F6F8;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:"Noto Sans",system-ui,Arial,sans-serif;color:var(--ink);line-height:1.45;background:#f4f6f8;
+ padding:18px 14px 40px;max-width:980px;margin:0 auto}
+.kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0 10px;margin-bottom:14px}
+.kopf .reihe{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--kupfer);font-weight:700}
+.kopf h1{font-size:22px;margin:4px 0 0}
+p{margin:8px 0}
+i{font-style:italic}
+.ziel,.methode{background:var(--kupferhell);border-left:5px solid var(--kupfer);padding:10px 14px;margin:12px 0}
+.ziel .cap,.methode .cap{font-weight:700;color:var(--kupfer);display:block;margin-bottom:2px}
+.sim{border:1.4px solid var(--ink);background:#fff;padding:16px;margin:12px 0}
+.stoffe{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 10px}
+.stoffe button{font:inherit;font-size:15px;padding:9px 14px;min-height:44px;cursor:pointer;
+ border:1.4px solid var(--linie);background:#fff;color:var(--ink)}
+.stoffe button[aria-pressed="true"]{border-color:var(--kupfer);background:var(--kupferhell);color:var(--kupfer);font-weight:700}
+canvas{width:100%;height:auto;display:block;background:#fff;border:1px solid var(--linie);touch-action:manipulation}
+.bildunterschrift{font-size:12.5px;color:var(--grau);margin:4px 0 0}
+.anzeige{font-size:28px;font-weight:700;margin:12px 0 2px;min-height:1.4em;white-space:nowrap}
+.anzeige .wert{white-space:nowrap}
+@media (max-width:420px){.anzeige{font-size:24px;white-space:normal;min-height:2.6em;line-height:1.3}.anzeige .lab{display:block;font-size:16px}}
+.regler{display:flex;align-items:center;gap:12px;margin:10px 0 2px;flex-wrap:wrap}
+.regler label{font-weight:700;min-width:170px}
+.regler input[type=range]{flex:1 1 160px;height:44px;accent-color:var(--kupfer);cursor:pointer}
+.rval{font-weight:700;min-width:74px;text-align:right;font-variant-numeric:tabular-nums}
+.tasten{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 2px}
+button.tk{font:inherit;font-weight:700;border:1.4px solid var(--rot);background:#fff;color:var(--rot);
+ padding:8px 14px;min-height:44px;cursor:pointer}
+table.ab{border-collapse:collapse;margin-top:12px;font-size:15px}
+table.ab th,table.ab td{border:1px solid var(--linie);padding:6px 10px;text-align:left}
+table.ab th{background:var(--hell);font-size:13px}
+table.ab td.z{text-align:right;font-variant-numeric:tabular-nums}
+details{margin-top:14px;border:1px solid var(--linie);padding:6px 10px;background:#fff}
+details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2px;min-height:44px}
+.formel{background:#fff;border:1.6px solid var(--kupfer);border-left:6px solid var(--kupfer);padding:12px 16px;margin:10px 0}
+.formel .cap{font-weight:700;color:var(--kupfer);display:block;margin-bottom:6px}
+.formelzeile{font-size:22px;margin:6px 0}
+.quelle{font-size:13px;color:var(--grau);border-left:3px solid var(--kupfer);padding-left:10px;margin-top:20px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="kopf">
+ <div class="reihe">E1EG · Lernfeld 1 · Gleichstrom-Grundlagen · Block EG1-B14</div>
+ <h1>Widerstand und Temperatur messen</h1>
+</div>
+
+<div class="ziel">
+ <span class="cap">Das sollen Sie hier selbst herausfinden</span>
+ Ein Draht liegt in einem Ölbad, dessen Temperatur Sie einstellen. Wie ändert sich sein Widerstand, wenn er warm wird?
+ Hängt die Änderung von der Temperatur, vom Widerstand bei 20&nbsp;°C und vom <b>Werkstoff</b> ab? Die Aufträge stehen auf dem
+ Arbeitsblatt (Aufgabe&nbsp;2 bis 4).
+</div>
+
+<div class="methode">
+ <span class="cap">So bedienen Sie den Messplatz</span>
+ Tippen Sie einen Werkstoff an, stellen Sie den Widerstand des Drahtes bei 20&nbsp;°C und die Temperatur des Ölbads ein.
+ Das Widerstandsmessgerät zeigt den Widerstand des Drahtes bei dieser Temperatur. Sagen Sie jedes Ergebnis zuerst voraus,
+ dann messen Sie. Mit <b>„Zurücksetzen“</b> kehren Sie zur Grundstellung zurück. Arbeiten Sie zu zweit: einer stellt ein,
+ einer protokolliert.
+</div>
+
+<div class="sim">
+ <div class="stoffe" id="stoffe" role="group" aria-label="Werkstoff wählen"></div>
+ <canvas id="cBad" data-quelle="eigene Darstellung: Drahtwendel im Ölbad mit Thermometer am Widerstandsmessgerät, Messaufbau nach Europa-Rechenbuch S. 46, Aufgabe 12 (Ölbad)" width="960" height="440"
+  aria-label="Eine Drahtwendel haengt in einem Oelbad. Ein Thermometer zeigt die eingestellte Temperatur. Zwei Messleitungen fuehren zum Widerstandsmessgeraet, das den Widerstand anzeigt."></canvas>
+ <p class="bildunterschrift">Schematisch: Die Farbe des Ölbads wird mit der Temperatur wärmer, das Thermometer zeigt die eingestellte Temperatur.</p>
+ <div class="anzeige"><span class="lab">Widerstandsmessgerät:</span> <span class="wert"><i>R</i> = <span id="aR">100,00&nbsp;Ω</span></span></div>
+ <div class="regler">
+  <label for="rR1">Widerstand bei 20&nbsp;°C</label>
+  <input id="rR1" type="range" min="10" max="200" value="100" step="10" aria-label="Widerstand bei 20 Grad Celsius in Ohm">
+  <span class="rval" id="wR1">100 Ω</span>
+ </div>
+ <div class="regler">
+  <label for="rT">Temperatur des Ölbads</label>
+  <input id="rT" type="range" min="-20" max="200" value="20" step="5" aria-label="Temperatur in Grad Celsius">
+  <span class="rval" id="wT">20 °C</span>
+ </div>
+ <div class="tasten"><button class="tk" id="bReset" type="button">Zurücksetzen</button></div>
+ <table class="ab">
+  <tr><th>Werkstoff</th><th>Temperaturkoeffizient <i>α</i> (Tabellenbuch S.&nbsp;559)</th></tr>
+  <tr><td id="aStoff">Kupfer</td><td class="z" id="aAlpha">0,0039 in 1/K</td></tr>
+ </table>
+</div>
+
+<details class="ergebnis-aufdecken">
+ <summary><b>Ergebnis anzeigen</b> (erst, wenn Sie in Aufgabe&nbsp;5 des Arbeitsblatts die Formel selbst zusammengesetzt haben)</summary>
+ <div class="formel">
+  <span class="cap">Widerstandsänderung (Tabellenbuch S. 29, Formel 10 und 11)</span>
+  <div class="formelzeile">Δ<i>R</i> = <i>α</i> · <i>R</i><sub>1</sub> · Δ<i>ϑ</i> &nbsp;&nbsp;&nbsp; <i>R</i><sub>2</sub> = <i>R</i><sub>1</sub> + Δ<i>R</i></div>
+  <p id="aNach">Nachrechnung der Einstellung: …</p>
+ </div>
+</details>
+
+<div class="quelle">Temperaturkoeffizienten bei 20&nbsp;°C aus dem Tabellenbuch S.&nbsp;559 („Stoffwerte“, Spalte <i>α</i>). Die Rechnung gilt für Temperaturänderungen unter 300&nbsp;K. Alle Messwerte sind mit der Hand nachgerechnet.</div>
+
+<script>
+(function(){
+ "use strict";
+ var $ = function(id){ return document.getElementById(id); };
+ // Temperaturkoeffizienten Tabellenbuch S. 559, Spalte alpha in 1/K
+ var STOFFE = [{n:"Kupfer",a:0.0039,f:"#C9722B"},{n:"Aluminium",a:0.004,f:"#A9B3BA"},
+               {n:"Silber",a:0.0041,f:"#C4CACF"},{n:"Eisen",a:0.00657,f:"#7D858C"},
+               {n:"Konstantan",a:0.00004,f:"#8E7C63"}];
+ var START = {stoff:0, R1:100, t:20};
+ var gewaehlt = START.stoff;
+ function komma(s){ return String(s).replace('.', ','); }
+ function mess(x){ return komma(x.toFixed(2)); }            // Messgeraet: zwei Nachkommastellen
+ function ganz(x){ return komma(String(Math.round(x*100)/100)); }
+ function minus(s){ return String(s).replace('-', '−'); }
+ var fs = 1;
+ function schrift(){ var w = $('cBad').clientWidth || 480; fs = Math.max(1, Math.min(1.6, 460 / w)); }
+ function f(px){ return Math.round(px * fs); }
+ var cv = $('cBad'), ctx;
+ function setup(){
+   var dpr = Math.min(window.devicePixelRatio || 1, 2);
+   cv.width = Math.round(480 * dpr); cv.height = Math.round(220 * dpr);
+   ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+ }
+ function sym(z, index, rest, x, y, px, gew){   // kursives Formelzeichen, tiefgestellter Index, aufrechter Rest
+   ctx.textAlign = 'left';
+   ctx.font = gew + 'italic ' + px + 'px "Noto Sans",Arial'; ctx.fillText(z, x, y);
+   var w = ctx.measureText(z).width;
+   if(index){ ctx.font = gew + Math.round(px*0.7) + 'px "Noto Sans",Arial'; ctx.fillText(index, x + w, y + px*0.25);
+              w += ctx.measureText(index).width; }
+   ctx.font = gew + px + 'px "Noto Sans",Arial'; ctx.fillText(rest, x + w + 1, y);
+ }
+ function breite(z, index, rest, px, gew){
+   ctx.font = gew + 'italic ' + px + 'px "Noto Sans",Arial'; var w = ctx.measureText(z).width;
+   if(index){ ctx.font = gew + Math.round(px*0.7) + 'px "Noto Sans",Arial'; w += ctx.measureText(index).width; }
+   ctx.font = gew + px + 'px "Noto Sans",Arial'; return w + 1 + ctx.measureText(rest).width;
+ }
+ function badfarbe(t){      // kalt blaugrau, warm orange (nur Anschauung)
+   var k = Math.max(0, Math.min(1, (t + 20) / 220));
+   var r = Math.round(170 + 80*k), g = Math.round(200 - 80*k), b = Math.round(220 - 150*k);
+   return 'rgb(' + r + ',' + g + ',' + b + ')';
+ }
+ function zeichne(s, R1, t, R){
+   ctx.clearRect(0, 0, 480, 220);
+   // Messgeraet links oben
+   ctx.strokeStyle = '#1A2530'; ctx.lineWidth = 2; ctx.fillStyle = '#fff';
+   ctx.beginPath(); ctx.arc(86, 47, 22, 0, 2*Math.PI); ctx.fill(); ctx.stroke();
+   ctx.fillStyle = '#1A2530'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+   ctx.font = 'bold ' + f(18) + 'px "Noto Sans",Arial'; ctx.fillText('Ω', 86, 47);
+   ctx.textBaseline = 'alphabetic';
+   // Oelbad
+   var bx = 250, by = 70, bw = 190, bh = 130;
+   ctx.fillStyle = badfarbe(t); ctx.fillRect(bx, by + 18, bw, bh - 18);
+   ctx.strokeStyle = '#1A2530'; ctx.lineWidth = 2;
+   ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(bx, by + bh); ctx.lineTo(bx + bw, by + bh); ctx.lineTo(bx + bw, by); ctx.stroke();
+   // Drahtwendel
+   ctx.strokeStyle = s.f; ctx.lineWidth = 4; ctx.beginPath();
+   var wx0 = bx + 30, wl = 110, wy = by + 80;
+   for(var i = 0; i <= wl; i++){ var x = wx0 + i; var y = wy + 16*Math.sin(i/wl*6*Math.PI); if(i===0) ctx.moveTo(x, y); else ctx.lineTo(x, y); }
+   ctx.stroke();
+   // Messleitungen: je eine Leitung vom Geraet zu einem Drahtende, sie kreuzen sich nicht
+   ctx.strokeStyle = '#1A2530'; ctx.lineWidth = 1.6; ctx.beginPath();
+   // obere Leitung zum fernen Drahtende, untere zum nahen: so kreuzen sie sich nicht
+   ctx.moveTo(106, 38); ctx.lineTo(wx0 + wl, 38); ctx.lineTo(wx0 + wl, wy);
+   ctx.moveTo(106, 56); ctx.lineTo(wx0, 56); ctx.lineTo(wx0, wy);
+   ctx.stroke();
+   // Thermometer rechts im Bad
+   var tx = bx + bw - 24, ty0 = by - 20, ty1 = by + bh - 16;
+   ctx.fillStyle = '#fff'; ctx.strokeStyle = '#1A2530'; ctx.lineWidth = 1.4;
+   ctx.fillRect(tx - 5, ty0, 10, ty1 - ty0); ctx.strokeRect(tx - 5, ty0, 10, ty1 - ty0);
+   ctx.beginPath(); ctx.arc(tx, ty1 + 6, 9, 0, 2*Math.PI); ctx.fillStyle = '#B23A33'; ctx.fill(); ctx.stroke();
+   var hoehe = (ty1 - ty0 - 6) * ((t + 20) / 220);
+   ctx.fillStyle = '#B23A33'; ctx.fillRect(tx - 3, ty1 - hoehe, 6, hoehe);
+   // Beschriftung, Formelzeichen kursiv (DIN 1338)
+   ctx.fillStyle = '#5A666F';
+   ctx.font = f(13) + 'px "Noto Sans",Arial'; ctx.textAlign = 'left';
+   ctx.fillText(s.n, 20, 110);
+   sym('ϑ', '', ' = ' + minus(ganz(t)) + ' °C', 20, 132, f(13), '');
+   sym('R', '1', ' = ' + ganz(R1) + ' Ω bei 20 °C', 20, 154, f(13), '');
+   ctx.fillStyle = '#A34E0E';
+   var br = breite('R', '', ' = ' + mess(R) + ' Ω', f(15), 'bold ');
+   sym('R', '', ' = ' + mess(R) + ' Ω', Math.max(4, 86 - br/2), 17, f(15), 'bold ');
+ }
+ function tick(){
+   var s = STOFFE[gewaehlt], R1 = +$('rR1').value, t = +$('rT').value;
+   var dt = t - 20, dR = s.a * R1 * dt, R = R1 + dR;
+   $('wR1').textContent = ganz(R1) + ' Ω';
+   $('wT').textContent = minus(ganz(t)) + ' °C';
+   $('aR').innerHTML = mess(R) + '&nbsp;Ω';
+   $('aStoff').textContent = s.n;
+   $('aAlpha').innerHTML = komma(String(s.a)) + ' in 1/K';
+   $('aNach').innerHTML = 'Nachrechnung der Einstellung: Δ<i>ϑ</i> = ' + minus(ganz(t)) + ' °C − 20 °C = ' + minus(ganz(dt)) + ' K; ' +
+     'Δ<i>R</i> = ' + komma(String(s.a)) + ' · ' + ganz(R1) + ' Ω · ' + minus(ganz(dt)) + ' = ' + minus(komma(dR.toFixed(4))) + ' Ω; ' +
+     '<i>R</i><sub>2</sub> = ' + mess(R) + ' Ω';
+   Array.prototype.forEach.call($('stoffe').children, function(b, i){
+     b.setAttribute('aria-pressed', i === gewaehlt ? 'true' : 'false'); });
+   zeichne(s, R1, t, R);
+ }
+ STOFFE.forEach(function(s, i){
+   var b = document.createElement('button');
+   b.type = 'button'; b.textContent = s.n; b.setAttribute('aria-pressed', 'false');
+   b.addEventListener('click', function(){ gewaehlt = i; tick(); });
+   $('stoffe').appendChild(b);
+ });
+ ['rR1', 'rT'].forEach(function(id){ ['input', 'change'].forEach(function(ev){ $(id).addEventListener(ev, tick); }); });
+ $('bReset').addEventListener('click', function(){
+   $('rR1').value = START.R1; $('rT').value = START.t; gewaehlt = START.stoff; tick();
+ });
+ window.addEventListener('resize', function(){ schrift(); setup(); tick(); });
+ // Startstellung aus den startwerten (Kupfer, 100 Ω, 20 °C: keine Aenderung sichtbar), nicht aus den loesungswerten
+ $('rR1').value = START.R1; $('rT').value = START.t;
+ schrift(); setup(); tick();
+})();
+</script>
