@@ -136,6 +136,7 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
  var gewaehlt = START.stoff;
  function komma(s){ return String(s).replace('.', ','); }
  // 25.09.2026 (PRUEF2509c N9): kaufmaennisch runden, fuer Delta R und R2 gleich; toFixed rundete 10,585 auf 10,58
+ function genau4(x){ return komma(String(Math.round(x * 1e4) / 1e4)); }   // genaue Werte ohne Gleitkomma-Reste
  function mess(x){ return komma((Math.round(x * 100 + 1e-7) / 100).toFixed(2)); }   // Messgeraet: zwei Nachkommastellen
  function ganz(x){ return komma(String(Math.round(x*100)/100)); }
  function minus(s){ return String(s).replace('-', '−'); }
@@ -220,8 +221,10 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
    var PK = '<span class="bruch"><span class="z">1</span><span class="n">K</span></span>';
    var dtF = dt < 0 ? '(' + minus(ganz(dt)) + '&nbsp;K)' : ganz(dt) + '&nbsp;K';
    $('aNach').innerHTML = 'Nachrechnung der Einstellung:<br>Δ<i>ϑ</i> = ' + minus(ganz(t)) + '&nbsp;°C − 20&nbsp;°C = ' + minus(ganz(dt)) + '&nbsp;K<br>' +
-     'Δ<i>R</i> = ' + komma(String(s.a)) + '&nbsp;' + PK + ' · ' + ganz(R1) + '&nbsp;Ω · ' + dtF + ' = ' + minus(mess(dR)) + '&nbsp;Ω<br>' +
-     '<i>R</i><sub>2</sub> = ' + ganz(R1) + '&nbsp;Ω + ' + (dR < 0 ? '(' + minus(mess(dR)) + '&nbsp;Ω)' : mess(dR) + '&nbsp;Ω') + ' = ' + mess(R) + '&nbsp;Ω';
+     // 25.09.2026 (PRUEF2509d N12): Delta R und R2 genau (bis vier Nachkommastellen, die Werte gehen auf), nur das Ergebnis gerundet
+     'Δ<i>R</i> = ' + komma(String(s.a)) + '&nbsp;' + PK + ' · ' + ganz(R1) + '&nbsp;Ω · ' + dtF + ' = ' + minus(genau4(dR)) + '&nbsp;Ω<br>' +
+     '<i>R</i><sub>2</sub> = ' + ganz(R1) + '&nbsp;Ω + ' + (dR < 0 ? '(' + minus(genau4(dR)) + '&nbsp;Ω)' : genau4(dR) + '&nbsp;Ω') + ' = ' + genau4(R) + '&nbsp;Ω' +
+     (Math.abs(R * 100 - Math.round(R * 100)) > 1e-6 ? ' ≈ ' + mess(R) + '&nbsp;Ω' : '');
    Array.prototype.forEach.call($('stoffe').children, function(b, i){
      b.setAttribute('aria-pressed', i === gewaehlt ? 'true' : 'false'); });
    zeichne(s, R1, t, R);

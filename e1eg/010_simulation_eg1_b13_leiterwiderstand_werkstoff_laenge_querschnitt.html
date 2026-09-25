@@ -134,8 +134,10 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
  var gewaehlt = START.stoff;
  function komma(s){ return String(s).replace('.', ','); }
  function drei(x){ // drei geltende Ziffern, wie ein Messgeraet
-   var s = x.toPrecision(3);
-   if(s.indexOf('e') >= 0) s = x.toFixed(5);
+   // 25.09.2026 (PRUEF2509d): kaufmaennisch runden; toPrecision rundete Haelften wie 0,0445 wegen der Binaerdarstellung ab
+   var y = x * (1 + 1e-12);
+   var s = y.toPrecision(3);
+   if(s.indexOf('e') >= 0) s = y.toFixed(5);
    return komma(s);
  }
  function zahl(x){ return komma(String(Math.round(x*100)/100)); }
