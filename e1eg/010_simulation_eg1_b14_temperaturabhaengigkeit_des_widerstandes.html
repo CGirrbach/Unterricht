@@ -48,6 +48,8 @@ canvas{width:100%;height:auto;display:block;background:#fff;border:1px solid var
 .regler label{font-weight:700;min-width:170px}
 .regler input[type=range]{flex:1 1 160px;height:44px;accent-color:var(--kupfer);cursor:pointer}
 .rval{font-weight:700;min-width:74px;text-align:right;font-variant-numeric:tabular-nums}
+button.pm{font:inherit;font-size:20px;font-weight:700;min-width:44px;min-height:44px;border:1.4px solid var(--linie);background:#fff;color:var(--ink);cursor:pointer}
+@media (max-width:520px){.regler label{flex:1 0 100%}}
 .tasten{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 2px}
 button.tk{font:inherit;font-weight:700;border:1.4px solid var(--rot);background:#fff;color:var(--rot);
  padding:8px 14px;min-height:44px;cursor:pointer}
@@ -92,18 +94,22 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
  <div class="anzeige"><span class="lab">Widerstandsmessgerät:</span> <span class="wert"><i>R</i> = <span id="aR">100,00&nbsp;Ω</span></span></div>
  <div class="regler">
   <label for="rR1">Widerstand bei 20&nbsp;°C</label>
+  <button class="pm" type="button" data-ziel="rR1" data-schritt="-10" aria-label="Widerstand 10 Ohm kleiner">−</button>
   <input id="rR1" type="range" min="10" max="200" value="100" step="10" aria-label="Widerstand bei 20 Grad Celsius in Ohm">
+  <button class="pm" type="button" data-ziel="rR1" data-schritt="10" aria-label="Widerstand 10 Ohm größer">+</button>
   <span class="rval" id="wR1">100 Ω</span>
  </div>
  <div class="regler">
   <label for="rT">Temperatur des Ölbads</label>
+  <button class="pm" type="button" data-ziel="rT" data-schritt="-5" aria-label="Temperatur 5 Grad kleiner">−</button>
   <input id="rT" type="range" min="-20" max="200" value="20" step="5" aria-label="Temperatur in Grad Celsius">
+  <button class="pm" type="button" data-ziel="rT" data-schritt="5" aria-label="Temperatur 5 Grad größer">+</button>
   <span class="rval" id="wT">20 °C</span>
  </div>
  <div class="tasten"><button class="tk" id="bReset" type="button">Zurücksetzen</button></div>
  <table class="ab">
-  <tr><th>Werkstoff</th><th>Temperaturkoeffizient <i>α</i> (Tabellenbuch S.&nbsp;559)</th></tr>
-  <tr><td id="aStoff">Kupfer</td><td class="z" id="aAlpha">0,0039 in 1/K</td></tr>
+  <tr><th>Werkstoff</th><th>Temperaturkoeffizient <i>α</i> in 1/K (Tabellenbuch S.&nbsp;559)</th></tr>
+  <tr><td id="aStoff">Kupfer</td><td class="z" id="aAlpha">0,0039</td></tr>
  </table>
 </div>
 
@@ -207,10 +213,10 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
    $('wT').textContent = minus(ganz(t)) + ' °C';
    $('aR').innerHTML = mess(R) + '&nbsp;Ω';
    $('aStoff').textContent = s.n;
-   $('aAlpha').innerHTML = komma(String(s.a)) + ' in 1/K';
-   $('aNach').innerHTML = 'Nachrechnung der Einstellung: Δ<i>ϑ</i> = ' + minus(ganz(t)) + ' °C − 20 °C = ' + minus(ganz(dt)) + ' K; ' +
-     'Δ<i>R</i> = ' + komma(String(s.a)) + ' · ' + ganz(R1) + ' Ω · ' + minus(ganz(dt)) + ' = ' + minus(komma(dR.toFixed(4))) + ' Ω; ' +
-     '<i>R</i><sub>2</sub> = ' + mess(R) + ' Ω';
+   $('aAlpha').innerHTML = komma(String(s.a));
+   $('aNach').innerHTML = 'Nachrechnung der Einstellung: Δ<i>ϑ</i>&nbsp;=&nbsp;' + minus(ganz(t)) + '&nbsp;°C&nbsp;−&nbsp;20&nbsp;°C&nbsp;=&nbsp;' + minus(ganz(dt)) + '&nbsp;K; ' +
+     'Δ<i>R</i>&nbsp;=&nbsp;' + komma(String(s.a)) + '&nbsp;1/K&nbsp;·&nbsp;' + ganz(R1) + '&nbsp;Ω&nbsp;·&nbsp;' + minus(ganz(dt)) + '&nbsp;K&nbsp;=&nbsp;' + minus(mess(dR)) + '&nbsp;Ω; ' +
+     '<i>R</i><sub>2</sub>&nbsp;=&nbsp;' + mess(R) + '&nbsp;Ω';
    Array.prototype.forEach.call($('stoffe').children, function(b, i){
      b.setAttribute('aria-pressed', i === gewaehlt ? 'true' : 'false'); });
    zeichne(s, R1, t, R);
@@ -224,6 +230,13 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
  ['rR1', 'rT'].forEach(function(id){ ['input', 'change'].forEach(function(ev){ $(id).addEventListener(ev, tick); }); });
  $('bReset').addEventListener('click', function(){
    $('rR1').value = START.R1; $('rT').value = START.t; gewaehlt = START.stoff; tick();
+ });
+ // ★ 25.09.2026 (PRUEF2509_Block_14, K12): Schrittknoepfe, am Handy trifft der Daumen 30, 40, 60 °C schwer
+ Array.prototype.forEach.call(document.querySelectorAll('button.pm'), function(b){
+   b.addEventListener('click', function(){
+     var el = $(b.getAttribute('data-ziel')), v = parseFloat(el.value) + parseFloat(b.getAttribute('data-schritt'));
+     el.value = Math.max(parseFloat(el.min), Math.min(parseFloat(el.max), v)); tick();
+   });
  });
  window.addEventListener('resize', function(){ schrift(); setup(); tick(); });
  // Startstellung aus den startwerten (Kupfer, 100 Ω, 20 °C: keine Aenderung sichtbar), nicht aus den loesungswerten
