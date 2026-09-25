@@ -44,19 +44,21 @@ canvas{width:100%;height:auto;display:block;background:#fff;border:1px solid var
 .regler label{font-weight:700;min-width:170px}
 .regler input[type=range]{flex:1 1 160px;height:44px;accent-color:var(--kupfer);cursor:pointer}
 .rval{font-weight:700;min-width:74px;text-align:right;font-variant-numeric:tabular-nums}
+button.pm{font:inherit;font-size:20px;font-weight:700;min-width:44px;min-height:44px;border:1.4px solid var(--linie);background:#fff;color:var(--ink);cursor:pointer}
 .tasten{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 2px}
 button.tk{font:inherit;font-weight:700;border:1.4px solid var(--rot);background:#fff;color:var(--rot);
  padding:8px 14px;min-height:44px;cursor:pointer}
 table.ab{border-collapse:collapse;margin-top:12px;font-size:15px}
 table.ab th,table.ab td{border:1px solid var(--linie);padding:6px 10px;text-align:left}
-table.ab th{background:var(--hell);font-size:12.5px;letter-spacing:.04em;text-transform:uppercase}
+table.ab th{background:var(--hell);font-size:13px}
 table.ab td.z{text-align:right;font-variant-numeric:tabular-nums}
 details{margin-top:14px;border:1px solid var(--linie);padding:6px 10px;background:#fff}
 details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2px;min-height:44px}
 .formel{background:#fff;border:1.6px solid var(--kupfer);border-left:6px solid var(--kupfer);padding:12px 16px;margin:10px 0}
 .formel .cap{font-weight:700;color:var(--kupfer);display:block;margin-bottom:6px}
 .formelzeile{font-size:22px;margin:6px 0}
-.bruch{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;line-height:1.05;margin:0 .12em;font-size:.62em}
+.bruch{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;line-height:1.05;margin:0 .12em;font-size:.8em}
+.bruch .bruch{font-size:.85em}
 .bruch .z{border-bottom:1.6px solid currentColor;padding:0 .35em}
 .bruch .n{padding:0 .35em}
 .quelle{font-size:13px;color:var(--grau);border-left:3px solid var(--kupfer);padding-left:10px;margin-top:20px}
@@ -90,18 +92,22 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
  <div class="anzeige">Widerstandsmessgerät: <i>R</i> = <span id="aR">0,119&nbsp;Ω</span></div>
  <div class="regler">
   <label for="rL">Drahtlänge <i>l</i></label>
+  <button class="pm" type="button" data-ziel="rL" data-schritt="-1" aria-label="Länge 1 m kürzer">−</button>
   <input id="rL" type="range" min="1" max="100" value="40" step="1" aria-label="Länge in Meter">
+  <button class="pm" type="button" data-ziel="rL" data-schritt="1" aria-label="Länge 1 m länger">+</button>
   <span class="rval" id="wL">40 m</span>
  </div>
  <div class="regler">
   <label for="rA">Querschnitt <i>A</i></label>
+  <button class="pm" type="button" data-ziel="rA" data-schritt="-0.5" aria-label="Querschnitt 0,5 mm² kleiner">−</button>
   <input id="rA" type="range" min="0.5" max="10" value="6" step="0.5" aria-label="Querschnitt in Quadratmillimeter">
+  <button class="pm" type="button" data-ziel="rA" data-schritt="0.5" aria-label="Querschnitt 0,5 mm² größer">+</button>
   <span class="rval" id="wA">6 mm²</span>
  </div>
  <div class="tasten"><button class="tk" id="bReset" type="button">Zurücksetzen</button></div>
  <table class="ab">
-  <tr><th>Werkstoff</th><th>spezifischer Widerstand <i>ϱ</i> (Tabellenbuch S.&nbsp;559)</th></tr>
-  <tr><td id="aStoff">Kupfer</td><td class="z" id="aRho">0,0178&nbsp;Ω·mm²/m</td></tr>
+  <tr><th>Werkstoff</th><th>spezifischer Widerstand <i>ϱ</i> in <span class="bruch"><span class="z">Ω·mm²</span><span class="n">m</span></span> (Tabellenbuch S.&nbsp;559)</th></tr>
+  <tr><td id="aStoff">Kupfer</td><td class="z" id="aRho">0,0178</td></tr>
  </table>
 </div>
 
@@ -192,9 +198,10 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
    $('wA').textContent = zahl(A) + ' mm²';
    $('aR').innerHTML = drei(R) + '&nbsp;Ω';
    $('aStoff').textContent = s.n;
-   $('aRho').innerHTML = komma(String(s.rho)) + '&nbsp;Ω·mm²/m';
-   $('aNach').innerHTML = 'Nachrechnung der Einstellung: <i>R</i> = ' + komma(String(s.rho)) + ' Ω·mm²/m · ' + zahl(l) +
-     ' m : ' + zahl(A) + ' mm² = ' + drei(R) + ' Ω';
+   $('aRho').innerHTML = komma(String(s.rho));
+   var EH = '<span class="bruch"><span class="z">Ω·mm²</span><span class="n">m</span></span>';
+   $('aNach').innerHTML = 'Nachrechnung der Einstellung: <i>R</i> = <span class="bruch"><span class="z">' + komma(String(s.rho)) + '&nbsp;' + EH + ' · ' + zahl(l) +
+     '&nbsp;m</span><span class="n">' + zahl(A) + '&nbsp;mm²</span></span> = ' + drei(R) + '&nbsp;Ω';
    Array.prototype.forEach.call($('stoffe').children, function(b, i){
      b.setAttribute('aria-pressed', i === gewaehlt ? 'true' : 'false'); });
    zeichne(s, l, A, R);
@@ -206,6 +213,13 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
    $('stoffe').appendChild(b);
  });
  ['rL', 'rA'].forEach(function(id){ ['input', 'change'].forEach(function(ev){ $(id).addEventListener(ev, tick); }); });
+ // ★ 25.09.2026 (PRUEF2509_Block_13, K9): am Handy trifft der Daumen 10, 20, 30 m schwer; Schrittknoepfe
+ Array.prototype.forEach.call(document.querySelectorAll('button.pm'), function(b){
+   b.addEventListener('click', function(){
+     var el = $(b.getAttribute('data-ziel')), v = parseFloat(el.value) + parseFloat(b.getAttribute('data-schritt'));
+     v = Math.max(parseFloat(el.min), Math.min(parseFloat(el.max), Math.round(v * 2) / 2)); el.value = v; tick();
+   });
+ });
  $('bReset').addEventListener('click', function(){
    $('rL').value = START.l; $('rA').value = START.A; gewaehlt = START.stoff; tick();
  });
