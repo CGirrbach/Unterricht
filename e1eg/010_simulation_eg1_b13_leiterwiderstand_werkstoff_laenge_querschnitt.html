@@ -141,6 +141,13 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
    return komma(s);
  }
  function zahl(x){ return komma(String(Math.round(x*100)/100)); }
+ // 25.09.2026 (PRUEF2509e N1): Nachrechnung wie in B14. Geht der Wert in fuenf Nachkommastellen auf, steht er mit „=“;
+ //   sonst die ersten fuenf geltenden Ziffern abgeschnitten mit „…“. Das gerundete Messergebnis folgt mit „≈“.
+ function genau(x){
+   if (Math.abs(x * 1e5 - Math.round(x * 1e5)) < 1e-6) return {t: komma(String(Math.round(x * 1e5) / 1e5)), exakt: true};
+   var k = 4 - Math.floor(Math.log10(x)), f = Math.pow(10, k);
+   return {t: komma((Math.floor(x * f + 1e-9) / f).toFixed(k)) + '…', exakt: false};
+ }
  // Schrift waechst am schmalen Bildschirm mit (Zeichenflaeche 480 logische Pixel)
  var fs = 1;
  function schrift(){ var w = $('cDraht').clientWidth || 480; fs = Math.max(1, Math.min(1.6, 460 / w)); }
@@ -203,7 +210,10 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
    $('aRho').innerHTML = komma(String(s.rho));
    var EH = '<span class="bruch"><span class="z">Ω·mm²</span><span class="n">m</span></span>';
    $('aNach').innerHTML = 'Nachrechnung der Einstellung: <i>R</i> = <span class="bruch"><span class="z">' + komma(String(s.rho)) + '&nbsp;' + EH + ' · ' + zahl(l) +
-     '&nbsp;m</span><span class="n">' + zahl(A) + '&nbsp;mm²</span></span> = ' + drei(R) + '&nbsp;Ω';
+     '&nbsp;m</span><span class="n">' + zahl(A) + '&nbsp;mm²</span></span> = ' + (function(){
+       var g = genau(R), d = drei(R);
+       if (g.exakt && parseFloat(d.replace(',', '.')) === parseFloat(g.t.replace(',', '.'))) return d + '&nbsp;Ω';
+       return g.t + '&nbsp;Ω ≈ ' + d + '&nbsp;Ω'; })();
    Array.prototype.forEach.call($('stoffe').children, function(b, i){
      b.setAttribute('aria-pressed', i === gewaehlt ? 'true' : 'false'); });
    zeichne(s, l, A, R);
