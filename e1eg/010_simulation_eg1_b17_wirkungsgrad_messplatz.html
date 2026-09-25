@@ -15,7 +15,7 @@
  "thema": "Wirkungsgrad eines Motors bei verschiedener Belastung, Wirkungsgradkette Netzteil und Motor",
  "modell": "P_v = 20 W + P_ab^2/300 W; P_zu = P_ab + P_v; eta = P_ab/P_zu; Netzteil eta_N = 0,8, P_Netz = P_zu/0,8 (Tabellenbuch S. 26, Formel 8, 9, 10)",
  "quelle": "Tabellenbuch 32. A., S. 26",
- "startwerte": { "P_ab": 0, "netzteil": false },
+ "startwerte": { "P_ab": 10, "netzteil": false },
  "loesungswerte": { "P_ab": 60, "netzteil": true }
 }
 </script>
@@ -85,7 +85,7 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
  Stellen Sie mit dem Regler oder den Knöpfen „−“ und „+“ die Belastung ein: So viel Leistung muss der Motor an der Bremse abgeben.
  Auf dem Leistungsschild des Motors steht die Bemessungsleistung 90&nbsp;W; bei 150&nbsp;W ist er überlastet.
  Der Leistungsmesser zeigt, wie viel Leistung der Motor dafür aufnimmt. Mit „Netzteil davor“ schalten Sie ein Netzteil vor den Motor;
- dann zeigt ein zweiter Leistungsmesser die Leistung aus dem Netz. Sagen Sie jedes Ergebnis zuerst voraus, dann messen Sie.
+ dann zeigt ein zweiter Leistungsmesser die Leistung aus dem Netz.
  Mit <b>„Zurücksetzen“</b> kehren Sie zur Grundstellung zurück. <b>Sozialform:</b> Partnerarbeit, einer stellt ein, einer protokolliert.
  <b>Zeit:</b> rund 17&nbsp;min für Aufgabe&nbsp;3 bis 5. <b>Fertig, wenn</b> Aufgabe&nbsp;3 bis 5 des Arbeitsblatts ausgefüllt sind.
 </div>
@@ -101,9 +101,9 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
  <div class="regler">
   <label for="rB">Belastung <i>P</i><sub>ab</sub></label>
   <button class="pm" type="button" data-ziel="rB" data-schritt="-10" aria-label="Belastung 10 W kleiner">−</button>
-  <input id="rB" type="range" min="0" max="150" value="0" step="10" aria-label="abgegebene Leistung in Watt">
+  <input id="rB" type="range" min="0" max="150" value="10" step="10" aria-label="abgegebene Leistung in Watt">
   <button class="pm" type="button" data-ziel="rB" data-schritt="10" aria-label="Belastung 10 W größer">+</button>
-  <span class="rval" id="wB">0 W</span>
+  <span class="rval" id="wB">10 W</span>
  </div>
  <div class="tasten"><button class="tk" id="bReset" type="button">Zurücksetzen</button></div>
 </div>
@@ -117,13 +117,13 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
  </div>
 </details>
 
-<div class="quelle">Die Formeln stehen hinter „Ergebnis anzeigen“. Das Modell des Motors ist ausgedacht, seine Zahlen sind so gewählt, dass man gut rechnen kann; alle Anzeigen sind mit der Hand nachgerechnet.</div>
+<div class="quelle">Das Modell des Motors ist ausgedacht, seine Zahlen sind so gewählt, dass man gut rechnen kann; alle Anzeigen sind mit der Hand nachgerechnet.</div>
 
 <script>
 (function(){
  "use strict";
  var $ = function(id){ return document.getElementById(id); };
- var START = {B:0, netz:false};
+ var START = {B:10, netz:false};
  var ETA_N = 0.8, P0 = 20, K = 300;
  var netz = START.netz;
  function komma(s){ return String(s).replace('.', ','); }
@@ -201,9 +201,10 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
      (Math.abs(eta * 1e4 - Math.round(eta * 1e4)) < 1e-6 ? '= ' : '≈ ') + zahl(eta, 4);
    if (netz) {
      var eg = Pab / Pnetz;
-     t += '; Netzteil <i>η</i><sub>N</sub> = <span class="bruch"><span class="z">' + zahl(Pzu, 2) + '&nbsp;W</span><span class="n">' + zahl(Pnetz, 2) + '&nbsp;W</span></span> = 0,8; ' +
+     t += '; Netzteil <i>η</i><sub>N</sub> = <span class="bruch"><span class="z">' + zahl(Pzu, 2) + '&nbsp;W</span><span class="n">' + zahl(Pnetz, 2) + '&nbsp;W</span></span> ' + (Math.abs(Pzu * 100 - Math.round(Pzu * 100)) < 1e-6 ? '= ' : '≈ ') + '0,8; ' +
        'gesamt <i>η</i> = <span class="bruch"><span class="z">' + zahl(Pab, 0) + '&nbsp;W</span><span class="n">' + zahl(Pnetz, 2) + '&nbsp;W</span></span> ' +
-       (Math.abs(eg * 1e4 - Math.round(eg * 1e4)) < 1e-6 ? '= ' : '≈ ') + zahl(eg, 4) + ' = 0,8 · ' + zahl(eta, 4).replace(/$/, '') + (Math.abs(eta * 1e4 - Math.round(eta * 1e4)) < 1e-6 ? '' : '…');
+       (Math.abs(Pzu * 100 - Math.round(Pzu * 100)) < 1e-6 ? '= ' : '≈ ') + '0,8 · <span class="bruch"><span class="z">' + zahl(Pab, 0) + '&nbsp;W</span><span class="n">' + zahl(Pzu, 2) + '&nbsp;W</span></span> ' +
+       (Math.abs(eg * 1e4 - Math.round(eg * 1e4)) < 1e-6 ? '= ' : '≈ ') + zahl(eg, 4);
    }
    $('aNach').innerHTML = t;
    zeichne(Pnetz, Pzu, Pab);
@@ -219,7 +220,7 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
  });
  $('bReset').addEventListener('click', function(){ netz = START.netz; $('rB').value = START.B; tick(); });
  window.addEventListener('resize', function(){ schrift(); setup(); tick(); });
- // Startstellung aus den startwerten (Leerlauf, ohne Netzteil), nicht aus den loesungswerten
+ // Startstellung aus den startwerten (10 W, in keiner Aufgabe verwendet, ohne Netzteil), nicht aus den loesungswerten
  $('rB').value = START.B;
  schrift(); setup(); tick();
 })();
