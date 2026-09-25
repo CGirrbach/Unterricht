@@ -129,6 +129,7 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
  function komma(s){ return String(s).replace('.', ','); }
  function rund(x, st){ var f = Math.pow(10, st); return Math.round(x * f + 1e-9) / f; }
  function zahl(x, st){ return komma(String(rund(x, st))); }
+ function vier(x){ return x === 0 ? "0" : komma(rund(x, 4).toFixed(4)); }   // Anteile immer mit vier Nachkommastellen
  function watt(x){ return zahl(x, 2) + '&nbsp;W'; }
  function wattT(x){ return zahl(x, 2) + ' W'; }
  var fs = 1;
@@ -198,13 +199,13 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
    var eta = Pab / Pzu;
    var t = 'Nachrechnung der Einstellung: <i>P</i><sub>v</sub> = ' + zahl(Pzu, 2) + '&nbsp;W − ' + zahl(Pab, 0) + '&nbsp;W = ' + zahl(Pv, 2) + '&nbsp;W; ' +
      '<i>η</i> = <span class="bruch"><span class="z">' + zahl(Pab, 0) + '&nbsp;W</span><span class="n">' + zahl(Pzu, 2) + '&nbsp;W</span></span> ' +
-     (Math.abs(eta * 1e4 - Math.round(eta * 1e4)) < 1e-6 ? '= ' : '≈ ') + zahl(eta, 4);
+     (Math.abs(eta * 1e4 - Math.round(eta * 1e4)) < 1e-6 ? '= ' : '≈ ') + vier(eta);
    if (netz) {
      var eg = Pab / Pnetz;
      t += '; Netzteil <i>η</i><sub>N</sub> = <span class="bruch"><span class="z">' + zahl(Pzu, 2) + '&nbsp;W</span><span class="n">' + zahl(Pnetz, 2) + '&nbsp;W</span></span> ' + (Math.abs(Pzu * 100 - Math.round(Pzu * 100)) < 1e-6 ? '= ' : '≈ ') + '0,8; ' +
        'gesamt <i>η</i> = <span class="bruch"><span class="z">' + zahl(Pab, 0) + '&nbsp;W</span><span class="n">' + zahl(Pnetz, 2) + '&nbsp;W</span></span> ' +
        (Math.abs(Pzu * 100 - Math.round(Pzu * 100)) < 1e-6 ? '= ' : '≈ ') + '0,8 · <span class="bruch"><span class="z">' + zahl(Pab, 0) + '&nbsp;W</span><span class="n">' + zahl(Pzu, 2) + '&nbsp;W</span></span> ' +
-       (Math.abs(eg * 1e4 - Math.round(eg * 1e4)) < 1e-6 ? '= ' : '≈ ') + zahl(eg, 4);
+       (Math.abs(eg * 1e4 - Math.round(eg * 1e4)) < 1e-6 ? '= ' : '≈ ') + vier(eg);
    }
    $('aNach').innerHTML = t;
    zeichne(Pnetz, Pzu, Pab);
