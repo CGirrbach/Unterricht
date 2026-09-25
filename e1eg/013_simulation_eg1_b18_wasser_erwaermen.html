@@ -1,0 +1,238 @@
+<!-- lehrmaterial -->
+<!-- materialtyp: simulation -->
+<!-- sim_bearbeitung: pflicht -->
+<!-- EG1-B18 · Elektrowärme-Messplatz (Neubau 25.09.2026): Wasser wird von 20 °C auf eine einstellbare Endtemperatur erwärmt,
+     wahlweise im gut isolierten Laborgefäß (Tauchsieder 1000 W, Verluste vernachlässigt) oder im Topf auf der Kochplatte (1500 W,
+     Wärmenutzungsgrad 0,8). Angezeigt werden nur Thermometer, Zähler (zugeführte elektrische Arbeit in kJ) und Heizzeit.
+     Modell: Q_nutz = m · c · Δϑ mit c = 4,19 kJ/(kg·K) (Fachkunde S. 47, Tabellenbuch S. 29, Formel 5); W = Q_S = Q_nutz/ζ; t = W/P.
+     Formeln hinter „Ergebnis anzeigen“. -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EG1-B18: Wasser erwärmen</title>
+
+<script type="application/json" id="sim-meta">
+{
+ "block": "EG1-B18",
+ "thema": "Wärmemenge beim Erwärmen von Wasser, Abhängigkeit von Masse und Temperaturdifferenz, Wärmenutzungsgrad",
+ "modell": "Q_nutz = m * 4,19 kJ/(kg*K) * (theta2 - 20 °C); W = Q_nutz/zeta, zeta = 1 (Laborgefäß) bzw. 0,8 (Topf); t = W/P, P = 1 kW bzw. 1,5 kW",
+ "quelle": "Fachkunde S. 47; Tabellenbuch 32. A., S. 29 (Formel 5) und S. 36 (Formel 9)",
+ "startwerte": { "gefaess": "labor", "m": 1, "theta2": 20 },
+ "loesungswerte": { "gefaess": "topf", "m": 1, "theta2": 60 }
+}
+</script>
+
+<style>.bruch{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;line-height:1.05;margin:0 .12em;font-size:.8em}.bruch .z{border-bottom:1.6px solid currentColor;padding:0 .35em}.bruch .n{padding:0 .35em}:root{
+ --ink:#1A2530; --kupfer:#A34E0E; --kupferhell:#F5EBDF; --rot:#B23A33;
+ --gruen:#2F7D62; --gruenhell:#EAF3EC; --linie:#9AA5AE; --grau:#5A666F; --hell:#F4F6F8;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:"Noto Sans",system-ui,Arial,sans-serif;color:var(--ink);line-height:1.45;background:#f4f6f8;
+ padding:18px 14px 40px;max-width:980px;margin:0 auto}
+.kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0 10px;margin-bottom:14px}
+.kopf .reihe{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--kupfer);font-weight:700}
+.kopf h1{font-size:22px;margin:4px 0 0}
+p{margin:8px 0}
+i{font-style:italic}
+.ziel,.methode{background:var(--kupferhell);border-left:5px solid var(--kupfer);padding:10px 14px;margin:12px 0}
+.ziel .cap,.methode .cap{font-weight:700;color:var(--kupfer);display:block;margin-bottom:2px}
+.sim{border:1.4px solid var(--ink);background:#fff;padding:16px;margin:12px 0}
+.wahl{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.wahl span.l{font-weight:700;align-self:center;margin-right:4px}
+.wahl button{font:inherit;font-size:15px;padding:9px 16px;min-height:44px;min-width:72px;cursor:pointer;
+ border:1.4px solid var(--linie);background:#fff;color:var(--ink)}
+.wahl button[aria-pressed="true"]{border-color:var(--kupfer);background:var(--kupferhell);color:var(--kupfer);font-weight:700}
+canvas{width:100%;height:auto;display:block;background:#fff;border:1px solid var(--linie);touch-action:manipulation}
+.bildunterschrift{font-size:12.5px;color:var(--grau);margin:4px 0 0}
+.anzeige{font-size:26px;font-weight:700;margin:10px 0 2px;min-height:1.4em;white-space:nowrap}
+.anzeige .wert{white-space:nowrap}
+@media (max-width:420px){.anzeige{font-size:22px;white-space:normal;min-height:2.6em;line-height:1.3}.anzeige .lab{display:block;font-size:16px}}
+.regler{display:flex;align-items:center;gap:10px;margin:10px 0 2px;flex-wrap:wrap}
+.regler label{font-weight:700;min-width:170px}
+@media (max-width:520px){.regler label{flex:1 0 100%}}
+.regler input[type=range]{flex:1 1 140px;height:44px;accent-color:var(--kupfer);cursor:pointer}
+.rval{font-weight:700;min-width:74px;text-align:right;font-variant-numeric:tabular-nums}
+button.pm{font:inherit;font-size:20px;font-weight:700;min-width:44px;min-height:44px;border:1.4px solid var(--linie);background:#fff;color:var(--ink);cursor:pointer}
+.tasten{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 2px}
+button.tk{font:inherit;font-weight:700;border:1.4px solid var(--rot);background:#fff;color:var(--rot);
+ padding:8px 14px;min-height:44px;cursor:pointer}
+details{margin-top:14px;border:1px solid var(--linie);padding:6px 10px;background:#fff}
+details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2px;min-height:44px}
+.formel{background:#fff;border:1.6px solid var(--kupfer);border-left:6px solid var(--kupfer);padding:12px 16px;margin:10px 0}
+.formel .cap{font-weight:700;color:var(--kupfer);display:block;margin-bottom:6px}
+.formelzeile{font-size:22px;margin:6px 0}
+.formelzeile span{white-space:nowrap;margin-right:1.4em}
+.schalter{display:flex;align-items:center;gap:10px;margin:10px 0}
+.schalter button{font:inherit;font-size:15px;padding:9px 16px;min-height:44px;cursor:pointer;border:1.4px solid var(--linie);background:#fff;color:var(--ink)}
+.schalter button[aria-pressed="true"]{border-color:var(--kupfer);background:var(--kupferhell);color:var(--kupfer);font-weight:700}
+.quelle{font-size:13px;color:var(--grau);border-left:3px solid var(--kupfer);padding-left:10px;margin-top:20px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="kopf">
+ <div class="reihe">E1EG · Lernfeld 1 · Gleichstrom-Grundlagen · Block EG1-B18</div>
+ <h1>Wasser erwärmen</h1>
+</div>
+
+<div class="ziel">
+ <span class="cap">Das sollen Sie hier selbst herausfinden</span>
+ Wie viel elektrische Energie braucht man, um Wasser zu erwärmen? Wie hängt sie von der Wassermenge und vom Temperaturanstieg ab?
+ Und was ändert sich, wenn ein Teil der Wärme nicht im Wasser ankommt? Die Aufträge stehen auf dem Arbeitsblatt (Aufgabe&nbsp;3 bis 6).
+</div>
+
+<div class="methode">
+ <span class="cap">So bedienen Sie den Messplatz</span>
+ Wählen Sie das Gefäß und die Wassermenge (1&nbsp;l Wasser hat die Masse 1&nbsp;kg). Das Wasser beginnt immer bei 20&nbsp;°C.
+ Stellen Sie mit dem Regler oder den Knöpfen „−“ und „+“ die Endtemperatur ein. Der Zähler zeigt die zugeführte elektrische Arbeit in kJ,
+ dazu steht die Heizzeit. Sagen Sie jedes Ergebnis zuerst voraus, dann messen Sie. Mit <b>„Zurücksetzen“</b> kehren Sie zur Grundstellung zurück.
+ <b>Sozialform:</b> Partnerarbeit, einer stellt ein, einer protokolliert. <b>Zeit:</b> rund 22&nbsp;min für Aufgabe&nbsp;3 bis 6.
+ <b>Fertig, wenn</b> Aufgabe&nbsp;3 bis 6 des Arbeitsblatts ausgefüllt sind.
+</div>
+
+<div class="sim">
+ <canvas id="cMess" data-quelle="eigene Darstellung: Laborgefaess mit Tauchsieder oder Topf auf der Kochplatte, Thermometer, Zaehler" width="960" height="480"
+  aria-label="Ein Gefaess mit Wasser wird elektrisch beheizt. Rechts ein Thermometer, oben der Zaehler fuer die zugefuehrte elektrische Arbeit."></canvas>
+ <p class="bildunterschrift">Schematisch: Beim Topf auf der Kochplatte geht ein Teil der Wärme an die Umgebung (rote Pfeile).</p>
+ <div class="wahl" role="group" aria-label="Gefäß"><span class="l">Gefäß:</span>
+  <button type="button" data-g="labor" aria-pressed="true">Laborgefäß (gut isoliert, Tauchsieder 1000&nbsp;W)</button>
+  <button type="button" data-g="topf" aria-pressed="false">Topf auf der Kochplatte (1500&nbsp;W)</button></div>
+ <div class="wahl" role="group" aria-label="Wassermenge"><span class="l">Wassermenge:</span>
+  <button type="button" data-m="0.5" aria-pressed="false">0,5&nbsp;kg</button>
+  <button type="button" data-m="1" aria-pressed="true">1&nbsp;kg</button>
+  <button type="button" data-m="1.5" aria-pressed="false">1,5&nbsp;kg</button>
+  <button type="button" data-m="2" aria-pressed="false">2&nbsp;kg</button></div>
+ <div class="anzeige"><span class="lab">Thermometer:</span> <span class="wert"><i>ϑ</i><sub>2</sub> = <span id="aT">20&nbsp;°C</span></span></div>
+ <div class="anzeige"><span class="lab">Zähler (zugeführte elektrische Arbeit):</span> <span class="wert"><i>W</i> = <span id="aW">0&nbsp;kJ</span></span></div>
+ <div class="anzeige"><span class="lab">Heizzeit:</span> <span class="wert"><i>t</i> = <span id="aZ">0&nbsp;s</span></span></div>
+ <div class="regler">
+  <label for="rT">Endtemperatur <i>ϑ</i><sub>2</sub></label>
+  <button class="pm" type="button" data-ziel="rT" data-schritt="-5" aria-label="Endtemperatur 5 Kelvin kleiner">−</button>
+  <input id="rT" type="range" min="20" max="100" value="20" step="5" aria-label="Endtemperatur in Grad Celsius">
+  <button class="pm" type="button" data-ziel="rT" data-schritt="5" aria-label="Endtemperatur 5 Kelvin größer">+</button>
+  <span class="rval" id="wT">20 °C</span>
+ </div>
+ <div class="tasten"><button class="tk" id="bReset" type="button">Zurücksetzen</button></div>
+</div>
+
+<details class="ergebnis-aufdecken">
+ <summary><b>Ergebnis anzeigen</b> (erst, wenn Sie Aufgabe&nbsp;3 bis 6 des Arbeitsblatts bearbeitet haben)</summary>
+ <div class="formel">
+  <span class="cap">Wärmemenge und Wärmenutzungsgrad (Tabellenbuch S. 29, Formel 5; S. 36, Formel 9)</span>
+  <div class="formelzeile"><span><i>Q</i> = Δ<i>ϑ</i> · <i>c</i> · <i>m</i></span> <span><i>Q</i><sub>S</sub> = <i>W</i></span> <span><i>ζ</i> = <span class="bruch"><span class="z"><i>Q</i><sub>nutz</sub></span><span class="n"><i>Q</i><sub>S</sub></span></span></span></div>
+  <p>Wasser hat die spezifische Wärmekapazität <i>c</i> = 4,19&nbsp;kJ/(kg·K) (Tabellenbuch S.&nbsp;29).</p>
+  <p id="aNach">Nachrechnung der Einstellung: …</p>
+ </div>
+</details>
+
+<div class="quelle">Die Formeln stehen hinter „Ergebnis anzeigen“. Das Laborgefäß ist so gut isoliert, dass man seine Verluste vernachlässigt. Alle Anzeigen sind mit der Hand nachgerechnet.</div>
+
+<script>
+(function(){
+ "use strict";
+ var $ = function(id){ return document.getElementById(id); };
+ var START = {g:'labor', m:1, T:20};
+ var C = 4.19, T1 = 20;
+ var GEF = {labor: {P: 1.0, zeta: 1.0}, topf: {P: 1.5, zeta: 0.8}};
+ var g = START.g, m = START.m;
+ function komma(s){ return String(s).replace('.', ','); }
+ function rund(x, st){ var f = Math.pow(10, st); return Math.round(x * f + 1e-7) / f; }
+ function zahl(x, st){ return komma(String(rund(x, st))); }
+ function genau(x, st){ return Math.abs(x * Math.pow(10, st) - Math.round(x * Math.pow(10, st))) < 1e-6; }
+ var fs = 1;
+ function schrift(){ var w = $('cMess').clientWidth || 480; fs = Math.max(1, Math.min(1.6, 460 / w)); }
+ function f(px){ return Math.round(px * fs); }
+ var cv = $('cMess'), ctx;
+ function setup(){
+   var dpr = Math.min(window.devicePixelRatio || 1, 2);
+   cv.width = Math.round(480 * dpr); cv.height = Math.round(240 * dpr);
+   ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+ }
+ function pfeil(x1, y1, x2, y2, farbe){
+   ctx.strokeStyle = farbe; ctx.fillStyle = farbe; ctx.lineWidth = 2.2;
+   ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+   var a = Math.atan2(y2 - y1, x2 - x1), l = 8;
+   ctx.beginPath(); ctx.moveTo(x2, y2); ctx.lineTo(x2 - l * Math.cos(a - 0.45), y2 - l * Math.sin(a - 0.45));
+   ctx.lineTo(x2 - l * Math.cos(a + 0.45), y2 - l * Math.sin(a + 0.45)); ctx.closePath(); ctx.fill();
+ }
+ function zeichne(T, W){
+   ctx.clearRect(0, 0, 480, 240);
+   var x0 = 120, x1 = 290, yb = 176, hoehe = 118;
+   var pegel = yb - 12 - (hoehe - 20) * (m / 2);
+   // Wasser, Farbe nach Temperatur
+   ctx.fillStyle = '#BFDDF2';   // Wasser; die Temperatur zeigt nur das Thermometer
+   ctx.fillRect(x0 + 6, pegel, x1 - x0 - 12, yb - 6 - pegel);
+   ctx.strokeStyle = '#1A2530'; ctx.lineWidth = 2;
+   if (g === 'labor') {
+     ctx.strokeRect(x0, yb - hoehe, x1 - x0, hoehe);
+     ctx.setLineDash([4, 3]); ctx.strokeRect(x0 - 8, yb - hoehe - 4, x1 - x0 + 16, hoehe + 10); ctx.setLineDash([]);
+     // Tauchsieder
+     ctx.strokeStyle = '#A34E0E'; ctx.lineWidth = 3;
+     ctx.beginPath(); ctx.moveTo(262, yb - hoehe - 24); ctx.lineTo(262, yb - 22);
+     for (var i = 0; i < 5; i++) { ctx.lineTo(250 - i * 18, yb - 14); ctx.lineTo(241 - i * 18, yb - 22); }
+     ctx.lineTo(160, yb - 22); ctx.lineTo(160, yb - hoehe - 24); ctx.stroke();
+     ctx.fillStyle = '#1A2530'; ctx.font = f(11) + 'px "Noto Sans",Arial'; ctx.textAlign = 'center';
+     ctx.fillText('Laborgefäß, 1000 W', (x0 + x1) / 2, 228);
+   } else {
+     ctx.beginPath(); ctx.moveTo(x0, yb - hoehe); ctx.lineTo(x0, yb); ctx.lineTo(x1, yb); ctx.lineTo(x1, yb - hoehe); ctx.stroke();
+     ctx.fillStyle = '#B23A33'; ctx.fillRect(x0 - 14, yb + 4, x1 - x0 + 28, 10);
+     ctx.fillStyle = '#5A666F'; ctx.fillRect(x0 - 24, yb + 14, x1 - x0 + 48, 14);
+     if (T > T1) {
+       pfeil(x0 - 4, yb - 40, x0 - 34, yb - 60, '#B23A33'); pfeil(x1 + 4, yb - 40, x1 + 34, yb - 60, '#B23A33');
+       pfeil(x0 + 30, yb - hoehe - 4, x0 + 20, yb - hoehe - 34, '#B23A33'); pfeil(x1 - 30, yb - hoehe - 4, x1 - 20, yb - hoehe - 34, '#B23A33');
+     }
+     ctx.fillStyle = '#1A2530'; ctx.font = f(11) + 'px "Noto Sans",Arial'; ctx.textAlign = 'center';
+     ctx.fillText('Topf auf der Kochplatte, 1500 W', (x0 + x1) / 2, 228);
+   }
+   // Thermometer
+   var tx = 390, ty0 = 30, ty1 = 170;
+   ctx.strokeStyle = '#1A2530'; ctx.lineWidth = 1.6; ctx.fillStyle = '#fff';
+   ctx.fillRect(tx - 7, ty0, 14, ty1 - ty0); ctx.strokeRect(tx - 7, ty0, 14, ty1 - ty0);
+   ctx.beginPath(); ctx.arc(tx, ty1 + 10, 12, 0, 2 * Math.PI); ctx.fillStyle = '#B23A33'; ctx.fill(); ctx.stroke();
+   var yT = ty1 - (ty1 - ty0) * (T / 100);
+   ctx.fillStyle = '#B23A33'; ctx.fillRect(tx - 4, yT, 8, ty1 - yT + 4);
+   ctx.fillStyle = '#5A666F'; ctx.font = f(10) + 'px "Noto Sans",Arial'; ctx.textAlign = 'left';
+   for (var s = 0; s <= 100; s += 20) { var ys = ty1 - (ty1 - ty0) * (s / 100); ctx.fillRect(tx + 7, ys, 6, 1); ctx.fillText(s + ' °C', tx + 16, ys + 4); }
+   // Zaehler
+   ctx.strokeStyle = '#1A2530'; ctx.fillStyle = '#fff'; ctx.lineWidth = 1.6;
+   ctx.fillRect(16, 16, 88, 40); ctx.strokeRect(16, 16, 88, 40);
+   ctx.fillStyle = '#1A2530'; ctx.font = 'bold ' + f(10) + 'px "Noto Sans",Arial'; ctx.textAlign = 'center';
+   ctx.fillText('Zähler', 60, 30); ctx.font = f(12) + 'px "Noto Sans",Arial'; ctx.fillText(zahl(W, 1) + ' kJ', 60, 48);
+ }
+ function tick(){
+   var T = +$('rT').value, d = T - T1, G = GEF[g];
+   var Q = m * C * d, W = Q / G.zeta, t = W / G.P;
+   $('wT').textContent = T + ' °C';
+   $('aT').innerHTML = T + '&nbsp;°C';
+   $('aW').innerHTML = zahl(W, 1) + '&nbsp;kJ';
+   $('aZ').innerHTML = zahl(t, 1) + '&nbsp;s';
+   Array.prototype.forEach.call(document.querySelectorAll('[data-g]'), function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-g') === g ? 'true' : 'false'); });
+   Array.prototype.forEach.call(document.querySelectorAll('[data-m]'), function(b){ b.setAttribute('aria-pressed', +b.getAttribute('data-m') === m ? 'true' : 'false'); });
+   var mz = zahl(m, 1);
+   var s = 'Nachrechnung der Einstellung: Δ<i>ϑ</i> = ' + T + '&nbsp;°C − 20&nbsp;°C = ' + d + '&nbsp;K; <i>Q</i><sub>nutz</sub> = ' + d + '&nbsp;K · 4,19&nbsp;kJ/(kg·K) · ' + mz + '&nbsp;kg ' +
+     (genau(Q, 3) ? '= ' : '≈ ') + zahl(Q, 3) + '&nbsp;kJ';
+   if (g === 'topf') {
+     var zg = d > 0 ? Q / W : 0;
+     s += '; <i>Q</i><sub>S</sub> = <i>W</i> ' + (genau(W, 1) ? '= ' : '≈ ') + zahl(W, 1) + '&nbsp;kJ; <i>ζ</i> = ' + (d > 0 ? '<span class="bruch"><span class="z">' + zahl(Q, 3) + '&nbsp;kJ</span><span class="n">' + zahl(W, 3) + '&nbsp;kJ</span></span> ' + (genau(W, 3) ? '= ' : '≈ ') + '0,8' : 'keine Erwärmung');
+   } else {
+     s += '; im Laborgefäß ist <i>Q</i><sub>S</sub> = <i>W</i> = <i>Q</i><sub>nutz</sub>';
+   }
+   $('aNach').innerHTML = s;
+   zeichne(T, W);
+ }
+ Array.prototype.forEach.call(document.querySelectorAll('[data-g]'), function(b){ b.addEventListener('click', function(){ g = b.getAttribute('data-g'); tick(); }); });
+ Array.prototype.forEach.call(document.querySelectorAll('[data-m]'), function(b){ b.addEventListener('click', function(){ m = +b.getAttribute('data-m'); tick(); }); });
+ ['input', 'change'].forEach(function(ev){ $('rT').addEventListener(ev, tick); });
+ Array.prototype.forEach.call(document.querySelectorAll('button.pm'), function(b){
+   b.addEventListener('click', function(){
+     var el = $(b.getAttribute('data-ziel')), st = parseFloat(b.getAttribute('data-schritt'));
+     var v = Math.round(parseFloat(el.value) + st);
+     el.value = Math.max(parseFloat(el.min), Math.min(parseFloat(el.max), v)); tick();
+   });
+ });
+ $('bReset').addEventListener('click', function(){ g = START.g; m = START.m; $('rT').value = START.T; tick(); });
+ window.addEventListener('resize', function(){ schrift(); setup(); tick(); });
+ // Startstellung aus den startwerten (Laborgefaess, 1 kg, 20 °C: keine Erwaermung), nicht aus den loesungswerten
+ $('rT').value = START.T;
+ schrift(); setup(); tick();
+})();
+</script>
