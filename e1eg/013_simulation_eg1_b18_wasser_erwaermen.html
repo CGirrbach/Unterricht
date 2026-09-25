@@ -16,7 +16,7 @@
  "thema": "Wärmemenge beim Erwärmen von Wasser, Abhängigkeit von Masse und Temperaturdifferenz, Wärmenutzungsgrad",
  "modell": "Q_nutz = m * 4,19 kJ/(kg*K) * (theta2 - 20 °C); W = Q_nutz/zeta, zeta = 1 (Laborgefäß) bzw. 0,8 (Topf); t = W/P, P = 1 kW bzw. 1,5 kW",
  "quelle": "Fachkunde S. 47; Tabellenbuch 32. A., S. 29 (Formel 5) und S. 36 (Formel 9)",
- "startwerte": { "gefaess": "labor", "m": 1, "theta2": 20 },
+ "startwerte": { "gefaess": "labor", "m": 0.5, "theta2": 20 },
  "loesungswerte": { "gefaess": "topf", "m": 1, "theta2": 60 }
 }
 </script>
@@ -97,8 +97,8 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
   <button type="button" data-g="labor" aria-pressed="true">Laborgefäß (gut isoliert, Tauchsieder 1000&nbsp;W)</button>
   <button type="button" data-g="topf" aria-pressed="false">Topf auf der Kochplatte (1500&nbsp;W)</button></div>
  <div class="wahl" role="group" aria-label="Wassermenge"><span class="l">Wassermenge:</span>
-  <button type="button" data-m="0.5" aria-pressed="false">0,5&nbsp;kg</button>
-  <button type="button" data-m="1" aria-pressed="true">1&nbsp;kg</button>
+  <button type="button" data-m="0.5" aria-pressed="true">0,5&nbsp;kg</button>
+  <button type="button" data-m="1" aria-pressed="false">1&nbsp;kg</button>
   <button type="button" data-m="1.5" aria-pressed="false">1,5&nbsp;kg</button>
   <button type="button" data-m="2" aria-pressed="false">2&nbsp;kg</button></div>
  <div class="anzeige"><span class="lab">Thermometer:</span> <span class="wert"><i>ϑ</i><sub>2</sub> = <span id="aT">20&nbsp;°C</span></span></div>
@@ -117,7 +117,7 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
 <details class="ergebnis-aufdecken">
  <summary><b>Ergebnis anzeigen</b> (erst, wenn Sie Aufgabe&nbsp;3 bis 6 des Arbeitsblatts bearbeitet haben)</summary>
  <div class="formel">
-  <span class="cap">Wärmemenge und Wärmenutzungsgrad (Tabellenbuch S. 29, Formel 5; S. 36, Formel 9)</span>
+  <span class="cap">Wärmemenge und Wärmenutzungsgrad (Tabellenbuch S. 29, Formel 5; Tabellenbuch S. 36, Formel 9)</span>
   <div class="formelzeile"><span><i>Q</i> = Δ<i>ϑ</i> · <i>c</i> · <i>m</i></span> <span><i>Q</i><sub>S</sub> = <i>W</i></span> <span><i>ζ</i> = <span class="bruch"><span class="z"><i>Q</i><sub>nutz</sub></span><span class="n"><i>Q</i><sub>S</sub></span></span></span></div>
   <p>Wasser hat die spezifische Wärmekapazität <i>c</i> = 4,19&nbsp;kJ/(kg·K) (Tabellenbuch S.&nbsp;29).</p>
   <p id="aNach">Nachrechnung der Einstellung: …</p>
@@ -130,7 +130,7 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
 (function(){
  "use strict";
  var $ = function(id){ return document.getElementById(id); };
- var START = {g:'labor', m:1, T:20};
+ var START = {g:'labor', m:0.5, T:20};
  var C = 4.19, T1 = 20;
  var GEF = {labor: {P: 1.0, zeta: 1.0}, topf: {P: 1.5, zeta: 0.8}};
  var g = START.g, m = START.m;
@@ -231,7 +231,7 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
  });
  $('bReset').addEventListener('click', function(){ g = START.g; m = START.m; $('rT').value = START.T; tick(); });
  window.addEventListener('resize', function(){ schrift(); setup(); tick(); });
- // Startstellung aus den startwerten (Laborgefaess, 1 kg, 20 °C: keine Erwaermung), nicht aus den loesungswerten
+ // Startstellung aus den startwerten (Laborgefaess, 0,5 kg, 20 °C: keine Erwaermung), nicht aus den loesungswerten
  $('rT').value = START.T;
  schrift(); setup(); tick();
 })();
