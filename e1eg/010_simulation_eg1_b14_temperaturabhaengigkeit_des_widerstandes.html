@@ -135,7 +135,8 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
  var START = {stoff:0, R1:100, t:20};
  var gewaehlt = START.stoff;
  function komma(s){ return String(s).replace('.', ','); }
- function mess(x){ return komma(x.toFixed(2)); }            // Messgeraet: zwei Nachkommastellen
+ // 25.09.2026 (PRUEF2509c N9): kaufmaennisch runden, fuer Delta R und R2 gleich; toFixed rundete 10,585 auf 10,58
+ function mess(x){ return komma((Math.round(x * 100 + 1e-7) / 100).toFixed(2)); }   // Messgeraet: zwei Nachkommastellen
  function ganz(x){ return komma(String(Math.round(x*100)/100)); }
  function minus(s){ return String(s).replace('-', '−'); }
  var fs = 1;

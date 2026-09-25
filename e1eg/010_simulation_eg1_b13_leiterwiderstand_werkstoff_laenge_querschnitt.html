@@ -41,7 +41,7 @@ canvas{width:100%;height:auto;display:block;background:#fff;border:1px solid var
 .bildunterschrift{font-size:12.5px;color:var(--grau);margin:4px 0 0}
 .anzeige{font-size:28px;font-weight:700;margin:12px 0 2px}
 .regler{display:flex;align-items:center;gap:12px;margin:10px 0 2px;flex-wrap:wrap}
-.regler label{font-weight:700;min-width:170px}@media(max-width:520px){.regler label{flex:1 0 100%}}
+.regler label{font-weight:700;min-width:170px}@media(max-width:520px){.regler label{flex:1 0 100%}}@media (max-width:420px){.anzeige{font-size:24px;white-space:normal;min-height:2.6em;line-height:1.3}.anzeige .lab{display:block;font-size:16px}}
 .regler input[type=range]{flex:1 1 160px;height:44px;accent-color:var(--kupfer);cursor:pointer}
 .rval{font-weight:700;min-width:74px;text-align:right;font-variant-numeric:tabular-nums}
 button.pm{font:inherit;font-size:20px;font-weight:700;min-width:44px;min-height:44px;border:1.4px solid var(--linie);background:#fff;color:var(--ink);cursor:pointer}
@@ -89,7 +89,7 @@ details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2
  <canvas id="cDraht" data-quelle="eigene Darstellung: Leiter mit Länge l und Querschnitt A am Widerstandsmessgerät, nach Europa-Fachkunde S. 38, Tabelle 2" width="960" height="440"
   aria-label="Ein Draht ist zwischen zwei Klemmen eines Widerstandsmessgeraets eingespannt. Die gezeichnete Laenge waechst mit der eingestellten Laenge, die Dicke mit dem Querschnitt. Das Messgeraet zeigt den Widerstand."></canvas>
  <p class="bildunterschrift">Schematisch, nicht maßstäblich: länger heißt länger gezeichnet, größerer Querschnitt heißt dicker gezeichnet.</p>
- <div class="anzeige">Widerstandsmessgerät: <i>R</i> = <span id="aR">0,119&nbsp;Ω</span></div>
+ <div class="anzeige"><span class="lab">Widerstandsmessgerät:</span> <span class="wert"><i>R</i> = <span id="aR">0,119&nbsp;Ω</span></span></div>
  <div class="regler">
   <label for="rL">Drahtlänge <i>l</i></label>
   <button class="pm" type="button" data-ziel="rL" data-schritt="-1" aria-label="Länge 1 m kürzer">−</button>
