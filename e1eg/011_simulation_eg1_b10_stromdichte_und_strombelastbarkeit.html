@@ -7,15 +7,15 @@
          duenneren Leiter bedeutet mehr Stromdichte und mehr Waerme.
      (2) Die Fehlvorstellung, die der Block ausdruecklich nennt: „Stromdichte J und
          Strombelastbarkeit sind dasselbe." Sie sind es NICHT, J wird GERECHNET (in A/mm²),
-           I_r wird ABGELESEN (in A); bei 30 °C und allein verlegt ist I_z = I_r
-         Bei 1,5 mm² und Verlegeart C, 3 Leiter: J ≈ 3,73 A/mm², I_z = 17,5 A. Voellig
+           I_r wird ABGELESEN (in A); bei 30 °C und allein verlegt ist I_Z = I_r
+         Bei 1,5 mm² und Verlegeart C, 3 Strom fuehrende Leiter: J ≈ 3,73 A/mm², I_Z = 17,5 A. Voellig
          verschiedene Zahlen, verschiedene Einheiten. Die Simulation zeigt beide
          NEBENEINANDER, damit der Unterschied ins Auge faellt.
      (3) Die Strombelastbarkeit haengt von der VERLEGEART ab: bei 1,5 mm² reicht sie
          von 15 A (B2, drei Leiter) bis 19,5 A (C, zwei Leiter), das 1,3-fache.
      (4) GRENZFAELLE, beide im Einstellbereich:
-           1,5 mm² mit 20 A bei B2/3 -> J ≈ 13,33 A/mm², I_z = 15 A -> UEBERLASTET
-           16 mm² mit 20 A bei C/2   -> J =  1,25 A/mm², I_z = 85 A -> reichlich zulaessig
+           1,5 mm² mit 20 A bei B2/3 -> J ≈ 13,33 A/mm², I_Z = 15 A -> UEBERLASTET
+           16 mm² mit 20 A bei C/2   -> J =  1,25 A/mm², I_Z = 85 A -> reichlich zulaessig
      Startstellung: 2,5 mm², 5,6 A, Verlegeart C mit 3 Leitern. Das ist der Betriebsstrom
      des Blockes, aber NICHT der zu bemessende Fall, der Querschnitt ist bereits gewaehlt
      und soll geprueft, nicht gesucht werden. -->
@@ -32,8 +32,8 @@
          6      38     34     46     41
          10     52     46     63     57
          16     69     62     85     76
-     Die Nennquerschnittsreihe steht auf derselben Seite. I_z = F · I_r und
-     I_B <= I_N <= I_z: Tabellenbuch S. 195, Formel 1 und 2 (hier F = 1).
+     Die Nennquerschnittsreihe steht auf derselben Seite. I_Z = F · I_r und
+     I_B <= I_N <= I_Z: Tabellenbuch S. 195, Formel 1 und 2 (hier F = 1).
      Handrechnung == Simulationsmodell:
        5,6 A / 2,5 mm² = 2,24 A/mm²;   5,6 A / 1,5 mm² ≈ 3,73 A/mm²
        20 A / 1,5 mm² ≈ 13,33 A/mm²;   20 A / 16 mm² = 1,25 A/mm² -->
@@ -101,18 +101,18 @@
     <p>Im Bild sehen Sie den <b>Leiterquerschnitt</b>: Jeder Punkt steht für einen Teil des
     Stroms. Wird der Leiter dünner oder der Strom größer, <b>drängen sich die Punkte</b>, 
     das ist die Stromdichte. Daneben (auf dem Handy darunter) stehen <b>zwei Zahlen</b>:
-    <i>J</i> in A/mm² (gerechnet) und die Strombelastbarkeit <i>I</i><sub>z</sub> in A: Aus der Tabelle liest man den Bemessungswert <i>I</i><sub>r</sub> ab; bei 30&nbsp;°C und allein verlegt ist <i>I</i><sub>z</sub>&nbsp;=&nbsp;<i>I</i><sub>r</sub>.
-    Achten Sie darauf, <b>wie verschieden</b> die beiden sind. „2&nbsp;Adern“ heißt im Tabellenbuch „2 Strom führende Leiter“.</p>
- <p><b>Ablauf:</b> Die fünf Schritte stehen auf dem Arbeitsblatt im Kasten „Simulation öffnen“. <b>Sozialform:</b> Einzelarbeit, freiwillig zu Hause. <b>Zeit:</b> rund 10&nbsp;min. <b>Fertig, wenn</b> Sie in einem Satz sagen können, worin sich <i>J</i> und <i>I</i><sub>z</sub> unterscheiden, und welche der beiden Größen man rechnet und welche man aus der Tabelle abliest.</p>
+    <i>J</i> in A/mm² (gerechnet) und die Strombelastbarkeit <i>I</i><sub>Z</sub> in A: Aus der Tabelle liest man den Bemessungswert <i>I</i><sub>r</sub> ab; bei 30&nbsp;°C und allein verlegt ist <i>I</i><sub>Z</sub>&nbsp;=&nbsp;<i>I</i><sub>r</sub>.
+    Achten Sie darauf, <b>wie verschieden</b> die beiden sind. Die Knöpfe nennen Verlegeart und Zahl der Strom führenden Leiter; gezählt werden nur die Leiter, durch die der Betriebsstrom fließt (eine Mantelleitung mit Schutzleiter hat drei Adern, aber zwei Strom führende Leiter).</p>
+ <p><b>Ablauf:</b> Die fünf Schritte stehen auf dem Arbeitsblatt im Kasten „Simulation öffnen“. <b>Sozialform:</b> Einzelarbeit, freiwillig zu Hause. <b>Zeit:</b> rund 10&nbsp;min. <b>Fertig, wenn</b> Sie in einem Satz sagen können, worin sich <i>J</i> und <i>I</i><sub>Z</sub> unterscheiden, welche Größe man rechnet, welchen Wert man in der Tabelle abliest und wie man von diesem Wert zu <i>I</i><sub>Z</sub> kommt.</p>
   </div>
 
-  <div class="arten" id="arten" role="group" aria-label="Verlegeart und Zahl der Strom führenden Adern wählen"></div>
+  <div class="arten" id="arten" role="group" aria-label="Verlegeart und Zahl der Strom führenden Leiter wählen"></div>
 
   <figure>
     <script type="application/json" id="sim-meta">{"startwerte":{"I":5.6,"A":2.5,"verlegeart":"C-3"},"loesungswerte":{"A":1.5}}</script>
     <canvas class="stage" id="cQuer" width="880" height="300"
-      data-quelle="Schema Leiterquerschnitt (kein Buchbild): Punktdichte als Stromdichte; Werte I_r aus Tabellenbuch S. 198 (bei 30 °C und allein verlegt I_z = I_r), J = I/A nach Tabellenbuch S. 30, Formel 5"
-      aria-label="Ein Kreis als Leiterquerschnitt, in dem Punkte die Stromdichte darstellen: je enger sie stehen, desto höher die Stromdichte. Daneben zwei Felder mit der gerechneten Stromdichte in Ampere je Quadratmillimeter und der Strombelastbarkeit in Ampere (aus der Tabelle abgelesen), dazu die Aussage, ob der Betriebsstrom zulässig ist."></canvas>
+      data-quelle="Schema Leiterquerschnitt (kein Buchbild): Punktdichte als Stromdichte; Werte I_r aus Tabellenbuch S. 198 (bei 30 °C und allein verlegt I_Z = I_r), J = I/A nach Tabellenbuch S. 30, Formel 5"
+      aria-label="Ein Kreis als Leiterquerschnitt, in dem Punkte die Stromdichte darstellen: je enger sie stehen, desto höher die Stromdichte. Daneben zwei Felder mit der gerechneten Stromdichte in Ampere je Quadratmillimeter und der Strombelastbarkeit in Ampere (aus dem Tabellenwert), dazu die Aussage, ob der Betriebsstrom zulässig ist."></canvas>
     <figcaption>Die <b>Punktdichte</b> im Querschnitt ist die Stromdichte. Der Kreis ist
     <b>schematisch</b>, er zeigt das Verhältnis, nicht den wirklichen Durchmesser.</figcaption>
   </figure>
@@ -134,13 +134,13 @@
     <tr><td><b>Strom&shy;dichte <span style="white-space:nowrap"><i>J</i> = <i>I</i>/<i>A</i></span></b></td>
         <td><b>gerechnet</b>, Tabellen&shy;buch S.&nbsp;30, Formel&nbsp;5</td>
         <td class="z" id="aJ">2,24 A/mm²</td></tr>
-    <tr><td><b>Strom&shy;belastbarkeit <i>I</i><sub>z</sub>&nbsp;=&nbsp;<i>I</i><sub>r</sub></b></td>
-        <td><b>abgelesen</b>, Tabellen&shy;buch S.&nbsp;198</td>
+    <tr><td><b>Strom&shy;belastbarkeit <i>I</i><sub>Z</sub>&nbsp;=&nbsp;<i>I</i><sub>r</sub></b></td>
+        <td><b><i>I</i><sub>r</sub> abgelesen</b>, Tabellen&shy;buch S.&nbsp;198</td>
         <td class="z" id="aIz">24 A</td></tr>
     <tr><td>Betriebsstrom <i>I</i><sub>B</sub></td><td>eingestellt</td><td class="z" id="aI">5,6 A</td></tr>
-    <tr><td><b>Ist <i>I</i><sub>B</sub> ≤ <i>I</i><sub>z</sub>?</b></td><td>Vergleich</td>
+    <tr><td><b>Ist <i>I</i><sub>B</sub> ≤ <i>I</i><sub>Z</sub>?</b></td><td>Vergleich</td>
         <td class="z" id="aUrteil">zulässig</td></tr>
-    <tr><td>Ausnutzung <span style="white-space:nowrap"><i>I</i><sub>B</sub>/<i>I</i><sub>z</sub></span></td><td>gerechnet</td><td class="z" id="aAus">23 %</td></tr>
+    <tr><td>Ausnutzung <span style="white-space:nowrap"><i>I</i><sub>B</sub>/<i>I</i><sub>Z</sub></span></td><td>gerechnet</td><td class="z" id="aAus">23 %</td></tr>
   </table>
   <p class="hinw" id="hDeut">Wählen Sie eine Verlegeart und verstellen Sie Strom und Querschnitt.</p>
 
@@ -150,7 +150,7 @@
     <b>S.&nbsp;30</b>, Formel&nbsp;5 (dort auch <i>I</i>&nbsp;=&nbsp;<i>J</i>·<i>A</i> und
     <i>A</i>&nbsp;=&nbsp;<i>I</i>/<i>J</i>). Die Bemessungswerte der Strombelastbarkeit <i>I</i><sub>r</sub> stehen auf
     <b>Tabellenbuch S.&nbsp;198</b> („Strombelastbarkeiten für festverlegte Kabel, Leitungen bei
-    <i>ϑ</i><sub>U</sub>&nbsp;=&nbsp;30&nbsp;°C“, vgl. DIN&nbsp;VDE&nbsp;0298-4), für
+    <i>ϑ</i><sub>U</sub>&nbsp;=&nbsp;30&nbsp;°C“, nach DIN&nbsp;VDE&nbsp;0298-4), für
     Kupferleiter mit Betriebstemperatur <i>ϑ</i><sub>B</sub>&nbsp;≤&nbsp;70&nbsp;°C.
     Dieselbe Seite trägt die genormte Nennquerschnittsreihe.</small>
   </div>
@@ -160,7 +160,7 @@
 (function(){
   "use strict";
   var $=function(id){return document.getElementById(id);};
-  // I_r 1:1 aus Tabellenbuch S. 198 (Seite gerendert und abgelesen); bei 30 °C und allein verlegt I_z = I_r
+  // I_r 1:1 aus Tabellenbuch S. 198 (Seite gerendert und abgelesen); bei 30 °C und allein verlegt I_Z = I_r
   var NENN=[1.5,2.5,4,6,10,16];
   var IZ={ "1.5":{"B2-2":16.5,"B2-3":15,"C-2":19.5,"C-3":17.5},
            "2.5":{"B2-2":23,  "B2-3":20,"C-2":27,  "C-3":24},
@@ -168,8 +168,8 @@
            "6":  {"B2-2":38,  "B2-3":34,"C-2":46,  "C-3":41},
            "10": {"B2-2":52,  "B2-3":46,"C-2":63,  "C-3":57},
            "16": {"B2-2":69,  "B2-3":62,"C-2":85,  "C-3":76} };
-  var ARTEN=[{k:"B2-2",n:"B2, 2 Adern"},{k:"B2-3",n:"B2, 3 Adern"},
-             {k:"C-2", n:"C, 2 Adern"}, {k:"C-3", n:"C, 3 Adern"}];
+  var ARTEN=[{k:"B2-2",n:"B2, 2 Leiter"},{k:"B2-3",n:"B2, 3 Leiter"},
+             {k:"C-2", n:"C, 2 Leiter"}, {k:"C-3", n:"C, 3 Leiter"}];
   var art=3, START={I:56,A:1,art:3};
   // kaufmaennisch runden: ohne Zugabe wurde 22,5 % als 22 % gezeigt (Gleitkomma 22,4999…), 26.09.2026
   function fmt(x,n){ var f=Math.pow(10,n); return (Math.round(x*f+1e-7)/f).toFixed(n).replace(".",","); }
@@ -235,23 +235,23 @@
       var br=g.measureText(wert).width;
       g.fillStyle="#5A666F"; g.font="15px 'Noto Sans',sans-serif";
       g.fillText(einheit, x+14+br+9, y+58);
-      g.font="12.5px 'Noto Sans',sans-serif"; g.fillText(unten,x+14,y+82);
+      schreibe(g,unten,x+14,y+82,12.5);
     }
     feld(L.fx,L.fy1,"Stromdichte J = I / A", fmt(J,2), "A/mm²", "#A34E0E", "GERECHNET");
-    feld(L.fx,L.fy2,"Strombelastbarkeit I_z = I_r", (iz%1===0?String(iz):fmt(iz,1)), "A",
-         "#2557A3", "ABGELESEN aus der Tabelle");
+    feld(L.fx,L.fy2,"Strombelastbarkeit I_Z = I_r", (iz%1===0?String(iz):fmt(iz,1)), "A",
+         "#2557A3", "I_r ABGELESEN aus der Tabelle");
     // Urteil
     var ok = I <= iz;
     g.fillStyle = ok ? "#2F7D62" : "#B23A33";
-    schreibe(g, ok ? "I_B ≤ I_z: zulässig" : "I_B > I_z: überlastet!", L.ux, L.uy, 17);
+    schreibe(g, ok ? "I_B ≤ I_Z: zulässig" : "I_B > I_Z: überlastet!", L.ux, L.uy, 17);
     g.fillStyle="#5A666F";
-    schreibe(g, "Ausnutzung I_B / I_z" + gl(I/iz*100,0) + fmt(I/iz*100,0) + " %", L.ux, L.uy+22, 12.5);
+    schreibe(g, "Ausnutzung I_B / I_Z" + gl(I/iz*100,0) + fmt(I/iz*100,0) + " %", L.ux, L.uy+22, 12.5);
     g.fillStyle="#2F7D62";
     if(L.zweizeilig){
       schreibe(g, "Verschiedene Zahlen, verschiedene Einheiten:", L.sx, L.sy, 12.5);
-      schreibe(g, "J und I_z: zwei verschiedene Größen.", L.sx, L.sy+19, 12.5);
+      schreibe(g, "J und I_Z: zwei verschiedene Größen.", L.sx, L.sy+19, 12.5);
     } else {
-      schreibe(g, "Verschiedene Zahlen, verschiedene Einheiten: J und I_z, zwei verschiedene Größen.",
+      schreibe(g, "Verschiedene Zahlen, verschiedene Einheiten: J und I_Z, zwei verschiedene Größen.",
                L.sx, L.sy, 12.5);
     }
   }
@@ -267,8 +267,8 @@
     $("aUrteil").textContent = I<=iz ? "zulässig" : "überlastet!";
     $("aAus").textContent=fmt(I/iz*100,0)+" %";
     $("hDeut").innerHTML = I<=iz
-      ? "<i>J</i>"+gl(J,2)+fmt(J,2)+" A/mm² ist gerechnet, <i>I</i><sub>z</sub> = <i>I</i><sub>r</sub> = "+(iz%1===0?iz:fmt(iz,1))
-        +" A ist abgelesen. Beide Größen sagen etwas anderes."
+      ? "<i>J</i>"+gl(J,2)+fmt(J,2)+" A/mm² ist gerechnet, <i>I</i><sub>r</sub> = "+(iz%1===0?iz:fmt(iz,1))
+        +" A ist abgelesen; bei 30&nbsp;°C und allein verlegt ist <i>I</i><sub>Z</sub> = <i>I</i><sub>r</sub>. <i>J</i> und <i>I</i><sub>Z</sub> sagen etwas anderes."
       : "Der Betriebsstrom übersteigt die Strombelastbarkeit der Leitung. Wählen Sie einen größeren "
         + "Querschnitt oder eine günstigere Verlegeart.";
     zeichne($("cQuer"),I,A,J,iz);
@@ -284,7 +284,7 @@
   ["rI","rA"].forEach(function(id){ $(id).addEventListener("input",tick); });
   window.addEventListener("resize",tick);
   $("bReset").addEventListener("click",function(){
-    // Startstellung: 2,5 mm², 5,6 A, Verlegeart C mit 3 Leitern, der Betriebsstrom des
+    // Startstellung: 2,5 mm², 5,6 A, Verlegeart C mit 3 Strom fuehrenden Leitern, der Betriebsstrom des
     // Blockes bei bereits gewaehltem Querschnitt; zu PRUEFEN, nicht zu suchen.
     $("rI").value=START.I; $("rA").value=START.A; art=START.art; tick();
   });
