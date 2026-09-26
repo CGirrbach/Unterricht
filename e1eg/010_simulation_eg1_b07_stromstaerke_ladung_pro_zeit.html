@@ -155,7 +155,7 @@
   function strom(I){
     var v = I < 0.1 ? I*1000 : I, e = I < 0.1 ? " mA" : " A";
     var s = v >= 100 ? v.toFixed(0) : (v >= 10 ? v.toFixed(1) : (v >= 1 ? v.toFixed(2) : v.toFixed(3)));
-    s = s.replace(/\.?0+$/, function(m){ return m.indexOf(".") >= 0 ? "" : m; });
+    if (s.indexOf(".") >= 0) s = s.replace(/0+$/, "").replace(/\.$/, "");   // nur Nullen HINTER dem Komma
     var gleich = Math.abs(parseFloat(s) - v) < 1e-9;
     return {z: gleich ? "=" : "≈", t: s.replace(".", ",") + e};
   }
