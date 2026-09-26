@@ -209,7 +209,8 @@ function pruefen(antwort) {
  r.className = "rueck " + (ok ? "richtig" : "falsch");
  r.innerHTML = '<div class="titel">' + (ok ? "Richtig." : "Nicht richtig.") + "</div>" +
    (ok ? "" : "<div>" + aufgabe.label + ": <span class=\"konsole\">" + esc(aufgabe.loesung) + "</span></div>") +
-   (punkt ? "<div>Fast: Das Konsolenfenster zeigt Nachkommastellen mit Komma, nicht mit Punkt.</div>" : "") +
+   (punkt ? "<div>" + (aufgabe.wert ? "Fast: Schreiben Sie den Wert mit Komma, nicht mit Punkt (" + (aufgabe.loesung.indexOf(",") < 0 ? aufgabe.loesung + " oder " + aufgabe.loesung + ",0" : aufgabe.loesung) + ")."
+     : "Fast: Das Konsolenfenster zeigt Nachkommastellen mit Komma, nicht mit Punkt.") + "</div>" : "") +
    "<div>" + aufgabe.weg + "</div>";
  karte.querySelectorAll("[data-antwort], #pruefen").forEach(function (b) { b.disabled = true; });
  var w = document.getElementById("weiter"); w.disabled = false;
