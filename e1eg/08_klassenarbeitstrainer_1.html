@@ -226,7 +226,7 @@ G.push({stufe: 1, block: "Block 10", f: function(){
  var iz = wahl([13.5, 15.5, 16.5, 18, 19.5, 21, 24, 27, 28, 32]), ib = rund(iz + wahl([-3, -2, -1, -0.5, 0.5, 1, 2, 3]), 1);
  var ok = ib <= iz;
  return {art: "eignung", mc: true, p: {iz: iz, ib: ib},
-  frage: "Für eine Leitung lesen Sie in der Tabelle den Bemessungswert der Strombelastbarkeit <i>I</i><sub>r</sub> = " + zahl(iz, 1) + " A ab. Sie liegt allein und bei 30 °C, die Tabelle gilt also ohne Umrechnung: <i>I</i><sub>Z</sub> = <i>I</i><sub>r</sub>. Der Betriebsstrom beträgt <i>I</i><sub>B</sub> = " + zahl(ib, 1) + " A. Ist die Leitung hinsichtlich der Erwärmung geeignet?",
+  frage: "Für eine Leitung lesen Sie in der Tabelle (Tabellenbuch S. 198) den Bemessungswert der Strombelastbarkeit <i>I</i><sub>r</sub> = " + zahl(iz, 1) + " A ab. Sie liegt allein und bei 30 °C, die Tabelle gilt also ohne Umrechnung: <i>I</i><sub>Z</sub> = <i>I</i><sub>r</sub>. Der Betriebsstrom beträgt <i>I</i><sub>B</sub> = " + zahl(ib, 1) + " A. Ist die Leitung hinsichtlich der Erwärmung geeignet?",
   optionen: ["Ja, weil <i>I</i><sub>B</sub> ≤ <i>I</i><sub>Z</sub> ist.", "Nein, weil <i>I</i><sub>B</sub> > <i>I</i><sub>Z</sub> ist.", "Das lässt sich ohne die Stromdichte nicht entscheiden."],
   richtig: ok ? 0 : 1,
   begruendung: "Hinsichtlich der Erwärmung ist die Leitung geeignet, wenn der Betriebsstrom höchstens so groß ist wie ihre Strombelastbarkeit: <i>I</i><sub>B</sub> ≤ <i>I</i><sub>Z</sub>. Hier ist <i>I</i><sub>Z</sub> = <i>I</i><sub>r</sub>, also " + zahl(ib, 1) + " A " + (ok ? "≤" : ">") + " " + zahl(iz, 1) + " A."};
