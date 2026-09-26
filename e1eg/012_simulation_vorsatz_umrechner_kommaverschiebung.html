@@ -1,0 +1,380 @@
+<!-- lehrmaterial -->
+<!-- materialtyp: simulation -->
+<!doctype html>
+<html lang="de"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Simulation Block 03: Vorsatz-Umrechner und Kommaverschiebung (p…G)</title>
+<!-- Aussagenlose Startstellung: Zahlenwert 1, Ausgangs- und Ziel-Vorsatz auf Grundeinheit
+     (kein Task geloest). Loesungswerte = erste gekoppelte Entdeckungsaufgabe (20 mA -> A). -->
+<script type="application/json" id="sim-meta">
+{"startwerte":{"wert":"1","von":"0","zu":"0"},"loesungswerte":{"wert":"20","von":"-3"}}
+</script>
+<style>
+:root{
+  --ink:#1A2530; --kupfer:#A34E0E; --kupferhell:#F5EBDF; --rot:#B23A33; --gruen:#2F7D62;
+  --blau:#33627D; --papier:#FBF7EF; --linie:#D8CBBB;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{font-family:"Noto Sans",system-ui,Arial,sans-serif;color:var(--ink);
+  background:#EEE6DA;line-height:1.4;padding:18px;}
+.wrap{max-width:960px;margin:0 auto;background:#fff;border-radius:14px;
+  box-shadow:0 6px 30px rgba(0,0,0,.14);overflow:hidden;}
+header{background:var(--kupfer);color:#fff;padding:20px 26px;}
+header .line{height:6px;width:120px;background:#fff;opacity:.85;margin-bottom:14px;}
+header h1{margin:0;font-size:26px;line-height:1.2;}
+header .sub{margin-top:8px;font-size:16px;opacity:.95;}
+.body{padding:22px 26px 28px;}
+.fz{font-style:italic;} .ez{font-style:normal;}
+sup{font-size:.7em;} sub{font-size:.7em;vertical-align:-.22em;}
+
+.ziel{background:var(--kupferhell);border-left:10px solid var(--kupfer);border-radius:8px;
+  padding:14px 18px;margin-bottom:20px;}
+.ziel .cap{display:block;color:var(--kupfer);font-weight:700;font-size:14px;
+  text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
+.ziel p{margin:0;font-size:17px;}
+
+.panel{background:var(--papier);border:2px solid var(--linie);border-radius:12px;padding:18px 18px 20px;}
+.ctrls{display:grid;grid-template-columns:1fr 1fr;gap:14px 18px;align-items:end;}
+.ctrl label{display:block;font-size:13px;font-weight:700;color:#5A666F;
+  text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;}
+.ctrl input,.ctrl select{width:100%;font-family:inherit;font-size:20px;font-weight:700;color:var(--ink);
+  padding:9px 12px;border:2px solid var(--linie);border-radius:9px;background:#fff;}
+.ctrl input:focus,.ctrl select:focus{outline:none;border-color:var(--kupfer);}
+.presets{margin:18px 0 4px;}
+.presets .cap{font-size:13px;font-weight:700;color:#5A666F;text-transform:uppercase;
+  letter-spacing:.04em;margin-bottom:8px;}
+.pbtns{display:flex;flex-wrap:wrap;gap:9px;}
+.pbtn{appearance:none;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;
+  border:2px solid var(--blau);background:#EEF4F8;color:var(--blau);border-radius:22px;padding:7px 16px;}
+.pbtn:active{background:var(--blau);color:#fff;}
+.actions{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap;}
+.go{appearance:none;font-family:inherit;font-size:19px;font-weight:700;cursor:pointer;border:0;
+  background:var(--kupfer);color:#fff;border-radius:28px;padding:12px 34px;}
+.go:active{background:#8a410b;}
+.reset{appearance:none;font-family:inherit;font-size:17px;font-weight:700;cursor:pointer;
+  border:2px solid var(--kupfer);background:#fff;color:var(--kupfer);border-radius:28px;padding:11px 26px;}
+
+.strahl-wrap{margin:22px 0 6px;text-align:center;}
+canvas{width:100%;max-width:900px;height:auto;display:block;margin:0 auto;}
+.strahl-cap{font-size:13px;color:#8a95a0;text-align:center;margin-top:2px;}
+
+.out{margin-top:20px;background:#fff;border:2px solid var(--linie);border-radius:12px;padding:18px 20px;}
+.out .num{font-family:"DejaVu Sans Mono",monospace;font-size:44px;font-weight:700;text-align:center;
+  color:var(--ink);line-height:1.15;min-height:56px;transition:opacity .18s ease;}
+.out .num .komma{color:var(--rot);}
+.out .num .u{font-family:"Noto Sans",system-ui,Arial,sans-serif;color:var(--kupfer);}
+.out .note{text-align:center;font-size:16px;color:#5A666F;margin-top:6px;min-height:22px;}
+.eqs{margin-top:14px;border-top:1px dashed var(--linie);padding-top:14px;}
+.eq{font-size:20px;text-align:center;margin:8px 0;opacity:0;transform:translateY(6px);
+  transition:opacity .3s ease,transform .3s ease;}
+.eq.on{opacity:1;transform:none;}
+.eq .res{color:var(--kupfer);font-weight:700;}
+.eq .gr{color:var(--gruen);font-weight:700;}
+
+.aufg{margin-top:22px;background:#EBF2F0;border-left:10px solid var(--gruen);border-radius:8px;padding:14px 18px;}
+.aufg .cap{display:block;color:var(--gruen);font-weight:700;font-size:14px;
+  text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
+.aufg ol{margin:0;padding-left:22px;} .aufg li{margin:7px 0;font-size:16px;}
+
+.rechner{margin-top:18px;background:#12202b;color:#d7e6df;border-radius:12px;padding:16px 20px;}
+.rechner .cap{display:block;color:#8ff0c0;font-weight:700;font-size:14px;
+  text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
+.rechner p{margin:6px 0;font-size:16px;}
+.rechner .k{display:inline-block;background:#2c3d4d;border-radius:6px;padding:2px 9px;
+  font-family:"DejaVu Sans Mono",monospace;font-weight:700;color:#fff;margin:0 2px;}
+
+.quelle{margin-top:18px;font-size:13px;color:#8a95a0;}
+@media (max-width:560px){ .ctrls{grid-template-columns:1fr;} header h1{font-size:22px;} .out .num{font-size:34px;} }
+@media (prefers-reduced-motion:reduce){ .eq,.out .num{transition:none;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="line"></div>
+    <h1>Vorsatz-Umrechner und Kommaverschiebung</h1>
+    <div class="sub">Block&nbsp;03, Lernfeld&nbsp;1: große und kleine Kennwerte handhabbar machen</div>
+  </header>
+  <div class="body">
+
+    <div class="ziel">
+      <span class="cap">Das sollen Sie hier selbst herausfinden</span>
+      <p>Ein Einheitenvorsatz (p&nbsp;…&nbsp;G) ersetzt eine Zehnerpotenz. Wechseln Sie den Vorsatz, dann
+      <b>verschiebt sich nur das Komma</b>, der Wert der Größe bleibt gleich und die Einheit bleibt erhalten.
+      Probieren Sie es an den Kennwerten unten aus.</p>
+    </div>
+
+    <div class="panel">
+      <div class="ctrls">
+        <div class="ctrl">
+          <label for="wert">Zahlenwert</label>
+          <input id="wert" type="text" inputmode="decimal" value="1" autocomplete="off">
+        </div>
+        <div class="ctrl">
+          <label for="unit">Einheit</label>
+          <select id="unit">
+            <option value="A">A (Strom)</option>
+            <option value="&#937;">&#937; (Widerstand)</option>
+            <option value="F">F (Kapazität)</option>
+            <option value="W">W (Leistung)</option>
+            <option value="Wh">Wh (Energie)</option>
+            <option value="V">V (Spannung)</option>
+            <option value="Ah">Ah (Ladung)</option>
+          </select>
+        </div>
+        <div class="ctrl">
+          <label for="von">Ausgangs-Vorsatz</label>
+          <select id="von"></select>
+        </div>
+        <div class="ctrl">
+          <label for="zu">Ziel-Vorsatz</label>
+          <select id="zu"></select>
+        </div>
+      </div>
+
+      <div class="presets">
+        <div class="cap">Kennwerte zum Antippen</div>
+        <div class="pbtns" id="presets"></div>
+      </div>
+
+      <div class="actions">
+        <button class="go" id="go" type="button">Umrechnen &#9656;</button>
+        <button class="reset" id="reset" type="button">Zurücksetzen</button>
+      </div>
+    </div>
+
+    <div class="strahl-wrap">
+      <canvas id="strahl" width="900" height="200" data-quelle="Europa-Fachkunde Elektrotechnik S. 21, Tab. 1 (Vorsätze p…G) /" aria-label="Zahlenstrahl der Zehnerpotenzen von Pico bis Giga mit Ausgangs- und Ziel-Vorsatz"></canvas>
+      <div class="strahl-cap">Zahlenstrahl der Zehnerpotenzen (p&nbsp;…&nbsp;G), Tabelle&nbsp;1</div>
+    </div>
+
+    <div class="out">
+      <div class="num" id="num">1</div>
+      <div class="note" id="note">Wählen Sie einen Ausgangs- und einen Ziel-Vorsatz und tippen Sie „Umrechnen“.</div>
+      <div class="eqs">
+        <div class="eq" id="eq1"></div>
+        <div class="eq" id="eq2"></div>
+        <div class="eq" id="eq3"></div>
+      </div>
+    </div>
+
+    <div class="rechner">
+      <span class="cap">Eingabe am Taschenrechner (CALCOOM IQ-S1)</span>
+      <p>Zehnerpotenz eingeben: <span class="k">Zahl</span> <span class="k">×10ˣ</span> <span class="k">Exponent</span>, negativer Exponent mit <span class="k">(−)</span> davor.</p>
+      <p>Beispiel: 20&nbsp;<span class="ez">mA</span> = <span class="k">20</span> <span class="k">×10ˣ</span> <span class="k">(−)</span> <span class="k">3</span></p>
+      <p>Präfixgerecht ablesen (Dreierschritte): <span class="k">ENG</span>, rückwärts <span class="k">SHIFT</span> <span class="k">ENG</span>.</p>
+    </div>
+
+    <div class="aufg">
+      <span class="cap">Entdeckungsaufgaben: am Umrechner lösen</span>
+      <ol>
+        <li>Stellen Sie <b>20&nbsp;mA</b> ein und rechnen Sie in die Grundeinheit <span class="ez">A</span> um. Um wie viele Stellen wandert das Komma, und in welche Richtung?</li>
+        <li>Rechnen Sie <b>10&nbsp;kΩ</b> in die Grundeinheit <span class="ez">Ω</span> um. Vergleichen Sie die Kommarichtung mit Aufgabe&nbsp;1, woran liegt der Unterschied?</li>
+        <li>Stellen Sie <b>0,68&nbsp;µF</b> ein und rechnen Sie nach <span class="ez">nF</span> und dann nach <span class="ez">pF</span> um. Notieren Sie beide Ergebnisse.</li>
+        <li>Ändert sich der <b>Wert der Größe</b>, wenn Sie nur den Vorsatz wechseln? Begründen Sie mit dem, was Sie am Zahlenstrahl sehen.</li>
+      </ol>
+    </div>
+
+    <div class="quelle">(Einheitenvorsätze, Tabelle&nbsp;1); Dezimalvorsätze (Tabellenbuch S.&nbsp;18, Binäre Vorsätze). Tastenwege: der Bedienungsanleitung des CALCOOM&nbsp;IQ-S1 (CALCOOM IQ-S1). Die Einheit wird bei jeder Umrechnung mitgeführt (Anknüpfung an Block 02).</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+  // Vorsätze p…G (Fachkunde S.21, Tab.1). exponent = Zehnerpotenz-Faktor.
+  var VS = [
+    {sym:'p', name:'Pico',  exp:-12},
+    {sym:'n', name:'Nano',  exp:-9},
+    {sym:'µ', name:'Mikro', exp:-6},
+    {sym:'m', name:'Milli', exp:-3},
+    {sym:'', name:'Grundeinheit', exp:0},
+    {sym:'k', name:'Kilo',  exp:3},
+    {sym:'M', name:'Mega',  exp:6},
+    {sym:'G', name:'Giga',  exp:9}
+  ];
+  function idxByExp(e){ for(var i=0;i<VS.length;i++){ if(VS[i].exp===e) return i; } return 4; }
+
+  var el = function(id){ return document.getElementById(id); };
+  var wertI = el('wert'), unitI = el('unit'), vonI = el('von'), zuI = el('zu');
+  var numO = el('num'), noteO = el('note'), eq1 = el('eq1'), eq2 = el('eq2'), eq3 = el('eq3');
+  var cv = el('strahl'), ctx = cv.getContext('2d');
+
+  // Vorsatz-Auswahllisten fuellen
+  VS.forEach(function(v,i){
+    var t = v.sym==='' ? 'ohne Vorsatz (Grundeinheit, 10⁰)' : v.sym+'  '+v.name+'  (10'+sup(v.exp)+')';
+    vonI.appendChild(opt(i,t)); zuI.appendChild(opt(i,t));
+  });
+  function opt(val,txt){ var o=document.createElement('option'); o.value=String(val); o.textContent=txt; return o; }
+
+  // Startwerte (aussagenlos): Zahlenwert 1, beide Vorsaetze Grundeinheit.
+  var START = {wert:'1', von:4, zu:4, unit:'A'};
+  function applyStart(){
+    wertI.value = START.wert; unitI.value = START.unit;
+    vonI.value = String(START.von); zuI.value = String(START.zu);
+    numO.textContent = '1'; noteO.textContent = 'Wählen Sie einen Ausgangs- und einen Ziel-Vorsatz und tippen Sie „Umrechnen".';
+    [eq1,eq2,eq3].forEach(function(e){ e.classList.remove('on'); e.innerHTML=''; });
+    drawStrahl(4,4,false);
+  }
+
+  // Hochzahl-Darstellung (echte Hochstellung, mit Minus)
+  function sup(n){
+    var map={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+    return String(n).split('').map(function(c){ return map[c]||c; }).join('');
+  }
+
+  // Komma um k Stellen verschieben (k>0: nach rechts / ×10^k). Rein stringbasiert.
+  function shiftComma(numStr, k){
+    var s = String(numStr).trim().replace(/\s/g,'');
+    var neg = s.charAt(0)==='-'; if(neg) s=s.slice(1);
+    var p = s.split(','); var intp = p[0]||'0'; var frac = p[1]||'';
+    var digits = (intp+frac).replace(/^0+(?=\d)/,''); // fuehrende Nullen (ausser einer) weg
+    var lead = (intp+frac).length - digits.length;
+    var comma = intp.length - lead;                   // Kommaposition in digits
+    comma += k;
+    if(comma < 1){ var add = 1-comma; digits = zeros(add)+digits; comma += add; }
+    if(comma > digits.length){ digits = digits + zeros(comma-digits.length); }
+    var ip = digits.slice(0,comma).replace(/^0+(?=\d)/,'');
+    var fp = digits.slice(comma).replace(/0+$/,'');
+    var out = ip + (fp ? ','+fp : '');
+    return (neg?'-':'') + out;
+  }
+  function zeros(n){ return n>0 ? new Array(n+1).join('0') : ''; }
+
+  // Wissenschaftliche Schreibweise (1 ≤ Mantisse < 10) aus einem Zahlen-String
+  function wiss(numStr){
+    var s = String(numStr).replace(/\s/g,''); var neg=s.charAt(0)==='-'; if(neg)s=s.slice(1);
+    var p=s.split(','); var intp=p[0]||'0'; var frac=p[1]||'';
+    var digits=(intp+frac); var comma=intp.length;
+    var first=-1; for(var i=0;i<digits.length;i++){ if(digits[i]!=='0'){ first=i; break; } }
+    if(first<0) return {m:'0', e:0};
+    var e = comma - first - 1;
+    var m = digits.slice(first).replace(/0+$/,'');
+    var mant = m.charAt(0) + (m.length>1 ? ','+m.slice(1) : '');
+    return {m:(neg?'-':'')+mant, e:e};
+  }
+
+  function valid(str){ return /^[0-9]+(,[0-9]+)?$/.test(String(str).trim().replace(/\s/g,'')); }
+
+  // Zahlenstrahl zeichnen (Canvas). Markierung Ausgang (blau) + Ziel (kupfer) + Pfeil.
+  function drawStrahl(vonIdx, zuIdx, arrow){
+    var W=cv.width, H=cv.height;
+    ctx.clearRect(0,0,W,H);
+    var padL=40, padR=40, y=110;
+    var n=VS.length; var step=(W-padL-padR)/(n-1);
+    // Grundlinie
+    ctx.strokeStyle='#B9A88C'; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W-padR, y); ctx.stroke();
+    // Ticks + Beschriftung
+    ctx.textAlign='center';
+    for(var i=0;i<n;i++){
+      var x=padL+step*i;
+      ctx.strokeStyle='#B9A88C'; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.moveTo(x,y-9); ctx.lineTo(x,y+9); ctx.stroke();
+      ctx.fillStyle='#1A2530'; ctx.font='bold 24px "Noto Sans",Arial,sans-serif';
+      ctx.fillText(VS[i].sym===''?'1':VS[i].sym, x, y+38);
+      ctx.fillStyle='#5A666F'; ctx.font='16px "DejaVu Sans Mono",monospace';
+      ctx.fillText('10'+sup(VS[i].exp), x, y+62);
+    }
+    // Pfeil von -> zu
+    var xv=padL+step*vonIdx, xz=padL+step*zuIdx;
+    if(arrow && vonIdx!==zuIdx){
+      ctx.strokeStyle='#A34E0E'; ctx.lineWidth=4;
+      ctx.beginPath(); ctx.moveTo(xv,y-30); ctx.lineTo(xz,y-30); ctx.stroke();
+      var dir = xz>xv?1:-1;
+      ctx.beginPath();
+      ctx.moveTo(xz,y-30); ctx.lineTo(xz-dir*14,y-37); ctx.lineTo(xz-dir*14,y-23); ctx.closePath();
+      ctx.fillStyle='#A34E0E'; ctx.fill();
+      var shiftv = VS[vonIdx].exp - VS[zuIdx].exp; // Faktor auf den Zahlenwert
+      ctx.fillStyle='#A34E0E'; ctx.font='bold 18px "Noto Sans",Arial,sans-serif';
+      ctx.fillText('Zahlenwert · 10'+sup(shiftv), (xv+xz)/2, y-44);
+    }
+    // Marker Ausgang (blau)
+    dot(xv,y,'#33627D'); dot(xz,y,'#A34E0E');
+    ctx.font='bold 15px "Noto Sans",Arial,sans-serif';
+    ctx.fillStyle='#33627D'; ctx.fillText('Ausgang', xv, y-70);
+    if(vonIdx!==zuIdx){ ctx.fillStyle='#A34E0E'; ctx.fillText('Ziel', xz, y-88); }
+  }
+  function dot(x,y,c){ ctx.beginPath(); ctx.arc(x,y,9,0,Math.PI*2); ctx.fillStyle=c; ctx.fill();
+    ctx.lineWidth=3; ctx.strokeStyle='#fff'; ctx.stroke(); }
+
+  function unitLabel(){ return unitI.value; }
+
+  function compute(animate){
+    var w = wertI.value.trim().replace(/\s/g,'');
+    if(!valid(w)){ noteO.textContent='Bitte einen Zahlenwert eingeben (Dezimalkomma, zum Beispiel 0,68).'; return; }
+    var vi = parseInt(vonI.value,10), zi = parseInt(zuI.value,10);
+    var von = VS[vi], zu = VS[zi], u = unitLabel();
+    var shift = von.exp - zu.exp;               // >0: Komma nach rechts
+    var neu = shiftComma(w, shift);
+    var grund = shiftComma(w, von.exp);         // Wert in der Grundeinheit
+    var ws = wiss(grund);
+    var dir = shift>0 ? 'rechts' : (shift<0 ? 'links' : '');
+    var nStellen = Math.abs(shift);
+
+    drawStrahl(vi, zi, true);
+
+    // Ergebniszahl mit hervorgehobenem Komma
+    var shown = neu.replace(',', '<span class="komma">,</span>');
+    var vsZielSym = zu.sym==='' ? '' : zu.sym;
+    numO.innerHTML = shown + ' <span class="u">'+vsZielSym+u+'</span>';
+    numO.style.opacity = 1;
+
+    noteO.innerHTML = (vi===zi)
+      ? 'Gleicher Vorsatz: der Zahlenwert bleibt unverändert.'
+      : 'Vorsatzwechsel '+(von.sym===''?'Grundeinheit':von.sym)+' → '+(zu.sym===''?'Grundeinheit':zu.sym)+
+        ': Zahlenwert · 10'+sup(shift)+' → Komma '+nStellen+' Stelle'+(nStellen===1?'':'n')+' nach '+dir+'.';
+
+    // Rechenweg (formeldarstellung): Eingabe -> Grundeinheit -> Zielvorsatz -> wiss. Schreibweise
+    var eA = '<b>'+fmt(w)+' '+(von.sym===''?'':'<span class="fz" style="font-style:normal">'+von.sym+'</span>')+'<span class="ez">'+u+'</span></b>'+
+             ' = '+fmt(w)+' · 10'+sup(von.exp)+' <span class="ez">'+u+'</span>  (Grundeinheit: <span class="gr">'+fmt(grund)+' <span class="ez">'+u+'</span></span>)';
+    var eB = '= <span class="res">'+fmt(neu)+' '+vsZielSym+'<span class="ez">'+u+'</span></span>'+
+             (vi===zi?'':'  (Komma '+nStellen+' nach '+dir+', Einheit bleibt erhalten)');
+    var eC = 'wissenschaftliche Schreibweise: '+fmt(grund)+' <span class="ez">'+u+'</span> = <span class="res">'+ws.m+' · 10'+sup(ws.e)+' <span class="ez">'+u+'</span></span>';
+
+    reveal(eq1, eA, 0, animate);
+    reveal(eq2, eB, animate&&!reduce?360:0, animate);
+    reveal(eq3, eC, animate&&!reduce?720:0, animate);
+  }
+  function fmt(s){ return String(s); }
+  function reveal(node, html, delay, animate){
+    node.classList.remove('on'); node.innerHTML = html;
+    if(animate && !reduce){ setTimeout(function(){ node.classList.add('on'); }, delay); }
+    else node.classList.add('on');
+  }
+
+  // Presets, Kennwerte aus den Aufgaben dieses Blocks
+  var PRE = [
+    {t:'20 mA → A',   w:'20',   u:'A',       von:-3, zu:0},
+    {t:'10 kΩ → Ω',   w:'10',   u:'Ω',  von:3,  zu:0},
+    {t:'100 W → kW', w:'100',  u:'W',       von:0,  zu:3},
+    {t:'1,2 kWh → Wh',w:'1,2',  u:'Wh',      von:3,  zu:0},
+    {t:'0,68 µF → nF',w:'0,68', u:'F',       von:-6, zu:-9},
+    {t:'4,7 MΩ → Ω',  w:'4,7',  u:'Ω',  von:6,  zu:0},
+    {t:'4,7 nF → pF', w:'4,7',  u:'F',       von:-9, zu:-12}
+  ];
+  var pbox = el('presets');
+  PRE.forEach(function(p){
+    var b=document.createElement('button'); b.type='button'; b.className='pbtn'; b.textContent=p.t;
+    b.addEventListener('click', function(){
+      wertI.value=p.w; unitI.value=p.u; vonI.value=String(idxByExp(p.von)); zuI.value=String(idxByExp(p.zu));
+      compute(true);
+    });
+    pbox.appendChild(b);
+  });
+
+  el('go').addEventListener('click', function(){ compute(true); });
+  el('reset').addEventListener('click', function(){ applyStart(); });
+  [wertI,unitI,vonI,zuI].forEach(function(n){
+    n.addEventListener('change', function(){ /* Ergebnis erst auf „Umrechnen", nichts vorlösen */ });
+  });
+  wertI.addEventListener('keydown', function(e){ if(e.key==='Enter'){ compute(true); } });
+
+  applyStart();
+})();
+</script>
+</body></html>
