@@ -186,8 +186,8 @@
   var STOFF = {
     "Kupfer":        {gruppe:"Leiter",      gamma:56},
     "Aluminium":     {gruppe:"Leiter",      gamma:36},
-    "Kohle":         {gruppe:"Leiter"},
-    "Salzlösung":    {gruppe:"Leiter"},
+    "Kohle":         {gruppe:"Leiter", schwach:true},
+    "Salzlösung":    {gruppe:"Leiter", schwach:true},
     "Silicium":      {gruppe:"Halbleiter"},
     "Germanium":     {gruppe:"Halbleiter"},
     "Kunststoff":    {gruppe:"Nichtleiter"},
@@ -324,7 +324,7 @@
     else g.fillText("Schaltplan eines Gleichstromkreises, Schaltzeichen nach DIN EN 60617", xt, 26);
     g.font = SCHMAL ? "bold 17px 'Noto Sans',sans-serif" : "bold 19px 'Noto Sans',sans-serif";
     g.fillStyle = an ? "#2F7D62" : "#B23A33";
-    g.fillText(an ? "Die Leuchte leuchtet." : "Die Leuchte bleibt dunkel.", xt, SCHMAL ? 64 : 62);
+    g.fillText(an ? ((STOFF[z.stoff] || {}).schwach ? "Die Leuchte leuchtet schwach." : "Die Leuchte leuchtet.") : "Die Leuchte bleibt dunkel.", xt, SCHMAL ? 64 : 62);
     // ★ Die Begruendung UMBRECHEN. Einzeilig lief der Silicium-Satz rechts aus dem Bild,
     //   und der kurze Satz lag auf dem ausgeschwenkten Schalterarm. Beides im Bild gesehen.
     g.font="13.5px 'Noto Sans',sans-serif"; g.fillStyle="#5A666F";
@@ -378,7 +378,7 @@
         + (eintrag.gruppe === "Leiter" ? "Leiter"
         : (eintrag.gruppe === "Halbleiter" ? "Halbleiter" : "Nichtleiter"))
         + (eintrag.gamma ? " (γ = " + eintrag.gamma + " m/(Ω·mm²), Tabellenbuch S. 559)" : "");
-    $("aLicht").textContent = licht ? "ja" : "nein";
+    $("aLicht").textContent = licht ? ((STOFF[stoff] || {}).schwach ? "ja, schwach" : "ja") : "nein";
     $("hDeut").textContent = grund;
     zeichne({schalter:schalter, rueck:rueck, stoff:stoff, gruppe:eintrag.gruppe,
              licht:licht, grund:grund});
