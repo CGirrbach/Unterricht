@@ -154,7 +154,7 @@ G.push({stufe: 1, block: "Block 03", f: function(){
   {von: "µF", nach: "nF", fak: 1000, x: zuf(12, 99)/100, gr: "<i>C</i>", name: "Kapazität", regel: "1 µF = 1000 nF"}];
  var a = wahl(arten), w = a.x*a.fak;
  return {art: "vorsatz", p: {x: a.x, fak: a.fak}, wert: w, einh: a.nach,
-  frage: "Rechnen Sie die " + a.name + " " + a.gr + " = " + zahl(a.x, 4) + " " + a.von + " in " + a.nach + " um.",
+  frage: "Rechnen Sie " + (a.name === "Widerstand" ? "den " : "die ") + a.name + " " + a.gr + " = " + zahl(a.x, 4) + " " + a.von + " in " + a.nach + " um.",
   weg: [["Umrechnung", a.regel], ["Ergebnis", a.gr + " = " + zahl(a.x, 4) + " " + a.von + " " + erg(w, a.nach, 4)]]};
 }});
 G.push({stufe: 2, block: "Block 05", f: function(){
@@ -164,7 +164,7 @@ G.push({stufe: 2, block: "Block 05", f: function(){
   weg: [["Formel", "<i>Q</i> = <i>n</i>" + MAL + "<i>e</i>"],
    ["Einsetzen", "<i>Q</i> = " + zahl(m, 2) + MAL + "10<sup>" + ex + "</sup>" + MAL + "1,602" + MAL + "10<sup>−19</sup> C"],
    ["Ergebnis", "<i>Q</i> " + erg(q, "C")]],
-  merke: "Die Exponenten werden addiert: " + ex + " + (−19) = " + (ex - 19) + ". Elektronen tragen negative Ladung; gefragt ist hier nur der Betrag."};
+  merke: "Die Exponenten werden addiert: " + ex + " + (−19) = " + zahl(ex - 19, 0) + ". Elektronen tragen negative Ladung; gefragt ist hier nur der Betrag."};
 }});
 G.push({stufe: 3, block: "Block 07", f: function(){
  var m = zuf(110, 990)/100, ex = zuf(18, 19), n = m*Math.pow(10, ex), e = 1.602e-19, t = zuf(2, 20), q = n*e, i = q/t;
@@ -226,10 +226,10 @@ G.push({stufe: 1, block: "Block 10", f: function(){
  var iz = wahl([13.5, 15.5, 16.5, 18, 19.5, 21, 24, 27, 28, 32]), ib = rund(iz + wahl([-3, -2, -1, -0.5, 0.5, 1, 2, 3]), 1);
  var ok = ib <= iz;
  return {art: "eignung", mc: true, p: {iz: iz, ib: ib},
-  frage: "Nach der Tabelle darf eine Leitung höchstens <i>I</i><sub>Z</sub> = " + zahl(iz, 1) + " A führen. Der Betriebsstrom beträgt <i>I</i><sub>B</sub> = " + zahl(ib, 1) + " A. Ist die Leitung geeignet?",
+  frage: "Für eine Leitung lesen Sie in der Tabelle den Bemessungswert der Strombelastbarkeit <i>I</i><sub>r</sub> = " + zahl(iz, 1) + " A ab. Sie liegt allein und bei 30 °C, die Tabelle gilt also ohne Umrechnung: <i>I</i><sub>Z</sub> = <i>I</i><sub>r</sub>. Der Betriebsstrom beträgt <i>I</i><sub>B</sub> = " + zahl(ib, 1) + " A. Ist die Leitung hinsichtlich der Erwärmung geeignet?",
   optionen: ["Ja, weil <i>I</i><sub>B</sub> ≤ <i>I</i><sub>Z</sub> ist.", "Nein, weil <i>I</i><sub>B</sub> > <i>I</i><sub>Z</sub> ist.", "Das lässt sich ohne die Stromdichte nicht entscheiden."],
   richtig: ok ? 0 : 1,
-  begruendung: "Eine Leitung ist geeignet, wenn der Betriebsstrom höchstens so groß ist wie ihre Strombelastbarkeit: <i>I</i><sub>B</sub> ≤ <i>I</i><sub>Z</sub>. Hier ist " + zahl(ib, 1) + " A " + (ok ? "≤" : ">") + " " + zahl(iz, 1) + " A."};
+  begruendung: "Hinsichtlich der Erwärmung ist die Leitung geeignet, wenn der Betriebsstrom höchstens so groß ist wie ihre Strombelastbarkeit: <i>I</i><sub>B</sub> ≤ <i>I</i><sub>Z</sub>. Hier ist <i>I</i><sub>Z</sub> = <i>I</i><sub>r</sub>, also " + zahl(ib, 1) + " A " + (ok ? "≤" : ">") + " " + zahl(iz, 1) + " A."};
 }});
 var BEGRIFFE_G = [
  {frage: "Wie ist die technische Stromrichtung außerhalb der Spannungsquelle festgelegt?",
@@ -240,7 +240,7 @@ var BEGRIFFE_G = [
  {frage: "Unter welcher Bedingung fließt ein elektrischer Strom?", optionen: ["nur im geschlossenen Stromkreis", "sobald eine Leitung an einem Pol angeschlossen ist", "auch bei geöffnetem Schalter"], richtig: 0,
   begruendung: "Strom fließt nur im geschlossenen Stromkreis: vom Erzeuger über den Hinleiter zum Verbraucher und über den Rückleiter zurück.", block: "Block 04"},
  {frage: "Zu welcher Werkstoffgruppe gehört Silicium?", optionen: ["Halbleiter", "Leiter", "Nichtleiter"], richtig: 0,
-  begruendung: "Silicium ist ein Halbleiter: Es leitet zwischen Leiter und Nichtleiter.", block: "Block 04"},
+  begruendung: "Silicium ist ein Halbleiter: Seine elektrische Leitfähigkeit liegt zwischen der von Leitern und Nichtleitern.", block: "Block 04"},
  {frage: "Welche Stromart hat immer dieselbe Richtung?", optionen: ["Gleichstrom", "Wechselstrom", "keine von beiden"], richtig: 0,
   begruendung: "Beim Gleichstrom hat der Strom immer dieselbe Richtung; beim Wechselstrom ändert er sie ständig.", block: "Block 08"},
  {frage: "Welche Ladung trägt ein Elektron?", optionen: ["−<i>e</i> = −1,602" + MAL + "10<sup>−19</sup> C", "+<i>e</i> = +1,602" + MAL + "10<sup>−19</sup> C", "keine Ladung"], richtig: 0,
@@ -310,19 +310,19 @@ var ALPHA = [{n: "Kupfer", a: 0.0039}, {n: "Aluminium", a: 0.004}, {n: "Eisen", 
 W.push({stufe: 2, block: "Block 14", f: function(){
  var s = wahl(ALPHA), r1 = wahl([10, 20, 25, 40, 50, 80, 100, 120]), dt = zuf(3, 16)*5, dr = s.a*r1*dt, r2 = r1 + dr;
  return {art: "temperatur_r2", p: {a: s.a, r1: r1, dt: dt}, wert: r2, einh: "Ω",
-  frage: "Eine Wicklung aus " + s.n + " hat bei 20 °C den Widerstand <i>R</i><sub>1</sub> = " + r1 + " Ω. Sie erwärmt sich um <i>Δϑ</i> = " + dt + " K (" + s.n + ": <i>α</i> = " + zahl(s.a, 5) + " " + br("1", "K") + "). Berechnen Sie den Widerstand <i>R</i><sub>2</sub> im warmen Zustand.",
-  weg: [["Formel", "<i>ΔR</i> = <i>α</i>" + MAL + "<i>R</i><sub>1</sub>" + MAL + "<i>Δϑ</i>;  <i>R</i><sub>2</sub> = <i>R</i><sub>1</sub> + <i>ΔR</i>"],
-   ["Einsetzen", "<i>ΔR</i> = " + zahl(s.a, 5) + " " + br("1", "K") + MAL + r1 + " Ω" + MAL + dt + " K " + erg(dr, "Ω", 4)],
+  frage: "Eine Wicklung aus " + s.n + " hat bei 20 °C den Widerstand <i>R</i><sub>1</sub> = " + r1 + " Ω. Sie erwärmt sich um Δ<i>ϑ</i> = " + dt + " K (" + s.n + ": <i>α</i> = " + zahl(s.a, 5) + " " + br("1", "K") + "). Berechnen Sie den Widerstand <i>R</i><sub>2</sub> im warmen Zustand.",
+  weg: [["Formel", "Δ<i>R</i> = <i>α</i>" + MAL + "<i>R</i><sub>1</sub>" + MAL + "Δ<i>ϑ</i>;  <i>R</i><sub>2</sub> = <i>R</i><sub>1</sub> + Δ<i>R</i>"],
+   ["Einsetzen", "Δ<i>R</i> = " + zahl(s.a, 5) + " " + br("1", "K") + MAL + r1 + " Ω" + MAL + dt + " K " + erg(dr, "Ω", 4)],
    ["Ergebnis", "<i>R</i><sub>2</sub> = " + r1 + " Ω + " + zahl(dr, 4) + " Ω " + erg(r2, "Ω", 3)]]};
 }});
 W.push({stufe: 3, block: "Block 14", f: function(){
  var s = wahl(ALPHA), r1 = wahl([10, 20, 40, 50, 80, 100]), dtw = zuf(4, 30)*2.5, r2 = rund(r1*(1 + s.a*dtw), 2), dt = (r2 - r1)/(s.a*r1), th2 = 20 + dt;
  return {art: "temperatur_dt", p: {a: s.a, r1: r1, r2: r2}, wert: th2, einh: "°C",
   frage: "Eine Spule aus " + s.n + " hat bei 20 °C den Widerstand <i>R</i><sub>1</sub> = " + r1 + " Ω, im Betrieb <i>R</i><sub>2</sub> = " + zahl(r2, 2) + " Ω (<i>α</i> = " + zahl(s.a, 5) + " " + br("1", "K") + "). Welche Temperatur <i>ϑ</i><sub>2</sub> hat die Spule im Betrieb?",
-  weg: [["Formel", "<i>Δϑ</i> = " + br("<i>R</i><sub>2</sub> − <i>R</i><sub>1</sub>", "<i>α</i>" + MAL + "<i>R</i><sub>1</sub>") + ";  <i>ϑ</i><sub>2</sub> = 20 °C + <i>Δϑ</i>"],
-   ["Einsetzen", "<i>Δϑ</i> = " + br(zahl(r2, 2) + " Ω − " + r1 + " Ω", zahl(s.a, 5) + " " + br("1", "K") + MAL + r1 + " Ω") + " " + erg(dt, "K")],
+  weg: [["Formel", "Δ<i>ϑ</i> = " + br("<i>R</i><sub>2</sub> − <i>R</i><sub>1</sub>", "<i>α</i>" + MAL + "<i>R</i><sub>1</sub>") + ";  <i>ϑ</i><sub>2</sub> = 20 °C + Δ<i>ϑ</i>"],
+   ["Einsetzen", "Δ<i>ϑ</i> = " + br(zahl(r2, 2) + " Ω − " + r1 + " Ω", zahl(s.a, 5) + " " + br("1", "K") + MAL + r1 + " Ω") + " " + erg(dt, "K")],
    ["Ergebnis", "<i>ϑ</i><sub>2</sub> = 20 °C + " + zahl(dt) + " K " + erg(th2, "°C")]],
-  merke: "Die Formel <i>ΔR</i> = <i>α</i>" + MAL + "<i>R</i><sub>1</sub>" + MAL + "<i>Δϑ</i> wird nach <i>Δϑ</i> umgestellt."};
+  merke: "Die Formel Δ<i>R</i> = <i>α</i>" + MAL + "<i>R</i><sub>1</sub>" + MAL + "Δ<i>ϑ</i> wird nach Δ<i>ϑ</i> umgestellt."};
 }});
 var BEGRIFFE_W = [
  {frage: "Wie heißt die Einheit des elektrischen Leitwerts <i>G</i>?", optionen: ["Siemens (S)", "Ohm (Ω)", "Volt (V)"], richtig: 0, begruendung: "Der Leitwert ist der Kehrwert des Widerstands: <i>G</i> = 1 durch <i>R</i>, Einheit Siemens (S).", block: "Block 11"},
@@ -392,16 +392,16 @@ E.push({stufe: 3, block: "Block 18", f: function(){
  var v = zuf(1, 2);
  if(v === 1){
   return {art: "waermemenge", p: {m: liter, dt: dt}, wert: q, einh: "kJ",
-   frage: "<i>m</i> = " + zahl(liter, 1) + " kg Wasser werden von " + t1 + " °C auf " + t2 + " °C erwärmt (Wasser: <i>c</i> = 4,19 " + br("kJ", "kg" + MAL + "K") + "). Berechnen Sie die Wärmemenge <i>Q</i>.",
-   weg: [["Formel", "<i>Q</i> = <i>Δϑ</i>" + MAL + "<i>c</i>" + MAL + "<i>m</i>"], ["Einsetzen", "<i>Q</i> = " + dt + " K" + MAL + "4,19 " + br("kJ", "kg" + MAL + "K") + MAL + zahl(liter, 1) + " kg"], ["Ergebnis", "<i>Q</i> " + erg(q, "kJ")]],
-   merke: "<i>Δϑ</i> = " + t2 + " °C − " + t1 + " °C = " + dt + " K."};
+   frage: "<i>m</i> = " + zahl(liter, 2) + " kg Wasser werden von " + t1 + " °C auf " + t2 + " °C erwärmt (Wasser: <i>c</i> = 4,19 " + br("kJ", "kg" + MAL + "K") + "). Berechnen Sie die Wärmemenge <i>Q</i>.",
+   weg: [["Formel", "<i>Q</i> = Δ<i>ϑ</i>" + MAL + "<i>c</i>" + MAL + "<i>m</i>"], ["Einsetzen", "<i>Q</i> = " + dt + " K" + MAL + "4,19 " + br("kJ", "kg" + MAL + "K") + MAL + zahl(liter, 2) + " kg"], ["Ergebnis", "<i>Q</i> " + erg(q, "kJ")]],
+   merke: "Δ<i>ϑ</i> = " + t2 + " °C − " + t1 + " °C = " + dt + " K."};
  }
  liter = wahl([0.5, 0.75, 1, 1.25, 1.5, 1.7]); q = dt*c*liter;     /* ein Wasserkocher fasst höchstens 1,7 kg */
  var p = wahl([1000, 1500, 2000, 2200, 3000]), zeta = zuf(70, 95)/100, qs = q/zeta, t = qs*1000/p/60;
  return {art: "aufheizzeit", p: {m: liter, dt: dt, p: p, zeta: zeta}, wert: t, einh: "min",
-  frage: "Ein Wasserkocher mit <i>P</i> = " + zahl(p) + " W erwärmt <i>m</i> = " + zahl(liter, 1) + " kg Wasser von " + t1 + " °C auf " + t2 + " °C (<i>c</i> = 4,19 " + br("kJ", "kg" + MAL + "K") + ", Wärmenutzungsgrad <i>ζ</i> = " + zahl(zeta, 2) + "). Wie lange dauert das? Geben Sie <i>t</i> in min an.",
-  weg: [["Formel", "<i>Q</i><sub>nutz</sub> = <i>Δϑ</i>" + MAL + "<i>c</i>" + MAL + "<i>m</i>;  <i>Q</i><sub>S</sub> = " + br("<i>Q</i><sub>nutz</sub>", "<i>ζ</i>") + ";  <i>t</i> = " + br("<i>Q</i><sub>S</sub>", "<i>P</i>")],
-   ["Einsetzen", "<i>Q</i><sub>nutz</sub> = " + dt + " K" + MAL + "4,19 " + br("kJ", "kg" + MAL + "K") + MAL + zahl(liter, 1) + " kg " + erg(q, "kJ", 2) + ";  <i>Q</i><sub>S</sub> = " + br(zahl(q, 2) + " kJ", zahl(zeta, 2)) + " " + erg(qs, "kJ", 1) +
+  frage: "Ein Wasserkocher mit <i>P</i> = " + zahl(p) + " W erwärmt <i>m</i> = " + zahl(liter, 2) + " kg Wasser von " + t1 + " °C auf " + t2 + " °C (<i>c</i> = 4,19 " + br("kJ", "kg" + MAL + "K") + ", Wärmenutzungsgrad <i>ζ</i> = " + zahl(zeta, 2) + "). Wie lange dauert das? Geben Sie <i>t</i> in min an.",
+  weg: [["Formel", "<i>Q</i><sub>nutz</sub> = Δ<i>ϑ</i>" + MAL + "<i>c</i>" + MAL + "<i>m</i>;  <i>Q</i><sub>S</sub> = " + br("<i>Q</i><sub>nutz</sub>", "<i>ζ</i>") + ";  <i>t</i> = " + br("<i>Q</i><sub>S</sub>", "<i>P</i>")],
+   ["Einsetzen", "<i>Q</i><sub>nutz</sub> = " + dt + " K" + MAL + "4,19 " + br("kJ", "kg" + MAL + "K") + MAL + zahl(liter, 2) + " kg " + erg(q, "kJ", 2) + ";  <i>Q</i><sub>S</sub> = " + br(zahl(q, 2) + " kJ", zahl(zeta, 2)) + " " + erg(qs, "kJ", 1) +
     ";  <i>t</i> = " + br(zahl(qs, 1) + " kJ", zahl(p/1000, 1) + " kW") + " " + erg(qs*1000/p, "s", 0)],
    ["Ergebnis", "<i>t</i> " + erg(t, "min")]],
   merke: "1 kW = 1 kJ je s; die Sekunden werden durch 60 geteilt. Weitergerechnet wird ungerundet."};
@@ -412,6 +412,21 @@ var BEGRIFFE_E = [
  {frage: "Kann ein Wirkungsgrad größer als 1 sein?", optionen: ["Nein, weil immer ein Teil der zugeführten Leistung als Verlust in Wärme übergeht.", "Ja, bei guten Motoren.", "Ja, wenn die Spannung hoch genug ist."], richtig: 0, begruendung: "<i>P</i><sub>ab</sub> ist immer kleiner als <i>P</i><sub>zu</sub>, deshalb ist <i>η</i> kleiner als 1.", block: "Block 17"},
  {frage: "Wie verhält sich die Leistung eines Heizwiderstands, wenn die Spannung verdoppelt wird?", optionen: ["Sie wird viermal so groß.", "Sie wird doppelt so groß.", "Sie bleibt gleich."], richtig: 0, begruendung: "<i>P</i> = <i>U</i><sup>2</sup> durch <i>R</i>: doppelte Spannung, vierfache Leistung.", block: "Block 16"},
  {frage: "Wo ist die Stromwärme erwünscht?", optionen: ["im Tauchsieder", "in der Zuleitung", "im Motor"], richtig: 0, begruendung: "Im Tauchsieder ist die Wärme Nutzwärme; in Zuleitung und Motor ist sie Verlustwärme.", block: "Block 18"}];
+/* 26.09.2026 (PRUEF2609m, B19-9 d): Stufe ① hatte hier nur Auswahlfragen, „fertig“ war ohne Rechnung erreichbar */
+E.push({stufe: 1, block: "Block 15 und 16", f: function(){
+ if(zuf(1, 2) === 1){
+  var u = wahl([12, 24, 230]), i = wahl([0.5, 1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10]), pw = u*i;
+  return {art: "leistung_einfach", p: {u: u, i: i}, wert: pw, einh: "W",
+   frage: "Ein Gerät nimmt an <i>U</i> = " + u + " V den Strom <i>I</i> = " + zahl(i, 1) + " A auf. Berechnen Sie die Leistung <i>P</i>.",
+   weg: [["Formel", "<i>P</i> = <i>U</i>" + MAL + "<i>I</i>"], ["Einsetzen", "<i>P</i> = " + u + " V" + MAL + zahl(i, 1) + " A"], ["Ergebnis", "<i>P</i> " + erg(pw, "W")]],
+   merke: "1 V" + MAL + "1 A = 1 W."};
+ }
+ var pk = wahl([0.5, 1, 1.5, 2, 2.5, 3]), h = zuf(1, 8), w = pk*h;
+ return {art: "arbeit_einfach", p: {p: pk, h: h}, wert: w, einh: "kWh",
+  frage: "Ein Heizgerät mit <i>P</i> = " + zahl(pk, 1) + " kW ist <i>t</i> = " + h + " h eingeschaltet. Berechnen Sie die elektrische Arbeit <i>W</i> in kWh.",
+  weg: [["Formel", "<i>W</i> = <i>P</i>" + MAL + "<i>t</i>"], ["Einsetzen", "<i>W</i> = " + zahl(pk, 1) + " kW" + MAL + h + " h"], ["Ergebnis", "<i>W</i> " + erg(w, "kWh")]],
+  merke: "kW mal h ergibt kWh."};
+}});
 E.push({stufe: 1, block: "", f: function(){ var b = wahl(BEGRIFFE_E); return {art: "begriff", mc: true, p: {}, frage: b.frage, optionen: b.optionen, richtig: b.richtig, begruendung: b.begruendung, blockText: b.block}; }});
 
 var GEBIETE = {g: {name: "Grundgrößen", liste: G}, w: {name: "Widerstand", liste: W}, e: {name: "Energie und Leistung", liste: E}};
@@ -446,6 +461,8 @@ function zeigen(){
 function neu(){ if(!zustand.gebiet) return; zustand.aufgabe = ziehen(); zeigen(); if(!zustand.aufgabe.mc) $("ein").focus({preventScroll: true}); }
 function wegZeigen(){
  var a = zustand.aufgabe; if(!a || a.mc) return;
+ /* 26.09.2026 (PRUEF2609m, B19-9 d): wer den Rechenweg VOR der eigenen Lösung ansieht, hat die Aufgabe nicht gelöst */
+ if(!zustand.geprueft){ zustand.geprueft = true; werten(false); $("fb").className = "fb falsch"; $("fb").textContent = "Rechenweg angesehen: Diese Aufgabe zählt nicht als gelöst, die Folge beginnt neu."; }
  $("weg").innerHTML = a.weg.map(function(z){ return '<div class="zeile"><span class="lbl">' + z[0] + '</span> ' + z[1] + '</div>'; }).join("") + (a.merke ? '<div class="merke">' + a.merke + '</div>' : "");
  $("weg").className = "weg an";
 }
@@ -502,10 +519,41 @@ window.probe = function(n){
  var aus = [];
  ["g", "w", "e"].forEach(function(gk){
   GEBIETE[gk].liste.forEach(function(gen, k){
-   for(var i = 0; i < n; i++){ var a = gen.f(); aus.push({gebiet: gk, gen: k, art: a.art, p: a.p, wert: a.wert, mc: !!a.mc, richtig: a.richtig, betrag: !!a.betrag}); }
+   for(var i = 0; i < n; i++){ var a = gen.f(); aus.push({gebiet: gk, gen: k, art: a.art, p: a.p, wert: a.wert, mc: !!a.mc, richtig: a.richtig, betrag: !!a.betrag, frage: a.frage}); }
   });
  });
  return aus;
+};
+/* 26.09.2026 (PRUEF2609m, B19-1): Anzeigeprobe. Jeder Zahlenwert, mit dem gerechnet wird, muss in der Frage
+   UNGERUNDET stehen (bis auf eine Zehnerpotenz, wegen der Vorsätze). Vorher zeigte der Wasserkocher 0,75 kg als
+   „0,8 kg“ und rechnete mit 0,75; probe() sah das nicht, weil sie die Rechnung prüft, nicht die Anzeige. */
+function angezeigt(html){
+ var s = html.replace(/·10<sup>([−-]?\d+)<\/sup>/g, "e$1").replace(/<[^>]+>/g, " ").replace(/−/g, "-").replace(/[\u00a0\u2009\u202f]/g, " ");
+ var z = s.match(/-?\d{1,3}(?: \d{3})+(?:,\d+)?|-?\d+(?:,\d+)?(?:e-?\d+)?/g) || [];
+ return z.map(function(x){ return parseFloat(x.replace(/ /g, "").replace(",", ".")); });
+}
+function zehnerpotenz(v, d){
+ if(v === 0 || d === 0) return v === d;
+ var q = Math.log10(Math.abs(v/d));
+ return Math.abs(q - Math.round(q)) < 1e-9;
+}
+var ABGELEITET = ["dt", "fak"];   /* dt aus den beiden Temperaturen, fak ist der Umrechnungsfaktor: beide rechnet der Schüler selbst */
+window.anzeigeprobe = function(n){
+ var fehl = [], gezaehlt = 0;
+ ["g", "w", "e"].forEach(function(gk){
+  GEBIETE[gk].liste.forEach(function(gen, k){
+   for(var i = 0; i < n; i++){
+    var a = gen.f(); if(a.mc || !a.p) continue;
+    var zahlen = angezeigt(a.frage);
+    Object.keys(a.p).forEach(function(key){
+     var v = a.p[key]; if(typeof v !== "number" || ABGELEITET.indexOf(key) >= 0) return;
+     gezaehlt++;
+     if(!zahlen.some(function(d){ return zehnerpotenz(v, d); })) fehl.push({art: a.art, groesse: key, wert: v, frage: a.frage.replace(/<[^>]+>/g, "")});
+    });
+   }
+  });
+ });
+ return {geprueft: gezaehlt, fehl: fehl};
 };
 })();
 </script>
