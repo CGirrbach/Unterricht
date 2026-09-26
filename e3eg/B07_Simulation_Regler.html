@@ -1,0 +1,194 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>B07 Simulation: der Blindleistungsregler einer Zentralkompensation</title>
+<!-- lehrmaterial -->
+<!-- materialtyp: simulation -->
+<script type="application/json" id="sim-meta">
+{"block": "B07", "titel": "Der Blindleistungsregler: Stufen folgen der Tageslast",
+ "startwerte": {"P": 120},
+ "loesungswerte": {"P": 120},
+ "weitere_stellungen": {"Nachtbetrieb": 20, "Schichtbeginn": 70, "Volllast": 240},
+ "ziel_erkenntnis": "Der Blindleistungsbedarf eines Betriebs aendert sich staendig. Ein fester Kondensator passt nur zu EINER Last: bei wenig Last ueberkompensiert er, bei viel Last reicht er nicht. Der Regler schaltet ganze Stufen zu und ab und trifft den Bedarf deshalb nur naeherungsweise, aber immer innerhalb einer Stufe. Eine Einzelkompensation braucht keinen Regler, weil ihr Verbraucher immer denselben Bedarf hat.",
+ "quellen": "Rechenmodell Tabellenbuch S. 328, Formel 3 und 5 (P = Wurzel3 * U * I * cos phi; Q_C = P * (tan phi1 - tan phi2)). Stufenleistung 12,5 kvar aus der Datentabelle der Pruefung Winter 2020/21, Typ MYB 15/280D bei 50 Hz. Zielwirkfaktor 0,92 als Mittelwert des Zielbereichs aus Block 6."}
+</script>
+<style>
+:root{--kupfer:#A34E0E;--kupferhell:#F6EBE0;--ink:#1A2530;--grau:#5A666F;--linie:#C9D1D8;--hell:#F3F5F7;--gruen:#2F7D62;--blau:#1E88C8;--rot:#C0246B}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans",Arial,sans-serif;color:var(--ink);background:#fff;font-size:15px;line-height:1.45}
+.wrap{max-width:1000px;margin:0 auto;padding:12px 14px 24px}
+header .reihe{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--kupfer);font-weight:700}
+header h1{font-size:22px;margin:2px 0 10px;border-bottom:3px solid var(--kupfer);padding-bottom:6px}
+.karte{border:1.6px solid var(--ink);padding:10px 12px;margin-bottom:12px;background:#fff}
+.karte .cap{display:block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--kupfer);font-weight:700;margin-bottom:6px}
+canvas{width:100%;height:auto;display:block;background:#fff}
+.hinweis{font-size:13px;color:var(--grau);margin:6px 0 0}
+.zwei{display:block}
+@media(min-width:760px){.zwei{display:grid;grid-template-columns:1.3fr 1fr;gap:12px}.zwei .karte{margin-bottom:12px}}
+.anz{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.anz div{border:1.3px solid var(--linie);padding:6px 8px;background:var(--hell)}
+.anz b{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--grau);font-weight:700}
+.anz span{font-size:19px;font-weight:700}
+.regler{margin:10px 0 2px}
+.regler label{display:block;font-size:13px;font-weight:700;margin-bottom:4px}
+input[type=range]{width:100%}
+.knoepfe{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+button{font:inherit;font-size:13px;padding:4px 10px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);font-weight:700;cursor:pointer}
+button:hover{background:var(--kupferhell)}
+.stufen{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+.stufen i{display:block;width:34px;height:26px;border:1.5px solid var(--ink);background:#fff;font-style:normal;font-size:12px;text-align:center;line-height:24px}
+.stufen i.an{background:var(--gruen);border-color:var(--gruen);color:#fff}
+</style>
+</head><body>
+<div class="wrap">
+<header>
+ <div class="reihe">E3EG · Lernfeld 11 · Einheit 1 Leistungskompensation · Block 7</div>
+ <h1>Der Blindleistungsregler: Stufen folgen der Tageslast</h1>
+</header>
+
+<div class="karte">
+ <span class="cap">Die Anlage</span>
+ <p style="margin:0">Ein Betrieb am 400-V-Netz. Über den Tag ändert sich die aufgenommene Wirkleistung <i>P</i>; der Wirkfaktor der Verbraucher bleibt dabei cos&nbsp;<i>φ</i><sub>1</sub> = 0,75. Die Zentralkompensation besteht aus <b>zehn Einzelbatterien zu je 12,5 kvar</b>. Der Regler schaltet so viele zu, dass der Zielwirkfaktor cos&nbsp;<i>φ</i><sub>2</sub> = 0,92 möglichst erreicht wird, ohne ihn zu überschreiten.</p>
+ <div class="regler">
+  <label for="p">Aufgenommene Wirkleistung <i>P</i> = <output id="pout">120</output> kW</label>
+  <input type="range" id="p" min="10" max="300" step="5" value="120">
+ </div>
+ <div class="knoepfe">
+  <button type="button" data-p="20">Nachtbetrieb</button>
+  <button type="button" data-p="70">Schichtbeginn</button>
+  <button type="button" data-p="120">Mittlere Last</button>
+  <button type="button" data-p="240">Volllast</button>
+  <button type="button" id="fest">Regler aus: acht Stufen fest</button>
+ </div>
+ <div class="stufen" id="stufen"></div>
+ <p class="hinweis" id="lage">Grün: zugeschaltete Einzelbatterie.</p>
+</div>
+
+<div class="zwei">
+ <div class="karte">
+  <span class="cap">Blindleistung über der Wirkleistung</span>
+  <canvas id="bild" width="640" height="380"></canvas>
+  <p class="hinweis">Braun: die Blindleistung <i>Q</i><sub>L1</sub>, die der Betrieb aufnimmt. Grün: die Blindleistung <i>Q</i><sub>C</sub>, die der Regler mit ganzen Stufen liefert. Der senkrechte Abstand ist das, was das Netz noch trägt.</p>
+ </div>
+ <div class="karte">
+  <span class="cap">Was das Netz sieht</span>
+  <div class="anz">
+   <div><b>Wirkleistung <i>P</i></b><span id="aP">120 kW</span></div>
+   <div><b>Bedarf <i>Q</i><sub>L1</sub></b><span id="aQL">105,8 kvar</span></div>
+   <div><b>zugeschaltet</b><span id="aStufen">4 Stufen</span></div>
+   <div><b>geliefert <i>Q</i><sub>C</sub></b><span id="aQC">50,0 kvar</span></div>
+   <div><b>Rest <i>Q</i><sub>2</sub></b><span id="aQ2">55,8 kvar induktiv</span></div>
+   <div><b>cos <i>φ</i><sub>2</sub></b><span id="aCos">0,907</span></div>
+  </div>
+  <p class="hinweis" id="deutung"></p>
+ </div>
+</div>
+
+<div class="karte">
+ <span class="cap">Zum Ausprobieren</span>
+ <ol style="margin:0;padding-left:20px">
+  <li>Stellen Sie den Schieber auf <b>Nachtbetrieb</b> und dann auf <b>Volllast</b>. Wie viele Stufen schaltet der Regler jeweils zu?</li>
+  <li>Drücken Sie <b>Regler aus</b>: jetzt liegen acht Stufen fest am Netz, wie bei einer Anlage ohne Regelung. Fahren Sie den Schieber langsam nach links. Ab wann wird die Anlage <b>kapazitiv</b>?</li>
+  <li>Schalten Sie den Regler wieder ein. Begründen Sie in einem Satz, warum eine <b>Einzelkompensation</b> keinen Regler braucht.</li>
+ </ol>
+</div>
+</div>
+
+<script>
+var META = JSON.parse(document.getElementById('sim-meta').textContent), START = META.startwerte;
+var COS1 = 0.75, COS2 = 0.92, STUFE = 12.5, NSTUFEN = 10;
+var TAN1 = Math.tan(Math.acos(COS1)), TAN2 = Math.tan(Math.acos(COS2));
+var reglerAn = true;
+var el = function(id){ return document.getElementById(id); };
+
+function zahl(x, n){ return x.toFixed(n === undefined ? 1 : n).replace('.', ','); }
+
+function rechne(P){
+  var QL = P * TAN1;                       // kvar, Bedarf des Betriebs
+  var soll = P * (TAN1 - TAN2);            // kvar, was fuer cos phi 2 noetig waere
+  var n = reglerAn ? Math.min(NSTUFEN, Math.floor(soll / STUFE)) : 8;
+  var QC = n * STUFE;
+  var Q2 = QL - QC;                        // positiv induktiv, negativ kapazitiv
+  var S2 = Math.sqrt(P * P + Q2 * Q2);
+  return {P: P, QL: QL, n: n, QC: QC, Q2: Q2, cos: S2 > 0 ? P / S2 : 1};
+}
+
+function zeichne(w){
+  var c = el('bild'), g = c.getContext('2d'), W = c.width, H = c.height;
+  var l = 58, r = 14, o = 14, u = 34, PX = 300, QY = 280;
+  g.clearRect(0, 0, W, H);
+  var x = function(P){ return l + (W - l - r) * P / PX; };
+  var y = function(Q){ return H - u - (H - o - u) * Q / QY; };
+  // Gitter und Achsen
+  g.strokeStyle = '#C9D1D8'; g.lineWidth = 1; g.font = '11px Arial'; g.fillStyle = '#5A666F';
+  for (var P = 0; P <= PX; P += 50){
+    g.beginPath(); g.moveTo(x(P), o); g.lineTo(x(P), H - u); g.stroke();
+    g.textAlign = 'center'; g.fillText(P, x(P), H - u + 14);
+  }
+  for (var Q = 0; Q <= QY; Q += 40){
+    g.beginPath(); g.moveTo(l, y(Q)); g.lineTo(W - r, y(Q)); g.stroke();
+    g.textAlign = 'right'; g.fillText(Q, l - 6, y(Q) + 4);
+  }
+  g.strokeStyle = '#1A2530'; g.lineWidth = 1.6;
+  g.beginPath(); g.moveTo(l, o); g.lineTo(l, H - u); g.lineTo(W - r, H - u); g.stroke();
+  g.textAlign = 'center'; g.fillStyle = '#1A2530';
+  g.fillText('P in kW', (l + W - r) / 2, H - 6);
+  g.save(); g.translate(14, (o + H - u) / 2); g.rotate(-Math.PI / 2);
+  g.fillText('Q in kvar', 0, 0); g.restore();
+  // Bedarfsgerade Q_L1 = P * tan phi1
+  g.strokeStyle = '#A34E0E'; g.lineWidth = 2.4;
+  g.beginPath(); g.moveTo(x(0), y(0)); g.lineTo(x(PX), y(Math.min(QY, PX * TAN1))); g.stroke();
+  // Treppe der gelieferten Stufen
+  g.strokeStyle = '#2F7D62'; g.lineWidth = 2.4;
+  g.beginPath();
+  var erst = true;
+  for (var p = 0; p <= PX; p += 2){
+    var s = reglerAn ? Math.min(NSTUFEN, Math.floor(p * (TAN1 - TAN2) / STUFE)) : 8;
+    var q = Math.min(QY, s * STUFE);
+    if (erst){ g.moveTo(x(p), y(q)); erst = false; } else { g.lineTo(x(p), y(q)); }
+  }
+  g.stroke();
+  // Arbeitspunkt
+  g.fillStyle = '#C0246B';
+  g.beginPath(); g.arc(x(w.P), y(Math.min(QY, w.QL)), 5, 0, 2 * Math.PI); g.fill();
+  g.beginPath(); g.arc(x(w.P), y(Math.min(QY, w.QC)), 5, 0, 2 * Math.PI); g.fill();
+  g.strokeStyle = '#C0246B'; g.lineWidth = 1.6; g.setLineDash([4, 3]);
+  g.beginPath(); g.moveTo(x(w.P), y(Math.min(QY, w.QL))); g.lineTo(x(w.P), y(Math.min(QY, w.QC)));
+  g.stroke(); g.setLineDash([]);
+}
+
+function aus(){
+  var P = parseFloat(el('p').value), w = rechne(P);
+  el('pout').textContent = P;
+  el('aP').textContent = zahl(P, 0) + ' kW';
+  el('aQL').textContent = zahl(w.QL) + ' kvar';
+  el('aStufen').textContent = w.n + (w.n === 1 ? ' Stufe' : ' Stufen');
+  el('aQC').textContent = zahl(w.QC) + ' kvar';
+  el('aQ2').textContent = zahl(Math.abs(w.Q2)) + ' kvar ' + (w.Q2 < -0.05 ? 'kapazitiv' : 'induktiv');
+  el('aCos').textContent = zahl(w.cos, 3) + (w.Q2 < -0.05 ? ' kapazitiv' : '');
+  var s = '';
+  for (var i = 1; i <= NSTUFEN; i++) s += '<i class="' + (i <= w.n ? 'an' : '') + '">' + i + '</i>';
+  el('stufen').innerHTML = s;
+  el('deutung').textContent = w.Q2 < -0.05
+    ? 'Die Anlage ist \u00fcberkompensiert: der Kondensator liefert mehr Blindleistung, als der Betrieb braucht. Der Rest flie\u00dft ins Netz zur\u00fcck.'
+    : (w.n === 0
+       ? 'Der Bedarf reicht noch nicht f\u00fcr eine ganze Stufe; der Regler schaltet nichts zu.'
+       : 'Der Regler bleibt unter dem Bedarf: er schaltet nur ganze Stufen und darf den Zielwert nicht \u00fcberschreiten.');
+  el('lage').textContent = reglerAn
+    ? 'Gr\u00fcn: zugeschaltete Einzelbatterie. Der Regler folgt der Last.'
+    : 'Regler aus: acht Stufen liegen fest am Netz, unabh\u00e4ngig von der Last.';
+  zeichne(w);
+}
+
+el('p').addEventListener('input', aus);
+Array.prototype.forEach.call(document.querySelectorAll('button[data-p]'), function(b){
+  b.addEventListener('click', function(){ el('p').value = b.getAttribute('data-p'); aus(); });
+});
+el('fest').addEventListener('click', function(){
+  reglerAn = !reglerAn;
+  el('fest').textContent = reglerAn ? 'Regler aus: acht Stufen fest' : 'Regler wieder einschalten';
+  aus();
+});
+el('p').value = START.P;
+aus();
+</script>
+</body></html>
