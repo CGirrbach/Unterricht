@@ -1,0 +1,511 @@
+<!-- lehrmaterial -->
+<!-- materialtyp: simulation -->
+<!-- sim_bearbeitung: freiwillig -->
+<!-- EG1-B19, Klassenarbeitstrainer 1, Neubau 26.09.2026 (der alte Trainer mit Leitprojekt liegt in .vor_neubau2609).
+ Stellt Zufallsaufgaben zu allen Themen der Klassenarbeit 1 (Block 02 bis 18) in der Schreibweise der Blöcke,
+ rechnet die Eingabe nach (1 Prozent Toleranz) und zeigt danach den vollen Rechenweg: Formel, Einsetzen mit
+ Einheiten, Ergebnis. Keine Zahlen der Klassenarbeit (Block 20): die Werte werden zufällig gezogen.
+ Werkstoffwerte wie in den Blöcken: Block 13 Tabelle 1 (Kupfer rho 0,0178, gamma 56; Aluminium 0,0278, 36),
+ Block 14 Tabelle A (Kupfer alpha 0,0039, Aluminium 0,004, Eisen 0,00657), Block 18 (Wasser c = 4,19 kJ/(kg K)),
+ Elementarladung wie Block 05 (1,602 mal 10 hoch minus 19 C). Jede Aufgabe gibt ihre Eingangswerte in p aus,
+ damit die Rechnung unabhängig nachgeprüft werden kann (window.probe). -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Klassenarbeitstrainer 1: Grundgrößen, Widerstand, Energie und Leistung</title>
+<script type="application/json" id="sim-meta">
+{"block": "EG1-B19", "thema": "Klassenarbeitstrainer 1", "startwerte": {"aufgabe": "keine, erst nach Wahl des Themengebiets"}, "loesungswerte": {"aufgabe": "zufällig"}}
+</script>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--rot:#B23A33;--rothell:#F6E4E2;--gruen:#2F7D62;--gruenhell:#EAF3EC;
+ --linie:#9AA5AE;--grau:#5A666F;--hell:#F3F1EC}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;padding:0}
+body{font-family:"Noto Sans",system-ui,Arial,sans-serif;color:var(--ink);line-height:1.45;background:#f4f6f8;padding:14px;max-width:760px;margin:0 auto;font-size:16px}
+.kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0 10px;margin-bottom:12px}
+.kopf .reihe{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--kupfer)}
+.kopf h1{font-size:22px;margin:4px 0 2px}
+.kopf .sub{color:var(--grau);font-size:14px}
+.box{background:#fff;border:1.4px solid var(--linie);padding:12px 14px;margin:12px 0}
+.box .cap{display:block;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--kupfer);margin-bottom:6px}
+.anleitung{background:var(--kupferhell);border-color:var(--kupfer)}
+.anleitung p{margin:6px 0}
+.wahl{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
+.wbtn{font:inherit;font-weight:700;border:1.4px solid var(--linie);background:#fff;color:var(--ink);padding:9px 12px;cursor:pointer;min-height:44px}
+.wbtn[aria-pressed="true"]{border-color:var(--kupfer);background:var(--kupferhell);color:var(--kupfer)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.chip{font-size:12px;font-weight:700;border:1px solid var(--linie);padding:2px 8px;color:var(--grau);background:var(--hell)}
+.frage{font-size:17px;margin:4px 0 10px}
+.eingabe{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.eingabe input{font:inherit;font-size:18px;padding:9px 10px;border:1.4px solid var(--ink);width:170px;max-width:60%}
+.eingabe .einh{font-weight:700;font-size:17px}
+.knopf{font:inherit;font-weight:700;border:1.4px solid var(--kupfer);background:var(--kupfer);color:#fff;padding:10px 16px;cursor:pointer;min-height:44px}
+.knopf.leise{background:#fff;color:var(--ink);border-color:var(--linie)}
+.knoepfe{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.fb{margin-top:12px;padding:9px 12px;font-weight:700;display:none}
+.fb.ok{display:block;border-left:5px solid var(--gruen);background:var(--gruenhell);color:var(--gruen)}
+.fb.falsch{display:block;border-left:5px solid var(--rot);background:var(--rothell);color:var(--rot)}
+.weg{display:none;margin-top:10px;border-top:1px dashed var(--linie);padding-top:8px}
+.weg.an{display:block}
+.weg .zeile{margin:4px 0}
+.weg .lbl{display:inline-block;min-width:88px;color:var(--grau);font-size:14px}
+.weg .merke{margin-top:8px;color:var(--grau);font-size:14px}
+.mc{display:flex;flex-direction:column;gap:8px}
+.mc button{font:inherit;text-align:left;border:1.4px solid var(--linie);background:#fff;color:var(--ink);padding:10px 12px;cursor:pointer;min-height:44px}
+.mc button.richtig{border-color:var(--gruen);background:var(--gruenhell)}
+.mc button.daneben{border-color:var(--rot);background:var(--rothell)}
+.stand{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--grau)}
+.stand b{color:var(--ink)}
+.bruch{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.1;margin:0 .15em;font-size:.95em}
+.bruch>span{padding:0 .2em}
+.bruch>span:first-child{border-bottom:1.3px solid currentColor}
+i{font-style:italic}
+.leer{color:var(--grau)}
+@media (max-width:420px){body{padding:10px}.kopf h1{font-size:20px}.frage{font-size:16px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="kopf">
+ <div class="reihe">E1EG · Grundlagen Elektrotechnik · Lernfeld&nbsp;1 · Block&nbsp;19</div>
+ <h1>Klassenarbeitstrainer 1</h1>
+ <div class="sub">Grundgrößen, Widerstand, Energie und Leistung</div>
+</div>
+
+<div class="box anleitung">
+ <span class="cap">So üben Sie mit dem Trainer</span>
+ <p>Der Trainer stellt Ihnen Aufgaben zu allen Themen der Klassenarbeit&nbsp;1, jedes Mal mit neuen Zahlen. Wählen Sie unten ein <b>Themengebiet</b> und eine <b>Stufe</b>.</p>
+ <p>Rechnen Sie auf Papier mit vollem Rechenweg: <b>Formel, Einsetzen mit Einheiten, Ergebnis</b>. Tragen Sie nur das Ergebnis in der angegebenen Einheit ein (Komma oder Punkt). Der Trainer rechnet nach; Ihr Ergebnis gilt als richtig, wenn es höchstens 1&nbsp;% abweicht. Danach zeigt er den Rechenweg.</p>
+ <p><b>Hilfsmittel</b> wie in der Klassenarbeit: Taschenrechner CALCOOM IQ-S1 und Tabellenbuch. Werkstoffwerte stehen in der Aufgabe. <b>Sozialform:</b> allein oder zu zweit, in der Lerntheke oder freiwillig zu Hause. <b>Fertig, wenn</b> Sie in jedem der drei Themengebiete fünf Aufgaben hintereinander richtig gelöst haben.</p>
+</div>
+
+<div class="box">
+ <span class="cap">Themengebiet</span>
+ <div class="wahl" id="wGebiet">
+  <button class="wbtn" type="button" data-g="g" aria-pressed="false">Grundgrößen</button>
+  <button class="wbtn" type="button" data-g="w" aria-pressed="false">Widerstand</button>
+  <button class="wbtn" type="button" data-g="e" aria-pressed="false">Energie und Leistung</button>
+  <button class="wbtn" type="button" data-g="alle" aria-pressed="false">alle gemischt</button>
+ </div>
+ <span class="cap">Stufe</span>
+ <div class="wahl" id="wStufe">
+  <button class="wbtn" type="button" data-s="1" aria-pressed="false">Stufe ①</button>
+  <button class="wbtn" type="button" data-s="2" aria-pressed="false">Stufe ②</button>
+  <button class="wbtn" type="button" data-s="3" aria-pressed="false">Stufe ③</button>
+  <button class="wbtn" type="button" data-s="alle" aria-pressed="true">alle Stufen</button>
+ </div>
+ <div class="stand" id="stand"></div>
+</div>
+
+<div class="box" id="karte">
+ <span class="cap">Aufgabe</span>
+ <p class="leer" id="leer">Wählen Sie oben ein Themengebiet, dann erscheint die erste Aufgabe.</p>
+ <div id="inhalt" hidden>
+  <div class="chips" id="chips"></div>
+  <div class="frage" id="frage"></div>
+  <div class="eingabe" id="eingabe"><input id="ein" type="text" inputmode="decimal" autocomplete="off" aria-label="Ihr Ergebnis"><span class="einh" id="einh"></span></div>
+  <div class="mc" id="mc" hidden></div>
+  <div class="knoepfe">
+   <button class="knopf" type="button" id="bPruefen">Prüfen</button>
+   <button class="knopf leise" type="button" id="bWeg">Rechenweg zeigen</button>
+   <button class="knopf leise" type="button" id="bNeu">Neue Aufgabe</button>
+  </div>
+  <div class="fb" id="fb"></div>
+  <div class="weg" id="weg"></div>
+ </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var $ = function(id){ return document.getElementById(id); };
+
+/* Zahlen deutsch darstellen: drei gültige Ziffern, Tausender mit schmalem Abstand */
+function stellen(x){ if(x === 0) return 0; return Math.max(0, 2 - Math.floor(Math.log10(Math.abs(x)) + 1e-12)); }
+function rund(x, d){ var f = Math.pow(10, d); return Math.round(x*f)/f; }
+function zahl(x, d){
+ if(d === undefined) d = stellen(x);
+ var s = rund(x, d).toFixed(d);
+ if(s.indexOf(".") >= 0) s = s.replace(/0+$/, "").replace(/\.$/, "");
+ var teile = s.split("."), g = teile[0], vz = "";
+ if(g.charAt(0) === "-"){ vz = "−"; g = g.slice(1); }
+ if(g.length > 4) g = g.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+ return vz + g + (teile[1] ? "," + teile[1] : "");
+}
+/* Gleichheitszeichen nur, wenn die Anzeige den Wert ohne Rundung zeigt */
+function gl(x, d){ if(d === undefined) d = stellen(x); return Math.abs(rund(x, d) - x) <= 1e-9*Math.max(1, Math.abs(x)) ? "=" : "≈"; }
+function erg(x, einheit, d){ return gl(x, d) + " " + zahl(x, d) + (einheit ? " " + einheit : ""); }
+function br(z, n){ return '<span class="bruch"><span>' + z + '</span><span>' + n + '</span></span>'; }
+function zuf(a, b){ return a + Math.floor(Math.random()*(b - a + 1)); }
+function wahl(liste){ return liste[Math.floor(Math.random()*liste.length)]; }
+function mischen(a){ for(var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random()*(i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+var MAL = " · ";
+
+/* ---------- Grundgrößen (Block 02 bis 10) ---------- */
+var G = [];
+G.push({stufe: 1, block: "Block 03", f: function(){
+ var arten = [
+  {von: "A", nach: "mA", fak: 1000, x: zuf(12, 950)/1000, gr: "<i>I</i>", name: "Stromstärke", regel: "1 A = 1000 mA"},
+  {von: "mA", nach: "A", fak: 1/1000, x: zuf(15, 900), gr: "<i>I</i>", name: "Stromstärke", regel: "1000 mA = 1 A"},
+  {von: "kΩ", nach: "Ω", fak: 1000, x: zuf(12, 470)/10, gr: "<i>R</i>", name: "Widerstand", regel: "1 kΩ = 1000 Ω"},
+  {von: "Ω", nach: "kΩ", fak: 1/1000, x: zuf(12, 99)*100, gr: "<i>R</i>", name: "Widerstand", regel: "1000 Ω = 1 kΩ"},
+  {von: "Ws", nach: "Wh", fak: 1/3600, x: zuf(2, 40)*900, gr: "<i>W</i>", name: "Arbeit", regel: "1 Wh = 3600 Ws"},
+  {von: "Wh", nach: "kWh", fak: 1/1000, x: zuf(15, 980)*10, gr: "<i>W</i>", name: "Arbeit", regel: "1000 Wh = 1 kWh"},
+  {von: "kV", nach: "V", fak: 1000, x: zuf(4, 400)/10, gr: "<i>U</i>", name: "Spannung", regel: "1 kV = 1000 V"},
+  {von: "µF", nach: "nF", fak: 1000, x: zuf(12, 99)/100, gr: "<i>C</i>", name: "Kapazität", regel: "1 µF = 1000 nF"}];
+ var a = wahl(arten), w = a.x*a.fak;
+ return {art: "vorsatz", p: {x: a.x, fak: a.fak}, wert: w, einh: a.nach,
+  frage: "Rechnen Sie die " + a.name + " " + a.gr + " = " + zahl(a.x, 4) + " " + a.von + " in " + a.nach + " um.",
+  weg: [["Umrechnung", a.regel], ["Ergebnis", a.gr + " = " + zahl(a.x, 4) + " " + a.von + " " + erg(w, a.nach, 4)]]};
+}});
+G.push({stufe: 2, block: "Block 05", f: function(){
+ var m = zuf(110, 990)/100, ex = zuf(17, 20), n = m*Math.pow(10, ex), e = 1.602e-19, q = n*e;
+ return {art: "ladung", p: {n: n}, wert: q, einh: "C", betrag: true,
+  frage: "Durch einen Leiter bewegen sich <i>n</i> = " + zahl(m, 2) + MAL + "10<sup>" + ex + "</sup> Elektronen. Berechnen Sie den Betrag der Ladung <i>Q</i>.",
+  weg: [["Formel", "<i>Q</i> = <i>n</i>" + MAL + "<i>e</i>"],
+   ["Einsetzen", "<i>Q</i> = " + zahl(m, 2) + MAL + "10<sup>" + ex + "</sup>" + MAL + "1,602" + MAL + "10<sup>−19</sup> C"],
+   ["Ergebnis", "<i>Q</i> " + erg(q, "C")]],
+  merke: "Die Exponenten werden addiert: " + ex + " + (−19) = " + (ex - 19) + ". Elektronen tragen negative Ladung; gefragt ist hier nur der Betrag."};
+}});
+G.push({stufe: 3, block: "Block 07", f: function(){
+ var m = zuf(110, 990)/100, ex = zuf(18, 19), n = m*Math.pow(10, ex), e = 1.602e-19, t = zuf(2, 20), q = n*e, i = q/t;
+ return {art: "strom_n", p: {n: n, t: t}, wert: i, einh: "A",
+  frage: "In <i>t</i> = " + t + " s bewegen sich <i>n</i> = " + zahl(m, 2) + MAL + "10<sup>" + ex + "</sup> Elektronen durch den Querschnitt eines Leiters. Berechnen Sie die Stromstärke <i>I</i>.",
+  weg: [["Formel", "<i>Q</i> = <i>n</i>" + MAL + "<i>e</i>;  <i>I</i> = " + br("<i>Q</i>", "<i>t</i>")],
+   ["Einsetzen", "<i>Q</i> = " + zahl(m, 2) + MAL + "10<sup>" + ex + "</sup>" + MAL + "1,602" + MAL + "10<sup>−19</sup> C " + erg(q, "C", 4) + ";  <i>I</i> = " + br(zahl(q, 4) + " C", t + " s")],
+   ["Ergebnis", "<i>I</i> " + erg(i, "A")]],
+  merke: "Erst die Ladung, dann die Stromstärke; weitergerechnet wird mit dem ungerundeten Wert."};
+}});
+G.push({stufe: 2, block: "Block 07", f: function(){
+ var v = zuf(1, 3);
+ if(v === 1){
+  var q = zuf(6, 180)/2, t = zuf(2, 60)*5, i = q/t;
+  return {art: "strom_qt", p: {q: q, t: t}, wert: i, einh: "A",
+   frage: "In der Zeit <i>t</i> = " + zahl(t) + " s fließt die Ladung <i>Q</i> = " + zahl(q, 1) + " C durch einen Leiter. Berechnen Sie die Stromstärke <i>I</i>.",
+   weg: [["Formel", "<i>I</i> = " + br("<i>Q</i>", "<i>t</i>")], ["Einsetzen", "<i>I</i> = " + br(zahl(q, 1) + " C", zahl(t) + " s")], ["Ergebnis", "<i>I</i> " + erg(i, "A")]],
+   merke: "1 C = 1 As, also ergibt C durch s die Einheit A."};
+ }
+ if(v === 2){
+  var i2 = zuf(2, 40)/10, h = zuf(2, 24), q2 = i2*h;
+  return {art: "ladung_it", p: {i: i2, h: h}, wert: q2, einh: "Ah",
+   frage: "Eine Leuchte nimmt <i>I</i> = " + zahl(i2, 1) + " A auf und ist <i>t</i> = " + h + " h eingeschaltet. Welche Ladung <i>Q</i> fließt in dieser Zeit? Geben Sie <i>Q</i> in Ah an.",
+   weg: [["Formel", "<i>Q</i> = <i>I</i>" + MAL + "<i>t</i>"], ["Einsetzen", "<i>Q</i> = " + zahl(i2, 1) + " A" + MAL + h + " h"], ["Ergebnis", "<i>Q</i> " + erg(q2, "Ah")]]};
+ }
+ var q3 = zuf(2, 36)*10, i3 = wahl([0.5, 1, 2, 2.5, 4, 5]), t3 = q3/i3;
+ return {art: "zeit_qi", p: {q: q3, i: i3}, wert: t3, einh: "h",
+  frage: "Eine Batterie liefert die Ladung <i>Q</i> = " + q3 + " Ah. Ein Verbraucher nimmt <i>I</i> = " + zahl(i3, 1) + " A auf. Wie lange kann er betrieben werden? Geben Sie <i>t</i> in h an.",
+  weg: [["Formel", "<i>t</i> = " + br("<i>Q</i>", "<i>I</i>")], ["Einsetzen", "<i>t</i> = " + br(q3 + " Ah", zahl(i3, 1) + " A")], ["Ergebnis", "<i>t</i> " + erg(t3, "h")]]};
+}});
+G.push({stufe: 2, block: "Block 06", f: function(){
+ var q = zuf(2, 40), u = wahl([1.5, 4.5, 6, 9, 12, 24, 48]), w = u*q;
+ if(Math.random() < 0.5){
+  return {art: "spannung", p: {w: w, q: q}, wert: u, einh: "V",
+   frage: "Um die Ladung <i>Q</i> = " + q + " C zu verschieben, wird die Arbeit <i>W</i> = " + zahl(w, 1) + " Ws aufgewendet. Berechnen Sie die Spannung <i>U</i>.",
+   weg: [["Formel", "<i>U</i> = " + br("<i>W</i>", "<i>Q</i>")], ["Einsetzen", "<i>U</i> = " + br(zahl(w, 1) + " Ws", q + " As")], ["Ergebnis", "<i>U</i> " + erg(u, "V")]],
+   merke: "1 C = 1 As; Ws durch As ergibt W durch A, also V."};
+ }
+ return {art: "arbeit_uq", p: {u: u, q: q}, wert: w, einh: "Ws",
+  frage: "Zwischen zwei Punkten liegt die Spannung <i>U</i> = " + zahl(u, 1) + " V. Welche Arbeit <i>W</i> wird aufgewendet, um die Ladung <i>Q</i> = " + q + " C zu verschieben?",
+  weg: [["Formel", "<i>W</i> = <i>U</i>" + MAL + "<i>Q</i>"], ["Einsetzen", "<i>W</i> = " + zahl(u, 1) + " V" + MAL + q + " As"], ["Ergebnis", "<i>W</i> " + erg(w, "Ws")]]};
+}});
+G.push({stufe: 2, block: "Block 10", f: function(){
+ var a = wahl([0.5, 0.75, 1, 1.5, 2.5, 4, 6]);
+ if(Math.random() < 0.5){
+  var i = rund(a*zuf(10, 100)/10, 1), j = i/a;       /* J zwischen 1 und 10 A/mm², wie bei Kupferadern üblich */
+  if(i < 0.5){ i = 0.5; j = i/a; }
+  return {art: "stromdichte", p: {i: i, a: a}, wert: j, einh: "A/mm²",
+   frage: "Durch eine Kupferader mit dem Querschnitt <i>A</i> = " + zahl(a, 2) + " mm² fließt <i>I</i> = " + zahl(i, 1) + " A. Berechnen Sie die Stromdichte <i>J</i>.",
+   weg: [["Formel", "<i>J</i> = " + br("<i>I</i>", "<i>A</i>")], ["Einsetzen", "<i>J</i> = " + br(zahl(i, 1) + " A", zahl(a, 2) + " mm²")], ["Ergebnis", "<i>J</i> " + erg(j, "A/mm²")]]};
+ }
+ var i2 = zuf(4, 60)/10, j2 = wahl([2, 2.5, 3, 4, 5, 6]), a2 = i2/j2;
+ return {art: "querschnitt", p: {i: i2, j: j2}, wert: a2, einh: "mm²",
+  frage: "Eine Wicklung führt <i>I</i> = " + zahl(i2, 1) + " A. Die Stromdichte darf höchstens <i>J</i> = " + zahl(j2, 1) + " A/mm² betragen. Welchen Querschnitt <i>A</i> braucht der Draht mindestens?",
+  weg: [["Formel", "<i>A</i> = " + br("<i>I</i>", "<i>J</i>")], ["Einsetzen", "<i>A</i> = " + br(zahl(i2, 1) + " A", zahl(j2, 1) + " A/mm²")], ["Ergebnis", "<i>A</i> " + erg(a2, "mm²")]],
+  merke: "A durch A/mm² ergibt mm²."};
+}});
+G.push({stufe: 1, block: "Block 10", f: function(){
+ var iz = wahl([13.5, 15.5, 16.5, 18, 19.5, 21, 24, 27, 28, 32]), ib = rund(iz + wahl([-3, -2, -1, -0.5, 0.5, 1, 2, 3]), 1);
+ var ok = ib <= iz;
+ return {art: "eignung", mc: true, p: {iz: iz, ib: ib},
+  frage: "Nach der Tabelle darf eine Leitung höchstens <i>I</i><sub>Z</sub> = " + zahl(iz, 1) + " A führen. Der Betriebsstrom beträgt <i>I</i><sub>B</sub> = " + zahl(ib, 1) + " A. Ist die Leitung geeignet?",
+  optionen: ["Ja, weil <i>I</i><sub>B</sub> ≤ <i>I</i><sub>Z</sub> ist.", "Nein, weil <i>I</i><sub>B</sub> > <i>I</i><sub>Z</sub> ist.", "Das lässt sich ohne die Stromdichte nicht entscheiden."],
+  richtig: ok ? 0 : 1,
+  begruendung: "Eine Leitung ist geeignet, wenn der Betriebsstrom höchstens so groß ist wie ihre Strombelastbarkeit: <i>I</i><sub>B</sub> ≤ <i>I</i><sub>Z</sub>. Hier ist " + zahl(ib, 1) + " A " + (ok ? "≤" : ">") + " " + zahl(iz, 1) + " A."};
+}});
+var BEGRIFFE_G = [
+ {frage: "Wie ist die technische Stromrichtung außerhalb der Spannungsquelle festgelegt?",
+  optionen: ["vom Pluspol über den Verbraucher zum Minuspol", "vom Minuspol über den Verbraucher zum Pluspol, wie die Elektronen", "sie wechselt ständig"], richtig: 0,
+  begruendung: "Außerhalb der Quelle fließt der Strom in technischer Stromrichtung vom Pluspol zum Minuspol; die Elektronen bewegen sich entgegengesetzt.", block: "Block 08"},
+ {frage: "Welche Wirkungen des elektrischen Stromes treten immer auf?", optionen: ["die Wärmewirkung und die magnetische Wirkung", "die Lichtwirkung und die chemische Wirkung", "nur die Wärmewirkung"], richtig: 0,
+  begruendung: "Wärme- und magnetische Wirkung treten bei jedem Stromfluss auf; Licht-, chemische und physiologische Wirkung nur unter Bedingungen.", block: "Block 09"},
+ {frage: "Unter welcher Bedingung fließt ein elektrischer Strom?", optionen: ["nur im geschlossenen Stromkreis", "sobald eine Leitung an einem Pol angeschlossen ist", "auch bei geöffnetem Schalter"], richtig: 0,
+  begruendung: "Strom fließt nur im geschlossenen Stromkreis: vom Erzeuger über den Hinleiter zum Verbraucher und über den Rückleiter zurück.", block: "Block 04"},
+ {frage: "Zu welcher Werkstoffgruppe gehört Silicium?", optionen: ["Halbleiter", "Leiter", "Nichtleiter"], richtig: 0,
+  begruendung: "Silicium ist ein Halbleiter: Es leitet zwischen Leiter und Nichtleiter.", block: "Block 04"},
+ {frage: "Welche Stromart hat immer dieselbe Richtung?", optionen: ["Gleichstrom", "Wechselstrom", "keine von beiden"], richtig: 0,
+  begruendung: "Beim Gleichstrom hat der Strom immer dieselbe Richtung; beim Wechselstrom ändert er sie ständig.", block: "Block 08"},
+ {frage: "Welche Ladung trägt ein Elektron?", optionen: ["−<i>e</i> = −1,602" + MAL + "10<sup>−19</sup> C", "+<i>e</i> = +1,602" + MAL + "10<sup>−19</sup> C", "keine Ladung"], richtig: 0,
+  begruendung: "Das Elektron trägt die negative Elementarladung −<i>e</i>, das Proton die positive +<i>e</i>, das Neutron keine.", block: "Block 05"}];
+G.push({stufe: 1, block: "", f: function(){ var b = wahl(BEGRIFFE_G); return {art: "begriff", mc: true, p: {}, frage: b.frage, optionen: b.optionen, richtig: b.richtig, begruendung: b.begruendung, blockText: b.block}; }});
+
+/* ---------- Widerstand (Block 11 bis 14) ---------- */
+var W = [];
+W.push({stufe: 1, block: "Block 11", f: function(){
+ if(Math.random() < 0.6){
+  var r = wahl([20, 25, 40, 50, 80, 100, 125, 200, 250, 400, 500, 800]), gms = 1000/r;
+  return {art: "leitwert", p: {r: r}, wert: gms, einh: "mS",
+   frage: "Ein Widerstand hat <i>R</i> = " + r + " Ω. Berechnen Sie seinen Leitwert <i>G</i> in mS.",
+   weg: [["Formel", "<i>G</i> = " + br("1", "<i>R</i>")], ["Einsetzen", "<i>G</i> = " + br("1", r + " Ω")], ["Ergebnis", "<i>G</i> " + erg(1/r, "S", 5) + " " + erg(gms, "mS")]],
+   merke: "1 durch Ω ergibt Siemens (S); 1 S = 1000 mS."};
+ }
+ var g = wahl([2, 4, 5, 8, 10, 20, 25, 50]), r2 = 1000/g;
+ return {art: "widerstand_g", p: {g: g}, wert: r2, einh: "Ω",
+  frage: "Ein Bauteil hat den Leitwert <i>G</i> = " + g + " mS. Berechnen Sie seinen Widerstand <i>R</i>.",
+  weg: [["Formel", "<i>R</i> = " + br("1", "<i>G</i>")], ["Einsetzen", "<i>R</i> = " + br("1", g + " mS") + " = " + br("1", zahl(g/1000, 3) + " S")], ["Ergebnis", "<i>R</i> " + erg(r2, "Ω")]]};
+}});
+W.push({stufe: 2, block: "Block 12", f: function(){
+ var v = zuf(1, 3);
+ if(v === 1){
+  var r = wahl([47, 68, 100, 150, 220, 330, 470, 680]), ima = zuf(5, 90), u = r*ima/1000;
+  return {art: "ohm_u", p: {r: r, ima: ima}, wert: u, einh: "V",
+   frage: "Durch einen Widerstand <i>R</i> = " + r + " Ω fließt <i>I</i> = " + ima + " mA. Welche Spannung <i>U</i> liegt an ihm?",
+   weg: [["Formel", "<i>U</i> = <i>R</i>" + MAL + "<i>I</i>"], ["Einsetzen", "<i>U</i> = " + r + " Ω" + MAL + zahl(ima/1000, 3) + " A"], ["Ergebnis", "<i>U</i> " + erg(u, "V")]],
+   merke: "Rechnen Sie mA vorher in A um: " + ima + " mA = " + zahl(ima/1000, 3) + " A."};
+ }
+ if(v === 2){
+  var u2 = wahl([4.5, 6, 9, 12, 24, 48, 230]), r2 = wahl([12, 18, 24, 36, 48, 60, 120, 240]), i2 = u2/r2;
+  return {art: "ohm_i", p: {u: u2, r: r2}, wert: i2, einh: "A",
+   frage: "An einem Widerstand <i>R</i> = " + r2 + " Ω liegt die Spannung <i>U</i> = " + zahl(u2, 1) + " V. Berechnen Sie die Stromstärke <i>I</i>.",
+   weg: [["Formel", "<i>I</i> = " + br("<i>U</i>", "<i>R</i>")], ["Einsetzen", "<i>I</i> = " + br(zahl(u2, 1) + " V", r2 + " Ω")], ["Ergebnis", "<i>I</i> " + erg(i2, "A")]]};
+ }
+ var u3 = wahl([6, 9, 12, 24, 110, 230]), i3 = zuf(2, 50)/10, r3 = u3/i3;
+ return {art: "ohm_r", p: {u: u3, i: i3}, wert: r3, einh: "Ω",
+  frage: "Ein Verbraucher nimmt bei <i>U</i> = " + u3 + " V den Strom <i>I</i> = " + zahl(i3, 1) + " A auf. Berechnen Sie seinen Widerstand <i>R</i>.",
+  weg: [["Formel", "<i>R</i> = " + br("<i>U</i>", "<i>I</i>")], ["Einsetzen", "<i>R</i> = " + br(u3 + " V", zahl(i3, 1) + " A")], ["Ergebnis", "<i>R</i> " + erg(r3, "Ω")]]};
+}});
+var LEITER = [{n: "Kupfer", rho: 0.0178, gam: 56}, {n: "Aluminium", rho: 0.0278, gam: 36}];
+function gamE(){ return br("m", "Ω" + MAL + "mm²"); }
+W.push({stufe: 2, block: "Block 13", f: function(){
+ var s = wahl(LEITER), l = zuf(4, 80)*5, a = wahl([0.75, 1, 1.5, 2.5, 4, 6, 10]);
+ if(Math.random() < 0.5){
+  var r = l/(s.gam*a);
+  return {art: "leiter_gamma", p: {l: l, a: a, gam: s.gam}, wert: r, einh: "Ω",
+   frage: "Eine " + s.n + "leitung ist <i>l</i> = " + l + " m lang und hat den Querschnitt <i>A</i> = " + zahl(a, 2) + " mm² (" + s.n + ": <i>γ</i> = " + s.gam + " " + gamE() + "). Berechnen Sie ihren Widerstand <i>R</i>.",
+   weg: [["Formel", "<i>R</i> = " + br("<i>l</i>", "<i>γ</i>" + MAL + "<i>A</i>")], ["Einsetzen", "<i>R</i> = " + br(l + " m", s.gam + " " + gamE() + MAL + zahl(a, 2) + " mm²")], ["Ergebnis", "<i>R</i> " + erg(r, "Ω")]]};
+ }
+ var r2 = s.rho*l/a;
+ return {art: "leiter_rho", p: {l: l, a: a, rho: s.rho}, wert: r2, einh: "Ω",
+  frage: "Ein " + s.n + "draht ist <i>l</i> = " + l + " m lang, <i>A</i> = " + zahl(a, 2) + " mm² (" + s.n + ": <i>ϱ</i> = " + zahl(s.rho, 4) + " " + br("Ω" + MAL + "mm²", "m") + "). Berechnen Sie seinen Widerstand <i>R</i>.",
+  weg: [["Formel", "<i>R</i> = " + br("<i>ϱ</i>" + MAL + "<i>l</i>", "<i>A</i>")], ["Einsetzen", "<i>R</i> = " + br(zahl(s.rho, 4) + " " + br("Ω" + MAL + "mm²", "m") + MAL + l + " m", zahl(a, 2) + " mm²")], ["Ergebnis", "<i>R</i> " + erg(r2, "Ω")]]};
+}});
+W.push({stufe: 3, block: "Block 13", f: function(){
+ var s = LEITER[0], a = wahl([1.5, 2.5, 4]), r = zuf(8, 60)/100, lges = r*s.gam*a, l = lges/2;
+ return {art: "leitungslaenge", p: {r: r, a: a, gam: s.gam}, wert: l, einh: "m",
+  frage: "Eine zweiadrige Kupferleitung mit <i>A</i> = " + zahl(a, 1) + " mm² ist am Ende kurzgeschlossen. Am Anfang misst man den Widerstand von Hin- und Rückleiter zusammen: <i>R</i> = " + zahl(r, 2) + " Ω (<i>γ</i> = 56 " + gamE() + "). Wie lang ist die Leitung?",
+  weg: [["Formel", "<i>l</i> = <i>R</i>" + MAL + "<i>γ</i>" + MAL + "<i>A</i> (Hin- und Rückleiter zusammen)"],
+   ["Einsetzen", "<i>l</i> = " + zahl(r, 2) + " Ω" + MAL + "56 " + gamE() + MAL + zahl(a, 1) + " mm² " + erg(lges, "m")],
+   ["Ergebnis", "Leitungslänge = " + br("<i>l</i>", "2") + " " + erg(l, "m")]],
+  merke: "Der Strom fließt durch Hin- und Rückleiter; die Leitung ist halb so lang wie der gemessene Leiterweg."};
+}});
+var ALPHA = [{n: "Kupfer", a: 0.0039}, {n: "Aluminium", a: 0.004}, {n: "Eisen", a: 0.00657}];
+W.push({stufe: 2, block: "Block 14", f: function(){
+ var s = wahl(ALPHA), r1 = wahl([10, 20, 25, 40, 50, 80, 100, 120]), dt = zuf(3, 16)*5, dr = s.a*r1*dt, r2 = r1 + dr;
+ return {art: "temperatur_r2", p: {a: s.a, r1: r1, dt: dt}, wert: r2, einh: "Ω",
+  frage: "Eine Wicklung aus " + s.n + " hat bei 20 °C den Widerstand <i>R</i><sub>1</sub> = " + r1 + " Ω. Sie erwärmt sich um <i>Δϑ</i> = " + dt + " K (" + s.n + ": <i>α</i> = " + zahl(s.a, 5) + " " + br("1", "K") + "). Berechnen Sie den Widerstand <i>R</i><sub>2</sub> im warmen Zustand.",
+  weg: [["Formel", "<i>ΔR</i> = <i>α</i>" + MAL + "<i>R</i><sub>1</sub>" + MAL + "<i>Δϑ</i>;  <i>R</i><sub>2</sub> = <i>R</i><sub>1</sub> + <i>ΔR</i>"],
+   ["Einsetzen", "<i>ΔR</i> = " + zahl(s.a, 5) + " " + br("1", "K") + MAL + r1 + " Ω" + MAL + dt + " K " + erg(dr, "Ω", 4)],
+   ["Ergebnis", "<i>R</i><sub>2</sub> = " + r1 + " Ω + " + zahl(dr, 4) + " Ω " + erg(r2, "Ω", 3)]]};
+}});
+W.push({stufe: 3, block: "Block 14", f: function(){
+ var s = wahl(ALPHA), r1 = wahl([10, 20, 40, 50, 80, 100]), dtw = zuf(4, 30)*2.5, r2 = rund(r1*(1 + s.a*dtw), 2), dt = (r2 - r1)/(s.a*r1), th2 = 20 + dt;
+ return {art: "temperatur_dt", p: {a: s.a, r1: r1, r2: r2}, wert: th2, einh: "°C",
+  frage: "Eine Spule aus " + s.n + " hat bei 20 °C den Widerstand <i>R</i><sub>1</sub> = " + r1 + " Ω, im Betrieb <i>R</i><sub>2</sub> = " + zahl(r2, 2) + " Ω (<i>α</i> = " + zahl(s.a, 5) + " " + br("1", "K") + "). Welche Temperatur <i>ϑ</i><sub>2</sub> hat die Spule im Betrieb?",
+  weg: [["Formel", "<i>Δϑ</i> = " + br("<i>R</i><sub>2</sub> − <i>R</i><sub>1</sub>", "<i>α</i>" + MAL + "<i>R</i><sub>1</sub>") + ";  <i>ϑ</i><sub>2</sub> = 20 °C + <i>Δϑ</i>"],
+   ["Einsetzen", "<i>Δϑ</i> = " + br(zahl(r2, 2) + " Ω − " + r1 + " Ω", zahl(s.a, 5) + " " + br("1", "K") + MAL + r1 + " Ω") + " " + erg(dt, "K")],
+   ["Ergebnis", "<i>ϑ</i><sub>2</sub> = 20 °C + " + zahl(dt) + " K " + erg(th2, "°C")]],
+  merke: "Die Formel <i>ΔR</i> = <i>α</i>" + MAL + "<i>R</i><sub>1</sub>" + MAL + "<i>Δϑ</i> wird nach <i>Δϑ</i> umgestellt."};
+}});
+var BEGRIFFE_W = [
+ {frage: "Wie heißt die Einheit des elektrischen Leitwerts <i>G</i>?", optionen: ["Siemens (S)", "Ohm (Ω)", "Volt (V)"], richtig: 0, begruendung: "Der Leitwert ist der Kehrwert des Widerstands: <i>G</i> = 1 durch <i>R</i>, Einheit Siemens (S).", block: "Block 11"},
+ {frage: "Wie ändert sich der Widerstand eines Drahtes, wenn seine Länge verdoppelt wird?", optionen: ["Er verdoppelt sich.", "Er halbiert sich.", "Er bleibt gleich."], richtig: 0, begruendung: "<i>R</i> ist proportional zur Länge <i>l</i>: doppelte Länge, doppelter Widerstand.", block: "Block 13"},
+ {frage: "Wie ändert sich der Widerstand eines Drahtes, wenn sein Querschnitt verdoppelt wird?", optionen: ["Er halbiert sich.", "Er verdoppelt sich.", "Er bleibt gleich."], richtig: 0, begruendung: "<i>R</i> ist umgekehrt proportional zum Querschnitt <i>A</i>: doppelter Querschnitt, halber Widerstand.", block: "Block 13"},
+ {frage: "Wie verhält sich der Widerstand eines Kaltleiters, wenn er wärmer wird?", optionen: ["Er steigt.", "Er sinkt.", "Er bleibt gleich."], richtig: 0, begruendung: "Kaltleiter (Metalle) leiten kalt besser; ihr Widerstand steigt mit der Temperatur, <i>α</i> ist positiv.", block: "Block 14"},
+ {frage: "Wie verhält sich der Widerstand eines Heißleiters, wenn er wärmer wird?", optionen: ["Er sinkt.", "Er steigt.", "Er bleibt gleich."], richtig: 0, begruendung: "Heißleiter (Kohle, Halbleiter) leiten heiß besser; ihr Widerstand sinkt mit der Temperatur, <i>α</i> ist negativ.", block: "Block 14"},
+ {frage: "Die Spannung an einem Widerstand wird verdoppelt. Was geschieht mit der Stromstärke?", optionen: ["Sie verdoppelt sich.", "Sie halbiert sich.", "Sie bleibt gleich."], richtig: 0, begruendung: "Nach dem Ohm'schen Gesetz ist <i>I</i> = <i>U</i> durch <i>R</i>: bei gleichem <i>R</i> ist <i>I</i> proportional zu <i>U</i>.", block: "Block 12"}];
+W.push({stufe: 1, block: "", f: function(){ var b = wahl(BEGRIFFE_W); return {art: "begriff", mc: true, p: {}, frage: b.frage, optionen: b.optionen, richtig: b.richtig, begruendung: b.begruendung, blockText: b.block}; }});
+
+/* ---------- Energie und Leistung (Block 15 bis 18) ---------- */
+var E = [];
+E.push({stufe: 2, block: "Block 16", f: function(){
+ var v = zuf(1, 4);
+ if(v === 1){
+  var u = wahl([12, 24, 230]), i = zuf(2, 60)/10, p = u*i;
+  return {art: "leistung_ui", p: {u: u, i: i}, wert: p, einh: "W",
+   frage: "Ein Gerät nimmt bei <i>U</i> = " + u + " V den Strom <i>I</i> = " + zahl(i, 1) + " A auf. Berechnen Sie seine Leistung <i>P</i>.",
+   weg: [["Formel", "<i>P</i> = <i>U</i>" + MAL + "<i>I</i>"], ["Einsetzen", "<i>P</i> = " + u + " V" + MAL + zahl(i, 1) + " A"], ["Ergebnis", "<i>P</i> " + erg(p, "W")]]};
+ }
+ if(v === 2){
+  var u2 = wahl([12, 24, 230]), r = wahl([10, 20, 40, 50, 80, 100, 200]), p2 = u2*u2/r;
+  return {art: "leistung_ur", p: {u: u2, r: r}, wert: p2, einh: "W",
+   frage: "An einem Heizwiderstand <i>R</i> = " + r + " Ω liegt <i>U</i> = " + u2 + " V. Berechnen Sie die Leistung <i>P</i>.",
+   weg: [["Formel", "<i>P</i> = " + br("<i>U</i><sup>2</sup>", "<i>R</i>")], ["Einsetzen", "<i>P</i> = " + br("(" + u2 + " V)<sup>2</sup>", r + " Ω")], ["Ergebnis", "<i>P</i> " + erg(p2, "W")]]};
+ }
+ if(v === 3){
+  var i3 = zuf(2, 30)/10, r3 = wahl([2, 5, 8, 10, 15, 22, 47]), p3 = i3*i3*r3;
+  return {art: "leistung_ir", p: {i: i3, r: r3}, wert: p3, einh: "W",
+   frage: "Durch einen Widerstand <i>R</i> = " + r3 + " Ω fließt <i>I</i> = " + zahl(i3, 1) + " A. Berechnen Sie die Leistung <i>P</i>, die er in Wärme umsetzt.",
+   weg: [["Formel", "<i>P</i> = <i>I</i><sup>2</sup>" + MAL + "<i>R</i>"], ["Einsetzen", "<i>P</i> = (" + zahl(i3, 1) + " A)<sup>2</sup>" + MAL + r3 + " Ω"], ["Ergebnis", "<i>P</i> " + erg(p3, "W")]]};
+ }
+ var p4 = wahl([40, 60, 100, 500, 800, 1000, 1500, 2000, 2200]), u4 = 230, i4 = p4/u4;
+ return {art: "strom_pu", p: {p: p4, u: u4}, wert: i4, einh: "A",
+  frage: "Auf einem Gerät steht die Bemessungsleistung <i>P</i> = " + zahl(p4) + " W bei <i>U</i> = 230 V. Welchen Strom <i>I</i> nimmt es auf?",
+  weg: [["Formel", "<i>I</i> = " + br("<i>P</i>", "<i>U</i>")], ["Einsetzen", "<i>I</i> = " + br(zahl(p4) + " W", "230 V")], ["Ergebnis", "<i>I</i> " + erg(i4, "A")]]};
+}});
+E.push({stufe: 2, block: "Block 15", f: function(){
+ var p = wahl([60, 100, 450, 800, 1200, 2000, 2500]), h = zuf(2, 40)/2, tarif = zuf(25, 40)/100, w = p*h/1000, k = w*tarif;
+ if(Math.random() < 0.5){
+  return {art: "arbeit", p: {p: p, h: h}, wert: w, einh: "kWh",
+   frage: "Ein Gerät mit <i>P</i> = " + zahl(p) + " W ist <i>t</i> = " + zahl(h, 1) + " h in Betrieb. Berechnen Sie die elektrische Arbeit <i>W</i> in kWh.",
+   weg: [["Formel", "<i>W</i> = <i>P</i>" + MAL + "<i>t</i>"], ["Einsetzen", "<i>W</i> = " + zahl(p) + " W" + MAL + zahl(h, 1) + " h " + erg(p*h, "Wh")], ["Ergebnis", "<i>W</i> " + erg(w, "kWh")]],
+   merke: "1000 Wh = 1 kWh."};
+ }
+ return {art: "kosten", p: {p: p, h: h, tarif: tarif}, wert: k, einh: "€", tolAbs: 0.005,
+  frage: "Ein Gerät mit <i>P</i> = " + zahl(p) + " W ist <i>t</i> = " + zahl(h, 1) + " h in Betrieb. Der Tarif beträgt <i>T</i> = " + zahl(tarif, 2) + " €/kWh. Berechnen Sie den Arbeitspreis <i>K</i><sub>A</sub>.",
+  weg: [["Formel", "<i>W</i> = <i>P</i>" + MAL + "<i>t</i>;  <i>K</i><sub>A</sub> = <i>W</i>" + MAL + "<i>T</i>"], ["Einsetzen", "<i>W</i> = " + zahl(p/1000, 3) + " kW" + MAL + zahl(h, 1) + " h " + erg(w, "kWh", 4) + ";  <i>K</i><sub>A</sub> = " + zahl(w, 4) + " kWh" + MAL + zahl(tarif, 2) + " €/kWh"], ["Ergebnis", "<i>K</i><sub>A</sub> " + erg(k, "€", 2)]],
+  merke: "Rechnen Sie W vorher in kW um, dann kommt die Arbeit gleich in kWh heraus."};
+}});
+E.push({stufe: 2, block: "Block 17", f: function(){
+ var pzu = wahl([200, 400, 500, 800, 1000, 1500, 2000, 4000]), eta = zuf(60, 95)/100, pab = rund(pzu*eta, 1), e2 = pab/pzu;
+ if(Math.random() < 0.5){
+  return {art: "wirkungsgrad", p: {pab: pab, pzu: pzu}, wert: e2, einh: "",
+   frage: "Ein Motor nimmt <i>P</i><sub>zu</sub> = " + zahl(pzu) + " W auf und gibt <i>P</i><sub>ab</sub> = " + zahl(pab, 1) + " W ab. Berechnen Sie den Wirkungsgrad <i>η</i> (als Dezimalzahl, zum Beispiel 0,8).",
+   weg: [["Formel", "<i>η</i> = " + br("<i>P</i><sub>ab</sub>", "<i>P</i><sub>zu</sub>")], ["Einsetzen", "<i>η</i> = " + br(zahl(pab, 1) + " W", zahl(pzu) + " W")], ["Ergebnis", "<i>η</i> " + erg(e2, "", 3) + " (" + zahl(e2*100, 1) + " %)"]],
+   merke: "W durch W kürzt sich: der Wirkungsgrad hat keine Einheit und ist immer kleiner als 1."};
+ }
+ var pab2 = wahl([0.75, 1.1, 1.5, 2.2, 3, 4, 5.5]), eta2 = zuf(70, 92)/100, pzu2 = pab2/eta2, pv = pzu2 - pab2;
+ return {art: "zugefuehrt", p: {pab: pab2, eta: eta2}, wert: pzu2, einh: "kW",
+  frage: "Ein Motor gibt <i>P</i><sub>ab</sub> = " + zahl(pab2, 2) + " kW ab, sein Wirkungsgrad ist <i>η</i> = " + zahl(eta2, 2) + ". Welche Leistung <i>P</i><sub>zu</sub> nimmt er auf?",
+  weg: [["Formel", "<i>P</i><sub>zu</sub> = " + br("<i>P</i><sub>ab</sub>", "<i>η</i>")], ["Einsetzen", "<i>P</i><sub>zu</sub> = " + br(zahl(pab2, 2) + " kW", zahl(eta2, 2))], ["Ergebnis", "<i>P</i><sub>zu</sub> " + erg(pzu2, "kW")]],
+  merke: "Die Verlustleistung ist <i>P</i><sub>v</sub> = <i>P</i><sub>zu</sub> − <i>P</i><sub>ab</sub> " + erg(pv, "kW") + "."};
+}});
+E.push({stufe: 3, block: "Block 18", f: function(){
+ var liter = wahl([0.5, 1, 1.5, 2, 3, 5, 10]), t1 = zuf(10, 20), t2 = wahl([60, 70, 80, 90, 95]), dt = t2 - t1, c = 4.19, q = dt*c*liter;
+ var v = zuf(1, 2);
+ if(v === 1){
+  return {art: "waermemenge", p: {m: liter, dt: dt}, wert: q, einh: "kJ",
+   frage: "<i>m</i> = " + zahl(liter, 1) + " kg Wasser werden von " + t1 + " °C auf " + t2 + " °C erwärmt (Wasser: <i>c</i> = 4,19 " + br("kJ", "kg" + MAL + "K") + "). Berechnen Sie die Wärmemenge <i>Q</i>.",
+   weg: [["Formel", "<i>Q</i> = <i>Δϑ</i>" + MAL + "<i>c</i>" + MAL + "<i>m</i>"], ["Einsetzen", "<i>Q</i> = " + dt + " K" + MAL + "4,19 " + br("kJ", "kg" + MAL + "K") + MAL + zahl(liter, 1) + " kg"], ["Ergebnis", "<i>Q</i> " + erg(q, "kJ")]],
+   merke: "<i>Δϑ</i> = " + t2 + " °C − " + t1 + " °C = " + dt + " K."};
+ }
+ liter = wahl([0.5, 0.75, 1, 1.25, 1.5, 1.7]); q = dt*c*liter;     /* ein Wasserkocher fasst höchstens 1,7 kg */
+ var p = wahl([1000, 1500, 2000, 2200, 3000]), zeta = zuf(70, 95)/100, qs = q/zeta, t = qs*1000/p/60;
+ return {art: "aufheizzeit", p: {m: liter, dt: dt, p: p, zeta: zeta}, wert: t, einh: "min",
+  frage: "Ein Wasserkocher mit <i>P</i> = " + zahl(p) + " W erwärmt <i>m</i> = " + zahl(liter, 1) + " kg Wasser von " + t1 + " °C auf " + t2 + " °C (<i>c</i> = 4,19 " + br("kJ", "kg" + MAL + "K") + ", Wärmenutzungsgrad <i>ζ</i> = " + zahl(zeta, 2) + "). Wie lange dauert das? Geben Sie <i>t</i> in min an.",
+  weg: [["Formel", "<i>Q</i><sub>nutz</sub> = <i>Δϑ</i>" + MAL + "<i>c</i>" + MAL + "<i>m</i>;  <i>Q</i><sub>S</sub> = " + br("<i>Q</i><sub>nutz</sub>", "<i>ζ</i>") + ";  <i>t</i> = " + br("<i>Q</i><sub>S</sub>", "<i>P</i>")],
+   ["Einsetzen", "<i>Q</i><sub>nutz</sub> = " + dt + " K" + MAL + "4,19 " + br("kJ", "kg" + MAL + "K") + MAL + zahl(liter, 1) + " kg " + erg(q, "kJ", 2) + ";  <i>Q</i><sub>S</sub> = " + br(zahl(q, 2) + " kJ", zahl(zeta, 2)) + " " + erg(qs, "kJ", 1) +
+    ";  <i>t</i> = " + br(zahl(qs, 1) + " kJ", zahl(p/1000, 1) + " kW") + " " + erg(qs*1000/p, "s", 0)],
+   ["Ergebnis", "<i>t</i> " + erg(t, "min")]],
+  merke: "1 kW = 1 kJ je s; die Sekunden werden durch 60 geteilt. Weitergerechnet wird ungerundet."};
+}});
+var BEGRIFFE_E = [
+ {frage: "Wofür bezahlen Sie den Energieversorger?", optionen: ["für die elektrische Arbeit in kWh", "für die Leistung in kW", "für die Spannung in V"], richtig: 0, begruendung: "Der Zähler misst die elektrische Arbeit; bezahlt wird <i>K</i><sub>A</sub> = <i>W</i>" + MAL + "<i>T</i>.", block: "Block 15"},
+ {frage: "Was gibt die Angabe 2000 W auf einem Wasserkocher an?", optionen: ["die Leistung, also die Arbeit je Sekunde", "die Arbeit, die er insgesamt verrichtet", "den Strom, den er aufnimmt"], richtig: 0, begruendung: "Watt ist die Einheit der Leistung: 2000 W bedeuten 2000 Ws in jeder Sekunde.", block: "Block 16"},
+ {frage: "Kann ein Wirkungsgrad größer als 1 sein?", optionen: ["Nein, weil immer ein Teil der zugeführten Leistung als Verlust in Wärme übergeht.", "Ja, bei guten Motoren.", "Ja, wenn die Spannung hoch genug ist."], richtig: 0, begruendung: "<i>P</i><sub>ab</sub> ist immer kleiner als <i>P</i><sub>zu</sub>, deshalb ist <i>η</i> kleiner als 1.", block: "Block 17"},
+ {frage: "Wie verhält sich die Leistung eines Heizwiderstands, wenn die Spannung verdoppelt wird?", optionen: ["Sie wird viermal so groß.", "Sie wird doppelt so groß.", "Sie bleibt gleich."], richtig: 0, begruendung: "<i>P</i> = <i>U</i><sup>2</sup> durch <i>R</i>: doppelte Spannung, vierfache Leistung.", block: "Block 16"},
+ {frage: "Wo ist die Stromwärme erwünscht?", optionen: ["im Tauchsieder", "in der Zuleitung", "im Motor"], richtig: 0, begruendung: "Im Tauchsieder ist die Wärme Nutzwärme; in Zuleitung und Motor ist sie Verlustwärme.", block: "Block 18"}];
+E.push({stufe: 1, block: "", f: function(){ var b = wahl(BEGRIFFE_E); return {art: "begriff", mc: true, p: {}, frage: b.frage, optionen: b.optionen, richtig: b.richtig, begruendung: b.begruendung, blockText: b.block}; }});
+
+var GEBIETE = {g: {name: "Grundgrößen", liste: G}, w: {name: "Widerstand", liste: W}, e: {name: "Energie und Leistung", liste: E}};
+var zustand = {gebiet: null, stufe: "alle", aufgabe: null, geprueft: false, richtig: 0, gesamt: 0, folge: {g: 0, w: 0, e: 0}};
+
+function ziehen(){
+ var gk = zustand.gebiet === "alle" ? wahl(["g", "w", "e"]) : zustand.gebiet;
+ var liste = GEBIETE[gk].liste.filter(function(x){ return zustand.stufe === "alle" || x.stufe === +zustand.stufe; });
+ if(!liste.length){ gk = zustand.gebiet === "alle" ? "g" : gk; liste = GEBIETE[gk].liste; }
+ var gen = wahl(liste), a = gen.f();
+ a.gebiet = gk; a.stufe = gen.stufe; a.block = a.blockText || gen.block;
+ return a;
+}
+function zeigen(){
+ var a = zustand.aufgabe;
+ $("leer").hidden = true; $("inhalt").hidden = false;
+ $("chips").innerHTML = '<span class="chip">' + GEBIETE[a.gebiet].name + '</span><span class="chip">Stufe ' + "①②③".charAt(a.stufe - 1) + '</span>' + (a.block ? '<span class="chip">' + a.block + '</span>' : "");
+ $("frage").innerHTML = a.frage;
+ $("fb").className = "fb"; $("fb").innerHTML = "";
+ $("weg").className = "weg"; $("weg").innerHTML = "";
+ zustand.geprueft = false;
+ if(a.mc){
+  $("eingabe").hidden = true; $("mc").hidden = false; $("bPruefen").hidden = true; $("bWeg").hidden = true;
+  var reihe = mischen(a.optionen.map(function(o, i){ return i; }));
+  $("mc").innerHTML = reihe.map(function(i){ return '<button type="button" data-i="' + i + '">' + a.optionen[i] + '</button>'; }).join("");
+  Array.prototype.forEach.call($("mc").querySelectorAll("button"), function(b){ b.addEventListener("click", function(){ mcWahl(+b.getAttribute("data-i")); }); });
+ } else {
+  $("eingabe").hidden = false; $("mc").hidden = true; $("bPruefen").hidden = false; $("bWeg").hidden = false;
+  $("ein").value = ""; $("einh").innerHTML = a.einh || "(ohne Einheit)";
+ }
+}
+function neu(){ if(!zustand.gebiet) return; zustand.aufgabe = ziehen(); zeigen(); if(!zustand.aufgabe.mc) $("ein").focus({preventScroll: true}); }
+function wegZeigen(){
+ var a = zustand.aufgabe; if(!a || a.mc) return;
+ $("weg").innerHTML = a.weg.map(function(z){ return '<div class="zeile"><span class="lbl">' + z[0] + '</span> ' + z[1] + '</div>'; }).join("") + (a.merke ? '<div class="merke">' + a.merke + '</div>' : "");
+ $("weg").className = "weg an";
+}
+function werten(ok){
+ zustand.gesamt++; if(ok) zustand.richtig++;
+ var g = zustand.aufgabe.gebiet; zustand.folge[g] = ok ? zustand.folge[g] + 1 : 0;
+ stand();
+}
+function pruefen(){
+ var a = zustand.aufgabe; if(!a || a.mc || zustand.geprueft) return;
+ var roh = $("ein").value.trim().replace(/\s/g, "").replace(",", ".").replace("−", "-");
+ if(roh === "" || isNaN(+roh)){ $("fb").className = "fb falsch"; $("fb").textContent = "Bitte eine Zahl eingeben, zum Beispiel 0,25."; return; }
+ var x = +roh, soll = a.wert;
+ var ok = Math.abs((a.betrag ? Math.abs(x) : x) - soll) <= Math.max(0.01*Math.abs(soll), a.tolAbs || 0) + 1e-12;
+ zustand.geprueft = true; werten(ok);
+ $("fb").className = ok ? "fb ok" : "fb falsch";
+ $("fb").innerHTML = ok ? "Richtig. Vergleichen Sie Ihren Rechenweg mit dem unten." : "Noch nicht richtig. Richtig ist " + erg(soll, a.einh).replace(/^[=≈] /, "") + ". Sehen Sie sich den Rechenweg an.";
+ wegZeigen();
+}
+function mcWahl(i){
+ var a = zustand.aufgabe; if(zustand.geprueft) return;
+ var ok = i === a.richtig; zustand.geprueft = true; werten(ok);
+ Array.prototype.forEach.call($("mc").querySelectorAll("button"), function(b){
+  var k = +b.getAttribute("data-i");
+  if(k === a.richtig) b.classList.add("richtig"); else if(k === i) b.classList.add("daneben");
+ });
+ $("fb").className = ok ? "fb ok" : "fb falsch";
+ $("fb").innerHTML = (ok ? "Richtig. " : "Nicht richtig. ") + '<span style="font-weight:400;color:var(--ink)">' + a.begruendung + "</span>";
+}
+function stand(){
+ var f = zustand.folge, fertig = f.g >= 5 && f.w >= 5 && f.e >= 5;
+ $("stand").innerHTML = "<span>Richtig: <b>" + zustand.richtig + "</b> von <b>" + zustand.gesamt + "</b></span>" +
+  "<span>In Folge richtig: Grundgrößen <b>" + f.g + "</b>, Widerstand <b>" + f.w + "</b>, Energie und Leistung <b>" + f.e + "</b></span>" +
+  (fertig ? '<span style="color:var(--gruen);font-weight:700">Fertig: in allen drei Gebieten fünf in Folge richtig.</span>' : "");
+}
+function knoepfe(gruppe, attr, feld){
+ Array.prototype.forEach.call($(gruppe).querySelectorAll("button"), function(b){
+  b.addEventListener("click", function(){
+   Array.prototype.forEach.call($(gruppe).querySelectorAll("button"), function(x){ x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+   zustand[feld] = b.getAttribute(attr); neu();
+  });
+ });
+}
+knoepfe("wGebiet", "data-g", "gebiet");
+knoepfe("wStufe", "data-s", "stufe");
+$("bPruefen").addEventListener("click", pruefen);
+$("bWeg").addEventListener("click", wegZeigen);
+$("bNeu").addEventListener("click", neu);
+$("ein").addEventListener("keydown", function(ev){ if(ev.key === "Enter") pruefen(); });
+stand();
+
+/* Prüfhilfe: viele Aufgaben erzeugen, ohne sie anzuzeigen (für die Nachrechnung von außen) */
+window.probe = function(n){
+ var aus = [];
+ ["g", "w", "e"].forEach(function(gk){
+  GEBIETE[gk].liste.forEach(function(gen, k){
+   for(var i = 0; i < n; i++){ var a = gen.f(); aus.push({gebiet: gk, gen: k, art: a.art, p: a.p, wert: a.wert, mc: !!a.mc, richtig: a.richtig, betrag: !!a.betrag}); }
+  });
+ });
+ return aus;
+};
+})();
+</script>
