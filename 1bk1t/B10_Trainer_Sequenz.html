@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Klassenarbeitstrainer 1: Sequenz (1BK1T Block 10)</title>
+<script type="application/json" id="sim-meta">{"art":"trainer","startwerte":{"modus":"keiner","stufe":1,"aufgabe":0},"loesungswerte":{"hinweis":"jede Aufgabe wird zufällig erzeugt und im Trainer selbst nachgerechnet"}}</script>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--rot:#B23A33;--rothell:#FBEDEB;--gruen:#2F7D62;--gruenhell:#EBF2F0;--linie:#9AA5AE;--hell:#F4F6F8}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Noto Sans','Segoe UI',Arial,sans-serif;color:var(--ink);background:#fff;font-size:17px;line-height:1.45}
+header{border-bottom:4px solid var(--kupfer);padding:14px 18px 10px}
+header .reihe{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--kupfer);font-weight:700}
+header h1{margin:4px 0 0;font-size:24px}
+main{max-width:860px;margin:0 auto;padding:14px 18px 40px}
+.leiste{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+button{font:inherit;border:2px solid var(--kupfer);background:#fff;color:var(--kupfer);border-radius:8px;padding:9px 14px;min-height:44px;cursor:pointer}
+button.an{background:var(--kupfer);color:#fff}
+button.haupt{background:var(--ink);border-color:var(--ink);color:#fff}
+button:disabled{opacity:.45;cursor:default}
+.karte{border:2px solid var(--linie);border-radius:10px;padding:14px 16px;margin-top:14px}
+.karte .kopf{display:flex;justify-content:space-between;gap:10px;font-size:14px;color:#5A666F}
+pre.code{background:#F7F4F0;border-left:6px solid var(--kupfer);padding:10px 14px;font-family:Consolas,'DejaVu Sans Mono',monospace;font-size:16px;overflow-x:auto;white-space:pre}
+code{font-family:Consolas,'DejaVu Sans Mono',monospace;background:var(--hell);padding:0 3px;border-radius:3px}
+.frage{font-weight:700;margin:6px 0}
+.wahl{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-top:8px}
+.wahl button{font-family:Consolas,'DejaVu Sans Mono',monospace}
+.eingabe{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.eingabe input{font:inherit;font-family:Consolas,'DejaVu Sans Mono',monospace;border:2px solid var(--linie);border-radius:8px;padding:8px 10px;min-height:44px;flex:1 1 220px}
+.rueck{margin-top:12px;padding:10px 14px;border-radius:8px;display:none}
+.rueck.richtig{display:block;background:var(--gruenhell);border-left:6px solid var(--gruen)}
+.rueck.falsch{display:block;background:var(--rothell);border-left:6px solid var(--rot)}
+.rueck .titel{font-weight:700}
+.stand{font-size:15px;margin-top:10px}
+.hinweis{font-size:14px;color:#5A666F}
+.konsole{background:#1A2530;color:#F4F6F8;font-family:Consolas,'DejaVu Sans Mono',monospace;padding:6px 12px;border-radius:4px;white-space:pre;display:inline-block}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header>
+ <div class="reihe">1BK1T Informationstechnik · C# · Einheit 1 · Block 10</div>
+ <h1>Klassenarbeitstrainer 1: Sequenz</h1>
+</header>
+<main>
+ <p>Wählen Sie eine Übungsart und eine Stufe. Jede Runde hat 10 zufällige Aufgaben; nach jeder Antwort sehen Sie den Lösungsweg.
+ Zahlen mit Nachkommastellen schreiben Sie wie im Konsolenfenster mit Komma.</p>
+ <div class="leiste" role="group" aria-label="Übungsart">
+  <button type="button" data-modus="datentyp">Datentyp wählen</button>
+  <button type="button" data-modus="ausgabe">Ausgabe vorhersagen</button>
+  <button type="button" data-modus="division">Ganzzahldivision</button>
+ </div>
+ <div class="leiste" role="group" aria-label="Stufe">
+  <button type="button" data-stufe="1" class="an">Stufe ① Grundlagen</button>
+  <button type="button" data-stufe="2">Stufe ② sicher anwenden</button>
+  <button type="button" data-stufe="3">Stufe ③ prüfungsnah</button>
+ </div>
+ <div id="karte" class="karte" aria-live="polite">
+  <p class="hinweis">Noch keine Aufgabe: Wählen Sie oben eine Übungsart.</p>
+ </div>
+ <div class="leiste">
+  <button type="button" id="neu">Neue Runde</button>
+ </div>
+ <p class="hinweis">Ohne Anmeldung, nichts wird gespeichert. Der Trainer ersetzt nicht das Übungsblatt; er ist zusätzlicher Übungsvorrat.</p>
+</main>
+<script>
+"use strict";
+/* Klassenarbeitstrainer 1BK1T, Block 10 (26.09.2026). Jede Aufgabe wird zufällig erzeugt; das erwartete Konsolenfenster
+   rechnet der Trainer selbst aus, nach den Regeln von C# (Ganzzahldivision schneidet ab, + verkettet von links nach rechts,
+   Formatanweisung F2 rundet die Anzeige). Nachkommastellen nur, wo C# sie genau so zeigt: Division durch 2, 4 oder 5 ohne
+   Formatanweisung, F2 nur bei Division durch 3, 6, 7 oder 9 (nie genau auf der Mitte). Am Compiler geprüft: siehe
+   Recherche BK1-B10. */
+var modus = null, stufe = 1, nr = 0, richtig = 0, aufgabe = null, beantwortet = false;
+var ZUF = Math.random;
+function z(a, b) { return a + Math.floor(ZUF() * (b - a + 1)); }
+function eins(l) { return l[Math.floor(ZUF() * l.length)]; }
+function komma(x) { return String(x).replace(".", ","); }
+function f2(x) { return x.toFixed(2).replace(".", ","); }
+function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+/* ---------- Datentyp wählen ---------- */
+var TYPEN = ["int", "double", "char", "string", "bool"];
+var SPEICHERN = "Sie wollen in einer Variable speichern: ";
+var GROESSEN = {
+ 1: [[SPEICHERN + "die Anzahl der Schüler einer Klasse.", "int", "eine ganze Zahl, mit der man rechnen kann"],
+     [SPEICHERN + "den Preis einer Ware in Euro, etwa 12,99.", "double", "eine Gleitpunktzahl: Cent sind Nachkommastellen"],
+     [SPEICHERN + "den Namen eines Geräts.", "string", "eine Zeichenkette aus mehreren Zeichen"],
+     [SPEICHERN + "ob ein Gerät eingeschaltet ist (ja oder nein).", "bool", "ein Wahrheitswert: true oder false"],
+     [SPEICHERN + "den Buchstaben der Energieeffizienzklasse, etwa A.", "char", "ein einzelnes Zeichen"],
+     [SPEICHERN + "eine Temperatur in °C mit einer Nachkommastelle.", "double", "eine Gleitpunktzahl"],
+     [SPEICHERN + "die Zahl der Tage eines Monats.", "int", "eine ganze Zahl"],
+     [SPEICHERN + "einen Gruß wie Guten Morgen.", "string", "eine Zeichenkette"]],
+ 2: [["Welchen Datentyp hat das Literal <code>42</code>?", "int", "eine ganze Zahl ohne Punkt"],
+     ["Welchen Datentyp hat das Literal <code>3.5</code>?", "double", "mit Punkt: eine Gleitpunktzahl"],
+     ["Welchen Datentyp hat das Literal <code>'A'</code>?", "char", "einfache Anführungszeichen: ein Zeichen"],
+     ["Welchen Datentyp hat das Literal <code>\"A\"</code>?", "string", "doppelte Anführungszeichen: eine Zeichenkette, auch wenn sie nur ein Zeichen hat"],
+     ["Welchen Datentyp hat das Literal <code>true</code>?", "bool", "ein Wahrheitswert"],
+     ["Welchen Datentyp hat das Literal <code>\"42\"</code>?", "string", "doppelte Anführungszeichen: eine Zeichenkette, keine Zahl"],
+     ["Welchen Datentyp hat das Literal <code>42.0</code>?", "double", "mit Punkt: eine Gleitpunktzahl, auch wenn nach dem Punkt nur 0 steht"],
+     ["Welchen Datentyp hat das Literal <code>false</code>?", "bool", "ein Wahrheitswert"]],
+ 3: [[SPEICHERN + "eine Postleitzahl wie 07318.", "string", "mit ihr rechnet man nicht, und als int ginge die führende 0 verloren"],
+     [SPEICHERN + "eine Hausnummer wie 12a.", "string", "sie enthält einen Buchstaben"],
+     [SPEICHERN + "eine Schulnote wie 2,3.", "double", "sie hat Nachkommastellen"],
+     [SPEICHERN + "die Zahl der Pfosten eines Zauns.", "int", "Pfosten zählt man in ganzen Zahlen"],
+     [SPEICHERN + "eine Telefonnummer wie 0711 1234.", "string", "mit ihr rechnet man nicht; Leerzeichen und führende 0 bleiben erhalten"],
+     ["Welchen Datentyp hat das Ergebnis des Ausdrucks <code>7 / 2</code>?", "int", "7 und 2 sind ganze Zahlen: Ganzzahldivision, das Ergebnis 3 ist int"],
+     ["Welchen Datentyp hat das Ergebnis des Ausdrucks <code>7 / 2.0</code>?", "double", "2.0 ist eine Gleitpunktzahl, darum ist das Ergebnis 3,5 double"],
+     [SPEICHERN + "ob ein Passwort richtig eingegeben wurde.", "bool", "ein Wahrheitswert: richtig oder nicht"]]
+};
+function datentyp() {
+ var g = eins(GROESSEN[stufe]);
+ return { art: "wahl", frage: g[0], wahl: TYPEN, loesung: g[1], label: "Richtig ist",
+          weg: "<code>" + g[1] + "</code>: " + g[2] + "." };
+}
+
+/* ---------- Ausgabe vorhersagen ---------- */
+function ausgabe() {
+ var a = z(3, 19), b = z(2, 9), c = z(2, 6), typ, code, aus, weg;
+ var liste = { 1: ["summe", "produkt", "klammer", "platzhalter"], 2: ["punkt", "klammerpunkt", "verkettet", "platzhalter2", "doubleganz"],
+               3: ["f2", "genau", "summeeuro", "cast", "sekunden"] }[stufe];
+ typ = eins(liste);
+ var kopf = "int a = " + a + ";\nint b = " + b + ";\n";
+ if (typ === "summe") { code = kopf + "Console.WriteLine(a + b);"; aus = String(a + b); weg = a + " + " + b + " = " + (a + b) + "."; }
+ else if (typ === "produkt") { code = kopf + "Console.WriteLine(a * b);"; aus = String(a * b); weg = a + " · " + b + " = " + (a * b) + "."; }
+ else if (typ === "klammer") { code = kopf + "Console.WriteLine(\"Ergebnis: \" + (a + b));"; aus = "Ergebnis: " + (a + b);
+   weg = "Die Klammer wird zuerst gerechnet: " + a + " + " + b + " = " + (a + b) + "; dann wird die Zahl an den Text gehängt."; }
+ else if (typ === "platzhalter") { code = kopf + "Console.WriteLine(\"{0} und {1}\", a, b);"; aus = a + " und " + b;
+   weg = "{0} ist der erste Wert hinter der Zeichenkette (a), {1} der zweite (b)."; }
+ else if (typ === "punkt") { code = kopf + "int c = " + c + ";\nConsole.WriteLine(a + b * c);"; aus = String(a + b * c);
+   weg = "Punkt vor Strich: " + b + " · " + c + " = " + (b * c) + ", dann " + a + " + " + (b * c) + " = " + (a + b * c) + "."; }
+ else if (typ === "klammerpunkt") { code = kopf + "int c = " + c + ";\nConsole.WriteLine((a + b) * c);"; aus = String((a + b) * c);
+   weg = "Die Klammer zuerst: " + a + " + " + b + " = " + (a + b) + ", dann · " + c + " = " + ((a + b) * c) + "."; }
+ else if (typ === "verkettet") { code = kopf + "Console.WriteLine(\"Summe: \" + a + b);"; aus = "Summe: " + a + b;
+   weg = "+ arbeitet von links nach rechts: Erst wird a an den Text gehängt, dann b. Es wird nicht gerechnet. Richtig rechnen würde <code>\"Summe: \" + (a + b)</code>."; }
+ else if (typ === "platzhalter2") { code = kopf + "Console.WriteLine(\"{1} vor {0}\", a, b);"; aus = b + " vor " + a;
+   weg = "{1} ist der zweite Wert (b), {0} der erste (a); die Reihenfolge im Text bestimmt der Index."; }
+ else if (typ === "doubleganz") { b = eins([2, 3, 4, 5]); while (a % b === 0) a++; code = "int a = " + a + ";\nint b = " + b + ";\ndouble d = a / b;\nConsole.WriteLine(d);";
+   aus = String(Math.floor(a / b)); weg = "a / b ist eine Ganzzahldivision: " + a + " = " + Math.floor(a / b) + " · " + b + " + " + (a % b) +
+   ". Erst das Ergebnis " + Math.floor(a / b) + " wird in double umgewandelt; ohne Nachkommastellen zeigt das Konsolenfenster " + Math.floor(a / b) + "."; }
+ else if (typ === "f2") { b = eins([3, 6, 7, 9]); while (a % b === 0) a++; code = "int a = " + a + ";\nint b = " + b + ";\nConsole.WriteLine(\"{0:F2}\", (double)a / b);";
+   aus = f2(a / b); weg = "(double) macht a zur Gleitpunktzahl: " + a + " : " + b + " = " + komma((a / b).toFixed(4)) + "…; F2 zeigt zwei Nachkommastellen: " + aus + "."; }
+ else if (typ === "genau") { b = eins([2, 4, 5]); while (a % b === 0) a++; code = "int a = " + a + ";\nint b = " + b + ";\nConsole.WriteLine((double)a / b);";
+   aus = komma(a / b); weg = "Mit dem cast-Operator rechnet C# mit Nachkommastellen: " + a + " : " + b + " = " + aus + "."; }
+ else if (typ === "summeeuro") { code = kopf + "Console.WriteLine(a + b + \" Euro\");"; aus = (a + b) + " Euro";
+   weg = "Von links nach rechts: a + b sind zwei Zahlen, also " + a + " + " + b + " = " + (a + b) + "; erst dann wird \" Euro\" angehängt."; }
+ else if (typ === "cast") { var n = z(2, 9), k = eins([1, 2, 3, 4, 6, 7, 8, 9]); code = "double x = " + n + "." + k + ";\nConsole.WriteLine((int)x);";
+   aus = String(n); weg = "(int) lässt die Nachkommastellen weg, gerundet wird nicht: " + n + "," + k + " wird " + n + "."; }
+ else { var s = z(61, 599); while (s % 60 === 0) s++; code = "int sekunden = " + s + ";\nConsole.WriteLine(sekunden / 60 + \" min \" + sekunden % 60 + \" s\");";
+   aus = Math.floor(s / 60) + " min " + (s % 60) + " s"; weg = s + " = " + Math.floor(s / 60) + " · 60 + " + (s % 60) + ": / ergibt die ganzen Minuten, % den Rest in Sekunden."; }
+ return { art: "text", frage: "Was steht im Konsolenfenster?", code: code, loesung: aus, weg: weg, label: "Im Konsolenfenster steht" };
+}
+
+/* ---------- Ganzzahldivision ---------- */
+function division() {
+ var a = z(10, 99), b = z(2, 9);
+ while (a % b === 0) a++;
+ var q = Math.floor(a / b), r = a % b, typ, ausdruck, erg, weg;
+ typ = eins({ 1: ["div", "mod"], 2: ["div", "mod", "genau", "castklammer"], 3: ["genau", "castklammer", "mischung", "rueck"] }[stufe]);
+ var zerl = a + " = " + q + " · " + b + " + " + r;
+ if (typ === "div") { ausdruck = a + " / " + b; erg = String(q); weg = "Zwei ganze Zahlen: Ganzzahldivision, die Nachkommastellen fallen weg. " + zerl + ", also " + q + "."; }
+ else if (typ === "mod") { ausdruck = a + " % " + b; erg = String(r); weg = "% liefert den Rest der Ganzzahldivision. " + zerl + ", also " + r + "."; }
+ else if (typ === "genau") { b = eins([2, 4, 5]); while (a % b === 0) a++; ausdruck = "(double)" + a + " / " + b; erg = komma(a / b);
+   weg = "Der cast-Operator macht " + a + " zur Gleitpunktzahl, dann wird mit Nachkommastellen geteilt: " + a + " : " + b + " = " + erg + "."; }
+ else if (typ === "castklammer") { ausdruck = "(double)(" + a + " / " + b + ")"; erg = String(q);
+   weg = "Die Klammer zuerst: " + a + " / " + b + " ist eine Ganzzahldivision (" + zerl + "), erst das Ergebnis " + q + " wird umgewandelt."; }
+ else if (typ === "mischung") { var c = z(2, 5); ausdruck = a + " / " + b + " * " + c; erg = String(q * c);
+   weg = "/ und * haben denselben Rang, gerechnet wird von links nach rechts: " + a + " / " + b + " = " + q + " (Ganzzahldivision), dann · " + c + " = " + (q * c) + "."; }
+ else { ausdruck = a + " / " + b + " * " + b + " + " + a + " % " + b; erg = String(a);
+   weg = a + " / " + b + " = " + q + ", " + q + " · " + b + " = " + (q * b) + ", " + a + " % " + b + " = " + r + ", also " + (q * b) + " + " + r + " = " + a + ": Ergebnis der Ganzzahldivision mal Teiler plus Rest ergibt wieder die Zahl."; }
+ return { art: "text", frage: "Welchen Wert hat der Ausdruck in C#? (alle Zahlen ohne Punkt sind int)", code: ausdruck, loesung: erg, weg: weg, label: "Der Ausdruck hat den Wert" };
+}
+
+/* ---------- Ablauf ---------- */
+var karte = document.getElementById("karte");
+function neueAufgabe() {
+ aufgabe = modus === "datentyp" ? datentyp() : modus === "ausgabe" ? ausgabe() : division();
+ nr++; beantwortet = false;
+ var h = '<div class="kopf"><span>Aufgabe ' + nr + " von 10</span><span>richtig: " + richtig + " von " + (nr - 1) + "</span></div>";
+ h += '<p class="frage">' + aufgabe.frage + "</p>";
+ if (aufgabe.code) h += '<pre class="code">' + esc(aufgabe.code) + "</pre>";
+ if (aufgabe.art === "wahl") {
+  h += '<div class="wahl">' + aufgabe.wahl.map(function (w) { return '<button type="button" data-antwort="' + w + '">' + w + "</button>"; }).join("") + "</div>";
+ } else {
+  h += '<div class="eingabe"><input id="antwort" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Ihre Antwort">' +
+       '<button type="button" class="haupt" id="pruefen">Prüfen</button></div>';
+ }
+ h += '<div id="rueck" class="rueck"></div><div class="leiste"><button type="button" id="weiter" disabled>Nächste Aufgabe</button></div>';
+ karte.innerHTML = h;
+ karte.querySelectorAll("[data-antwort]").forEach(function (b) { b.addEventListener("click", function () { pruefen(b.getAttribute("data-antwort")); }); });
+ var p = document.getElementById("pruefen"), ein = document.getElementById("antwort");
+ if (p) { p.addEventListener("click", function () { pruefen(ein.value); }); ein.addEventListener("keydown", function (e) { if (e.key === "Enter") pruefen(ein.value); }); ein.focus({ preventScroll: true }); }
+ document.getElementById("weiter").addEventListener("click", weiter);
+}
+function norm(s) { return String(s).replace(/\s+$/, "").replace(/^\s+/, ""); }
+function pruefen(antwort) {
+ if (beantwortet) return;
+ beantwortet = true;
+ var ok = norm(antwort) === aufgabe.loesung;
+ var punkt = !ok && norm(antwort).replace(/\./g, ",") === aufgabe.loesung;
+ if (ok) richtig++;
+ var r = document.getElementById("rueck");
+ r.className = "rueck " + (ok ? "richtig" : "falsch");
+ r.innerHTML = '<div class="titel">' + (ok ? "Richtig." : "Nicht richtig.") + "</div>" +
+   (ok ? "" : "<div>" + aufgabe.label + ": <span class=\"konsole\">" + esc(aufgabe.loesung) + "</span></div>") +
+   (punkt ? "<div>Fast: Das Konsolenfenster zeigt Nachkommastellen mit Komma, nicht mit Punkt.</div>" : "") +
+   "<div>" + aufgabe.weg + "</div>";
+ karte.querySelectorAll("[data-antwort], #pruefen").forEach(function (b) { b.disabled = true; });
+ var w = document.getElementById("weiter"); w.disabled = false;
+ if (nr >= 10) w.textContent = "Ergebnis der Runde";
+ w.focus();
+}
+function weiter() {
+ if (nr >= 10) {
+  karte.innerHTML = '<p class="frage">Runde beendet: ' + richtig + " von 10 richtig.</p>" +
+   '<p>' + (richtig >= 9 ? "Sicher. Versuchen Sie die nächste Stufe." : richtig >= 6 ? "Fast sicher. Noch eine Runde auf dieser Stufe." : "Lesen Sie die Lösungswege noch einmal nach und üben Sie diese Stufe weiter.") + "</p>";
+  return;
+ }
+ neueAufgabe();
+}
+function start() {
+ nr = 0; richtig = 0;
+ if (!modus) { karte.innerHTML = '<p class="hinweis">Noch keine Aufgabe: Wählen Sie oben eine Übungsart.</p>'; return; }
+ neueAufgabe();
+ // am Handy liegt die Aufgabe unter den Knöpfen: hinrollen (ohne Bewegung, wenn reduzierte Bewegung gewünscht ist)
+ var ruhig = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+ if (karte.scrollIntoView) karte.scrollIntoView({ behavior: ruhig ? "auto" : "smooth", block: "start" });
+}
+document.querySelectorAll("[data-modus]").forEach(function (b) {
+ b.addEventListener("click", function () {
+  modus = b.getAttribute("data-modus");
+  document.querySelectorAll("[data-modus]").forEach(function (x) { x.classList.toggle("an", x === b); });
+  start();
+ });
+});
+document.querySelectorAll("[data-stufe]").forEach(function (b) {
+ b.addEventListener("click", function () {
+  stufe = parseInt(b.getAttribute("data-stufe"), 10);
+  document.querySelectorAll("[data-stufe]").forEach(function (x) { x.classList.toggle("an", x === b); });
+  start();
+ });
+});
+document.getElementById("neu").addEventListener("click", start);
+
+/* Prüfhilfe (nicht sichtbar für Schüler): ?export=N legt N Aufgaben je Übungsart und Stufe als JSON ab, damit jede
+   erwartete Ausgabe am Compiler nachgeprüft werden kann. */
+(function () {
+ var m = /[?&]export=(\d+)/.exec(location.search);
+ if (!m) return;
+ var n = parseInt(m[1], 10), aus = [];
+ ["ausgabe", "division", "datentyp"].forEach(function (mo) {
+  [1, 2, 3].forEach(function (st) {
+   modus = mo; stufe = st;
+   for (var i = 0; i < n; i++) { var a = mo === "datentyp" ? datentyp() : mo === "ausgabe" ? ausgabe() : division(); aus.push({ modus: mo, stufe: st, code: a.code || "", frage: a.frage, loesung: a.loesung }); }
+  });
+ });
+ var p = document.createElement("pre"); p.id = "export"; p.textContent = JSON.stringify(aus); document.body.appendChild(p);
+ modus = null; stufe = 1;
+})();
+</script>
+</body></html>
