@@ -7,8 +7,7 @@
          Stromrichtung ist umgekehrt festgelegt: von PLUS nach MINUS.
      (2) Der BEZUGSPFEIL ist eine WAHL, keine Tatsache. Er legt nur fest, welche Richtung
          als positiv gezaehlt wird.
-     (3) Das VORZEICHEN von I sagt etwas ueber das Verhaeltnis von Pfeil und Strom —
-         nicht ueber den Strom selbst. Dreht man den Pfeil um, wechselt das Vorzeichen;
+     (3) Das VORZEICHEN von I sagt etwas ueber das Verhaeltnis von Pfeil und Strom, nicht ueber den Strom selbst. Dreht man den Pfeil um, wechselt das Vorzeichen;
          die Elektronen laufen unveraendert weiter.
      (4) Alle VIER Zustaende sind einstellbar und von Hand geprueft:
            Polung normal    + Pfeil mit dem Strom   -> I = +1 A
@@ -16,10 +15,10 @@
            Polung getauscht + Pfeil nach rechts     -> I = -1 A
            Polung getauscht + Pfeil nach links      -> I = +1 A
      Startstellung: Polung normal, Bezugspfeil in technischer Stromrichtung -> I = +1 A.
-     Das ist der LEHRBUCHFALL und zugleich der einzige, in dem nichts ueberrascht — die
+     Das ist der LEHRBUCHFALL und zugleich der einzige, in dem nichts ueberrascht, die
      Erkenntnis entsteht erst beim Umschalten. Deshalb ist er hier die Startstellung und
      nicht die Loesung einer Aufgabe. -->
-<!-- BELEGE — Tabellenbuch 32. A., gedruckt Tabellenbuch S. 43 „Bezugspfeile, Kirchhoff'sche
+<!-- BELEGE, Tabellenbuch 32. A., gedruckt Tabellenbuch S. 43 „Bezugspfeile, Kirchhoff'sche
      Regeln, Spannungsteiler" (Seite gerendert und gelesen, nicht erinnert):
        „Haben Stromrichtung und Bezugspfeil dieselbe Richtung, so spricht man von
         POSITIVER Stromstaerke."
@@ -159,7 +158,7 @@
              g.fillText(txt, Math.min(x1,x2)+Math.abs(x2-x1)/2-g.measureText(txt).width/2, y-13); }
   }
 
-  // ★ 11.09.2026 — die erste Fassung lief rechts aus der Flaeche („I = +1 A" und der
+  // ★ 11.09.2026, die erste Fassung lief rechts aus der Flaeche („I = +1 A" und der
   //   Erklaertext standen bei x > 730 und wurden abgeschnitten), und die Quelle war als
   //   galvanisches Element nicht zu erkennen. Beim Ansehen gefunden.
   //   Jetzt: Kreis schmaler (xl 120 … xr 600), das Ergebnis steht RECHTS DANEBEN im
@@ -216,7 +215,7 @@
     g.fillStyle="#2557A3"; g.font="12.5px 'Noto Sans',sans-serif";
     g.fillText("Elektronen: von Minus nach Plus", xl+8, yo+24);
     g.font="14px 'Noto Sans',sans-serif";
-    // technische Stromrichtung (Plus -> Minus) — auf der oberen Leitung gegen die Elektronen
+    // technische Stromrichtung (Plus -> Minus), auf der oberen Leitung gegen die Elektronen
     var techR = plusOben;
     pfeilZeichnen(g, techR?xl+26:xr-26, yo-44, techR?xr-26:xl+26, "#A34E0E", null, 2.6);
     g.fillStyle="#A34E0E";
