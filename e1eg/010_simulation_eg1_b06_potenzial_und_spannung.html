@@ -1,0 +1,407 @@
+<!-- lehrmaterial -->
+<!-- materialtyp: simulation -->
+<!-- sim_bearbeitung: pflicht -->
+<!-- Block EG1-B06 · Elektrische Spannung U, U = W/Q, Potenzial und Potenzialdifferenz -->
+<!-- Ziel-Erkenntnis:
+     (1) Die Potenzialleiter ist STARR. Verschiebt man den Bezugspunkt (Masse), aendern
+         sich ALLE Potenziale phi, der Abstand zweier Sprossen aber nicht. Genau deshalb
+         ist das Potenzial relativ und die Spannung nicht.
+     (2) U_mn = phi_m - phi_n haengt nur von m, n und der Stufenspannung ab:
+         U_mn = (m - n) * u. Der Bezugspunkt kuerzt sich heraus. Die Simulation zeigt
+         BEIDE Rechenwege nebeneinander, das ist der Beweis, nicht die Behauptung.
+     (3) Die Spannung ist die Arbeit je Ladung: wandert Q von m nach n, wird
+         W = U_mn * Q frei. Das ist Formel 6 umgestellt.
+     (4) GRENZFAELLE, beide im Einstellbereich:
+           m = n            -> U = 0 V und W = 0 Ws (ein Punkt allein traegt keine Spannung)
+           m unter n        -> U negativ, W negativ: die Arbeit wird nicht frei, sondern
+                               muss aufgewendet werden (die Ladung wird gehoben).
+     (5) NACHBAU DES BLATTES: Stufenspannung 3,0 V, Masse an Anschluss 1 ergibt genau die
+         Potenziale 0/3/6/9/12 V der Aufgaben 4 und 5. Masse auf Anschluss 2 verschoben
+         ergibt genau die -3/0/3/6/9 V der Loesung "Share".
+     Startstellung: u = 2,0 V, Masse an Anschluss 3, m = 5, n = 2, Q = 0,5 As.
+     Keiner dieser Werte kommt im Blatt vor; beide Regler stehen im inneren Bereich
+     (u bei 25 %, Q bei 21 %), die Masse in der Mitte der Leiter. -->
+<!-- BELEGE, Tabellenbuch 32. A., gedruckt S. 30 "Ladung, Spannung, Stromstaerke,
+     Widerstand" (Seite gerendert und abgelesen am 11.09.2026):
+       Formel 6 (gerahmt)   U = W / Q
+       darunter ungerahmt   U = dW/dQ   ·   Q = W/U   ·   W = U * Q   ·   W = e*U
+       Einheiten            [U] = [W]/[Q] = J/C = Ws/As = W/A = V
+     ★ NICHT im Tabellenbuch: der Potenzialbegriff phi und die Beziehung
+       U_mn = phi_m - phi_n. Die Seite kennt nur die Spannung zwischen zwei Klemmen.
+       Die Simulation sagt das im Quellenkasten ausdruecklich, statt einen Beleg zu
+       erfinden, dieselbe Lage wie beim Wirkungsgrad in Block B17.
+     Handrechnung == Simulationsmodell:
+       phi(k) = (k - ref) * u
+       u=2,0 ref=3 -> phi1=-4  phi2=-2  phi3=0  phi4=+2  phi5=+4
+       U_52 = +4 - (-2) = 6 V   und (5-2)*2,0 = 6 V        beide Wege gleich
+       W    = 6 V * 0,5 As = 3 Ws            [W] = V*As = Ws
+       u=3,0 ref=1 -> 0/3/6/9/12 V; U_41 = 9 V; U_43 = 3 V; U_54 = 3 V; U_42 = 6 V
+       u=3,0 ref=2 -> -3/0/3/6/9 V; U_41 = 6-(-3) = 9 V   (unveraendert)
+       m=n         -> U = 0 V, W = 0 Ws
+       m=2 n=5     -> U = -6 V, W = -3 Ws -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulation EG1-B06: Potenzial und Spannung</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--rot:#B23A33;--hell:#F4F6F8;
+        --linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62;--blau:#2557A3}
+  html,body{margin:0;padding:0}
+  body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;
+       line-height:1.46;font-size:16px;padding:18px 14px 60px}
+  .wrap{max-width:960px;margin:0 auto;background:#fff;border:1px solid var(--linie);
+        box-shadow:0 6px 26px rgba(0,0,0,.10);padding:22px 24px 30px}
+  .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:9px 0;margin-bottom:16px}
+  .kopf .reihe{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--kupfer);font-weight:700}
+  .kopf h1{font-size:22px;margin:3px 0 2px}
+  .kopf .sub{font-size:13px;color:var(--grau)}
+  .box{border:1.2px solid var(--ink);padding:11px 14px;margin:14px 0;background:#fff}
+  .box .cap{display:block;font-size:12px;font-weight:700;letter-spacing:.09em;
+            text-transform:uppercase;color:var(--kupfer);margin-bottom:5px}
+  .box.sim{background:var(--kupferhell)}
+  .box.quelle{border:none;padding:0;margin:16px 0 0}
+  .box.quelle .cap{color:var(--grau)}
+  .quelle small{font-size:11.5px;color:var(--grau)}
+  i{font-style:italic} sub{font-size:.7em;vertical-align:-.25em} sup{font-size:.7em;vertical-align:.5em}
+  figure{margin:10px 0}
+  canvas.stage{width:100%;max-width:880px;height:auto;display:block;margin:6px auto 0;
+               border:1px solid var(--linie);background:#fff;touch-action:manipulation}
+  figcaption{font-size:11.5px;color:var(--grau);text-align:left;border-left:3px solid var(--kupfer);
+             padding:4px 0 4px 9px;margin-top:7px}
+  .regler{display:grid;grid-template-columns:1fr;gap:13px;margin:14px 0 4px}
+  @media(min-width:640px){.regler{grid-template-columns:1fr 1fr}}
+  /* 26.09.2026: Handybreite, wie B10 (Tabelle sonst breiter als die Karte) */
+  @media(max-width:480px){.wrap{padding:18px 12px 24px}.wrap table.ab{font-size:13.5px}.wrap table.ab th,.wrap table.ab td{padding:5px 5px}}
+  @media(max-width:380px){.wrap table.ab{font-size:12.5px}.wrap table.ab th,.wrap table.ab td{padding:4px 4px}}
+  .regler label{display:block;font-size:13.5px;font-weight:600;margin-bottom:3px}
+  .regler input[type=range]{width:100%;height:34px;accent-color:var(--kupfer)}
+  .regler select{font:inherit;font-size:15px;padding:8px 10px;min-height:44px;
+                 border:1.2px solid var(--linie);background:#fff;color:var(--ink);width:100%}
+  .paar{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .wert{font-variant-numeric:tabular-nums;font-weight:700;color:var(--kupfer)}
+  table.ab{width:100%;border-collapse:collapse;margin-top:12px;font-size:14.5px}
+  table.ab th,table.ab td{border:1px solid var(--linie);padding:5px 8px;text-align:left}
+  table.ab th{background:var(--hell);font-size:12px;letter-spacing:.05em;text-transform:uppercase}
+  table.ab td.z{text-align:right;font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
+  .hinw{font-size:13px;color:var(--grau);margin-top:8px}
+  button.reset{font:inherit;font-size:14px;padding:9px 16px;border:1.4px solid var(--kupfer);
+               background:#fff;color:var(--kupfer);cursor:pointer;margin-top:12px;min-height:44px}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="kopf">
+    <div class="reihe">E1EG · Grundlagen Elektrotechnik · Lernfeld&nbsp;1 · Block&nbsp;6</div>
+    <h1>Potenzial und Spannung</h1>
+    <div class="sub">Selbst bedienbar · <i>U</i><sub>mn</sub> = <i>φ</i><sub>m</sub> − <i>φ</i><sub>n</sub> · <i>W</i> = <i>U</i> · <i>Q</i></div>
+  </div>
+
+  <div class="box sim">
+    <span class="cap">So bedienen Sie die Simulation</span>
+    <p>Das Netzteil hat fünf Anschlüsse; zwischen je zwei benachbarten liegt dieselbe
+    <b>Stufenspannung</b>. Legen Sie fest, welcher Anschluss die <b>Masse</b> ist, und
+    wählen Sie zwei Punkte <b>m</b> und <b>n</b>. Verschieben Sie dann die Masse und
+    beobachten Sie genau: <b>Was ändert sich, was bleibt stehen?</b></p>
+  
+    <p><b>Ablauf:</b> Die fünf Schritte stehen auf dem Arbeitsblatt im Kasten „Simulation öffnen“. <b>Sozialform:</b> Partnerarbeit, zu zweit an einem Gerät, freiwillig zu Hause. <b>Zeit:</b> rund 10&nbsp;min. <b>Fertig, wenn</b> Sie in einem Satz sagen können, was sich beim Verschieben der Masse ändert und was nicht, und begründen können, warum Schritt&nbsp;5 nicht gelingen kann.</p>
+  </div>
+
+  <figure>
+  <script type="application/json" id="sim-meta">{"startwerte":{"u":20,"Q":5,"ref":"3","m":"5","n":"2"},"loesungswerte":{"u":30,"ref":"1","m":"4","n":"1"}}</script>
+  <canvas class="stage" id="cLeiter" width="880" height="440"
+      data-quelle="Europa-Fachkunde S.28 Bild 2 (Potenziale in elektrischen Schaltungen, Netzteil mit fünf Anschlüssen gegen Masse); Leiter-Darstellung schematisch nach dieser Vorlage"
+      aria-label="Eine senkrechte Leiter aus fünf waagerechten Sprossen, den Anschlüssen des Netzteils. Links steht zu jeder Sprosse ihr Potenzial gegenüber der gewählten Masse. Die Masse trägt das Erdungszeichen und das Potenzial null Volt. Rechts verbindet ein Doppelpfeil die beiden gewählten Punkte und trägt die Spannung zwischen ihnen. Eine wandernde Ladung zeigt, wie beim Verschieben von m nach n Arbeit frei wird."></canvas>
+    <figcaption>Die Leiter ist <b>starr</b>. Wird die Masse verschoben, wandern alle
+    Potenzialwerte mit, der <b>Abstand</b> zweier Sprossen, also die Spannung, bleibt
+    unverändert.</figcaption>
+  </figure>
+
+  <div class="regler">
+    <div>
+      <label for="rU">Stufenspannung je Anschluss: <span class="wert" id="wU">2,0 V</span></label>
+      <input id="rU" type="range" min="10" max="50" value="20" step="1" aria-label="Stufenspannung in Zehntel Volt">
+    </div>
+    <div>
+      <label for="rQ">Ladung <i>Q</i>: <span class="wert" id="wQ">0,5 As</span></label>
+      <input id="rQ" type="range" min="1" max="20" value="5" step="1" aria-label="Ladung in Zehntel Amperesekunden">
+    </div>
+    <div>
+      <label for="sRef">Bezugspunkt (Masse, <i>φ</i> = 0 V)</label>
+      <select id="sRef"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select>
+    </div>
+    <div class="paar">
+      <div>
+        <label for="sM">Punkt m</label>
+        <select id="sM"><option>1</option><option>2</option><option>3</option><option>4</option><option selected>5</option></select>
+      </div>
+      <div>
+        <label for="sN">Punkt n</label>
+        <select id="sN"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option></select>
+      </div>
+    </div>
+  </div>
+  <button class="reset" id="bReset" type="button">Zurücksetzen</button>
+
+  <table class="ab">
+    <tr><th>Größe</th><th>Rechnung</th><th style="text-align:right">Wert</th></tr>
+    <tr><td>Potenzial <i>φ</i><sub>m</sub></td><td>Punkt m gegen Masse</td><td class="z" id="aPm">+4,0 V</td></tr>
+    <tr><td>Potenzial <i>φ</i><sub>n</sub></td><td>Punkt n gegen Masse</td><td class="z" id="aPn">−2,0 V</td></tr>
+    <tr><td><b>Spannung <i>U</i><sub>mn</sub> = <i>φ</i><sub>m</sub> − <i>φ</i><sub>n</sub></b></td>
+        <td id="aUrech">+4,0 V − (−2,0 V)</td><td class="z" id="aU">6,0 V</td></tr>
+    <tr><td>Probe ohne Masse: (m − n) · Stufe</td>
+        <td id="aProbeRech">(5 − 2) · 2,0 V</td><td class="z" id="aProbe">6,0 V</td></tr>
+    <tr><td>Ladung <i>Q</i></td><td>eingestellt</td><td class="z" id="aQ">0,5 As</td></tr>
+    <tr><td><b>Arbeit <i>W</i> = <i>U</i><sub>mn</sub> · <i>Q</i></b></td>
+        <td>Tabellenbuch S.&nbsp;30, Formel&nbsp;6 umgestellt</td><td class="z" id="aW">3,00 Ws</td></tr>
+  </table>
+  <p class="hinw" id="hDeut">Verschieben Sie die Masse und achten Sie auf die letzten beiden Zeilen.</p>
+
+  <div class="box quelle">
+    <span class="cap">Woher die Werte stammen</span>
+    <small>Im Tabellenbuch auf <b>S.&nbsp;30</b> („Ladung, Spannung, Stromstärke,
+    Widerstand“) steht <b>Formel&nbsp;6</b> <i>U</i>&nbsp;=&nbsp;<i>W</i>/<i>Q</i>;
+    unmittelbar darunter stehen ungerahmt <i>U</i>&nbsp;=&nbsp;Δ<i>W</i>/Δ<i>Q</i>,
+    <i>Q</i>&nbsp;=&nbsp;<i>W</i>/<i>U</i> und <b><i>W</i>&nbsp;=&nbsp;<i>U</i>·<i>Q</i></b>, mit dieser umgestellten Form rechnet die letzte Tabellenzeile. Die Einheitenkette
+    derselben Seite: [<i>U</i>]&nbsp;=&nbsp;[<i>W</i>]/[<i>Q</i>]&nbsp;=&nbsp;J/C&nbsp;=&nbsp;Ws/As&nbsp;=&nbsp;V.
+    <b>Das Potenzial</b> <i>φ</i> steht auf <b>S.&nbsp;15</b> in der Tabelle „Größen und
+    Einheiten“: „el. Spannung <i>U</i>, el. Potenzial <i>φ</i>“, beide in Volt. Als gerahmte
+    Formel steht <i>U</i><sub>mn</sub>&nbsp;=&nbsp;<i>φ</i><sub>m</sub>&nbsp;−&nbsp;<i>φ</i><sub>n</sub>
+    weder auf S.&nbsp;15 noch auf S.&nbsp;30. Auf <b>S.&nbsp;339</b> rechnet das Buch aber
+    genauso: Die Spannung zwischen einer Kupfer- und einer Zinkplatte ist dort die „Differenz
+    der Potenziale“, <i>U</i><sub>0</sub>&nbsp;=&nbsp;+0,34&nbsp;V&nbsp;−&nbsp;(−0,76&nbsp;V)&nbsp;=&nbsp;1,1&nbsp;V.</small>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  var START={u:20,Q:5,ref:"3",m:"5",n:"2"};
+  var RUHIG = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var phase = 0;            // 0 … 1: Weg der Ladung von m nach n
+
+  function fmt(x,n){ return x.toFixed(n).replace(".",","); }
+  function vz(x,n){        // mit Vorzeichen und deutschem Komma: +4,0  /  -2,0
+    return (x>0?"+":(x<0?"−":"")) + fmt(Math.abs(x),n);
+  }
+
+  // y-Lage der Sprosse k. Die Leiter ist STARR: die Sprossen liegen immer gleich,
+  // gleichgueltig wo die Masse sitzt und wie gross die Stufenspannung ist. Genau das
+  // soll man sehen, es wandern nur die Beschriftungen.
+  // ★ 26.09.2026: Unter 600 px Kartenbreite (Handy) wird ein eigenes, 360 px breites
+  //   Bild gezeichnet; das 880-px-Bild erschien dort mit dem Massstab 0,38.
+  var SCHMAL = false;
+  function yk(k){ return SCHMAL ? 314 - (k-1)*46 : 353 - (k-1)*52; }
+
+  // Zeilen passend zur Breite umbrechen; gibt die Zahl der Zeilen zurueck.
+  function zeilen(g, s, x, y, breite, abstand){
+    var w = s.split(" "), z = "", k = 0;
+    for(var i=0;i<w.length;i++){
+      var probe = z ? z + " " + w[i] : w[i];
+      if(z && g.measureText(probe).width > breite){ g.fillText(z, x, y + k*abstand); k++; z = w[i]; }
+      else z = probe;
+    }
+    if(z){ g.fillText(z, x, y + k*abstand); k++; }
+    return k;
+  }
+
+  // 26.09.2026: Tiefstellung im Zeichenbild ("U_{52}" wird U mit tiefgestelltem 52); Canvas kennt kein <sub>.
+  //   Beachtet die gesetzte Ausrichtung (left, right, center) und gibt die Breite zurueck.
+  function schreibeT(g, s, x, y){
+    var teile = s.split(/_\{([^}]*)\}/), font = g.font, mm = font.match(/(\d+(?:\.\d+)?)px/), px = mm ? parseFloat(mm[1]) : 14;
+    var klein = font.replace(/(\d+(?:\.\d+)?)px/, (px*0.72).toFixed(1) + 'px'), w = 0, k;
+    for(k=0;k<teile.length;k++){ g.font = (k%2) ? klein : font; w += g.measureText(teile[k]).width; }
+    var al = g.textAlign, x0 = al==='right' ? x-w : (al==='center' ? x-w/2 : x);
+    g.textAlign = 'left';
+    for(k=0;k<teile.length;k++){ g.font = (k%2) ? klein : font; g.fillText(teile[k], x0, (k%2) ? y+px*0.28 : y); x0 += g.measureText(teile[k]).width; }
+    g.font = font; g.textAlign = al; return w;
+  }
+
+  function erdzeichen(g,x,y){
+    g.strokeStyle="#1A2530"; g.lineWidth=2;
+    g.beginPath(); g.moveTo(x,y-9); g.lineTo(x,y); g.stroke();
+    var br=[20,13,6];
+    for(var i=0;i<3;i++){
+      g.beginPath(); g.moveTo(x-br[i]/2,y+i*5); g.lineTo(x+br[i]/2,y+i*5); g.stroke();
+    }
+  }
+
+  function zeichne(u,ref,m,n,U,W,Q,pm,pn){
+    var c=$("cLeiter");
+    SCHMAL = (c.parentNode.clientWidth || 880) < 600;
+    var S = SCHMAL, BW = S ? 360 : 880, BH = 440;
+    if(c.width !== BW) c.width = BW;
+    if(c.height !== BH) c.height = BH;
+    var g=c.getContext("2d");
+    g.clearRect(0,0,BW,BH);
+    g.font="14px 'Noto Sans',sans-serif"; g.textBaseline="middle";
+    var xl = S ? 132 : 210, xr = S ? 262 : 520, xphi = xl - (S ? 42 : 42);
+
+    // Sprossen
+    for(var k=1;k<=5;k++){
+      var y=yk(k), phi=(k-ref)*u;
+      g.strokeStyle = (k===ref) ? "#1A2530" : "#5A666F";
+      g.lineWidth   = (k===ref) ? 3 : 2;
+      g.beginPath(); g.moveTo(xl,y); g.lineTo(xr,y); g.stroke();
+      // Klemmenkreis am linken Ende
+      g.beginPath(); g.arc(xl,y,5,0,6.2832);
+      g.fillStyle="#fff"; g.fill(); g.strokeStyle="#1A2530"; g.lineWidth=2; g.stroke();
+      // Potenzialwert links
+      g.textAlign="right";
+      g.fillStyle = (k===ref) ? "#1A2530" : "#2557A3";
+      var gr = S ? "13px" : "15px";
+      g.font = (k===ref) ? "bold " + gr + " 'Noto Sans',sans-serif" : gr + " 'Noto Sans',sans-serif";
+      schreibeT(g, "φ_{" + k + "} = " + vz(phi,1) + " V", xphi, y);
+      // Anschlussnummer rechts (schmal nur die Nummer, sonst fehlt der Platz fuer den Pfeil)
+      g.textAlign="left"; g.font="13px 'Noto Sans',sans-serif"; g.fillStyle="#5A666F";
+      g.fillText(S ? String(k) : "Anschluss " + k, xr + (S ? 8 : 12), y);
+    }
+    // Senkrechte Sammelschiene links
+    g.strokeStyle="#9AA5AE"; g.lineWidth=1.5;
+    g.beginPath(); g.moveTo(xl,yk(5)); g.lineTo(xl,yk(1)); g.stroke();
+
+    // Erdungszeichen an der Masse
+    erdzeichen(g, xl - (S ? 19 : 22), yk(ref));
+    g.textAlign="right"; g.font="bold 12px 'Noto Sans',sans-serif"; g.fillStyle="#1A2530";
+    g.fillText("Masse", xphi, yk(ref)+ (S ? 21 : 24));
+
+    // Stufenspannung: kleine Klammer zwischen Sprosse 1 und 2
+    g.strokeStyle="#2F7D62"; g.lineWidth=1.4;
+    var xs = xl + (S ? 16 : 38);
+    g.beginPath(); g.moveTo(xs,yk(1)); g.lineTo(xs,yk(2)); g.stroke();
+    g.beginPath(); g.moveTo(xs-4,yk(1)); g.lineTo(xs+4,yk(1));
+    g.moveTo(xs-4,yk(2)); g.lineTo(xs+4,yk(2)); g.stroke();
+    g.textAlign="left"; g.fillStyle="#2F7D62"; g.font="12.5px 'Noto Sans',sans-serif";
+    if(S){ g.font="12px 'Noto Sans',sans-serif";
+      g.fillText("Stufe", xs+6, (yk(1)+yk(2))/2 - 8); g.fillText(fmt(u,1) + " V", xs+6, (yk(1)+yk(2))/2 + 8); }
+    else g.fillText("Stufe " + fmt(u,1) + " V", xs+8, (yk(1)+yk(2))/2);
+
+    // Markierung der Punkte m und n auf den Sprossen
+    var xp = S ? 240 : 470;
+    [[m,"m"],[n,"n"]].forEach(function(p){
+      var y=yk(p[0]);
+      g.beginPath(); g.arc(xp,y,8,0,6.2832);
+      g.fillStyle="#A34E0E"; g.fill();
+      g.fillStyle="#fff"; g.font="bold 12px 'Noto Sans',sans-serif";
+      g.textAlign="center"; g.fillText(p[1], xp, y+1);
+    });
+
+    // Doppelpfeil der Spannung zwischen m und n
+    var xu = S ? 300 : 620, ym=yk(m), yn=yk(n);
+    g.strokeStyle="#A34E0E"; g.lineWidth=2.2;
+    if(m!==n){
+      g.beginPath(); g.moveTo(xu,ym); g.lineTo(xu,yn); g.stroke();
+      [[ym,(yn>ym?1:-1)],[yn,(ym>yn?1:-1)]].forEach(function(a){
+        g.beginPath(); g.moveTo(xu,a[0]); g.lineTo(xu-5,a[0]+7*a[1]);
+        g.lineTo(xu+5,a[0]+7*a[1]); g.closePath(); g.fillStyle="#A34E0E"; g.fill();
+      });
+      // Anschlusslinien zu den Sprossen
+      g.lineWidth=1; g.strokeStyle="#C9A98C";
+      g.beginPath(); g.moveTo(xp+8,ym); g.lineTo(xu,ym);
+      g.moveTo(xp+8,yn); g.lineTo(xu,yn); g.stroke();
+      // 26.09.2026: die Anschlusslinien liefen durch „Anschluss m/n“; Beschriftung freistellen und neu schreiben
+      g.font="13px 'Noto Sans',sans-serif"; g.textAlign="left";
+      [m,n].forEach(function(k){
+        var tx = S ? String(k) : "Anschluss " + k, bw=g.measureText(tx).width, yy=yk(k), xa = xr + (S ? 8 : 12);
+        g.fillStyle="#fff"; g.fillRect(xa-4, yy-9, bw+8, 18);
+        g.fillStyle="#5A666F"; g.fillText(tx, xa, yy);
+      });
+    } else {
+      g.beginPath(); g.arc(xu,ym,10,0,6.2832); g.stroke();
+    }
+    g.textAlign="left"; g.fillStyle="#A34E0E"; g.font = S ? "bold 15px 'Noto Sans',sans-serif" : "bold 16px 'Noto Sans',sans-serif";
+    // schmal steht am Pfeil nur das Formelzeichen, der Wert steht oben in der ersten Zeile
+    schreibeT(g, "U_{" + m + n + "}" + (S ? "" : " = " + fmt(U,1).replace("-","−") + " V"),
+               xu + (m===n ? 22 : (S ? 10 : 14)), (ym+yn)/2);
+
+    // Wandernde Ladung von m nach n.
+    // ★ Eigene Spur links der Punktmarken: bei xp lag die Ladung im Grenzfall m = n
+    //   genau auf der Marke, und ihre Beschriftung ueberschrieb "Anschluss k".
+    //   Beides erst im Bild gesehen.
+    var xc = xp - (S ? 24 : 34);
+    var t2 = (RUHIG || m===n) ? 0 : phase;
+    var yc = ym + (yn-ym)*t2;
+    var bez = S ? "Q" : "Q = " + fmt(Q,1) + " As";
+    g.font="12px 'Noto Sans',sans-serif";
+    var bq = g.measureText(bez).width;
+    g.fillStyle="#fff"; g.fillRect(xc-16-bq, yc-8, bq+12, 16);   // Sprosse freistellen
+    g.textAlign="right"; g.fillStyle="#2557A3";
+    g.fillText(bez, xc-8, yc);
+    g.beginPath(); g.arc(xc, yc, 6, 0, 6.2832);
+    g.fillStyle="#2557A3"; g.fill();
+
+    // Ergebniszeile. ★ Erst stand hier die ARBEIT gross und die Spannung klein am
+    //   Pfeil. Der Block heisst "Elektrische Spannung U", die Spannung gehoert nach
+    //   vorn, die Arbeit ist ihre Folge. Im Bild gesehen, nicht im Quelltext.
+    g.fillStyle="#A34E0E"; g.font = S ? "22px 'Noto Sans',sans-serif" : "26px 'Noto Sans',sans-serif"; g.textAlign="left";
+    var txt = "U_{" + m + n + "} = " + fmt(U,1).replace("-","\u2212") + " V";
+    var x0 = S ? 16 : 24;
+    var brT = schreibeT(g, txt, x0, S ? 26 : 66);
+    // ★ Breite MESSEN, solange die 26-px-Schrift gesetzt ist, mit einem geschaetzten
+    //   Faktor klebt der Zusatz am Wert. Derselbe Fehler ist in B10 und B07 je einmal
+    //   passiert; er steht hier als Warnung, damit er nicht ein viertes Mal auftritt.
+    g.font="13px 'Noto Sans',sans-serif"; g.fillStyle="#5A666F";
+    schreibeT(g, "= \u03C6_{" + m + "} \u2212 \u03C6_{" + n + "} = " + vz(pm,1) + " V \u2212 ("
+               + vz(pn,1) + " V)", S ? x0 : 24+brT+14, S ? 54 : 62);
+    g.fillStyle="#1A2530"; g.font="13.5px 'Noto Sans',sans-serif";
+    schreibeT(g, "W = U_{" + m + n + "} \u00B7 Q = " + fmt(U,1).replace("-","\u2212") + " V \u00B7 "
+               + fmt(Q,1) + " As = " + fmt(W,2).replace("-","\u2212") + " Ws", x0, S ? 78 : 96);
+
+    // Fusszeile
+    g.fillStyle = (W<0) ? "#B23A33" : "#2F7D62";
+    g.font="12.5px 'Noto Sans',sans-serif";
+    var f1 = W<0 ? "W ist negativ: die Arbeit wird nicht frei, sie muss aufgewendet werden."
+                 : (W===0 ? "W = 0: zwischen einem Punkt und sich selbst liegt keine Spannung."
+                          : "Wandert Q von m nach n, wird diese Arbeit frei.");
+    var f2 = "Die Sprossen liegen fest. Verschieben Sie die Masse: alle \u03C6 \u00E4ndern sich, "
+             + "der Abstand zweier Sprossen nicht.";
+    if(S){
+      var yf = yk(1) + 48, nz = zeilen(g, f1, x0, yf, BW - 2*x0, 16);
+      g.fillStyle="#5A666F"; zeilen(g, f2, x0, yf + 16*nz + 8, BW - 2*x0, 16);
+    } else {
+      g.fillText(f1, 24, 400);
+      g.fillStyle="#5A666F"; g.font="12.5px 'Noto Sans',sans-serif";
+      g.fillText(f2, 24, 422);
+    }
+  }
+
+  function tick(){
+    var u=+$("rU").value/10, Q=+$("rQ").value/10;
+    var ref=+$("sRef").value, m=+$("sM").value, n=+$("sN").value;
+    var pm=(m-ref)*u, pn=(n-ref)*u;
+    var U=pm-pn, W=U*Q;
+    $("wU").textContent=fmt(u,1)+" V"; $("wQ").textContent=fmt(Q,1)+" As";
+    $("aPm").textContent=vz(pm,1)+" V"; $("aPn").textContent=vz(pn,1)+" V";
+    $("aUrech").innerHTML = vz(pm,1)+"&nbsp;V &minus; ("+vz(pn,1)+"&nbsp;V)";
+    $("aU").textContent=fmt(U,1).replace("-","−")+" V";
+    $("aProbeRech").textContent="("+m+" − "+n+") · "+fmt(u,1)+" V";
+    $("aProbe").textContent=fmt((m-n)*u,1).replace("-","−")+" V";
+    $("aQ").textContent=fmt(Q,1)+" As";
+    $("aW").textContent=fmt(W,2).replace("-","−")+" Ws";
+    $("hDeut").textContent =
+      "Die beiden Potenziale sind auf Anschluss " + ref + " bezogen. Die Probe rechnet "
+      + "ganz ohne Bezugspunkt und kommt auf denselben Wert " + fmt(U,1).replace("-","−")
+      + " V, deshalb ändert das Verschieben der Masse die Spannung nicht.";
+    zeichne(u,ref,m,n,U,W,Q,pm,pn);
+  }
+
+  ["rU","rQ","sRef","sM","sN"].forEach(function(id){
+    $(id).addEventListener("input",tick); $(id).addEventListener("change",tick);
+  });
+  window.addEventListener("resize", tick);
+  $("bReset").addEventListener("click",function(){
+    // Startstellung u = 2,0 V, Masse 3, m = 5, n = 2, Q = 0,5 As -> U = 6 V, W = 3 Ws.
+    // Kein Blattwert, kein Grenzfall, beide Regler im inneren Bereich.
+    $("rU").value=START.u; $("rQ").value=START.Q;
+    $("sRef").value=START.ref; $("sM").value=START.m; $("sN").value=START.n;
+    phase=0; tick();
+  });
+
+  tick();
+  if(!RUHIG){
+    // ★ Der erste Aufruf von tick() hat schon vollstaendig gezeichnet (Ladung bei m).
+    //   Der Lauf verschiebt nur die Ladung; ein Standbild ist deshalb immer vollstaendig.
+    setInterval(function(){ phase += 0.02; if(phase>1) phase=0; tick(); }, 40);
+  }
+})();
+</script>

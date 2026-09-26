@@ -1,0 +1,239 @@
+<!-- lehrmaterial -->
+<!-- materialtyp: simulation -->
+<!-- sim_bearbeitung: pflicht -->
+<!-- Block EG1-B07 · Elektrischer Strom und Stromstaerke I = Q/t -->
+<!-- Ziel-Erkenntnis:
+     (1) Die Stromstaerke ist eine RATE: Ladung je Zeit. Dieselbe Ladung in kuerzerer Zeit
+         bedeutet groessere Stromstaerke, 2 As in 10 s sind 0,2 A, dieselben 2 As in 1 s
+         sind 2 A.
+     (2) Anschaulich ist I die DICHTE der Ladung auf dem Zeitstrahl. Das ist dieselbe
+         Denkfigur wie bei der Stromdichte in Block B10 (Ladung je Flaeche), nur hier je
+         ZEIT statt je Querschnitt.
+     (3) Die Zahl, die man nicht vergisst: 1 As sind rund 6,24 · 10^18 Elektronen. Bei
+         1 A fliessen in jeder Sekunde 6,2 Trillionen Elementarladungen durch den
+         Querschnitt.
+     (4) GRENZFAELLE, beide im Einstellbereich:
+           10 As in  1 s  -> I = 10 A      (alles auf einmal)
+          0,1 As in 60 s  -> I = 0,0017 A  (kaum messbar)
+     Startstellung: Q = 2 As, t = 10 s -> I = 0,2 A. Ein unauffaelliger Wert, der weder
+     die Aufgaben des Blattes vorwegnimmt noch ein Grenzfall ist; beide Regler stehen im
+     mittleren Drittel. -->
+<!-- BELEGE, Tabellenbuch 32. A., gedrucktTabellenbuch S. 30 „Ladung, Spannung, Stromstaerke,
+     Widerstand" (Seite gerendert und abgelesen):
+       Formel 1   Q = I · t          (bei ungeladenem Koerper)
+       Formel 4   I = Q / t          (dazu t = Q/I)
+       Einheiten  [Q] = [I]·[t] = A·s = As = C   ·   [I] = A   ·   [t] = s
+       Elementarladung   e = 0,16022 · 10^-18 As
+       Umrechnung        1 As = 6,24151 · 10^18 e
+     ★ Die beiden letzten Angaben sind NICHT exakt reziprok: 1/0,16022e-18 = 6,24142e18
+       gegen 6,24151e18 im Buch. Beide Werte sind gerundet, dieselbe Beobachtung wie bei
+       ϱ und γ auf S. 559. Die Simulation rechnet mit der Buchangabe 6,24151e18 und nennt
+       die Abweichung im Quellenkasten.
+     Handrechnung == Simulationsmodell:
+       2 As / 10 s = 0,2 A   ·   2 As / 1 s = 2 A   ·   10 As / 2 s = 5 A
+       0,1 As / 60 s = 0,001667 A   ·   1 As = 6,242e18 Elektronen -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulation EG1-B07: Stromstärke ist Ladung je Zeit</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--rot:#B23A33;--hell:#F4F6F8;
+        --linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62;--blau:#2557A3}
+  html,body{margin:0;padding:0}
+  body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;
+       line-height:1.46;font-size:16px;padding:18px 14px 60px}
+  .wrap{max-width:960px;margin:0 auto;background:#fff;border:1px solid var(--linie);
+        box-shadow:0 6px 26px rgba(0,0,0,.10);padding:22px 24px 30px}
+  .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:9px 0;margin-bottom:16px}
+  .kopf .reihe{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--kupfer);font-weight:700}
+  .kopf h1{font-size:22px;margin:3px 0 2px}
+  .kopf .sub{font-size:13px;color:var(--grau)}
+  .box{border:1.2px solid var(--ink);padding:11px 14px;margin:14px 0;background:#fff}
+  .box .cap{display:block;font-size:12px;font-weight:700;letter-spacing:.09em;
+            text-transform:uppercase;color:var(--kupfer);margin-bottom:5px}
+  .box.sim{background:var(--kupferhell)}
+  .box.quelle{border:none;padding:0;margin:16px 0 0}
+  .box.quelle .cap{color:var(--grau)}
+  .quelle small{font-size:11.5px;color:var(--grau)}
+  i{font-style:italic} sub{font-size:.7em;vertical-align:-.25em} sup{font-size:.7em;vertical-align:.5em}
+  figure{margin:10px 0}
+  canvas.stage{width:100%;max-width:880px;height:auto;display:block;margin:6px auto 0;
+               border:1px solid var(--linie);background:#fff;touch-action:manipulation}
+  figcaption{font-size:11.5px;color:var(--grau);text-align:left;border-left:3px solid var(--kupfer);
+             padding:4px 0 4px 9px;margin-top:7px}
+  .regler{display:grid;grid-template-columns:1fr;gap:13px;margin:14px 0 4px}
+  @media(min-width:640px){.regler{grid-template-columns:1fr 1fr}}
+  /* 26.09.2026: Handybreite, wie B10 (Tabelle sonst breiter als die Karte) */
+  @media(max-width:480px){.wrap{padding:18px 12px 24px}.wrap table.ab{font-size:13.5px}.wrap table.ab th,.wrap table.ab td{padding:5px 5px}}
+  @media(max-width:380px){.wrap table.ab{font-size:12.5px}.wrap table.ab th,.wrap table.ab td{padding:4px 4px}}
+  .regler label{display:block;font-size:13.5px;font-weight:600;margin-bottom:3px}
+  .regler input[type=range]{width:100%;height:34px;accent-color:var(--kupfer)}
+  .wert{font-variant-numeric:tabular-nums;font-weight:700;color:var(--kupfer)}
+  table.ab{width:100%;border-collapse:collapse;margin-top:12px;font-size:14.5px}
+  table.ab th,table.ab td{border:1px solid var(--linie);padding:5px 8px;text-align:left}
+  table.ab th{background:var(--hell);font-size:12px;letter-spacing:.05em;text-transform:uppercase}
+  table.ab td.z{text-align:right;font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
+  .hinw{font-size:13px;color:var(--grau);margin-top:8px}
+  button.reset{font:inherit;font-size:14px;padding:9px 16px;border:1.4px solid var(--kupfer);
+               background:#fff;color:var(--kupfer);cursor:pointer;margin-top:12px;min-height:44px}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="kopf">
+    <div class="reihe">E1EG · Grundlagen Elektrotechnik · Lernfeld&nbsp;1 · Block&nbsp;7</div>
+    <h1>Stromstärke ist Ladung je Zeit</h1>
+    <div class="sub">Selbst bedienbar · <i>I</i> = <i>Q</i> / <i>t</i></div>
+  </div>
+
+  <div class="box sim">
+    <span class="cap">So bedienen Sie die Simulation</span>
+    <p>Der Balken ist ein <b>Zeitstrahl</b>: Seine Länge ist die Zeit <i>t</i>, und die
+    Punkte darauf sind die Ladung <i>Q</i>, die in dieser Zeit durch den Querschnitt läuft.
+    Stellen Sie beide ein und achten Sie darauf, <b>wie dicht die Punkte stehen</b>: 
+    <b>Diese Dichte ist die Stromstärke</b>.</p>
+  
+    <p><b>Ablauf:</b> Die fünf Schritte stehen auf dem Arbeitsblatt im Kasten „Simulation öffnen“. <b>Sozialform:</b> Partnerarbeit, zu zweit an einem Gerät, freiwillig zu Hause. <b>Zeit:</b> rund 10&nbsp;min. <b>Fertig, wenn</b> Sie erklären können, warum <i>I</i> eine Rate ist und warum dieselbe Ladung je nach Zeit ganz verschiedene Stromstärken bedeutet.</p>
+  </div>
+
+  <figure>
+    <script type="application/json" id="sim-meta">{"startwerte":{"Q":20,"t":10},"loesungswerte":{"Q":100,"t":1}}</script>
+  <canvas class="stage" id="cZeit" width="880" height="290"
+      data-quelle="Schema nach Europa-Fachkunde S.31 (elektrischer Strom: bewegte Ladung je Zeit, I = Q/t); Zeitstrahl-Darstellung ohne Buchbild-Entsprechung"
+      aria-label="Ein waagerechter Zeitstrahl, dessen Länge der eingestellten Zeit entspricht. Darauf verteilte Punkte stellen die Ladung dar; je dichter sie stehen, desto größer ist die Stromstärke. Rechts die berechnete Stromstärke und die Zahl der Elektronen."></canvas>
+    <figcaption>Je <b>dichter</b> die Ladung auf dem Zeitstrahl, desto größer die
+    Stromstärke. Dieselbe Denkfigur wie die <b>Stromdichte</b> in Block&nbsp;10, dort je
+    Fläche, hier je Zeit.</figcaption>
+  </figure>
+
+  <div class="regler">
+    <div>
+      <label for="rQ">Ladung <i>Q</i>: <span class="wert" id="wQ">2,0 As</span></label>
+      <input id="rQ" type="range" min="1" max="100" value="20" step="1" aria-label="Ladung in Zehntel Amperesekunden">
+    </div>
+    <div>
+      <label for="rT">Zeit <i>t</i>: <span class="wert" id="wT">10 s</span></label>
+      <input id="rT" type="range" min="1" max="60" value="10" step="1" aria-label="Zeit in Sekunden">
+    </div>
+  </div>
+  <button class="reset" id="bReset" type="button">Zurücksetzen</button>
+
+  <table class="ab">
+    <tr><th>Größe</th><th>Rechnung</th><th style="text-align:right">Wert</th></tr>
+    <tr><td>Ladung <i>Q</i></td><td>eingestellt</td><td class="z" id="aQ">2,0 As</td></tr>
+    <tr><td>Zeit <i>t</i></td><td>eingestellt</td><td class="z" id="aT">10 s</td></tr>
+    <tr><td><b>Stromstärke <i>I</i> = <i>Q</i>/<i>t</i></b></td>
+        <td>Tabellenbuch S.&nbsp;30, Formel&nbsp;4</td><td class="z" id="aI">0,200 A</td></tr>
+    <tr><td>Probe: <i>Q</i> = <i>I</i>·<i>t</i></td><td>Formel&nbsp;1</td>
+        <td class="z" id="aProbe">2,0 As</td></tr>
+    <tr><td>Zahl der Elektronen</td><td><i>Q</i> · 6,24151·10<sup>18</sup>/As</td>
+        <td class="z" id="aE">1,25·10<sup>19</sup></td></tr>
+  </table>
+  <p class="hinw" id="hDeut">Verstellen Sie die Zeit und lassen Sie die Ladung stehen.</p>
+
+  <div class="box quelle">
+    <span class="cap">Woher die Werte stammen</span>
+    <small>Im Tabellenbuch auf <b>S.&nbsp;30</b> („Ladung, Spannung, Stromstärke,
+    Widerstand“) stehen <b>Formel&nbsp;4</b> <i>I</i>&nbsp;=&nbsp;<i>Q</i>/<i>t</i> und
+    <b>Formel&nbsp;1</b> <i>Q</i>&nbsp;=&nbsp;<i>I</i>·<i>t</i>, dazu die Einheiten
+    [<i>Q</i>]&nbsp;=&nbsp;A·s&nbsp;=&nbsp;As&nbsp;=&nbsp;C. Dieselbe Seite nennt die
+    <b>Elementarladung</b> <i>e</i>&nbsp;=&nbsp;0,16022·10<sup>−18</sup>&nbsp;As und
+    1&nbsp;As&nbsp;=&nbsp;6,24151·10<sup>18</sup>&nbsp;<i>e</i>.
+    <b>Beachten Sie:</b> Diese beiden Angaben sind <b>nicht genau Kehrwerte</b>
+    (1/0,16022·10<sup>−18</sup>&nbsp;=&nbsp;6,24142·10<sup>18</sup>), beide sind gerundet.
+    Gerechnet wird hier mit der Buchangabe 6,24151·10<sup>18</sup>.</small>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  var PRO_AS=6.24151e18, START={Q:20,t:10};
+  function fmt(x,n){ return x.toFixed(n).replace(".",","); }
+  function hoch(x){            // 1,25·10^19
+    var e=Math.floor(Math.log10(x)), m=x/Math.pow(10,e);
+    return fmt(m,2)+"·10^"+e;
+  }
+
+  // 26.09.2026: Balkenlaenge VERHAELTNISGLEICH zur Zeit, sonst ist die Punktdichte nicht Q/t
+  //   (vorher 200 px + 8,8 px je Sekunde: 10 As in 1 s war 50-mal mehr Strom, aber nur 7-mal dichter).
+  //   Zwei Anordnungen wie in B10: breit (Tafel) 880 px, schmal (Handy) 360 px Zeichenbreite.
+  var BREIT={w:880,h:290, xl:70, k:12, yI:60, yF:56, fI:30, zweizeilig:false, yFuss:262};
+  var SCHMAL={w:360,h:330, xl:16, k:5.3, yI:44, yF:70, fI:26, zweizeilig:true, yFuss:282};
+  function anordnung(c){
+    var L = (c.parentNode.clientWidth||880) < 600 ? SCHMAL : BREIT;
+    if(c.width!==L.w || c.height!==L.h){ c.width=L.w; c.height=L.h; }
+    return L;
+  }
+  function zeichne(c,Q,t,I){
+    var L=anordnung(c), g=c.getContext("2d"); g.clearRect(0,0,L.w,L.h);
+    g.font="14px 'Noto Sans',sans-serif";
+    var xl=L.xl, yb=(L.zweizeilig?128:118), hoehe=50;
+    var br = L.k * t;                      // Laenge ~ Zeit
+    g.fillStyle="#F4F6F8"; g.fillRect(xl,yb,br,hoehe);
+    g.strokeStyle="#1A2530"; g.lineWidth=2; g.strokeRect(xl,yb,br,hoehe);
+    // Ladungspunkte: Anzahl ~ Q, gleichmaessig ueber die Laenge -> Dichte ~ Q/t = I
+    var n = Math.max(2, Math.round(Q*14));
+    n = Math.min(n, 900);
+    // 26.09.2026: Punkte auf den Balken beschneiden; bei t = 1 s (5 px auf dem Handy) ragten
+    //   sie seitlich heraus. Der Rahmen wird danach noch einmal gezogen.
+    g.save(); g.beginPath(); g.rect(xl,yb,br,hoehe); g.clip();
+    for(var i=0;i<n;i++){
+      var x = xl + (i+0.5)/n * br;
+      var y = yb + 9 + ((i*37)%5)*8;      // fuenf Reihen, gleichmaessig durchmischt
+      g.beginPath(); g.arc(x,y,2.1,0,6.2832);
+      g.fillStyle="#2557A3"; g.fill();
+    }
+    g.restore(); g.strokeStyle="#1A2530"; g.lineWidth=2; g.strokeRect(xl,yb,br,hoehe);
+    // Achsenbeschriftung; bei kurzem Balken weichen die Marken einander aus
+    g.strokeStyle="#5A666F"; g.lineWidth=1;
+    g.beginPath(); g.moveTo(xl,yb+hoehe+14); g.lineTo(xl+br,yb+hoehe+14); g.stroke();
+    g.beginPath(); g.moveTo(xl,yb+hoehe+9); g.lineTo(xl,yb+hoehe+19);
+    g.moveTo(xl+br,yb+hoehe+9); g.lineTo(xl+br,yb+hoehe+19); g.stroke();
+    g.fillStyle="#5A666F"; g.font="13px 'Noto Sans',sans-serif";
+    g.textAlign="left"; g.fillText("0 s", xl-4, yb+hoehe+34);
+    var tt=t+" s", bt=g.measureText(tt).width;
+    g.fillText(tt, Math.max(xl+br-bt/2, xl+30), yb+hoehe+34);
+    g.fillText("Zeit t", xl, yb+hoehe+52);
+    g.fillStyle="#2557A3";
+    g.fillText("Ladung Q = "+fmt(Q,1)+" As", xl, yb-12);
+    // Ergebnis
+    g.fillStyle="#A34E0E"; g.font=L.fI+"px 'Noto Sans',sans-serif";
+    var txt="I = "+fmt(I,3)+" A";
+    g.fillText(txt, xl, L.yI);
+    // ★ Die Breite MESSEN, solange die grosse Schrift noch gesetzt ist, erst danach umstellen.
+    var brT = g.measureText(txt).width;
+    g.font="13px 'Noto Sans',sans-serif"; g.fillStyle="#5A666F";
+    g.fillText("= "+fmt(Q,1)+" As / "+t+" s", L.zweizeilig ? xl : xl+brT+14, L.yF);
+    g.fillStyle="#2F7D62"; g.font="12.5px 'Noto Sans',sans-serif";
+    if(L.zweizeilig){
+      g.fillText("Die Punktdichte auf dem Zeitstrahl IST die Stromstärke:", xl, L.yFuss);
+      g.fillText("mehr Ladung oder weniger Zeit machen sie größer.", xl, L.yFuss+18);
+    } else {
+      g.fillText("Die Punktdichte auf dem Zeitstrahl IST die Stromstärke, mehr Ladung oder "
+                 + "weniger Zeit machen sie größer.", xl, L.yFuss);
+    }
+  }
+
+  function tick(){
+    var Q=+$("rQ").value/10, t=+$("rT").value, I=Q/t;
+    $("wQ").textContent=fmt(Q,1)+" As"; $("wT").textContent=t+" s";
+    $("aQ").textContent=fmt(Q,1)+" As"; $("aT").textContent=t+" s";
+    $("aI").textContent=fmt(I,3)+" A";
+    $("aProbe").textContent=fmt(I*t,1)+" As";
+    $("aE").innerHTML=hoch(Q*PRO_AS).replace(/\^(\d+)/,"<sup>$1</sup>");
+    $("hDeut").textContent = "Bei " + fmt(Q,1) + " As in " + t + " s fließt ein Strom von "
+      + fmt(I,3) + " A. Dieselbe Ladung in der halben Zeit ergäbe " + fmt(I*2,3) + " A.";
+    zeichne($("cZeit"),Q,t,I);
+  }
+  ["rQ","rT"].forEach(function(id){ $(id).addEventListener("input",tick); });
+  window.addEventListener("resize", tick);
+  $("bReset").addEventListener("click",function(){
+    // Startstellung Q = 2 As, t = 10 s -> I = 0,2 A. Unauffaellig, kein Grenzfall,
+    // nimmt keine Blattaufgabe vorweg.
+    $("rQ").value=START.Q; $("rT").value=START.t; tick();
+  });
+  tick();
+})();
+</script>

@@ -1,0 +1,402 @@
+<!-- lehrmaterial -->
+<!-- materialtyp: simulation -->
+<!-- sim_bearbeitung: pflicht -->
+<script type="application/json" id="sim-meta">{"startwerte":{"schalter":"offen","werkstoff":"Kupfer","rueckleiter":"vorhanden"},"loesungswerte":{"schalter":"geschlossen"}}</script>
+<!-- Block EG1-B04 · Der geschlossene Stromkreis, Leiter, Nichtleiter, Halbleiter -->
+<!-- Ziel-Erkenntnis:
+     (1) ZWEI Bedingungen muessen GLEICHZEITIG erfuellt sein: der Kreis muss GESCHLOSSEN
+         sein UND jedes Stueck darin muss LEITEN. Eine allein genuegt nie.
+         Auf Papier steht das als Satz; hier muss man es ausprobieren.
+     (2) Die drei Faelle der Aufgabe 1 sind alle einstellbar:
+           Fall a  Schalter offen
+           Fall b  Kunststoff in der Ader
+           Fall c  Rueckleiter fehlt
+         Dreimal bleibt die Leuchte dunkel, aus DREI verschiedenen Gruenden.
+     (3) Der Halbleiter ist kein „halber Leiter". Silicium leitet so viel schlechter als
+         Kupfer, dass die Leuchte dunkel bleibt. Nuetzlich wird er erst als Bauelement
+         (LED in B28, NTC in B36). Genau diese Fehlvorstellung nennt das Arbeitsblatt.
+     (4) Reines Wasser leitet fast nicht, erst geloeste Salze machen es leitfaehig.
+         Auch das ist eine Fehlvorstellung des Blattes und hier einstellbar.
+     (5) UNMOEGLICH und nachweislich nicht einstellbar: die Leuchte zum Leuchten bringen,
+         solange der Schalter offen ist. Kein Werkstoff der Welt hilft, genau das ist
+         die Erkenntnis.
+     Startstellung: Schalter OFFEN, Kupfer eingesetzt, Rueckleiter vorhanden. Die Leuchte
+     bleibt dunkel, der Block beginnt mit der Frage „Warum bleibt die Leuchte dunkel?".
+     Keine Blattloesung wird vorweggenommen: das Einsetzfeld steht auf dem Werkstoff, den
+     die Leitung ohnehin hat. -->
+<!-- BELEGE, Tabellenbuch 32. A. (Seiten am 11.09.2026 gerendert und abgelesen):
+     Tabellenbuch S. 86 „Stromkreise und Schaltzeichen":
+       Beispiel 1  Ansicht eines physikalischen Stromkreises und der allpolige Schaltplan
+                   dazu (Spannungserzeuger, Last, Schalter)
+       Allgemeine Schaltzeichen, vgl. DIN EN 60617-4:
+         Galvanisches Element, langer Strich Pluspol, kurzer Strich Minuspol
+         Akkumulatorenbatterie 12 V
+         Schliesser a) / Oeffner b), handbetaetigt
+         Leuchte, allgemein, Kreis mit Kreuz (vgl. S. 95)
+         Widerstand, allgemein, leeres Rechteck
+         Verbindung/Anschluss, Punkt
+     Tabellenbuch S. 559 „Stoffwerte": Leitfaehigkeit γ20, Kupfer (99,9 %) 56, Aluminium (99,5 %) 36
+       m/(Ω·mm²). Fuer Nichtmetalle fuehrt das Buch KEINE Leitfaehigkeit; die Tabelle
+       „Nichtmetalle, fest" hat keine ϱ-Spalte.
+     ★ Deshalb nennt diese Simulation NUR fuer Kupfer und Aluminium einen Zahlenwert.
+       Fuer Glas, Gummi, Porzellan, Silicium und die uebrigen Stoffe gibt es im
+       Tabellenbuch keinen, und erfunden wird hier keiner. Die Zuordnung zu den drei
+       Werkstoffgruppen folgt woertlich der Liste des Arbeitsblattes:
+         Leiter      Metalle (Kupfer, Aluminium, Stahl), Kohle, Salzloesung
+         Halbleiter  Silicium, Germanium
+         Nichtleiter Luft, Gummi, Glas, Porzellan, Kunststoff
+       dazu der Satz des Blattes: „Reines Wasser leitet fast nicht." -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulation EG1-B04: Der geschlossene Stromkreis</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--rot:#B23A33;--hell:#F4F6F8;
+        --linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62;--blau:#2557A3}
+  html,body{margin:0;padding:0}
+  body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;
+       line-height:1.46;font-size:16px;padding:18px 14px 60px}
+  .wrap{max-width:960px;margin:0 auto;background:#fff;border:1px solid var(--linie);
+        box-shadow:0 6px 26px rgba(0,0,0,.10);padding:22px 24px 30px}
+  .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:9px 0;margin-bottom:16px}
+  .kopf .reihe{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--kupfer);font-weight:700}
+  .kopf h1{font-size:22px;margin:3px 0 2px}
+  .kopf .sub{font-size:13px;color:var(--grau)}
+  .box{border:1.2px solid var(--ink);padding:11px 14px;margin:14px 0;background:#fff}
+  .box .cap{display:block;font-size:12px;font-weight:700;letter-spacing:.09em;
+            text-transform:uppercase;color:var(--kupfer);margin-bottom:5px}
+  .box.sim{background:var(--kupferhell)}
+  .box.quelle{border:none;padding:0;margin:16px 0 0}
+  .box.quelle .cap{color:var(--grau)}
+  .quelle small{font-size:11.5px;color:var(--grau)}
+  i{font-style:italic} sub{font-size:.7em;vertical-align:-.25em} sup{font-size:.7em;vertical-align:.5em}
+  figure{margin:10px 0}
+  canvas.stage{width:100%;max-width:880px;height:auto;display:block;margin:6px auto 0;
+               border:1px solid var(--linie);background:#fff;touch-action:manipulation}
+  figcaption{font-size:11.5px;color:var(--grau);text-align:left;border-left:3px solid var(--kupfer);
+             padding:4px 0 4px 9px;margin-top:7px}
+  .regler{display:grid;grid-template-columns:1fr;gap:13px;margin:14px 0 4px}
+  @media(min-width:640px){.regler{grid-template-columns:1fr 1fr 1fr}}
+  /* 26.09.2026: Handybreite, wie B10 (Tabelle sonst breiter als die Karte) */
+  @media(max-width:480px){.wrap{padding:18px 12px 24px}.wrap table.ab{font-size:13.5px}.wrap table.ab th,.wrap table.ab td{padding:5px 5px}}
+  @media(max-width:380px){.wrap table.ab{font-size:12.5px}.wrap table.ab th,.wrap table.ab td{padding:4px 4px}}
+  .regler label{display:block;font-size:13.5px;font-weight:600;margin-bottom:3px}
+  .regler select{font:inherit;font-size:15px;padding:8px 10px;min-height:44px;
+                 border:1.2px solid var(--linie);background:#fff;color:var(--ink);width:100%}
+  .wert{font-variant-numeric:tabular-nums;font-weight:700;color:var(--kupfer)}
+  table.ab{width:100%;border-collapse:collapse;margin-top:12px;font-size:14.5px}
+  table.ab th,table.ab td{border:1px solid var(--linie);padding:5px 8px;text-align:left}
+  table.ab th{background:var(--hell);font-size:12px;letter-spacing:.05em;text-transform:uppercase}
+  .hinw{font-size:13px;color:var(--grau);margin-top:8px}
+  button.reset{font:inherit;font-size:14px;padding:9px 16px;border:1.4px solid var(--kupfer);
+               background:#fff;color:var(--kupfer);cursor:pointer;margin-top:12px;min-height:44px}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="kopf">
+    <div class="reihe">E1EG · Grundlagen Elektrotechnik · Lernfeld&nbsp;1 · Block&nbsp;4</div>
+    <h1>Der geschlossene Stromkreis</h1>
+    <div class="sub">Selbst bedienbar · Schaltzeichen nach DIN&nbsp;EN&nbsp;60617</div>
+  </div>
+
+  <div class="box sim">
+    <span class="cap">So bedienen Sie die Simulation</span>
+    <p>Sie sehen den Schaltplan eines einfachen Gleichstromkreises. Sie können den <b>Schalter</b> betätigen,
+    in die untere Ader einen <b>Werkstoff einsetzen</b> und den <b>Rückleiter</b> entfernen.
+    <b>Vermuten Sie erst</b>, ob die Leuchte leuchtet, und prüfen Sie dann.</p>
+  
+    <p><b>Ablauf:</b> Die fünf Schritte stehen auf dem Arbeitsblatt im Kasten „Simulation öffnen“. <b>Sozialform:</b> Einzelarbeit zu Hause (Selbstlernauftrag). <b>Zeit:</b> rund 10&nbsp;min. <b>Fertig, wenn</b> Sie in einem Satz sagen können, welche zwei Bedingungen gleichzeitig erfüllt sein müssen, damit Strom fließt.</p>
+  </div>
+
+  <figure>
+    <canvas class="stage" id="cKreis" width="880" height="470" data-quelle="Europa-Fachkunde S. 25, Bild ‚Schaltplan eines Stromkreises‘ (b, zeichnerische Darstellung); Schaltzeichen nach DIN EN 60617"
+      aria-label="Normgerechter Schaltplan: links die Batterie, oben im Hinleiter ein Schalter, rechts die Leuchte als Kreis mit Kreuz, unten im Rückleiter eine Einsetzstelle für einen Werkstoff. Leuchtet die Leuchte, wandern Ladungspunkte durch den Leiterzug; sonst ist der Kreis an der unterbrochenen Stelle sichtbar offen."></canvas>
+    <figcaption>Die Schaltzeichen sind die des Tabellenbuchs: <b>langer Strich&nbsp;=&nbsp;Pluspol</b>,
+    kurzer dicker Strich&nbsp;=&nbsp;Minuspol, <b>Kreis mit Kreuz</b>&nbsp;=&nbsp;Leuchte,
+    beweglicher Kontakt&nbsp;=&nbsp;Schalter.</figcaption>
+  </figure>
+
+  <div class="regler">
+    <div>
+      <label for="sSch">Schalter</label>
+      <select id="sSch">
+        <option value="0" selected>offen</option>
+        <option value="1">geschlossen</option>
+      </select>
+    </div>
+    <div>
+      <label for="sMat">Eingesetzter Werkstoff</label>
+      <select id="sMat">
+        <option selected>Kupfer</option>
+        <option>Aluminium</option>
+        <option>Kohle</option>
+        <option>Salzlösung</option>
+        <option>Silicium</option>
+        <option>Germanium</option>
+        <option>Kunststoff</option>
+        <option>Gummi</option>
+        <option>Glas</option>
+        <option>Porzellan</option>
+        <option>Luft</option>
+        <option>reines Wasser</option>
+      </select>
+    </div>
+    <div>
+      <label for="sRueck">Rückleiter</label>
+      <select id="sRueck">
+        <option value="1" selected>vorhanden</option>
+        <option value="0">fehlt</option>
+      </select>
+    </div>
+  </div>
+  <button class="reset" id="bReset" type="button">Zurücksetzen</button>
+
+  <table class="ab">
+    <tr><th>Bedingung</th><th>Zustand</th></tr>
+    <tr><td>Ist der Kreis <b>geschlossen</b>?</td><td id="aGeschl">nein, der Schalter ist offen</td></tr>
+    <tr><td>Ist jedes Stück im Kreis <b>leitend</b>?</td><td id="aLeit">ja, Kupfer ist ein Leiter</td></tr>
+    <tr><td><b>Leuchtet die Leuchte?</b></td><td id="aLicht">nein</td></tr>
+  </table>
+  <p class="hinw" id="hDeut">Schließen Sie den Schalter.</p>
+
+  <div class="box quelle">
+    <span class="cap">Woher die Werte stammen</span>
+    <small>Die Schaltzeichen stehen im Tabellenbuch auf <b>S.&nbsp;86</b> („Stromkreise und
+    Schaltzeichen“, allgemeine Schaltzeichen siehe <b>DIN&nbsp;EN&nbsp;60617-4</b>):
+    galvanisches Element mit langem Pluspol-Strich, Schließer, Leuchte als Kreis mit Kreuz.
+    Dieselbe Seite zeigt oben den Übergang vom physikalischen Stromkreis zum Schaltplan.
+    Die <b>Leitfähigkeit</b> <i>γ</i> steht auf <b>Tabellenbuch S.&nbsp;559</b> („Stoffwerte“), dort
+    allerdings <b>nur für Metalle</b>: Kupfer 56, Aluminium 36&nbsp;m/(Ω·mm²). Für Glas,
+    Gummi, Porzellan oder Silicium nennt das Buch keinen Wert, und hier wird auch keiner
+    erfunden; die Zuordnung zu den drei Werkstoffgruppen folgt wörtlich der Liste Ihres
+    Arbeitsblattes.</small>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  var RUHIG = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var phase = 0;
+
+  // Gruppen woertlich nach der Liste des Arbeitsblattes. γ nur, wo das Tabellenbuch
+  // einen Wert nennt (S. 559, nur Metalle), sonst leer, nicht geraten.
+  var STOFF = {
+    "Kupfer":        {gruppe:"Leiter",      gamma:56},
+    "Aluminium":     {gruppe:"Leiter",      gamma:36},
+    "Kohle":         {gruppe:"Leiter"},
+    "Salzlösung":    {gruppe:"Leiter"},
+    "Silicium":      {gruppe:"Halbleiter"},
+    "Germanium":     {gruppe:"Halbleiter"},
+    "Kunststoff":    {gruppe:"Nichtleiter"},
+    "Gummi":         {gruppe:"Nichtleiter"},
+    "Glas":          {gruppe:"Nichtleiter"},
+    "Porzellan":     {gruppe:"Nichtleiter"},
+    "Luft":          {gruppe:"Nichtleiter"},
+    "reines Wasser": {gruppe:"Nichtleiter", zusatz:"reines Wasser leitet fast nicht, erst gelöste Salze machen es leitfähig"}
+  };
+
+  // ★ Beschriftungen, die AUF einem Leiterzug liegen, muessen freigestellt werden.
+  //   Ohne das schnitt die senkrechte Leitung mitten durch „Batterie 12 V" und
+  //   „LED-Leuchte", im Bild gesehen, im Quelltext unsichtbar. Derselbe Fehlertyp wie
+  //   in B05 und B18.
+  // 26.09.2026: schmale Anordnung (Handy). Die Geometrie wird verkleinert (ABB.S), Schrift und Werkstoffkasten
+  //   stehen in voller Groesse an der umgerechneten Stelle, sonst waere sie auf dem Handy unlesbar klein.
+  var ABB = {S:1, OX:0, OY:0};
+  function P(x, y){ return [ABB.OX + x*ABB.S, ABB.OY + y*ABB.S]; }
+  function txt(g, t, x, y){ var q = P(x, y); g.save(); g.setTransform(1,0,0,1,0,0); g.fillText(t, q[0], q[1]); g.restore(); }
+  function freiText(g, s, x, y, grs, farbe, fett){
+    var q = P(x, y); g.save(); g.setTransform(1,0,0,1,0,0); x = q[0]; y = q[1];
+    g.font = (fett ? "bold " : "") + grs + "px 'Noto Sans',sans-serif";
+    g.textAlign = "center";
+    var b = g.measureText(s).width;
+    g.fillStyle = "#fff";
+    g.fillRect(x - b/2 - 6, y - grs*0.75, b + 12, grs*1.5);
+    g.fillStyle = farbe;
+    g.fillText(s, x, y);
+    g.textAlign = "left"; g.restore();
+  }
+
+  function zeichne(z){
+    var c=$("cKreis"), SCHMAL=(c.parentNode.clientWidth||880) < 600, W=SCHMAL?360:880, H=SCHMAL?400:470;
+    if(c.width!==W || c.height!==H){ c.width=W; c.height=H; }
+    var g=c.getContext("2d"); g.setTransform(1,0,0,1,0,0);
+    g.clearRect(0,0,W,H); g.textBaseline="middle"; g.textAlign="left";
+    ABB = SCHMAL ? {S:0.52, OX:60-190*0.52, OY:150-98*0.52} : {S:1, OX:0, OY:0};
+    g.setTransform(ABB.S,0,0,ABB.S,ABB.OX,ABB.OY);
+    var xl=190, xr=690, yo=150, yu=340;
+    var an = z.licht;
+
+    g.strokeStyle = an ? "#A34E0E" : "#5A666F";
+    g.lineWidth = an ? 3 : 2.4;
+
+    // Hinleiter oben, mit Luecke fuer den Schalter
+    g.beginPath(); g.moveTo(xl,yo); g.lineTo(398,yo); g.stroke();
+    g.beginPath(); g.moveTo(462,yo); g.lineTo(xr,yo); g.stroke();
+    // rechte Seite bis zur Leuchte
+    g.beginPath(); g.moveTo(xr,yo); g.lineTo(xr,168); g.stroke();
+    g.beginPath(); g.moveTo(xr,262); g.lineTo(xr,yu); g.stroke();
+    // linke Seite bis zur Batterie
+    g.beginPath(); g.moveTo(xl,yo); g.lineTo(xl,216); g.stroke();
+    g.beginPath(); g.moveTo(xl,254); g.lineTo(xl,yu); g.stroke();
+    // Rueckleiter unten, mit Luecke fuer die Einsetzstelle
+    g.beginPath(); g.moveTo(xl,yu); g.lineTo(388,yu); g.stroke();
+    if(z.rueck){
+      g.beginPath(); g.moveTo(492,yu); g.lineTo(xr,yu); g.stroke();
+    } else {
+      // ★ Fall c des Blattes: der Rueckleiter FEHLT. Die Luecke muss man sehen.
+      g.strokeStyle="#B23A33"; g.setLineDash([7,7]); g.lineWidth=2;
+      g.beginPath(); g.moveTo(492,yu); g.lineTo(xr,yu); g.stroke();
+      g.setLineDash([]);
+      g.fillStyle="#B23A33"; g.font="13px 'Noto Sans',sans-serif"; g.textAlign="center";
+      if(SCHMAL){ var qr = P(440, yu); g.save(); g.setTransform(1,0,0,1,0,0); g.font="12px 'Noto Sans',sans-serif"; g.textAlign="left";
+        g.fillText("Rückleiter fehlt", qr[0]+56, qr[1]+14); g.restore(); }
+      else txt(g, "Rückleiter fehlt", 590, yu+22);
+      g.textAlign="left";
+      g.strokeStyle = an ? "#A34E0E" : "#5A666F"; g.lineWidth = an ? 3 : 2.4;
+    }
+
+    // Batterie (galvanisches Element, Tabellenbuch S. 86): langer duenner Strich = Plus
+    g.strokeStyle="#1A2530";
+    g.lineWidth=1.6; g.beginPath(); g.moveTo(xl-24,216); g.lineTo(xl+24,216); g.stroke();
+    g.lineWidth=5;   g.beginPath(); g.moveTo(xl-13,254); g.lineTo(xl+13,254); g.stroke();
+    g.fillStyle="#1A2530"; g.font="15px 'Noto Sans',sans-serif"; g.textAlign="right";
+    txt(g, "+", xl-32, 216); txt(g, "−", xl-32, 254);
+    freiText(g, "Batterie 12 V", xl, 292, 13, "#5A666F");
+
+    // Schalter (Schliesser): fester Kontakt links, beweglicher Arm
+    g.strokeStyle="#1A2530"; g.lineWidth=2.4;
+    g.beginPath(); g.arc(398,yo,4,0,6.2832); g.fillStyle="#fff"; g.fill(); g.stroke();
+    g.beginPath(); g.arc(462,yo,4,0,6.2832); g.fillStyle="#fff"; g.fill(); g.stroke();
+    g.beginPath(); g.moveTo(398,yo);
+    if(z.schalter) g.lineTo(462,yo); else g.lineTo(456,yo-26);
+    g.stroke();
+    // ★ Hoeher als der ausgeschwenkte Schalterarm (der bis yo-26 reicht) und
+    //   freigestellt, sonst lag die Beschriftung auf dem Arm.
+    freiText(g, "Schalter " + (z.schalter ? "geschlossen" : "offen"), 430, yo-52, 13, "#5A666F");
+
+    // Leuchte (Kreis mit Kreuz)
+    g.strokeStyle = an ? "#A34E0E" : "#1A2530"; g.lineWidth = an ? 3 : 2.2;
+    if(an){
+      g.beginPath(); g.arc(xr,235,44,0,6.2832);
+      g.fillStyle="rgba(246,196,86,.45)"; g.fill();
+    }
+    g.beginPath(); g.arc(xr,235,27,0,6.2832);
+    g.fillStyle = an ? "#FBE3A6" : "#fff"; g.fill(); g.stroke();
+    var d = 27*0.7071;
+    g.beginPath(); g.moveTo(xr-d,235-d); g.lineTo(xr+d,235+d);
+    g.moveTo(xr-d,235+d); g.lineTo(xr+d,235-d); g.stroke();
+    freiText(g, "Leuchte", xr, 292, 13, "#5A666F");
+
+    // Einsetzstelle im Rueckleiter
+    var ok = (z.gruppe === "Leiter");
+    g.strokeStyle = ok ? "#2F7D62" : "#B23A33"; g.lineWidth=2.2;
+    g.fillStyle = ok ? "#EAF3EC" : "#F6E2E0";
+    var qb = P(440, yu); g.save(); g.setTransform(1,0,0,1,0,0);
+    g.fillRect(qb[0]-52, qb[1]-19, 104, 38); g.strokeRect(qb[0]-52, qb[1]-19, 104, 38); g.restore();
+    g.fillStyle="#1A2530"; g.font="13.5px 'Noto Sans',sans-serif"; g.textAlign="center";
+    txt(g, z.stoff, 440, yu-4/ABB.S);
+    g.font="11.5px 'Noto Sans',sans-serif"; g.fillStyle = ok ? "#2F7D62" : "#B23A33";
+    txt(g, z.gruppe, 440, yu+11/ABB.S);
+    g.font="12.5px 'Noto Sans',sans-serif"; g.fillStyle="#5A666F";
+    txt(g, "Einsetzstelle in der Ader", 440, yu+38/ABB.S);
+
+    // Wandernde Ladung, nur wenn der Strom wirklich fliesst
+    if(an){
+      var weg = 2*((xr-xl) + (yu-yo));
+      for(var i=0;i<14;i++){
+        var s = ((phase + i/14) % 1) * weg, x, y;
+        if(s < (xr-xl))                    { x = xl+s;                 y = yo; }
+        else if(s < (xr-xl)+(yu-yo))       { x = xr;                   y = yo + (s-(xr-xl)); }
+        else if(s < 2*(xr-xl)+(yu-yo))     { x = xr - (s-(xr-xl)-(yu-yo)); y = yu; }
+        else                               { x = xl;                   y = yu - (s-2*(xr-xl)-(yu-yo)); }
+        g.beginPath(); g.arc(x,y,4,0,6.2832); g.fillStyle="#2557A3"; g.fill();
+      }
+    }
+
+    // Kopf- und Urteilszeile
+    g.setTransform(1,0,0,1,0,0);
+    var xt = SCHMAL ? 16 : 24, bt = W - 2*xt;
+    g.textAlign="left"; g.fillStyle="#5A666F"; g.font="13px 'Noto Sans',sans-serif";
+    if(SCHMAL){ g.fillText("Schaltplan eines Gleichstromkreises,", xt, 20); g.fillText("Schaltzeichen nach DIN EN 60617", xt, 37); }
+    else g.fillText("Schaltplan eines Gleichstromkreises, Schaltzeichen nach DIN EN 60617", xt, 26);
+    g.font = SCHMAL ? "bold 17px 'Noto Sans',sans-serif" : "bold 19px 'Noto Sans',sans-serif";
+    g.fillStyle = an ? "#2F7D62" : "#B23A33";
+    g.fillText(an ? "Die Leuchte leuchtet." : "Die Leuchte bleibt dunkel.", xt, SCHMAL ? 64 : 62);
+    // ★ Die Begruendung UMBRECHEN. Einzeilig lief der Silicium-Satz rechts aus dem Bild,
+    //   und der kurze Satz lag auf dem ausgeschwenkten Schalterarm. Beides im Bild gesehen.
+    g.font="13.5px 'Noto Sans',sans-serif"; g.fillStyle="#5A666F";
+    function umbrechen(t, y0, dy){
+      var worte = t.split(" "), zeile = "", zy = y0;
+      for(var wi=0; wi<worte.length; wi++){
+        var probe = zeile ? zeile + " " + worte[wi] : worte[wi];
+        if(g.measureText(probe).width > bt && zeile){ g.fillText(zeile, xt, zy); zy += dy; zeile = worte[wi]; }
+        else { zeile = probe; }
+      }
+      if(zeile) g.fillText(zeile, xt, zy);
+    }
+    umbrechen(z.grund, SCHMAL ? 88 : 84, 19);
+    g.font="12.5px 'Noto Sans',sans-serif"; g.fillStyle="#5A666F";
+    umbrechen("Strom fließt nur, wenn der Kreis GESCHLOSSEN ist UND jedes Stück darin leitet, beides zugleich.", SCHMAL ? 350 : 452, 17);
+  }
+
+  function tick(){
+    var schalter = $("sSch").value === "1";
+    var rueck    = $("sRueck").value === "1";
+    var stoff    = $("sMat").value;
+    var eintrag  = STOFF[stoff] || {gruppe:"?"};
+    var leitend  = eintrag.gruppe === "Leiter";
+    var geschlossen = schalter && rueck;
+    var licht = geschlossen && leitend;
+
+    // Der Grund wird in der Reihenfolge genannt, in der man ihn sucht.
+    var grund;
+    if(licht){
+      grund = "Der Kreis ist geschlossen, und " + stoff + " ist ein Leiter, beide "
+            + "Bedingungen sind erfüllt.";
+    } else if(!schalter && !rueck){
+      grund = "Gleich zwei Unterbrechungen: der Schalter ist offen und der Rückleiter fehlt.";
+    } else if(!schalter){
+      grund = "Der offene Schalter unterbricht den Kreis: kein geschlossener Weg.";
+    } else if(!rueck){
+      grund = "Ohne Rückleiter ist der Weg nicht geschlossen; ein Stromkreis braucht Hin- "
+            + "und Rückleiter.";
+    } else if(eintrag.gruppe === "Halbleiter"){
+      grund = stoff + " ist ein Halbleiter: er leitet zwischen Leiter und Nichtleiter, "
+            + "für diese Leuchte viel zu schlecht. Nützlich wird er erst als Bauelement.";
+    } else {
+      grund = stoff + " ist ein Nichtleiter und lässt keinen Strom durch"
+            + (eintrag.zusatz ? " (" + eintrag.zusatz + ")" : "") + ".";
+    }
+
+    $("aGeschl").textContent = geschlossen ? "ja"
+        : (!schalter && !rueck ? "nein: Schalter offen und Rückleiter fehlt"
+        : (!schalter ? "nein: der Schalter ist offen" : "nein: der Rückleiter fehlt"));
+    $("aLeit").textContent = (leitend ? "ja" : "nein") + ": " + stoff + " ist ein "
+        + (eintrag.gruppe === "Leiter" ? "Leiter"
+        : (eintrag.gruppe === "Halbleiter" ? "Halbleiter" : "Nichtleiter"))
+        + (eintrag.gamma ? " (γ = " + eintrag.gamma + " m/(Ω·mm²), Tabellenbuch S. 559)" : "");
+    $("aLicht").textContent = licht ? "ja" : "nein";
+    $("hDeut").textContent = grund;
+    zeichne({schalter:schalter, rueck:rueck, stoff:stoff, gruppe:eintrag.gruppe,
+             licht:licht, grund:grund});
+  }
+  ["sSch","sMat","sRueck"].forEach(function(id){
+    $(id).addEventListener("input",tick); $(id).addEventListener("change",tick);
+  });
+  window.addEventListener("resize", tick);
+  $("bReset").addEventListener("click",function(){
+    // Startstellung: Schalter OFFEN, Kupfer, Rueckleiter vorhanden, die Leuchte bleibt
+    // dunkel. Genau die Frage, mit der der Block beginnt.
+    $("sSch").value="0"; $("sMat").value="Kupfer"; $("sRueck").value="1"; tick();
+  });
+  tick();
+  if(!RUHIG){
+    // ★ Der erste Aufruf hat schon vollstaendig gezeichnet; der Lauf verschiebt nur die
+    //   Ladungspunkte. Ein Standbild ist deshalb immer vollstaendig.
+    setInterval(function(){ phase += 0.012; if(phase>1) phase=0; tick(); }, 45);
+  }
+})();
+</script>

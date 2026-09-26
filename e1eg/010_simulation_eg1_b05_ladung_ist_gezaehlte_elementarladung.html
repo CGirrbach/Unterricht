@@ -1,0 +1,379 @@
+<!-- lehrmaterial -->
+<!-- materialtyp: simulation -->
+<!-- sim_bearbeitung: pflicht -->
+<script type="application/json" id="sim-meta">{"startwerte":{"n":"3,020e6 (Reglerstufe 648, neutral)","ladungstraeger":"Elektronen"},"loesungswerte":{"n":"2 bzw. 5e18 bzw. 6,242e18 (Blattaufgaben)"}}</script>
+<!-- Block EG1-B05 · Elektrische Ladung Q, Ladungsarten, Atombau, Elementarladung -->
+<!-- Ziel-Erkenntnis:
+     (1) Ladung ist ABGEZAEHLT. Q = n · e, und n ist eine ANZAHL, keine beliebige Zahl.
+         Unter e geht nichts; e ist die kleinste moegliche Ladung.
+     (2) Dieselbe Formel traegt beide Enden der Reihe, 19 Zehnerpotenzen auseinander:
+         ein einzelnes fehlendes Elektron (1,602e-19 C) und die Ladung im Draht (~1 C).
+         Bis etwa 200 Ladungen kann man ZAEHLEN; darueber sieht man nur noch eine Flaeche
+         die Formel bleibt dieselbe. Genau das ist auf Papier schwer zu fuehlen.
+     (3) Das Vorzeichen kommt vom TEILCHEN, nicht von der Zehnerpotenz: 10^-19 ist eine
+         sehr kleine POSITIVE Zahl. Das Blatt nennt diese Fehlvorstellung ausdruecklich.
+     (4) GRENZFAELLE, beide im Einstellbereich:
+           n = 1     -> Q = 1,602e-19 C   die kleinstmoegliche Ladung
+           n = 1e20  -> Q = 16,02 C
+         UNMOEGLICH und nachweislich nicht einstellbar: eine Ladung KLEINER als e.
+     Startstellung: n = 3,020 · 10^6 Elektronen -> Q = -4,838e-13 C (Reglerstufe 648 = 10^6,48;
+     der Regler kann nicht jede runde Zahl treffen). Kein Blattwert, kein Grenzfall;
+     der Regler steht bei 32 % seiner Spanne. -->
+<!-- BELEGE, Tabellenbuch 32. A., gedrucktTabellenbuch S. 30 „Ladung, Spannung, Stromstaerke,
+     Widerstand" (Seite am 11.09.2026 gerendert und abgelesen):
+       unter „Spannung"  Q = n · e      (ungerahmt, neben W = e · U)
+       Elementarladung   e = 0,16022 · 10^-18 As
+       Umrechnung        1 As = 6,24151 · 10^18 e
+       Formel 4          I = Q / t      (fuer die Zeitzeile)
+       Einheiten         [Q] = [I]·[t] = A·s = As = C
+     ★ Das ARBEITSBLATT rechnet mit e = 1,602 · 10^-19 C, das ist der Buchwert
+       0,16022 · 10^-18 As auf vier Ziffern gerundet (Buch: 1,6022 · 10^-19). Die
+       Simulation folgt dem BLATT, sonst widerspraechen sich Blatt und Simulation
+       desselben Blocks in der vierten Stelle. Der Quellenkasten sagt das.
+     Handrechnung == Simulationsmodell (mit e = 1,602e-19):
+       n = 1        -> 1,602e-19 C
+       n = 2        -> 3,204e-19 C     (Blattaufgabe ③, Ion mit 2 fehlenden Elektronen)
+       n = 5e18     -> 8,010e-01 C     (Blattaufgabe ①)
+       n = 6,242e18 -> 9,9997e-01 C    (Blattaufgabe ②: n aus Q = 1 C)
+       n = 3,020e6  -> 4,838e-13 C     (Startstellung, Reglerstufe 648)
+       t = Q/I bei I = 1 A: Q = 1 C ergibt t = 1 s -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulation EG1-B05: Ladung ist gezählte Elementarladung</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--rot:#B23A33;--hell:#F4F6F8;
+        --linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62;--blau:#2557A3}
+  html,body{margin:0;padding:0}
+  body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;
+       line-height:1.46;font-size:16px;padding:18px 14px 60px}
+  .wrap{max-width:960px;margin:0 auto;background:#fff;border:1px solid var(--linie);
+        box-shadow:0 6px 26px rgba(0,0,0,.10);padding:22px 24px 30px}
+  .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:9px 0;margin-bottom:16px}
+  .kopf .reihe{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--kupfer);font-weight:700}
+  .kopf h1{font-size:22px;margin:3px 0 2px}
+  .kopf .sub{font-size:13px;color:var(--grau)}
+  .box{border:1.2px solid var(--ink);padding:11px 14px;margin:14px 0;background:#fff}
+  .box .cap{display:block;font-size:12px;font-weight:700;letter-spacing:.09em;
+            text-transform:uppercase;color:var(--kupfer);margin-bottom:5px}
+  .box.sim{background:var(--kupferhell)}
+  .box.quelle{border:none;padding:0;margin:16px 0 0}
+  .box.quelle .cap{color:var(--grau)}
+  .quelle small{font-size:11.5px;color:var(--grau)}
+  i{font-style:italic} sub{font-size:.7em;vertical-align:-.25em} sup{font-size:.7em;vertical-align:.5em}
+  figure{margin:10px 0}
+  canvas.stage{width:100%;max-width:880px;height:auto;display:block;margin:6px auto 0;
+               border:1px solid var(--linie);background:#fff;touch-action:manipulation}
+  figcaption{font-size:11.5px;color:var(--grau);text-align:left;border-left:3px solid var(--kupfer);
+             padding:4px 0 4px 9px;margin-top:7px}
+  .regler{display:grid;grid-template-columns:1fr;gap:13px;margin:14px 0 4px}
+  @media(min-width:640px){.regler{grid-template-columns:2fr 1fr}}
+  /* 26.09.2026: Handybreite, wie B10 (Tabelle sonst breiter als die Karte) */
+  @media(max-width:480px){.wrap{padding:18px 12px 24px}.wrap table.ab{font-size:13.5px}.wrap table.ab th,.wrap table.ab td{padding:5px 5px}}
+  @media(max-width:380px){.wrap table.ab{font-size:12.5px}.wrap table.ab th,.wrap table.ab td{padding:4px 4px}}
+  @media(max-width:340px){.wrap table.ab td.z{white-space:normal}.wrap table.ab{font-size:12px}.wrap table.ab th{letter-spacing:0}}
+  .regler label{display:block;font-size:13.5px;font-weight:600;margin-bottom:3px}
+  .regler input[type=range]{width:100%;height:34px;accent-color:var(--kupfer)}
+  .regler select{font:inherit;font-size:15px;padding:8px 10px;min-height:44px;
+                 border:1.2px solid var(--linie);background:#fff;color:var(--ink);width:100%}
+  .wert{font-variant-numeric:tabular-nums;font-weight:700;color:var(--kupfer)}
+  table.ab{width:100%;border-collapse:collapse;margin-top:12px;font-size:14.5px}
+  table.ab th,table.ab td{border:1px solid var(--linie);padding:5px 8px;text-align:left}
+  table.ab th{background:var(--hell);font-size:12px;letter-spacing:.05em;text-transform:uppercase}
+  table.ab td.z{text-align:right;font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
+  .hinw{font-size:13px;color:var(--grau);margin-top:8px}
+  button.reset{font:inherit;font-size:14px;padding:9px 16px;border:1.4px solid var(--kupfer);
+               background:#fff;color:var(--kupfer);cursor:pointer;margin-top:12px;min-height:44px}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="kopf">
+    <div class="reihe">E1EG · Grundlagen Elektrotechnik · Lernfeld&nbsp;1 · Block&nbsp;5</div>
+    <h1>Ladung ist gezählte Elementarladung</h1>
+    <div class="sub">Selbst bedienbar · <i>Q</i> = <i>n</i> · <i>e</i></div>
+  </div>
+
+  <div class="box sim">
+    <span class="cap">So bedienen Sie die Simulation</span>
+    <p>Sie stellen die <b>Anzahl <i>n</i></b> der Elementarladungen ein und wählen, ob es
+    <b>Elektronen</b> (negativ) oder <b>Protonen</b> (positiv) sind. Achten Sie darauf,
+    <b>ab wann Sie die Ladungen nicht mehr zählen können</b>: Die Formel gilt trotzdem
+    weiter.</p>
+  
+    <p><b>Ablauf:</b> Die fünf Schritte stehen auf dem Arbeitsblatt im Kasten „Simulation öffnen“. <b>Sozialform:</b> Partnerarbeit, zu zweit an einem Gerät, freiwillig zu Hause. <b>Zeit:</b> rund 10&nbsp;min. <b>Fertig, wenn</b> Sie begründen können, warum es keine Ladung kleiner als <i>e</i> gibt und warum dieselbe Formel für zwei Ladungsträger und für Trillionen gilt.</p>
+  </div>
+
+  <figure>
+    <canvas class="stage" id="cLad" width="880" height="420" data-quelle="Rechenmodell Q = n·e nach Tabellenbuch S. 30 (Rubrik Spannung, ohne eigene Formelnummer); e = 1,602·10⁻¹⁹ C; schematische Zaehl-Animation ohne Buchbild-Entsprechung"
+      aria-label="Ein Feld zeigt die eingestellten Ladungsträger: bei kleiner Anzahl als einzelne, zählbare Punkte, bei großer Anzahl als gefüllte Fläche mit dem Hinweis, dass sie nicht mehr zählbar sind. Darunter eine logarithmische Achse von einer Elementarladung bis zehn hoch zwanzig, auf der die eingestellte Anzahl markiert ist. Oben steht die berechnete Ladung."></canvas>
+    <figcaption>Bis etwa 200 Ladungen lassen sie sich <b>zählen</b>. Darüber sieht man nur
+    noch eine Fläche, <b><i>Q</i> = <i>n</i>·<i>e</i> gilt unverändert weiter</b>.</figcaption>
+  </figure>
+
+  <div class="regler">
+    <div>
+      <label for="rN">Anzahl <i>n</i> der Elementarladungen: <span class="wert" id="wN">3,020·10⁶</span></label>
+      <input id="rN" type="range" min="0" max="2000" value="648" step="1" aria-label="Anzahl der Elementarladungen, logarithmisch von eins bis zehn hoch zwanzig">
+    </div>
+    <div>
+      <label for="sArt">Ladungsträger</label>
+      <select id="sArt">
+        <option value="-1" selected>Elektronen (−)</option>
+        <option value="1">Protonen (+)</option>
+      </select>
+    </div>
+  </div>
+  <button class="reset" id="bReset" type="button">Zurücksetzen</button>
+
+  <table class="ab">
+    <tr><th>Größe</th><th>Rechnung</th><th style="text-align:right">Wert</th></tr>
+    <tr><td>Anzahl <i>n</i></td><td>eingestellt</td><td class="z" id="aN">3,020·10<sup>6</sup></td></tr>
+    <tr><td>Elementarladung <i>e</i></td><td>Tabellenbuch S.&nbsp;30</td>
+        <td class="z">1,602·10<sup>−19</sup> C</td></tr>
+    <tr><td><b>Ladung <i>Q</i> = <i>n</i> · <i>e</i></b></td>
+        <td id="aRech">3,020·10<sup>6</sup> · (−1,602·10<sup>−19</sup> C)</td>
+        <td class="z" id="aQ">−4,838·10<sup>−13</sup> C</td></tr>
+    <tr><td>Probe: <i>n</i> = <i>Q</i>/<i>e</i></td><td>Formel umgestellt</td>
+        <td class="z" id="aProbe">3,020·10<sup>6</sup></td></tr>
+    <tr><td>Bei <i>I</i> = 1&nbsp;A flösse das in</td><td><i>t</i> = <i>Q</i>/<i>I</i> (Formel&nbsp;4)</td>
+        <td class="z" id="aT">4,838·10<sup>−13</sup> s</td></tr>
+  </table>
+  <p class="hinw" id="hDeut">Schieben Sie den Regler ganz nach links.</p>
+
+  <div class="box quelle">
+    <span class="cap">Woher die Werte stammen</span>
+    <small>Im Tabellenbuch auf <b>S.&nbsp;30</b> („Ladung, Spannung, Stromstärke,
+    Widerstand“) steht im Spannungs-Block ungerahmt <b><i>Q</i>&nbsp;=&nbsp;<i>n</i>·<i>e</i></b>,
+    dazu die <b>Elementarladung</b> <i>e</i>&nbsp;=&nbsp;0,16022·10<sup>−18</sup>&nbsp;As und
+    1&nbsp;As&nbsp;=&nbsp;6,24151·10<sup>18</sup>&nbsp;<i>e</i>; die Zeitzeile rechnet mit
+    <b>Formel&nbsp;4</b> <i>I</i>&nbsp;=&nbsp;<i>Q</i>/<i>t</i>.
+    <b>Beachten Sie:</b> Ihr Arbeitsblatt rechnet mit
+    <i>e</i>&nbsp;=&nbsp;1,602·10<sup>−19</sup>&nbsp;C, das ist der Buchwert
+    (1,6022·10<sup>−19</sup>&nbsp;C) auf vier Ziffern <b>gerundet</b>. Diese Simulation folgt
+    dem Blatt, damit beide dieselben Ergebnisse liefern.</small>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  var E = 1.602e-19;            // wie das Arbeitsblatt, siehe Quellenkasten
+  var START = {n:648, art:"-1"};
+
+  function fmt(x,k){ return x.toFixed(k).replace(".",","); }
+  // 4,806·10^-13, Mantisse mit drei Nachkommastellen, deutsches Komma
+  function hoch(x){
+    if(x === 0) return "0";
+    var vz = x < 0 ? "−" : "", a = Math.abs(x);
+    var ex = Math.floor(Math.log10(a)), m = a/Math.pow(10,ex);
+    if(m >= 9.9995){ m = 1; ex += 1; }          // Rundung darf die Mantisse nicht sprengen
+    // ★ 10^0 ist 1. "−1,188·10^0 C" ist richtig gerechnet und falsch geschrieben.
+    if(ex === 0) return vz + fmt(m,3);
+    return vz + fmt(m,3) + "·10^" + ex;
+  }
+  // ★ Das Pluszeichen gehoert NUR an die Ladung. Das Arbeitsblatt schreibt
+  //   "Q = +3,204·10^-19 C", ohne das Plus vergliche der Schueler zwei verschieden
+  //   geschriebene Zahlen. Eine ANZAHL oder eine ZEIT mit Plus waere dagegen falsch;
+  //   der erste Entwurf setzte es ueberall und schrieb "+3,020·10^6 Elektronen".
+  function hochVz(x){ return (x > 0 ? "+" : "") + hoch(x); }
+
+  // ★ REIHENFOLGE: erst das Minus umwandeln, dann hochstellen, und beide
+  //   Minus-Zeichen zulassen. Der erste Entwurf stellte zuerst hoch und suchte dabei
+  //   nur das typografische "−"; die erzeugten Exponenten tragen aber den
+  //   ASCII-Bindestrich. Ergebnis: "10^−19" stand mit Dach im Blatt, waehrend die
+  //   fest geschriebenen Stellen richtig aussahen. Vgl.
+  //   [[reflexion-am-endprodukt-messen-nicht-am-quelltext]], im Bild gesehen.
+  function sup(s){
+    return s.replace(/-(\d)/g, "−$1").replace(/\^([−-]?\d+)/g, "<sup>$1</sup>");
+  }
+
+  // ★ Das Canvas kennt kein <sup>. Der erste Entwurf malte "10^-13" mit Dach auf die
+  //   Grundlinie, das ist keine Zehnerpotenz. Diese Funktion setzt den Exponenten in
+  //   kleinerer Schrift hoeher und gibt die Gesamtbreite zurueck, damit der Aufrufer
+  //   weiterschreiben kann. Der Bindestrich wird zum echten Minuszeichen.
+  function hochText(g, s, x, y, gr, farbe){
+    var teile = String(s).split("^");
+    g.font = gr + "px 'Noto Sans',sans-serif"; g.fillStyle = farbe;
+    g.fillText(teile[0], x, y);
+    var b = g.measureText(teile[0]).width;
+    for(var i=1;i<teile.length;i++){
+      var m = /^(−?-?\d+)([\s\S]*)$/.exec(teile[i]);
+      if(!m){ g.fillText(teile[i], x+b, y); b += g.measureText(teile[i]).width; continue; }
+      var ex = m[1].replace("-","−");
+      g.font = Math.round(gr*0.62) + "px 'Noto Sans',sans-serif";
+      g.fillText(ex, x+b, y - gr*0.34);
+      b += g.measureText(ex).width;
+      g.font = gr + "px 'Noto Sans',sans-serif";
+      g.fillText(m[2], x+b, y);
+      b += g.measureText(m[2]).width;
+    }
+    return b;
+  }
+
+  // ★ n ist eine ANZAHL. Unter 1000 wird auf ganze Zahlen gerundet, damit n = 1 und
+  //   n = 2 exakt einstellbar sind, sonst zeigte der Regler "1,047 Elektronen".
+  function anzahl(stufe){
+    var n = Math.pow(10, stufe/100);
+    return n < 1000 ? Math.max(1, Math.round(n)) : n;
+  }
+
+  // Zeilen passend zur Breite umbrechen (Handy): gibt die Zahl der Zeilen zurueck.
+  function zeilen(g, s, x, y, breite, abstand){
+    var w = s.split(" "), z = "", k = 0;
+    for(var i=0;i<w.length;i++){
+      var probe = z ? z + " " + w[i] : w[i];
+      if(z && g.measureText(probe).width > breite){ g.fillText(z, x, y + k*abstand); k++; z = w[i]; }
+      else z = probe;
+    }
+    if(z){ g.fillText(z, x, y + k*abstand); k++; }
+    return k;
+  }
+
+  // ★ 26.09.2026: Das Canvas war 880 px breit und erschien auf dem Handy mit dem
+  //   Massstab 0,38, die Schrift also rund 5 px hoch. Unter 600 px Kartenbreite wird
+  //   jetzt ein eigenes, 360 px breites Bild gezeichnet (wie B04, B07, B08, B10).
+  function lage(){
+    var c = $("cLad"), schmal = (c.parentNode.clientWidth || 880) < 600;
+    return schmal
+      ? {S:true, W:360, H:430, x0:16, yK:20, yQ:54, qGr:22, xl:16, xr:344, yo:82, yu:222, ya:296}
+      : {S:false, W:880, H:420, x0:24, yK:26, yQ:64, qGr:26, xl:120, xr:760, yo:110, yu:250, ya:330};
+  }
+
+  function zeichne(n, vzn, Q){
+    var L = lage(), c = $("cLad");
+    if(c.width !== L.W) c.width = L.W;
+    if(c.height !== L.H) c.height = L.H;
+    var g = c.getContext("2d");
+    g.clearRect(0,0,L.W,L.H); g.textBaseline="middle"; g.textAlign="left";
+    var farbe = vzn < 0 ? "#2557A3" : "#B23A33";
+
+    // Kopf
+    hochText(g, (vzn<0 ? "Elektronen" : "Protonen") + ", Anzahl n = "
+                + (n<1000 ? String(Math.round(n)) : hoch(n)), L.x0, L.yK, 13, "#5A666F");
+    // ★ hochText() gibt die Gesamtbreite zurueck, sie wird GEMESSEN, nicht geschaetzt.
+    //   In B10, B07 und B06 ist derselbe Fehler je einmal passiert.
+    var brT = hochText(g, "Q = " + hochVz(Q) + " C", L.x0, L.yQ, L.qGr, "#A34E0E");
+    g.font="13px 'Noto Sans',sans-serif"; g.fillStyle="#5A666F";
+    g.fillText("= n · e", L.x0+brT+12, L.yQ-4);
+
+    // Ladungsfeld
+    var xl=L.xl, xr=L.xr, yo=L.yo, yu=L.yu;
+    g.strokeStyle="#9AA5AE"; g.lineWidth=1.4; g.strokeRect(xl,yo,xr-xl,yu-yo);
+    if(n <= 200){
+      // zaehlbar: echte Punkte im Raster.
+      // ★ 26.09.2026: Das feste Raster (20 Spalten, 31 px) fasste nur 80 Punkte, der
+      //   Satz darunter meldete aber bis 200 "Stück", und die Bildunterschrift
+      //   verspricht "bis etwa 200 zählen". Jetzt wird der Abstand so lange verkleinert,
+      //   bis ALLE n Punkte ins Feld passen; kleine Anzahlen bleiben gross.
+      var fw = xr-xl-12, fh = yu-yo-12, p = 31;
+      while(p > 10 && Math.floor(fw/p)*Math.floor(fh/p) < n) p--;
+      var spalten = Math.floor(fw/p), r = Math.min(6.5, p*0.36);
+      for(var i=0;i<n;i++){
+        var cx = xl + 6 + p/2 + (i % spalten) * p;
+        var cy = yo + 6 + p/2 + Math.floor(i/spalten) * p;
+        g.beginPath(); g.arc(cx,cy,r,0,6.2832); g.fillStyle=farbe; g.fill();
+        g.fillStyle="#fff"; g.font="bold " + Math.round(r*1.55) + "px 'Noto Sans',sans-serif"; g.textAlign="center";
+        g.fillText(vzn<0 ? "−" : "+", cx, cy+1); g.textAlign="left";
+      }
+      g.fillStyle="#2F7D62"; g.font="12.5px 'Noto Sans',sans-serif";
+      g.fillText("Diese Ladungen können Sie zählen: " + Math.round(n) + " Stück.", xl, yu+16);
+    } else {
+      // nicht mehr zaehlbar: Flaeche, deren Fuellung mit dem Zehnerlogarithmus waechst
+      var anteil = Math.log10(n)/20;
+      g.fillStyle = vzn<0 ? "#D6E2F2" : "#F2DAD8";
+      g.fillRect(xl+1, yo+1, (xr-xl-2)*anteil, yu-yo-2);
+      g.strokeStyle=farbe; g.lineWidth=2;
+      g.beginPath(); g.moveTo(xl+1+(xr-xl-2)*anteil, yo+1);
+      g.lineTo(xl+1+(xr-xl-2)*anteil, yu-1); g.stroke();
+      // ★ Beide Zeilen FREISTELLEN. Ohne den weissen Grund schnitt die Kante der
+      //   Flaeche mitten durch den Satz, im Bild gesehen, nicht im Quelltext.
+      var t1 = hoch(n) + " Ladungsträger";
+      var t2 = L.S ? ["Nicht mehr zählbar,", "die Formel Q = n·e gilt trotzdem."]
+                   : ["Nicht mehr zählbar, die Formel Q = n·e gilt trotzdem."];
+      g.font="12.5px 'Noto Sans',sans-serif";
+      var b2 = 0;
+      t2.forEach(function(z){ b2 = Math.max(b2, g.measureText(z).width); });
+      g.font="15px 'Noto Sans',sans-serif";
+      var b1 = g.measureText(t1).width + 26, ym = (yo+yu)/2, hz = 17*(t2.length-1);
+      g.fillStyle="rgba(255,255,255,.88)";
+      g.fillRect(xl+10, ym - 26 - hz/2, Math.max(b1,b2)+14, 48 + hz);
+      hochText(g, t1, xl+16, ym - 10 - hz/2, 15, farbe);
+      g.font="12.5px 'Noto Sans',sans-serif"; g.fillStyle="#B23A33";
+      t2.forEach(function(z, k){ g.fillText(z, xl+16, ym + 14 - hz/2 + 17*k); });
+    }
+
+    // Logarithmische Achse
+    var ya=L.ya;
+    g.strokeStyle="#1A2530"; g.lineWidth=1.6;
+    g.beginPath(); g.moveTo(xl,ya); g.lineTo(xr,ya); g.stroke();
+    g.font="11.5px 'Noto Sans',sans-serif"; g.textAlign="center";
+    for(var q=0;q<=20;q+=5){
+      var x = xl + (q/20)*(xr-xl);
+      g.strokeStyle="#5A666F"; g.lineWidth=1;
+      g.beginPath(); g.moveTo(x,ya-5); g.lineTo(x,ya+5); g.stroke();
+      g.fillStyle="#5A666F"; g.textAlign="center";
+      if(q===0){ g.fillText("1", x, ya+20); }
+      else {
+        g.font="11.5px 'Noto Sans',sans-serif";
+        var b = g.measureText("10").width + g.measureText(String(q)).width*0.62;
+        // der letzte Teilstrich sitzt am rechten Rand: Beschriftung nach links ruecken
+        var xa = Math.min(x - b/2, L.W - 4 - b);
+        g.textAlign="left";
+        hochText(g, "10^"+q, xa, ya+20, 11.5, "#5A666F");
+        g.textAlign="center";
+      }
+    }
+    // Marke
+    var xm = xl + (Math.log10(n)/20)*(xr-xl);
+    g.fillStyle="#A34E0E";
+    g.beginPath(); g.moveTo(xm,ya-9); g.lineTo(xm-7,ya-22); g.lineTo(xm+7,ya-22);
+    g.closePath(); g.fill();
+    g.font="12px 'Noto Sans',sans-serif";
+    g.fillText("n", xm, ya-30);
+    // ★ 26.09.2026: "jede Stufe ist der zehnfache Wert" passte nicht zur Achse, deren
+    //   Teilstriche 1, 10^5, 10^10 ... tragen. Gemeint ist der Abstand der Teilstriche.
+    g.textAlign="left"; g.fillStyle="#5A666F"; g.font="12px 'Noto Sans',sans-serif";
+    var zAchse = zeilen(g, "Anzahl n der Elementarladungen; von Teilstrich zu Teilstrich "
+             + "wächst sie auf das 100\u00a0000-Fache.", xl, ya+42, L.W - xl - 12, 16);
+
+    g.fillStyle="#2F7D62"; g.font="12.5px 'Noto Sans',sans-serif";
+    zeilen(g, "Unter einer Elementarladung geht es nicht weiter: e ist die kleinste "
+             + "mögliche Ladung.", L.x0, L.S ? ya + 42 + 16*zAchse + 16 : 404, L.W - 2*L.x0, 17);
+  }
+
+  function tick(){
+    var n = anzahl(+$("rN").value), vzn = +$("sArt").value;
+    var Q = vzn * n * E;
+    $("wN").innerHTML = sup(n<1000 ? String(Math.round(n)) : hoch(n));
+    $("aN").innerHTML = sup(n<1000 ? String(Math.round(n)) : hoch(n));
+    $("aRech").innerHTML = sup((n<1000 ? String(Math.round(n)) : hoch(n))
+                   + " · (" + (vzn<0?"−":"+") + "1,602·10^−19 C)");
+    $("aQ").innerHTML = sup(hochVz(Q) + " C");
+        // ★ Die Probe liefert eine ANZAHL. Unter 1000 wird sie ganzzahlig gezeigt, 
+    //   genau wie n selbst; "2,000 Elektronen" las sich wie eine Messgroesse.
+    var np = Math.abs(Q)/E;
+    $("aProbe").innerHTML = sup(np < 1000 ? String(Math.round(np)) : hoch(np));
+    $("aT").innerHTML = sup(hoch(Math.abs(Q)) + " s");
+    // ★ Der Hinweis braucht HTML, sonst steht die Zehnerpotenz als "10^6" da, 
+    //   oder, nach einem unbedachten replace(), als "106".
+    $("hDeut").innerHTML = (n <= 200)
+      ? "Bei " + Math.round(n) + " Ladungsträgern lässt sich jeder einzelne zählen. "
+        + "Die Ladung ist so klein, dass sie kein Messgerät der Werkstatt anzeigt."
+      : "Bei " + sup(hoch(n)) + " Ladungsträgern hilft nur noch die Formel: "
+        + "zählen kann man sie nicht mehr.";
+    zeichne(n, vzn, Q);
+  }
+  ["rN","sArt"].forEach(function(id){
+    $(id).addEventListener("input",tick); $(id).addEventListener("change",tick);
+  });
+  window.addEventListener("resize", tick);
+  $("bReset").addEventListener("click",function(){
+    // Startstellung: Reglerstufe 648 = 10^6,48 -> n = 3,020e6 Elektronen,
+    // Q = -4,838e-13 C. Kein Blattwert, kein Grenzfall, 32 % der Reglerspanne.
+    $("rN").value=START.n; $("sArt").value=START.art; tick();
+  });
+  tick();
+})();
+</script>
