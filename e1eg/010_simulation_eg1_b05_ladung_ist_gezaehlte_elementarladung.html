@@ -39,7 +39,7 @@
        t = Q/I bei I = 1 A: Q = 1 C ergibt t = 1 s -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Simulation EG1-B05: Ladung ist gezählte Elementarladung</title>
+<title>Simulation Block 05: Ladung ist gezählte Elementarladung</title>
 <style>
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--rot:#B23A33;--hell:#F4F6F8;
@@ -85,11 +85,14 @@
   button.reset{font:inherit;font-size:14px;padding:9px 16px;border:1.4px solid var(--kupfer);
                background:#fff;color:var(--kupfer);cursor:pointer;margin-top:12px;min-height:44px}
   @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+.bruch{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.1;font-size:.92em;margin:0 .1em}
+.bruch>span{padding:0 .15em}
+.bruch>span:first-child{border-bottom:1.2px solid currentColor}
 </style>
 
 <div class="wrap">
   <div class="kopf">
-    <div class="reihe">E1EG · Grundlagen Elektrotechnik · Lernfeld&nbsp;1 · Block&nbsp;5</div>
+    <div class="reihe">E1EG · Grundlagen Elektrotechnik · Lernfeld&nbsp;1 · Block&nbsp;05</div>
     <h1>Ladung ist gezählte Elementarladung</h1>
     <div class="sub">Selbst bedienbar, mit <i>Q</i> = <i>n</i> · <i>e</i></div>
   </div>
@@ -133,8 +136,8 @@
         <td class="z">1,602·10<sup>−19</sup> C</td></tr>
     <tr><td><b>Ladung <i>Q</i> = <i>n</i> · <i>e</i></b></td>
         <td id="aRech">3,020·10<sup>6</sup> · (−1,602·10<sup>−19</sup> C)</td>
-        <td class="z" id="aQ">−4,838·10<sup>−13</sup> C</td></tr>
-    <tr><td>Probe: <i>n</i> = <i>Q</i>/<i>e</i></td><td>Formel umgestellt</td>
+        <td class="z" id="aQ">≈ −4,838·10<sup>−13</sup> C</td></tr>
+    <tr><td>Probe: <i>n</i> = <span class="bruch"><span><i>Q</i></span><span><i>e</i></span></span></td><td>Formel umgestellt</td>
         <td class="z" id="aProbe">3,020·10<sup>6</sup></td></tr>
     <!-- 26.09.2026 (PRUEF2609h H8): Strom und Formel 4 kommen erst in Block 07; die Zeile bleibt fuer das Skript, ist aber ausgeblendet -->
     <tr style="display:none"><td>Bei <i>I</i> = 1&nbsp;A flösse das in</td><td><i>t</i> = <i>Q</i>/<i>I</i> (Formel&nbsp;4)</td>
@@ -216,7 +219,16 @@
   //   n = 2 exakt einstellbar sind, sonst zeigte der Regler "1,047 Elektronen".
   function anzahl(stufe){
     var n = Math.pow(10, stufe/100);
-    return n < 1000 ? Math.max(1, Math.round(n)) : n;
+    if(n < 1000) return Math.max(1, Math.round(n));
+    // Ab 1000 auf die vier angezeigten Stellen gerundet: dann ist n ganzzahlig und "n =" stimmt
+    var ex = Math.floor(Math.log10(n)), f = Math.pow(10, ex-3);
+    return Math.round(n/f)*f;
+  }
+  // true, wenn hoch(x) den Wert ohne Rundung zeigt (sonst gehoert "≈" davor)
+  function exakt(x){
+    if(x === 0) return true;
+    var a = Math.abs(x), ex = Math.floor(Math.log10(a)), m = a/Math.pow(10,ex);
+    return Math.abs(m*1000 - Math.round(m*1000)) < 1e-6;
   }
 
   // Zeilen passend zur Breite umbrechen (Handy): gibt die Zahl der Zeilen zurueck.
@@ -254,9 +266,9 @@
                 + (n<1000 ? String(Math.round(n)) : hoch(n)), L.x0, L.yK, 13, "#5A666F");
     // ★ hochText() gibt die Gesamtbreite zurueck, sie wird GEMESSEN, nicht geschaetzt.
     //   In B10, B07 und B06 ist derselbe Fehler je einmal passiert.
-    var brT = hochText(g, "Q = " + hochVz(Q) + " C", L.x0, L.yQ, L.qGr, "#A34E0E");
+    var brT = hochText(g, "Q " + (exakt(Q) ? "=" : "≈") + " " + hochVz(Q) + " C", L.x0, L.yQ, L.qGr, "#A34E0E");
     g.font="13px 'Noto Sans',sans-serif"; g.fillStyle="#5A666F";
-    g.fillText("= n · e", L.x0+brT+12, L.yQ-4);
+    g.fillText("(Q = n · e)", L.x0+brT+12, L.yQ-4);
 
     // Ladungsfeld
     var xl=L.xl, xr=L.xr, yo=L.yo, yu=L.yu;
@@ -350,7 +362,7 @@
     $("aN").innerHTML = sup(n<1000 ? String(Math.round(n)) : hoch(n));
     $("aRech").innerHTML = sup((n<1000 ? String(Math.round(n)) : hoch(n))
                    + " · (" + (vzn<0?"−":"+") + "1,602·10^−19 C)");
-    $("aQ").innerHTML = sup(hochVz(Q) + " C");
+    $("aQ").innerHTML = (exakt(Q) ? "" : "≈ ") + sup(hochVz(Q) + " C");
         // ★ Die Probe liefert eine ANZAHL. Unter 1000 wird sie ganzzahlig gezeigt, 
     //   genau wie n selbst; "2,000 Elektronen" las sich wie eine Messgroesse.
     var np = Math.abs(Q)/E;
