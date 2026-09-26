@@ -81,7 +81,7 @@
 
 <div class="wrap">
   <div class="kopf">
-    <div class="reihe">E1EG · Grundlagen Elektrotechnik · Lernfeld&nbsp;1 · Block&nbsp;7</div>
+    <div class="reihe">E1EG · Grundlagen Elektrotechnik · Lernfeld&nbsp;1 · Block&nbsp;07</div>
     <h1>Stromstärke ist Ladung je Zeit</h1>
     <div class="sub">Selbst bedienbar, mit <i>I</i> = <i>Q</i>/<i>t</i></div>
   </div>
@@ -102,8 +102,7 @@
       data-quelle="Schema nach Europa-Fachkunde S.31 (elektrischer Strom: bewegte Ladung je Zeit, I = Q/t); Zeitstrahl-Darstellung ohne Buchbild-Entsprechung"
       aria-label="Ein waagerechter Zeitstrahl, dessen Länge der eingestellten Zeit entspricht. Darauf verteilte Punkte stellen die Ladung dar; je dichter sie stehen, desto größer ist die Stromstärke. Rechts die berechnete Stromstärke und die Zahl der Elektronen."></canvas>
     <figcaption>Je <b>dichter</b> die Ladung auf dem Zeitstrahl, desto größer die
-    Stromstärke. Dieselbe Denkfigur wie die <b>Stromdichte</b> in Block&nbsp;10, dort je
-    Fläche, hier je Zeit.</figcaption>
+    Stromstärke.</figcaption>
   </figure>
 
   <div class="regler">
@@ -127,7 +126,7 @@
     <tr><td>Probe: <i>Q</i> = <i>I</i>·<i>t</i></td><td>Formel&nbsp;1</td>
         <td class="z" id="aProbe">2,0 As</td></tr>
     <tr><td>Zahl der Elektronen</td><td><i>Q</i> · 6,24151·10<sup>18</sup>/As</td>
-        <td class="z" id="aE">1,25·10<sup>19</sup></td></tr>
+        <td class="z" id="aE">≈ 1,25·10<sup>19</sup></td></tr>
   </table>
   <p class="hinw" id="hDeut">Verstellen Sie die Zeit und lassen Sie die Ladung stehen.</p>
 
@@ -140,7 +139,7 @@
     <b>Elementarladung</b> <i>e</i>&nbsp;=&nbsp;0,16022·10<sup>−18</sup>&nbsp;As und
     1&nbsp;As&nbsp;=&nbsp;6,24151·10<sup>18</sup>&nbsp;<i>e</i>.
     <b>Beachten Sie:</b> Diese beiden Angaben sind <b>nicht genau Kehrwerte</b>
-    (1/0,16022·10<sup>−18</sup>&nbsp;=&nbsp;6,24142·10<sup>18</sup>), beide sind gerundet.
+    (1/0,16022·10<sup>−18</sup>&nbsp;≈&nbsp;6,24142·10<sup>18</sup>), beide sind gerundet.
     Gerechnet wird hier mit der Buchangabe 6,24151·10<sup>18</sup>.</small>
   </div>
 </div>
@@ -151,11 +150,11 @@
   var $=function(id){return document.getElementById(id);};
   var PRO_AS=6.24151e18, START={Q:20,t:10};
   function fmt(x,n){ return x.toFixed(n).replace(".",","); }
-  // 26.09.2026 (PRUEF2609i, B07-4): Stromstaerke mit drei gueltigen Ziffern, unter 0,1 A in mA,
+  // 26.09.2026 (PRUEF2609i, B07-4; PRUEF2609k, B07-N6 auch unter 1): Stromstaerke mit drei gueltigen Ziffern, unter 0,1 A in mA,
   //   und "≈", wenn gerundet wurde (vorher 0,002 A fuer 0,00167 A, die Verdopplung war nicht zu sehen).
   function strom(I){
     var v = I < 0.1 ? I*1000 : I, e = I < 0.1 ? " mA" : " A";
-    var s = v >= 100 ? v.toFixed(0) : (v >= 10 ? v.toFixed(1) : v.toFixed(2));
+    var s = v >= 100 ? v.toFixed(0) : (v >= 10 ? v.toFixed(1) : (v >= 1 ? v.toFixed(2) : v.toFixed(3)));
     s = s.replace(/\.?0+$/, function(m){ return m.indexOf(".") >= 0 ? "" : m; });
     var gleich = Math.abs(parseFloat(s) - v) < 1e-9;
     return {z: gleich ? "=" : "≈", t: s.replace(".", ",") + e};
@@ -236,7 +235,8 @@
     var sI=strom(I), s2=strom(I*2);
     $("aI").textContent=(sI.z==="≈"?"≈ ":"")+sI.t;
     $("aProbe").textContent=fmt(I*t,1)+" As";
-    $("aE").innerHTML=hoch(Q*PRO_AS).replace(/\^(\d+)/,"<sup>$1</sup>");
+    // 26.09.2026 (PRUEF2609k, B07-N6): die Elektronenzahl ist immer gerundet, darum "≈"
+    $("aE").innerHTML="≈ "+hoch(Q*PRO_AS).replace(/\^(\d+)/,"<sup>$1</sup>");
     $("hDeut").textContent = "Bei " + fmt(Q,1) + " As in " + t + " s fließt ein Strom von "
       + (sI.z==="≈"?"rund ":"") + sI.t + ". Dieselbe Ladung in der halben Zeit ergäbe "
       + (s2.z==="≈"?"rund ":"") + s2.t + ", doppelt so viel.";
