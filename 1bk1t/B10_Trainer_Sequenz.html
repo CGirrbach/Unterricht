@@ -21,6 +21,7 @@ button:disabled{opacity:.45;cursor:default}
 .karte{border:2px solid var(--linie);border-radius:10px;padding:14px 16px;margin-top:14px}
 .karte .kopf{display:flex;justify-content:space-between;gap:10px;font-size:14px;color:#5A666F}
 pre.code{background:#F7F4F0;border-left:6px solid var(--kupfer);padding:10px 14px;font-family:Consolas,'DejaVu Sans Mono',monospace;font-size:16px;overflow-x:auto;white-space:pre}
+@media (max-width:600px){pre.code{white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;padding:8px 10px}}
 code{font-family:Consolas,'DejaVu Sans Mono',monospace;background:var(--hell);padding:0 3px;border-radius:3px}
 .frage{font-weight:700;margin:6px 0}
 .wahl{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-top:8px}
@@ -100,11 +101,11 @@ var GROESSEN = {
      ["Welchen Datentyp hat das Literal <code>false</code>?", "bool", "ein Wahrheitswert"]],
  3: [[SPEICHERN + "eine Postleitzahl wie 07318.", "string", "mit ihr rechnet man nicht, und als int ginge die führende 0 verloren"],
      [SPEICHERN + "eine Hausnummer wie 12a.", "string", "sie enthält einen Buchstaben"],
-     [SPEICHERN + "eine Schulnote wie 2,3.", "double", "sie hat Nachkommastellen"],
+     [SPEICHERN + "die Länge eines Bretts in m, etwa 2,35.", "double", "sie hat Nachkommastellen"],
      [SPEICHERN + "die Zahl der Pfosten eines Zauns.", "int", "Pfosten zählt man in ganzen Zahlen"],
      [SPEICHERN + "eine Telefonnummer wie 0711 1234.", "string", "mit ihr rechnet man nicht; Leerzeichen und führende 0 bleiben erhalten"],
      ["Welchen Datentyp hat das Ergebnis des Ausdrucks <code>7 / 2</code>?", "int", "7 und 2 sind ganze Zahlen: Ganzzahldivision, das Ergebnis 3 ist int"],
-     ["Welchen Datentyp hat das Ergebnis des Ausdrucks <code>7 / 2.0</code>?", "double", "2.0 ist eine Gleitpunktzahl, darum ist das Ergebnis 3,5 double"],
+     ["Welchen Datentyp hat das Ergebnis des Ausdrucks <code>7 / 2.0</code>?", "double", "<code>2.0</code> ist eine Gleitpunktzahl, darum ist das Ergebnis 3,5 double"],
      [SPEICHERN + "ob ein Passwort richtig eingegeben wurde.", "bool", "ein Wahrheitswert: richtig oder nicht"]]
 };
 function datentyp() {
@@ -138,7 +139,8 @@ function ausgabe() {
    aus = String(Math.floor(a / b)); weg = "a / b ist eine Ganzzahldivision: " + a + " = " + Math.floor(a / b) + " · " + b + " + " + (a % b) +
    ". Erst das Ergebnis " + Math.floor(a / b) + " wird in double umgewandelt; ohne Nachkommastellen zeigt das Konsolenfenster " + Math.floor(a / b) + "."; }
  else if (typ === "f2") { b = eins([3, 6, 7, 9]); while (a % b === 0) a++; code = "int a = " + a + ";\nint b = " + b + ";\nConsole.WriteLine(\"{0:F2}\", (double)a / b);";
-   aus = f2(a / b); weg = "(double) macht a zur Gleitpunktzahl: " + a + " : " + b + " = " + komma((a / b).toFixed(4)) + "…; F2 zeigt zwei Nachkommastellen: " + aus + "."; }
+   aus = f2(a / b); var exakt = Math.abs(a / b * 10000 - Math.round(a / b * 10000)) < 1e-9;
+   weg = "(double) macht a zur Gleitpunktzahl: " + a + " : " + b + " = " + (exakt ? komma(a / b) : komma((a / b).toFixed(4)) + "…") + "; F2 zeigt zwei Nachkommastellen: " + aus + "."; }
  else if (typ === "genau") { b = eins([2, 4, 5]); while (a % b === 0) a++; code = "int a = " + a + ";\nint b = " + b + ";\nConsole.WriteLine((double)a / b);";
    aus = komma(a / b); weg = "Mit dem cast-Operator rechnet C# mit Nachkommastellen: " + a + " : " + b + " = " + aus + "."; }
  else if (typ === "summeeuro") { code = kopf + "Console.WriteLine(a + b + \" Euro\");"; aus = (a + b) + " Euro";
@@ -154,20 +156,20 @@ function ausgabe() {
 function division() {
  var a = z(10, 99), b = z(2, 9);
  while (a % b === 0) a++;
- var q = Math.floor(a / b), r = a % b, typ, ausdruck, erg, weg;
+ var q = Math.floor(a / b), r = a % b, typ, ausdruck, erg, weg, wert = false;
  typ = eins({ 1: ["div", "mod"], 2: ["div", "mod", "genau", "castklammer"], 3: ["genau", "castklammer", "mischung", "rueck"] }[stufe]);
  var zerl = a + " = " + q + " · " + b + " + " + r;
  if (typ === "div") { ausdruck = a + " / " + b; erg = String(q); weg = "Zwei ganze Zahlen: Ganzzahldivision, die Nachkommastellen fallen weg. " + zerl + ", also " + q + "."; }
  else if (typ === "mod") { ausdruck = a + " % " + b; erg = String(r); weg = "% liefert den Rest der Ganzzahldivision. " + zerl + ", also " + r + "."; }
- else if (typ === "genau") { b = eins([2, 4, 5]); while (a % b === 0) a++; ausdruck = "(double)" + a + " / " + b; erg = komma(a / b);
+ else if (typ === "genau") { b = eins([2, 4, 5]); while (a % b === 0) a++; ausdruck = "(double)" + a + " / " + b; erg = komma(a / b); wert = true;
    weg = "Der cast-Operator macht " + a + " zur Gleitpunktzahl, dann wird mit Nachkommastellen geteilt: " + a + " : " + b + " = " + erg + "."; }
- else if (typ === "castklammer") { ausdruck = "(double)(" + a + " / " + b + ")"; erg = String(q);
+ else if (typ === "castklammer") { ausdruck = "(double)(" + a + " / " + b + ")"; erg = String(q); wert = true;
    weg = "Die Klammer zuerst: " + a + " / " + b + " ist eine Ganzzahldivision (" + zerl + "), erst das Ergebnis " + q + " wird umgewandelt."; }
  else if (typ === "mischung") { var c = z(2, 5); ausdruck = a + " / " + b + " * " + c; erg = String(q * c);
    weg = "/ und * haben denselben Rang, gerechnet wird von links nach rechts: " + a + " / " + b + " = " + q + " (Ganzzahldivision), dann · " + c + " = " + (q * c) + "."; }
  else { ausdruck = a + " / " + b + " * " + b + " + " + a + " % " + b; erg = String(a);
    weg = a + " / " + b + " = " + q + ", " + q + " · " + b + " = " + (q * b) + ", " + a + " % " + b + " = " + r + ", also " + (q * b) + " + " + r + " = " + a + ": Ergebnis der Ganzzahldivision mal Teiler plus Rest ergibt wieder die Zahl."; }
- return { art: "text", frage: "Welchen Wert hat der Ausdruck in C#? (alle Zahlen ohne Punkt sind int)", code: ausdruck, loesung: erg, weg: weg, label: "Der Ausdruck hat den Wert" };
+ return { art: "text", frage: "Welchen Wert hat der Ausdruck in C#? (alle Zahlen ohne Punkt sind int)", code: ausdruck, loesung: erg, weg: weg, label: "Der Ausdruck hat den Wert", wert: wert };
 }
 
 /* ---------- Ablauf ---------- */
@@ -188,7 +190,7 @@ function neueAufgabe() {
  karte.innerHTML = h;
  karte.querySelectorAll("[data-antwort]").forEach(function (b) { b.addEventListener("click", function () { pruefen(b.getAttribute("data-antwort")); }); });
  var p = document.getElementById("pruefen"), ein = document.getElementById("antwort");
- if (p) { p.addEventListener("click", function () { pruefen(ein.value); }); ein.addEventListener("keydown", function (e) { if (e.key === "Enter") pruefen(ein.value); }); ein.focus({ preventScroll: true }); }
+ if (p) { p.addEventListener("click", function () { pruefen(ein.value); }); ein.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); pruefen(ein.value); } }); ein.focus({ preventScroll: true }); }
  document.getElementById("weiter").addEventListener("click", weiter);
 }
 function norm(s) { return String(s).replace(/\s+$/, "").replace(/^\s+/, ""); }
@@ -196,6 +198,8 @@ function pruefen(antwort) {
  if (beantwortet) return;
  beantwortet = true;
  var ok = norm(antwort) === aufgabe.loesung;
+ /* Gleitpunktergebnis: nach dem WERT gefragt, 3,0 oder 8,50 ist derselbe Wert wie 3 oder 8,5 (Komma, nicht Punkt) */
+ if (!ok && aufgabe.wert && /^-?\d+(,\d+)?$/.test(norm(antwort))) ok = Math.abs(parseFloat(norm(antwort).replace(",", ".")) - parseFloat(aufgabe.loesung.replace(",", "."))) < 1e-9;
  var punkt = !ok && norm(antwort).replace(/\./g, ",") === aufgabe.loesung;
  if (ok) richtig++;
  var r = document.getElementById("rueck");
@@ -212,7 +216,7 @@ function pruefen(antwort) {
 function weiter() {
  if (nr >= 10) {
   karte.innerHTML = '<p class="frage">Runde beendet: ' + richtig + " von 10 richtig.</p>" +
-   '<p>' + (richtig >= 9 ? "Sicher. Versuchen Sie die nächste Stufe." : richtig >= 6 ? "Fast sicher. Noch eine Runde auf dieser Stufe." : "Gehen Sie die Lösungswege dieser Runde noch einmal durch und üben Sie diese Stufe weiter.") + "</p>";
+   '<p>' + (richtig >= 9 ? (stufe < 3 ? "Sicher. Versuchen Sie die nächste Stufe." : "Sicher. Üben Sie auch die anderen Übungsarten auf Stufe ③.") : richtig >= 6 ? "Fast sicher. Noch eine Runde auf dieser Stufe." : "Gehen Sie die Lösungswege dieser Runde noch einmal durch und üben Sie diese Stufe weiter.") + "</p>";
   return;
  }
  neueAufgabe();
