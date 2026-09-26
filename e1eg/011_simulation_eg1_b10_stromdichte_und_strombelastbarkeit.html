@@ -6,25 +6,24 @@
      (1) Die STROMDICHTE J = I/A sagt etwas ueber die Erwaermung: derselbe Strom in einem
          duenneren Leiter bedeutet mehr Stromdichte und mehr Waerme.
      (2) Die Fehlvorstellung, die der Block ausdruecklich nennt: „Stromdichte J und
-         zulaessige Stromstaerke I_z sind dasselbe." Sie sind es NICHT —
-           J wird GERECHNET  (in A/mm²)
-           I_z wird ABGELESEN (in A)
-         Bei 1,5 mm² und Verlegeart C, 3 Leiter: J = 3,73 A/mm², I_z = 17,5 A. Voellig
+         Strombelastbarkeit sind dasselbe." Sie sind es NICHT, J wird GERECHNET (in A/mm²),
+           I_r wird ABGELESEN (in A); bei 30 °C und allein verlegt ist I_z = I_r
+         Bei 1,5 mm² und Verlegeart C, 3 Leiter: J ≈ 3,73 A/mm², I_z = 17,5 A. Voellig
          verschiedene Zahlen, verschiedene Einheiten. Die Simulation zeigt beide
          NEBENEINANDER, damit der Unterschied ins Auge faellt.
-     (3) Die zulaessige Stromstaerke haengt von der VERLEGEART ab: bei 1,5 mm² reicht sie
-         von 15 A (B2, drei Leiter) bis 19,5 A (C, zwei Leiter) — das 1,3-fache.
+     (3) Die Strombelastbarkeit haengt von der VERLEGEART ab: bei 1,5 mm² reicht sie
+         von 15 A (B2, drei Leiter) bis 19,5 A (C, zwei Leiter), das 1,3-fache.
      (4) GRENZFAELLE, beide im Einstellbereich:
-           1,5 mm² mit 20 A bei B2/3 -> J = 13,33 A/mm², I_z = 15 A -> UEBERLASTET
+           1,5 mm² mit 20 A bei B2/3 -> J ≈ 13,33 A/mm², I_z = 15 A -> UEBERLASTET
            16 mm² mit 20 A bei C/2   -> J =  1,25 A/mm², I_z = 85 A -> reichlich zulaessig
      Startstellung: 2,5 mm², 5,6 A, Verlegeart C mit 3 Leitern. Das ist der Betriebsstrom
-     des Blockes, aber NICHT der zu bemessende Fall — der Querschnitt ist bereits gewaehlt
+     des Blockes, aber NICHT der zu bemessende Fall, der Querschnitt ist bereits gewaehlt
      und soll geprueft, nicht gesucht werden. -->
-<!-- BELEGE — beide Seiten gerendert und abgelesen, nicht erinnert:
-     Tabellenbuch 32. A., gedrucktTabellenbuch S. 30 „Ladung, Spannung, Stromstaerke,
+<!-- BELEGE, beide Seiten gerendert und abgelesen, nicht erinnert:
+     Tabellenbuch 32. A., gedruckt S. 30 „Ladung, Spannung, Stromstaerke,
        Widerstand", Formel 5:  J = I/A   (dazu I = J·A und A = I/J)
      Tabellenbuch 32. A., gedruckt S. 198 „Strombelastbarkeiten fuer festverlegte
-       Kabel, Leitungen bei ϑ_U = 30 °C" (vgl. DIN VDE 0298-4), Spalte I_z in A fuer
+       Kabel, Leitungen bei ϑ_U = 30 °C" (vgl. DIN VDE 0298-4), Strombelastbarkeit I_r in A fuer
        Kupferleiter, Betriebstemperatur ϑ_B <= 70 °C:
          mm²    B2/2   B2/3    C/2    C/3
          1,5    16,5   15     19,5   17,5
@@ -33,10 +32,11 @@
          6      38     34     46     41
          10     52     46     63     57
          16     69     62     85     76
-     Die Nennquerschnittsreihe steht auf derselben Seite.
+     Die Nennquerschnittsreihe steht auf derselben Seite. I_z = F · I_r und
+     I_B <= I_N <= I_z: Tabellenbuch S. 195, Formel 1 und 2 (hier F = 1).
      Handrechnung == Simulationsmodell:
-       5,6 A / 2,5 mm² = 2,24 A/mm²   ·   5,6 A / 1,5 mm² = 3,73 A/mm²
-       20 A / 1,5 mm² = 13,33 A/mm²   ·   20 A / 16 mm² = 1,25 A/mm² -->
+       5,6 A / 2,5 mm² = 2,24 A/mm²;   5,6 A / 1,5 mm² ≈ 3,73 A/mm²
+       20 A / 1,5 mm² ≈ 13,33 A/mm²;   20 A / 16 mm² = 1,25 A/mm² -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Simulation EG1-B10: Stromdichte und Strombelastbarkeit</title>
@@ -68,6 +68,9 @@
              padding:4px 0 4px 9px;margin-top:7px}
   .regler{display:grid;grid-template-columns:1fr;gap:13px;margin:14px 0 4px}
   @media(min-width:640px){.regler{grid-template-columns:1fr 1fr}}
+  /* 26.09.2026: bei 390 px war die Tabelle 12 px breiter als die Karte */
+  @media(max-width:480px){.wrap{padding:18px 12px 24px}.wrap table.ab{font-size:13.5px}.wrap table.ab th,.wrap table.ab td{padding:5px 5px}}
+  @media(max-width:380px){.wrap table.ab{font-size:12.5px}.wrap table.ab th,.wrap table.ab td{padding:4px 4px}}
   .regler label{display:block;font-size:13.5px;font-weight:600;margin-bottom:3px}
   .regler input[type=range]{width:100%;height:44px;accent-color:var(--kupfer)}
   .wert{font-variant-numeric:tabular-nums;font-weight:700;color:var(--kupfer)}
@@ -79,7 +82,7 @@
   table.ab{width:100%;border-collapse:collapse;margin-top:12px;font-size:14.5px}
   table.ab th,table.ab td{border:1px solid var(--linie);padding:5px 8px;text-align:left}
   table.ab th{background:var(--hell);font-size:12px;letter-spacing:.05em;text-transform:uppercase}
-  table.ab td.z{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+  table.ab td.z{text-align:right;font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
   .hinw{font-size:13px;color:var(--grau);margin-top:8px}
   button.reset{font:inherit;font-size:14px;padding:9px 16px;border:1.4px solid var(--kupfer);
                background:#fff;color:var(--kupfer);cursor:pointer;margin-top:12px;min-height:44px}
@@ -90,7 +93,7 @@
   <div class="kopf">
     <div class="reihe">E1EG · Grundlagen Elektrotechnik · Lernfeld&nbsp;1 · Block&nbsp;10</div>
     <h1>Stromdichte und Strombelastbarkeit: zwei verschiedene Größen</h1>
-    <div class="sub">Selbst bedienbar; <i>J</i> wird gerechnet, <i>I</i><sub>z</sub> wird abgelesen</div>
+    <div class="sub">Selbst bedienbar; <i>J</i> wird gerechnet, <i>I</i><sub>r</sub> wird abgelesen</div>
   </div>
 
   <div class="box sim">
@@ -98,9 +101,9 @@
     <p>Im Bild sehen Sie den <b>Leiterquerschnitt</b>: Jeder Punkt steht für einen Teil des
     Stroms. Wird der Leiter dünner oder der Strom größer, <b>drängen sich die Punkte</b>, 
     das ist die Stromdichte. Daneben (auf dem Handy darunter) stehen <b>zwei Zahlen</b>:
-    <i>J</i> in A/mm² (gerechnet) und <i>I</i><sub>z</sub> in A (aus der Tabelle abgelesen).
+    <i>J</i> in A/mm² (gerechnet) und die Strombelastbarkeit <i>I</i><sub>z</sub> in A: Aus der Tabelle liest man den Bemessungswert <i>I</i><sub>r</sub> ab; bei 30&nbsp;°C und allein verlegt ist <i>I</i><sub>z</sub>&nbsp;=&nbsp;<i>I</i><sub>r</sub>.
     Achten Sie darauf, <b>wie verschieden</b> die beiden sind. „2&nbsp;Adern“ heißt im Tabellenbuch „2 Strom führende Leiter“.</p>
- <p><b>Ablauf:</b> Die fünf Schritte stehen auf dem Arbeitsblatt im Kasten „Simulation öffnen“. <b>Sozialform:</b> Einzelarbeit, freiwillig zu Hause. <b>Zeit:</b> rund 10&nbsp;min. <b>Fertig, wenn</b> Sie in einem Satz sagen können, warum <i>J</i> und <i>I</i><sub>z</sub> nicht dasselbe sind, und welche der beiden Größen man rechnet und welche man abliest.</p>
+ <p><b>Ablauf:</b> Die fünf Schritte stehen auf dem Arbeitsblatt im Kasten „Simulation öffnen“. <b>Sozialform:</b> Einzelarbeit, freiwillig zu Hause. <b>Zeit:</b> rund 10&nbsp;min. <b>Fertig, wenn</b> Sie in einem Satz sagen können, worin sich <i>J</i> und <i>I</i><sub>z</sub> unterscheiden, und welche der beiden Größen man rechnet und welche man aus der Tabelle abliest.</p>
   </div>
 
   <div class="arten" id="arten" role="group" aria-label="Verlegeart und Zahl der Strom führenden Adern wählen"></div>
@@ -108,15 +111,15 @@
   <figure>
     <script type="application/json" id="sim-meta">{"startwerte":{"I":5.6,"A":2.5,"verlegeart":"C-3"},"loesungswerte":{"A":1.5}}</script>
     <canvas class="stage" id="cQuer" width="880" height="300"
-      data-quelle="Schema Leiterquerschnitt (kein Buchbild): Punktdichte als Stromdichte; Werte Iz aus Tabellenbuch S. 198, J = I/A nach Tabellenbuch S. 30, Formel 5"
-      aria-label="Ein Kreis als Leiterquerschnitt, in dem Punkte die Stromdichte darstellen: je enger sie stehen, desto höher die Stromdichte. Daneben zwei Felder mit der gerechneten Stromdichte in Ampere je Quadratmillimeter und der abgelesenen zulässigen Stromstärke in Ampere, dazu die Aussage, ob der Betriebsstrom zulässig ist."></canvas>
+      data-quelle="Schema Leiterquerschnitt (kein Buchbild): Punktdichte als Stromdichte; Werte I_r aus Tabellenbuch S. 198 (bei 30 °C und allein verlegt I_z = I_r), J = I/A nach Tabellenbuch S. 30, Formel 5"
+      aria-label="Ein Kreis als Leiterquerschnitt, in dem Punkte die Stromdichte darstellen: je enger sie stehen, desto höher die Stromdichte. Daneben zwei Felder mit der gerechneten Stromdichte in Ampere je Quadratmillimeter und der Strombelastbarkeit in Ampere (aus der Tabelle abgelesen), dazu die Aussage, ob der Betriebsstrom zulässig ist."></canvas>
     <figcaption>Die <b>Punktdichte</b> im Querschnitt ist die Stromdichte. Der Kreis ist
     <b>schematisch</b>, er zeigt das Verhältnis, nicht den wirklichen Durchmesser.</figcaption>
   </figure>
 
   <div class="regler">
     <div>
-      <label for="rI">Betriebsstrom <i>I</i>: <span class="wert" id="wI">5,6 A</span></label>
+      <label for="rI">Betriebsstrom <i>I</i><sub>B</sub>: <span class="wert" id="wI">5,6 A</span></label>
       <input id="rI" type="range" min="10" max="400" value="56" step="1" aria-label="Betriebsstrom in Zehntel Ampere">
     </div>
     <div>
@@ -128,16 +131,16 @@
 
   <table class="ab">
     <tr><th>Größe</th><th>woher</th><th style="text-align:right">Wert</th></tr>
-    <tr><td><b>Stromdichte <i>J</i> = <i>I</i>/<i>A</i></b></td>
-        <td><b>gerechnet</b> · Tabellenbuch S.&nbsp;30, Formel&nbsp;5</td>
+    <tr><td><b>Strom&shy;dichte <span style="white-space:nowrap"><i>J</i> = <i>I</i>/<i>A</i></span></b></td>
+        <td><b>gerechnet</b>, Tabellen&shy;buch S.&nbsp;30, Formel&nbsp;5</td>
         <td class="z" id="aJ">2,24 A/mm²</td></tr>
-    <tr><td><b>zulässige Stromstärke <i>I</i><sub>z</sub></b></td>
-        <td><b>abgelesen</b> · Tabellenbuch S.&nbsp;198</td>
+    <tr><td><b>Strom&shy;belastbarkeit <i>I</i><sub>z</sub>&nbsp;=&nbsp;<i>I</i><sub>r</sub></b></td>
+        <td><b>abgelesen</b>, Tabellen&shy;buch S.&nbsp;198</td>
         <td class="z" id="aIz">24 A</td></tr>
-    <tr><td>Betriebsstrom <i>I</i></td><td>eingestellt</td><td class="z" id="aI">5,6 A</td></tr>
-    <tr><td><b>Ist <i>I</i> ≤ <i>I</i><sub>z</sub>?</b></td><td>Vergleich</td>
+    <tr><td>Betriebsstrom <i>I</i><sub>B</sub></td><td>eingestellt</td><td class="z" id="aI">5,6 A</td></tr>
+    <tr><td><b>Ist <i>I</i><sub>B</sub> ≤ <i>I</i><sub>z</sub>?</b></td><td>Vergleich</td>
         <td class="z" id="aUrteil">zulässig</td></tr>
-    <tr><td>Ausnutzung <i>I</i>/<i>I</i><sub>z</sub></td><td>gerechnet</td><td class="z" id="aAus">23 %</td></tr>
+    <tr><td>Ausnutzung <span style="white-space:nowrap"><i>I</i><sub>B</sub>/<i>I</i><sub>z</sub></span></td><td>gerechnet</td><td class="z" id="aAus">23 %</td></tr>
   </table>
   <p class="hinw" id="hDeut">Wählen Sie eine Verlegeart und verstellen Sie Strom und Querschnitt.</p>
 
@@ -145,7 +148,7 @@
     <span class="cap">Woher die Werte stammen</span>
     <small>Die Formel <i>J</i>&nbsp;=&nbsp;<i>I</i>/<i>A</i> steht im Tabellenbuch auf
     <b>S.&nbsp;30</b>, Formel&nbsp;5 (dort auch <i>I</i>&nbsp;=&nbsp;<i>J</i>·<i>A</i> und
-    <i>A</i>&nbsp;=&nbsp;<i>I</i>/<i>J</i>). Die zulässigen Stromstärken stehen auf
+    <i>A</i>&nbsp;=&nbsp;<i>I</i>/<i>J</i>). Die Bemessungswerte der Strombelastbarkeit <i>I</i><sub>r</sub> stehen auf
     <b>Tabellenbuch S.&nbsp;198</b> („Strombelastbarkeiten für festverlegte Kabel, Leitungen bei
     <i>ϑ</i><sub>U</sub>&nbsp;=&nbsp;30&nbsp;°C“, vgl. DIN&nbsp;VDE&nbsp;0298-4), für
     Kupferleiter mit Betriebstemperatur <i>ϑ</i><sub>B</sub>&nbsp;≤&nbsp;70&nbsp;°C.
@@ -157,7 +160,7 @@
 (function(){
   "use strict";
   var $=function(id){return document.getElementById(id);};
-  // I_z 1:1 aus Tabellenbuch S. 198 (Seite gerendert und abgelesen)
+  // I_r 1:1 aus Tabellenbuch S. 198 (Seite gerendert und abgelesen); bei 30 °C und allein verlegt I_z = I_r
   var NENN=[1.5,2.5,4,6,10,16];
   var IZ={ "1.5":{"B2-2":16.5,"B2-3":15,"C-2":19.5,"C-3":17.5},
            "2.5":{"B2-2":23,  "B2-3":20,"C-2":27,  "C-3":24},
@@ -235,20 +238,20 @@
       g.font="12.5px 'Noto Sans',sans-serif"; g.fillText(unten,x+14,y+82);
     }
     feld(L.fx,L.fy1,"Stromdichte J = I / A", fmt(J,2), "A/mm²", "#A34E0E", "GERECHNET");
-    feld(L.fx,L.fy2,"zulässige Stromstärke I_z", (iz%1===0?String(iz):fmt(iz,1)), "A",
+    feld(L.fx,L.fy2,"Strombelastbarkeit I_z = I_r", (iz%1===0?String(iz):fmt(iz,1)), "A",
          "#2557A3", "ABGELESEN aus der Tabelle");
     // Urteil
     var ok = I <= iz;
     g.fillStyle = ok ? "#2F7D62" : "#B23A33";
-    schreibe(g, ok ? "I ≤ I_z: zulässig" : "I > I_z: überlastet!", L.ux, L.uy, 17);
+    schreibe(g, ok ? "I_B ≤ I_z: zulässig" : "I_B > I_z: überlastet!", L.ux, L.uy, 17);
     g.fillStyle="#5A666F";
-    schreibe(g, "Ausnutzung I / I_z" + gl(I/iz*100,0) + fmt(I/iz*100,0) + " %", L.ux, L.uy+22, 12.5);
+    schreibe(g, "Ausnutzung I_B / I_z" + gl(I/iz*100,0) + fmt(I/iz*100,0) + " %", L.ux, L.uy+22, 12.5);
     g.fillStyle="#2F7D62";
     if(L.zweizeilig){
       schreibe(g, "Verschiedene Zahlen, verschiedene Einheiten:", L.sx, L.sy, 12.5);
-      schreibe(g, "J und I_z sind NICHT dasselbe.", L.sx, L.sy+19, 12.5);
+      schreibe(g, "J und I_z: zwei verschiedene Größen.", L.sx, L.sy+19, 12.5);
     } else {
-      schreibe(g, "Verschiedene Zahlen, verschiedene Einheiten: J und I_z sind NICHT dasselbe.",
+      schreibe(g, "Verschiedene Zahlen, verschiedene Einheiten: J und I_z, zwei verschiedene Größen.",
                L.sx, L.sy, 12.5);
     }
   }
@@ -264,9 +267,9 @@
     $("aUrteil").textContent = I<=iz ? "zulässig" : "überlastet!";
     $("aAus").textContent=fmt(I/iz*100,0)+" %";
     $("hDeut").innerHTML = I<=iz
-      ? "<i>J</i>"+gl(J,2)+fmt(J,2)+" A/mm² ist gerechnet, <i>I</i><sub>z</sub> = "+(iz%1===0?iz:fmt(iz,1))
-        +" A ist abgelesen. Beide sagen etwas anderes."
-      : "Der Betriebsstrom übersteigt die zulässige Stromstärke. Wählen Sie einen größeren "
+      ? "<i>J</i>"+gl(J,2)+fmt(J,2)+" A/mm² ist gerechnet, <i>I</i><sub>z</sub> = <i>I</i><sub>r</sub> = "+(iz%1===0?iz:fmt(iz,1))
+        +" A ist abgelesen. Beide Größen sagen etwas anderes."
+      : "Der Betriebsstrom übersteigt die Strombelastbarkeit der Leitung. Wählen Sie einen größeren "
         + "Querschnitt oder eine günstigere Verlegeart.";
     zeichne($("cQuer"),I,A,J,iz);
     Array.prototype.forEach.call($("arten").children,function(b,i){
@@ -281,7 +284,7 @@
   ["rI","rA"].forEach(function(id){ $(id).addEventListener("input",tick); });
   window.addEventListener("resize",tick);
   $("bReset").addEventListener("click",function(){
-    // Startstellung: 2,5 mm², 5,6 A, Verlegeart C mit 3 Leitern — der Betriebsstrom des
+    // Startstellung: 2,5 mm², 5,6 A, Verlegeart C mit 3 Leitern, der Betriebsstrom des
     // Blockes bei bereits gewaehltem Querschnitt; zu PRUEFEN, nicht zu suchen.
     $("rI").value=START.I; $("rA").value=START.A; art=START.art; tick();
   });
