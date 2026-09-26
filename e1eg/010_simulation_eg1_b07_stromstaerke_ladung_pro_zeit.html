@@ -1,6 +1,6 @@
 <!-- lehrmaterial -->
 <!-- materialtyp: simulation -->
-<!-- sim_bearbeitung: pflicht -->
+<!-- sim_bearbeitung: freiwillig -->
 <!-- Block EG1-B07 · Elektrischer Strom und Stromstaerke I = Q/t -->
 <!-- Ziel-Erkenntnis:
      (1) Die Stromstaerke ist eine RATE: Ladung je Zeit. Dieselbe Ladung in kuerzerer Zeit
@@ -93,7 +93,7 @@
     Stellen Sie beide ein und achten Sie darauf, <b>wie dicht die Punkte stehen</b>: 
     <b>Diese Dichte ist die Stromstärke</b>.</p>
   
-    <p><b>Ablauf:</b> Die fünf Schritte stehen auf dem Arbeitsblatt im Kasten „Simulation öffnen“. <b>Sozialform:</b> Partnerarbeit, zu zweit an einem Gerät, freiwillig zu Hause. <b>Zeit:</b> rund 10&nbsp;min. <b>Fertig, wenn</b> Sie erklären können, warum <i>I</i> eine Rate ist und warum dieselbe Ladung je nach Zeit ganz verschiedene Stromstärken bedeutet.</p>
+    <p><b>Ablauf:</b> Die fünf Schritte stehen auf dem Arbeitsblatt im Kasten „Simulation öffnen“. <b>Sozialform:</b> allein oder zu zweit an einem Gerät, freiwillig zu Hause. <b>Zeit:</b> rund 10&nbsp;min. <b>Fertig, wenn</b> Sie erklären können, warum <i>I</i> eine Rate ist und warum dieselbe Ladung je nach Zeit ganz verschiedene Stromstärken bedeutet.</p>
   </div>
 
   <figure>
@@ -123,7 +123,7 @@
     <tr><td>Ladung <i>Q</i></td><td>eingestellt</td><td class="z" id="aQ">2,0 As</td></tr>
     <tr><td>Zeit <i>t</i></td><td>eingestellt</td><td class="z" id="aT">10 s</td></tr>
     <tr><td><b>Stromstärke <i>I</i> = <i>Q</i>/<i>t</i></b></td>
-        <td>Tabellenbuch S.&nbsp;30, Formel&nbsp;4</td><td class="z" id="aI">0,200 A</td></tr>
+        <td>Tabellenbuch S.&nbsp;30, Formel&nbsp;4</td><td class="z" id="aI">0,2 A</td></tr>
     <tr><td>Probe: <i>Q</i> = <i>I</i>·<i>t</i></td><td>Formel&nbsp;1</td>
         <td class="z" id="aProbe">2,0 As</td></tr>
     <tr><td>Zahl der Elektronen</td><td><i>Q</i> · 6,24151·10<sup>18</sup>/As</td>
@@ -151,6 +151,15 @@
   var $=function(id){return document.getElementById(id);};
   var PRO_AS=6.24151e18, START={Q:20,t:10};
   function fmt(x,n){ return x.toFixed(n).replace(".",","); }
+  // 26.09.2026 (PRUEF2609i, B07-4): Stromstaerke mit drei gueltigen Ziffern, unter 0,1 A in mA,
+  //   und "≈", wenn gerundet wurde (vorher 0,002 A fuer 0,00167 A, die Verdopplung war nicht zu sehen).
+  function strom(I){
+    var v = I < 0.1 ? I*1000 : I, e = I < 0.1 ? " mA" : " A";
+    var s = v >= 100 ? v.toFixed(0) : (v >= 10 ? v.toFixed(1) : v.toFixed(2));
+    s = s.replace(/\.?0+$/, function(m){ return m.indexOf(".") >= 0 ? "" : m; });
+    var gleich = Math.abs(parseFloat(s) - v) < 1e-9;
+    return {z: gleich ? "=" : "≈", t: s.replace(".", ",") + e};
+  }
   function hoch(x){            // 1,25·10^19
     var e=Math.floor(Math.log10(x)), m=x/Math.pow(10,e);
     return fmt(m,2)+"·10^"+e;
@@ -172,6 +181,9 @@
     var xl=L.xl, yb=(L.zweizeilig?128:118), hoehe=50;
     var br = L.k * t;                      // Laenge ~ Zeit
     g.fillStyle="#F4F6F8"; g.fillRect(xl,yb,br,hoehe);
+    // 26.09.2026: Toenung ~ Stromstaerke; auf dem Handy ist ein 1-s-Balken nur 5 px breit, die Punkte
+    //   ueberdecken sich dort, die Toenung zeigt die Dichte trotzdem (dichter = dunkler).
+    g.fillStyle="rgba(37,87,163,"+Math.min(0.75, 0.05 + I/14).toFixed(3)+")"; g.fillRect(xl,yb,br,hoehe);
     g.strokeStyle="#1A2530"; g.lineWidth=2; g.strokeRect(xl,yb,br,hoehe);
     // Ladungspunkte: Anzahl ~ Q, gleichmaessig ueber die Laenge -> Dichte ~ Q/t = I
     var n = Math.max(2, Math.round(Q*14));
@@ -190,7 +202,8 @@
     g.strokeStyle="#5A666F"; g.lineWidth=1;
     g.beginPath(); g.moveTo(xl,yb+hoehe+14); g.lineTo(xl+br,yb+hoehe+14); g.stroke();
     g.beginPath(); g.moveTo(xl,yb+hoehe+9); g.lineTo(xl,yb+hoehe+19);
-    g.moveTo(xl+br,yb+hoehe+9); g.lineTo(xl+br,yb+hoehe+19); g.stroke();
+    if(br >= 24){ g.moveTo(xl+br,yb+hoehe+9); g.lineTo(xl+br,yb+hoehe+19); }
+    g.stroke();
     g.fillStyle="#5A666F"; g.font="13px 'Noto Sans',sans-serif";
     g.textAlign="left"; g.fillText("0 s", xl-4, yb+hoehe+34);
     var tt=t+" s", bt=g.measureText(tt).width;
@@ -200,7 +213,7 @@
     g.fillText("Ladung Q = "+fmt(Q,1)+" As", xl, yb-12);
     // Ergebnis
     g.fillStyle="#A34E0E"; g.font=L.fI+"px 'Noto Sans',sans-serif";
-    var txt="I = "+fmt(I,3)+" A";
+    var sI=strom(I), txt="I "+sI.z+" "+sI.t;
     g.fillText(txt, xl, L.yI);
     // ★ Die Breite MESSEN, solange die grosse Schrift noch gesetzt ist, erst danach umstellen.
     var brT = g.measureText(txt).width;
@@ -220,11 +233,13 @@
     var Q=+$("rQ").value/10, t=+$("rT").value, I=Q/t;
     $("wQ").textContent=fmt(Q,1)+" As"; $("wT").textContent=t+" s";
     $("aQ").textContent=fmt(Q,1)+" As"; $("aT").textContent=t+" s";
-    $("aI").textContent=fmt(I,3)+" A";
+    var sI=strom(I), s2=strom(I*2);
+    $("aI").textContent=(sI.z==="≈"?"≈ ":"")+sI.t;
     $("aProbe").textContent=fmt(I*t,1)+" As";
     $("aE").innerHTML=hoch(Q*PRO_AS).replace(/\^(\d+)/,"<sup>$1</sup>");
     $("hDeut").textContent = "Bei " + fmt(Q,1) + " As in " + t + " s fließt ein Strom von "
-      + fmt(I,3) + " A. Dieselbe Ladung in der halben Zeit ergäbe " + fmt(I*2,3) + " A.";
+      + (sI.z==="≈"?"rund ":"") + sI.t + ". Dieselbe Ladung in der halben Zeit ergäbe "
+      + (s2.z==="≈"?"rund ":"") + s2.t + ", doppelt so viel.";
     zeichne($("cZeit"),Q,t,I);
   }
   ["rQ","rT"].forEach(function(id){ $(id).addEventListener("input",tick); });
