@@ -168,7 +168,8 @@
   var ARTEN=[{k:"B2-2",n:"B2, 2 Adern"},{k:"B2-3",n:"B2, 3 Adern"},
              {k:"C-2", n:"C, 2 Adern"}, {k:"C-3", n:"C, 3 Adern"}];
   var art=3, START={I:56,A:1,art:3};
-  function fmt(x,n){ return x.toFixed(n).replace(".",","); }
+  // kaufmaennisch runden: ohne Zugabe wurde 22,5 % als 22 % gezeigt (Gleitkomma 22,4999…), 26.09.2026
+  function fmt(x,n){ var f=Math.pow(10,n); return (Math.round(x*f+1e-7)/f).toFixed(n).replace(".",","); }
   // „=“ nur, wenn der Wert mit n Nachkommastellen aufgeht, sonst „≈“ (26.09.2026, wie auf Blatt und Übungsblatt)
   function gl(x,n){ var f=Math.pow(10,n); return Math.abs(x*f-Math.round(x*f))<1e-9 ? " = " : " ≈ "; }
   function schluessel(A){ return A%1===0 ? String(A) : String(A); }
