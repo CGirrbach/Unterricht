@@ -196,11 +196,14 @@ function neueAufgabe() {
 function norm(s) { return String(s).replace(/\s+$/, "").replace(/^\s+/, ""); }
 function pruefen(antwort) {
  if (beantwortet) return;
+ /* Ein leeres Feld zählt nicht als Antwort (Abnahme 26.09.2026) */
+ if (aufgabe.art === "text" && norm(antwort) === "") { var leer = document.getElementById("antwort"); if (leer) leer.focus(); return; }
  beantwortet = true;
  var ok = norm(antwort) === aufgabe.loesung;
  /* Gleitpunktergebnis: nach dem WERT gefragt, 3,0 oder 8,50 ist derselbe Wert wie 3 oder 8,5 (Komma, nicht Punkt) */
  if (!ok && aufgabe.wert && /^-?\d+(,\d+)?$/.test(norm(antwort))) ok = Math.abs(parseFloat(norm(antwort).replace(",", ".")) - parseFloat(aufgabe.loesung.replace(",", "."))) < 1e-9;
- var punkt = !ok && norm(antwort).replace(/\./g, ",") === aufgabe.loesung;
+ var punkt = !ok && (norm(antwort).replace(/\./g, ",") === aufgabe.loesung ||
+   (aufgabe.wert && /^-?\d+\.\d+$/.test(norm(antwort)) && Math.abs(parseFloat(norm(antwort)) - parseFloat(aufgabe.loesung.replace(",", "."))) < 1e-9));
  if (ok) richtig++;
  var r = document.getElementById("rueck");
  r.className = "rueck " + (ok ? "richtig" : "falsch");
