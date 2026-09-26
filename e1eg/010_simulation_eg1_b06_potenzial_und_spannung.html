@@ -1,6 +1,6 @@
 <!-- lehrmaterial -->
 <!-- materialtyp: simulation -->
-<!-- sim_bearbeitung: pflicht -->
+<!-- sim_bearbeitung: freiwillig -->
 <!-- Block EG1-B06 · Elektrische Spannung U, U = W/Q, Potenzial und Potenzialdifferenz -->
 <!-- Ziel-Erkenntnis:
      (1) Die Potenzialleiter ist STARR. Verschiebt man den Bezugspunkt (Masse), aendern
@@ -18,7 +18,7 @@
      (5) NACHBAU DES BLATTES: Stufenspannung 3,0 V, Masse an Anschluss 1 ergibt genau die
          Potenziale 0/3/6/9/12 V der Aufgaben 4 und 5. Masse auf Anschluss 2 verschoben
          ergibt genau die -3/0/3/6/9 V der Loesung "Share".
-     Startstellung: u = 2,0 V, Masse an Anschluss 3, m = 5, n = 2, Q = 0,5 As.
+     Startstellung: u = 2,0 V, Masse an Anschluss 3, m = 5, n = 2, Q = 1,5 As (26.09.2026: nicht mehr 0,5 As, der Wert von Aufgabe 5 ①).
      Keiner dieser Werte kommt im Blatt vor; beide Regler stehen im inneren Bereich
      (u bei 25 %, Q bei 21 %), die Masse in der Mitte der Leiter. -->
 <!-- BELEGE, Tabellenbuch 32. A., gedruckt S. 30 "Ladung, Spannung, Stromstaerke,
@@ -34,7 +34,7 @@
        phi(k) = (k - ref) * u
        u=2,0 ref=3 -> phi1=-4  phi2=-2  phi3=0  phi4=+2  phi5=+4
        U_52 = +4 - (-2) = 6 V   und (5-2)*2,0 = 6 V        beide Wege gleich
-       W    = 6 V * 0,5 As = 3 Ws            [W] = V*As = Ws
+       W    = 6 V * 1,5 As = 9 Ws            [W] = V*As = Ws
        u=3,0 ref=1 -> 0/3/6/9/12 V; U_41 = 9 V; U_43 = 3 V; U_54 = 3 V; U_42 = 6 V
        u=3,0 ref=2 -> -3/0/3/6/9 V; U_41 = 6-(-3) = 9 V   (unveraendert)
        m=n         -> U = 0 V, W = 0 Ws
@@ -103,14 +103,14 @@
     wählen Sie zwei Punkte <b>m</b> und <b>n</b>. Verschieben Sie dann die Masse und
     beobachten Sie genau: <b>Was ändert sich, was bleibt stehen?</b></p>
   
-    <p><b>Ablauf:</b> Die fünf Schritte stehen auf dem Arbeitsblatt im Kasten „Simulation öffnen“. <b>Sozialform:</b> Partnerarbeit, zu zweit an einem Gerät, freiwillig zu Hause. <b>Zeit:</b> rund 10&nbsp;min. <b>Fertig, wenn</b> Sie in einem Satz sagen können, was sich beim Verschieben der Masse ändert und was nicht, und begründen können, warum Schritt&nbsp;5 nicht gelingen kann.</p>
+    <p><b>Ablauf:</b> Die fünf Schritte stehen auf dem Arbeitsblatt im Kasten „Simulation öffnen“. <b>Sozialform:</b> allein oder zu zweit an einem Gerät, freiwillig zu Hause. <b>Zeit:</b> rund 10&nbsp;min. <b>Fertig, wenn</b> Sie in einem Satz sagen können, was sich beim Verschieben der Masse ändert und was nicht, und begründen können, warum Schritt&nbsp;5 nicht gelingen kann.</p>
   </div>
 
   <figure>
-  <script type="application/json" id="sim-meta">{"startwerte":{"u":20,"Q":5,"ref":"3","m":"5","n":"2"},"loesungswerte":{"u":30,"ref":"1","m":"4","n":"1"}}</script>
+  <script type="application/json" id="sim-meta">{"startwerte":{"u":20,"Q":15,"ref":"3","m":"5","n":"2"},"loesungswerte":{"u":30,"ref":"1","m":"4","n":"1"}}</script>
   <canvas class="stage" id="cLeiter" width="880" height="440"
       data-quelle="Europa-Fachkunde S.28 Bild 2 (Potenziale in elektrischen Schaltungen, Netzteil mit fünf Anschlüssen gegen Masse); Leiter-Darstellung schematisch nach dieser Vorlage"
-      aria-label="Eine senkrechte Leiter aus fünf waagerechten Sprossen, den Anschlüssen des Netzteils. Links steht zu jeder Sprosse ihr Potenzial gegenüber der gewählten Masse. Die Masse trägt das Erdungszeichen und das Potenzial null Volt. Rechts verbindet ein Doppelpfeil die beiden gewählten Punkte und trägt die Spannung zwischen ihnen. Eine wandernde Ladung zeigt, wie beim Verschieben von m nach n Arbeit frei wird."></canvas>
+      aria-label="Eine senkrechte Leiter aus fünf waagerechten Sprossen, den Anschlüssen des Netzteils. Links steht zu jeder Sprosse ihr Potenzial gegenüber der gewählten Masse. Die Masse trägt das Massezeichen und das Potenzial null Volt. Rechts verbindet ein Doppelpfeil die beiden gewählten Punkte und trägt die Spannung zwischen ihnen. Eine wandernde Ladung zeigt, wie beim Verschieben von m nach n Arbeit frei wird."></canvas>
     <figcaption>Die Leiter ist <b>starr</b>. Wird die Masse verschoben, wandern alle
     Potenzialwerte mit, der <b>Abstand</b> zweier Sprossen, also die Spannung, bleibt
     unverändert.</figcaption>
@@ -122,8 +122,8 @@
       <input id="rU" type="range" min="10" max="50" value="20" step="1" aria-label="Stufenspannung in Zehntel Volt">
     </div>
     <div>
-      <label for="rQ">Ladung <i>Q</i>: <span class="wert" id="wQ">0,5 As</span></label>
-      <input id="rQ" type="range" min="1" max="20" value="5" step="1" aria-label="Ladung in Zehntel Amperesekunden">
+      <label for="rQ">Ladung <i>Q</i>: <span class="wert" id="wQ">1,5 As</span></label>
+      <input id="rQ" type="range" min="1" max="20" value="15" step="1" aria-label="Ladung in Zehntel Amperesekunden">
     </div>
     <div>
       <label for="sRef">Bezugspunkt (Masse, <i>φ</i> = 0 V)</label>
@@ -150,9 +150,9 @@
         <td id="aUrech">+4,0 V − (−2,0 V)</td><td class="z" id="aU">6,0 V</td></tr>
     <tr><td>Probe ohne Masse: (m − n) · Stufe</td>
         <td id="aProbeRech">(5 − 2) · 2,0 V</td><td class="z" id="aProbe">6,0 V</td></tr>
-    <tr><td>Ladung <i>Q</i></td><td>eingestellt</td><td class="z" id="aQ">0,5 As</td></tr>
+    <tr><td>Ladung <i>Q</i></td><td>eingestellt</td><td class="z" id="aQ">1,5 As</td></tr>
     <tr><td><b>Arbeit <i>W</i> = <i>U</i><sub>mn</sub> · <i>Q</i></b></td>
-        <td>Tabellenbuch S.&nbsp;30, Formel&nbsp;6 umgestellt</td><td class="z" id="aW">3,00 Ws</td></tr>
+        <td>Tabellenbuch S.&nbsp;30, Formel&nbsp;6 umgestellt</td><td class="z" id="aW">9,00 Ws</td></tr>
   </table>
   <p class="hinw" id="hDeut">Verschieben Sie die Masse und achten Sie auf die letzten beiden Zeilen.</p>
 
@@ -176,7 +176,7 @@
 (function(){
   "use strict";
   var $=function(id){return document.getElementById(id);};
-  var START={u:20,Q:5,ref:"3",m:"5",n:"2"};
+  var START={u:20,Q:15,ref:"3",m:"5",n:"2"};
   var RUHIG = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var phase = 0;            // 0 … 1: Weg der Ladung von m nach n
 
@@ -217,13 +217,11 @@
     g.font = font; g.textAlign = al; return w;
   }
 
+  // 26.09.2026 (PRUEF2609i, B06-5): Zeichen fuer Koerper, Masse nach Tabellenbuch S. 87, nicht das Erdungszeichen
   function erdzeichen(g,x,y){
     g.strokeStyle="#1A2530"; g.lineWidth=2;
     g.beginPath(); g.moveTo(x,y-9); g.lineTo(x,y); g.stroke();
-    var br=[20,13,6];
-    for(var i=0;i<3;i++){
-      g.beginPath(); g.moveTo(x-br[i]/2,y+i*5); g.lineTo(x+br[i]/2,y+i*5); g.stroke();
-    }
+    g.beginPath(); g.moveTo(x-10,y); g.lineTo(x+10,y); g.stroke();
   }
 
   function zeichne(u,ref,m,n,U,W,Q,pm,pn){
@@ -260,7 +258,7 @@
     g.strokeStyle="#9AA5AE"; g.lineWidth=1.5;
     g.beginPath(); g.moveTo(xl,yk(5)); g.lineTo(xl,yk(1)); g.stroke();
 
-    // Erdungszeichen an der Masse
+    // Massezeichen (Koerper, Masse nach Tabellenbuch S. 87) an der Masse
     erdzeichen(g, xl - (S ? 19 : 22), yk(ref));
     g.textAlign="right"; g.font="bold 12px 'Noto Sans',sans-serif"; g.fillStyle="#1A2530";
     g.fillText("Masse", xphi, yk(ref)+ (S ? 21 : 24));
@@ -390,7 +388,7 @@
   });
   window.addEventListener("resize", tick);
   $("bReset").addEventListener("click",function(){
-    // Startstellung u = 2,0 V, Masse 3, m = 5, n = 2, Q = 0,5 As -> U = 6 V, W = 3 Ws.
+    // Startstellung u = 2,0 V, Masse 3, m = 5, n = 2, Q = 1,5 As -> U = 6 V, W = 9 Ws.
     // Kein Blattwert, kein Grenzfall, beide Regler im inneren Bereich.
     $("rU").value=START.u; $("rQ").value=START.Q;
     $("sRef").value=START.ref; $("sM").value=START.m; $("sN").value=START.n;
