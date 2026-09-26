@@ -90,7 +90,7 @@
   <div class="kopf">
     <div class="reihe">E1EG · Grundlagen Elektrotechnik · Lernfeld&nbsp;1 · Block&nbsp;10</div>
     <h1>Stromdichte und Strombelastbarkeit: zwei verschiedene Größen</h1>
-    <div class="sub">Selbst bedienbar · <i>J</i> wird gerechnet, <i>I</i><sub>z</sub> wird abgelesen</div>
+    <div class="sub">Selbst bedienbar; <i>J</i> wird gerechnet, <i>I</i><sub>z</sub> wird abgelesen</div>
   </div>
 
   <div class="box sim">
@@ -99,11 +99,11 @@
     Stroms. Wird der Leiter dünner oder der Strom größer, <b>drängen sich die Punkte</b>, 
     das ist die Stromdichte. Daneben (auf dem Handy darunter) stehen <b>zwei Zahlen</b>:
     <i>J</i> in A/mm² (gerechnet) und <i>I</i><sub>z</sub> in A (aus der Tabelle abgelesen).
-    Achten Sie darauf, <b>wie verschieden</b> die beiden sind.</p>
+    Achten Sie darauf, <b>wie verschieden</b> die beiden sind. „2&nbsp;Adern“ heißt im Tabellenbuch „2 Strom führende Leiter“.</p>
  <p><b>Ablauf:</b> Die fünf Schritte stehen auf dem Arbeitsblatt im Kasten „Simulation öffnen“. <b>Sozialform:</b> Einzelarbeit, freiwillig zu Hause. <b>Zeit:</b> rund 10&nbsp;min. <b>Fertig, wenn</b> Sie in einem Satz sagen können, warum <i>J</i> und <i>I</i><sub>z</sub> nicht dasselbe sind, und welche der beiden Größen man rechnet und welche man abliest.</p>
   </div>
 
-  <div class="arten" id="arten" role="group" aria-label="Verlegeart und Zahl der belasteten Leiter wählen"></div>
+  <div class="arten" id="arten" role="group" aria-label="Verlegeart und Zahl der Strom führenden Adern wählen"></div>
 
   <figure>
     <script type="application/json" id="sim-meta">{"startwerte":{"I":5.6,"A":2.5,"verlegeart":"C-3"},"loesungswerte":{"A":1.5}}</script>
@@ -169,6 +169,8 @@
              {k:"C-2", n:"C, 2 Adern"}, {k:"C-3", n:"C, 3 Adern"}];
   var art=3, START={I:56,A:1,art:3};
   function fmt(x,n){ return x.toFixed(n).replace(".",","); }
+  // „=“ nur, wenn der Wert mit n Nachkommastellen aufgeht, sonst „≈“ (26.09.2026, wie auf Blatt und Übungsblatt)
+  function gl(x,n){ var f=Math.pow(10,n); return Math.abs(x*f-Math.round(x*f))<1e-9 ? " = " : " ≈ "; }
   function schluessel(A){ return A%1===0 ? String(A) : String(A); }
 
   // Schreibt Text mit Tiefstellung: "I_z" wird I mit tiefgestelltem z (Canvas kennt kein <sub>).
@@ -239,7 +241,7 @@
     g.fillStyle = ok ? "#2F7D62" : "#B23A33";
     schreibe(g, ok ? "I ≤ I_z: zulässig" : "I > I_z: überlastet!", L.ux, L.uy, 17);
     g.fillStyle="#5A666F";
-    schreibe(g, "Ausnutzung I / I_z = " + fmt(I/iz*100,0) + " %", L.ux, L.uy+22, 12.5);
+    schreibe(g, "Ausnutzung I / I_z" + gl(I/iz*100,0) + fmt(I/iz*100,0) + " %", L.ux, L.uy+22, 12.5);
     g.fillStyle="#2F7D62";
     if(L.zweizeilig){
       schreibe(g, "Verschiedene Zahlen, verschiedene Einheiten:", L.sx, L.sy, 12.5);
@@ -261,7 +263,7 @@
     $("aUrteil").textContent = I<=iz ? "zulässig" : "überlastet!";
     $("aAus").textContent=fmt(I/iz*100,0)+" %";
     $("hDeut").innerHTML = I<=iz
-      ? "<i>J</i> = "+fmt(J,2)+" A/mm² ist gerechnet, <i>I</i><sub>z</sub> = "+(iz%1===0?iz:fmt(iz,1))
+      ? "<i>J</i>"+gl(J,2)+fmt(J,2)+" A/mm² ist gerechnet, <i>I</i><sub>z</sub> = "+(iz%1===0?iz:fmt(iz,1))
         +" A ist abgelesen. Beide sagen etwas anderes."
       : "Der Betriebsstrom übersteigt die zulässige Stromstärke. Wählen Sie einen größeren "
         + "Querschnitt oder eine günstigere Verlegeart.";
