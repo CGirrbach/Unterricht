@@ -1,0 +1,245 @@
+<!-- lehrmaterial -->
+<!-- materialtyp: simulation -->
+<!-- sim_bearbeitung: pflicht -->
+<!-- EG1-B22 · Messplatz Reihenschaltung (Neubau 27.09.2026): Quelle mit einstellbarer Spannung U (0 bis 12 V), zwei einstellbare
+     Widerstaende R1 und R2 (20 bis 240 Ohm) in Reihe; drei Strommesser (vor, zwischen, nach) und drei Spannungsmesser (an R1, an R2,
+     an der Quelle), alle ideal. Modell: I = U/(R1 + R2); U1 = I · R1; U2 = I · R2 (Fachkunde S. 49, Versuch 1 und 2; das Modell steht
+     nicht auf der Seite, weil der Ersatzwiderstand erst in Block 23 kommt). Die Seite nennt keine Ergebnisse der Aufgaben 2 bis 4; die
+     Gesetze stehen hinter „Ergebnis anzeigen“. Startstellung U = 0 V, R1 = R2 = 20 Ohm (alle Messgeraete zeigen null). -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulation Block 22: Messplatz Reihenschaltung</title>
+
+<script type="application/json" id="sim-meta">
+{
+ "block": "EG1-B22",
+ "thema": "Reihenschaltung: Stromstärke an drei Stellen, Teilspannungen und Gesamtspannung, Maschenregel",
+ "modell": "I = U/(R1 + R2); U1 = I * R1; U2 = I * R2; ideale Messgeraete",
+ "quelle": "Fachkunde S. 49 (Versuch 1 und 2, Bild 1 und 2); Tabellenbuch 32. A., S. 38 (Formel 1 und 2) und S. 43 (Formel 5)",
+ "startwerte": { "U": 0, "R1": 20, "R2": 20 },
+ "loesungswerte": { "U": 12, "R1": 40, "R2": 40 }
+}
+</script>
+
+<style>.bruch{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;line-height:1.05;margin:0 .12em;font-size:.8em}.bruch .z{border-bottom:1.6px solid currentColor;padding:0 .35em}.bruch .n{padding:0 .35em}:root{
+ --ink:#1A2530; --kupfer:#A34E0E; --kupferhell:#F5EBDF; --rot:#B23A33;
+ --gruen:#2F7D62; --gruenhell:#EAF3EC; --linie:#9AA5AE; --grau:#5A666F; --hell:#F4F6F8;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:"Noto Sans",system-ui,Arial,sans-serif;color:var(--ink);line-height:1.45;background:#f4f6f8;
+ padding:18px 14px 40px;max-width:980px;margin:0 auto}
+.kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0 10px;margin-bottom:14px}
+.kopf .reihe{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--kupfer);font-weight:700}
+.kopf h1{font-size:22px;margin:4px 0 0}
+p{margin:8px 0}
+i{font-style:italic}
+.ziel,.methode{background:var(--kupferhell);border-left:5px solid var(--kupfer);padding:10px 14px;margin:12px 0}
+.ziel .cap,.methode .cap{font-weight:700;color:var(--kupfer);display:block;margin-bottom:2px}
+.sim{border:1.4px solid var(--ink);background:#fff;padding:16px;margin:12px 0}
+canvas{width:100%;height:auto;display:block;background:#fff;border:1px solid var(--linie);touch-action:manipulation}
+.bildunterschrift{font-size:12.5px;color:var(--grau);margin:4px 0 0}
+.messwerte{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0 4px}
+.messwerte .zelle{border:1.4px solid var(--linie);padding:6px 8px;background:var(--hell)}
+.messwerte .l{display:block;font-size:13px;color:var(--grau);font-weight:700}
+.messwerte .w{display:block;font-size:22px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+@media (max-width:420px){.messwerte .w{font-size:18px}.messwerte .l{font-size:12px}}
+.gruppe{font-weight:700;margin:14px 0 0}
+.regler{display:flex;align-items:center;gap:10px;margin:10px 0 2px;flex-wrap:wrap}
+.regler label{font-weight:700;min-width:190px}
+@media (max-width:520px){.regler label{flex:1 0 100%}}
+.regler input[type=range]{flex:1 1 140px;height:44px;accent-color:var(--kupfer);cursor:pointer}
+.rval{font-weight:700;min-width:74px;text-align:right;font-variant-numeric:tabular-nums}
+button.pm{font:inherit;font-size:20px;font-weight:700;min-width:44px;min-height:44px;border:1.4px solid var(--linie);background:#fff;color:var(--ink);cursor:pointer}
+.tasten{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 2px}
+button.tk{font:inherit;font-weight:700;border:1.4px solid var(--rot);background:#fff;color:var(--rot);
+ padding:8px 14px;min-height:44px;cursor:pointer}
+details{margin-top:14px;border:1px solid var(--linie);padding:6px 10px;background:#fff}
+details summary{cursor:pointer;font-weight:700;color:var(--gruen);padding:10px 2px;min-height:44px}
+.formel{background:#fff;border:1.6px solid var(--kupfer);border-left:6px solid var(--kupfer);padding:12px 16px;margin:10px 0}
+.formel .cap{font-weight:700;color:var(--kupfer);display:block;margin-bottom:6px}
+.formelzeile{font-size:22px;margin:6px 0}
+.formelzeile span{white-space:nowrap;margin-right:1.4em}
+.quelle{font-size:13px;color:var(--grau);border-left:3px solid var(--kupfer);padding-left:10px;margin-top:20px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="kopf">
+ <div class="reihe">E1EG · Lernfeld 1 · Gleichstrom-Grundlagen · Block 22</div>
+ <h1>Messplatz Reihenschaltung</h1>
+</div>
+
+<div class="ziel">
+ <span class="cap">Das sollen Sie hier selbst herausfinden</span>
+ Zwei Verbraucher liegen in Reihe an einer Quelle. Wie groß ist die Stromstärke vor, zwischen und nach den Verbrauchern?
+ Wie groß sind die Spannungen an den Verbrauchern und an der Quelle? Die Aufträge stehen auf dem Arbeitsblatt (Aufgabe&nbsp;2 bis 4).
+</div>
+
+<div class="methode">
+ <span class="cap">So bedienen Sie den Messplatz</span>
+ Stellen Sie mit den Reglern oder den Knöpfen „−“ und „+“ die Spannung <i>U</i> der Quelle und die Widerstände <i>R</i><sub>1</sub> und <i>R</i><sub>2</sub> ein.
+ Die drei Strommesser zeigen <i>I</i><sub>1</sub>, <i>I</i><sub>2</sub> und <i>I</i><sub>3</sub>, die drei Spannungsmesser <i>U</i><sub>1</sub>, <i>U</i><sub>2</sub> und <i>U</i>.
+ Mit <b>„Zurücksetzen“</b> kehren Sie zur Grundstellung zurück.
+ <b>Sozialform:</b> Partnerarbeit, einer stellt ein, einer trägt ein. <b>Zeit:</b> rund 23&nbsp;min für Aufgabe&nbsp;2 bis 4.
+ <b>Fertig, wenn</b> Aufgabe&nbsp;2 bis 4 des Arbeitsblatts ausgefüllt sind.
+</div>
+
+<div class="sim">
+ <canvas id="cMess" data-quelle="eigene Darstellung: Quelle G, Widerstaende R1 und R2 in Reihe, Strommesser A vor, zwischen und nach, Spannungsmesser V an R1, R2 und an der Quelle; Pfeile wie Fachkunde S. 49, Bild 1 und 2" width="960" height="600"
+  aria-label="Schaltplan: Quelle G links, oben Strommesser A1 und Widerstand R1, rechts Strommesser A2, unten Widerstand R2 und Strommesser A3; Spannungsmesser an der Quelle, an R1 und an R2."></canvas>
+ <p class="bildunterschrift">Pink: Strombezugspfeile. Blau: Spannungsbezugspfeile (von Plus nach Minus). Die Messgeräte sind ideal.</p>
+ <div class="gruppe">Strommesser</div>
+ <div class="messwerte" aria-live="polite">
+  <div class="zelle"><span class="l"><i>I</i><sub>1</sub> (vor)</span><span class="w" id="aI1">0&nbsp;A</span></div>
+  <div class="zelle"><span class="l"><i>I</i><sub>2</sub> (zwischen)</span><span class="w" id="aI2">0&nbsp;A</span></div>
+  <div class="zelle"><span class="l"><i>I</i><sub>3</sub> (nach)</span><span class="w" id="aI3">0&nbsp;A</span></div>
+ </div>
+ <div class="gruppe">Spannungsmesser</div>
+ <div class="messwerte" aria-live="polite">
+  <div class="zelle"><span class="l"><i>U</i><sub>1</sub> (an <i>R</i><sub>1</sub>)</span><span class="w" id="aU1">0&nbsp;V</span></div>
+  <div class="zelle"><span class="l"><i>U</i><sub>2</sub> (an <i>R</i><sub>2</sub>)</span><span class="w" id="aU2">0&nbsp;V</span></div>
+  <div class="zelle"><span class="l"><i>U</i> (an der Quelle)</span><span class="w" id="aU">0&nbsp;V</span></div>
+ </div>
+ <div class="regler">
+  <label for="rU">Spannung der Quelle <i>U</i></label>
+  <button class="pm" type="button" data-ziel="rU" data-schritt="-1" aria-label="Spannung 1 Volt kleiner">−</button>
+  <input id="rU" type="range" min="0" max="12" value="0" step="1" aria-label="Spannung der Quelle in Volt">
+  <button class="pm" type="button" data-ziel="rU" data-schritt="1" aria-label="Spannung 1 Volt größer">+</button>
+  <span class="rval" id="wU">0 V</span>
+ </div>
+ <div class="regler">
+  <label for="rR1">Widerstand <i>R</i><sub>1</sub></label>
+  <button class="pm" type="button" data-ziel="rR1" data-schritt="-4" aria-label="R1 4 Ohm kleiner">−</button>
+  <input id="rR1" type="range" min="20" max="240" value="20" step="4" aria-label="Widerstand R1 in Ohm">
+  <button class="pm" type="button" data-ziel="rR1" data-schritt="4" aria-label="R1 4 Ohm größer">+</button>
+  <span class="rval" id="wR1">20 Ω</span>
+ </div>
+ <div class="regler">
+  <label for="rR2">Widerstand <i>R</i><sub>2</sub></label>
+  <button class="pm" type="button" data-ziel="rR2" data-schritt="-4" aria-label="R2 4 Ohm kleiner">−</button>
+  <input id="rR2" type="range" min="20" max="240" value="20" step="4" aria-label="Widerstand R2 in Ohm">
+  <button class="pm" type="button" data-ziel="rR2" data-schritt="4" aria-label="R2 4 Ohm größer">+</button>
+  <span class="rval" id="wR2">20 Ω</span>
+ </div>
+ <div class="tasten"><button class="tk" id="bReset" type="button">Zurücksetzen</button></div>
+</div>
+
+<details class="ergebnis-aufdecken">
+ <summary><b>Ergebnis anzeigen</b> (erst, wenn Sie Aufgabe&nbsp;2 bis 4 des Arbeitsblatts bearbeitet haben)</summary>
+ <div class="formel">
+  <span class="cap">Reihenschaltung und Maschenregel (Tabellenbuch S. 38, Formel 1 und 2; Tabellenbuch S. 43, Formel 5)</span>
+  <div class="formelzeile"><span><i>I</i><sub>1</sub> = <i>I</i><sub>2</sub> = <i>I</i><sub>3</sub></span> <span><i>U</i> = <i>U</i><sub>1</sub> + <i>U</i><sub>2</sub></span> <span>Σ<i>U</i> = 0</span></div>
+  <p>Umlauf im Uhrzeigersinn: <i>U</i><sub>1</sub> und <i>U</i><sub>2</sub> zeigen in Umlaufrichtung, <i>U</i> zeigt entgegen.</p>
+  <p id="aNach">Nachrechnung der Einstellung: …</p>
+ </div>
+</details>
+
+<div class="quelle">Die Strommesser haben keinen Widerstand, die Spannungsmesser nehmen keinen Strom auf. Alle Anzeigen sind mit der Hand nachgerechnet.</div>
+
+<script>
+(function(){
+ "use strict";
+ var $ = function(id){ return document.getElementById(id); };
+ var START = {U: 0, R1: 20, R2: 20};
+ function komma(s){ return String(s).replace('.', ','); }
+ // Stromstaerke mit drei geltenden Ziffern, Spannung mit zwei Nachkommastellen; Nullen am Ende entfallen
+ function strom(x){
+   if (x === 0) return '0';
+   var s = x.toPrecision(3);
+   if (s.indexOf('.') >= 0) s = s.replace(/0+$/, '').replace(/\.$/, '');
+   return komma(s);
+ }
+ function spannung(x){ return komma(x.toFixed(2).replace(/\.?0+$/, '')); }
+ var nbsp = ' ';
+ var cv = $('cMess'), ctx, fs = 1;
+ function schrift(){ var w = cv.clientWidth || 480; fs = Math.max(1, Math.min(1.6, 460 / w)); }
+ function f(px){ return Math.round(px * fs); }
+ function setup(){
+   var dpr = Math.min(window.devicePixelRatio || 1, 2);
+   cv.width = Math.round(480 * dpr); cv.height = Math.round(300 * dpr);
+   ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+   schrift();
+ }
+ function linie(pkte){ ctx.beginPath(); ctx.moveTo(pkte[0][0], pkte[0][1]); for (var i = 1; i < pkte.length; i++) ctx.lineTo(pkte[i][0], pkte[i][1]); ctx.stroke(); }
+ function pfeil(x1, y1, x2, y2, farbe){
+   ctx.strokeStyle = farbe; ctx.fillStyle = farbe; ctx.lineWidth = 2;
+   ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+   var a = Math.atan2(y2 - y1, x2 - x1), l = 8;
+   ctx.beginPath(); ctx.moveTo(x2, y2); ctx.lineTo(x2 - l * Math.cos(a - 0.45), y2 - l * Math.sin(a - 0.45));
+   ctx.lineTo(x2 - l * Math.cos(a + 0.45), y2 - l * Math.sin(a + 0.45)); ctx.closePath(); ctx.fill();
+ }
+ function geraet(x, y, buchstabe){
+   ctx.fillStyle = '#fff'; ctx.strokeStyle = '#1A2530'; ctx.lineWidth = 1.8;
+   ctx.beginPath(); ctx.arc(x, y, 15, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
+   ctx.fillStyle = '#1A2530'; ctx.font = f(14) + 'px "Noto Sans",Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+   ctx.fillText(buchstabe, x, y + 1);
+ }
+ function text(t, x, y, farbe, ausr, fett){
+   ctx.fillStyle = farbe || '#1A2530'; ctx.textAlign = ausr || 'center'; ctx.textBaseline = 'middle';
+   ctx.font = (fett ? 'bold ' : '') + f(11) + 'px "Noto Sans",Arial'; ctx.fillText(t, x, y);
+ }
+ var BLAU = '#1F7FC4', PINK = '#C2185B';
+ function zeichne(w){
+   ctx.clearRect(0, 0, 480, 300);
+   var yo = 70, yu = 240, xl = 65, xr = 400;
+   ctx.strokeStyle = '#1A2530'; ctx.lineWidth = 1.8;
+   // Leitungen
+   linie([[xl, 110], [xl, yo], [xr, yo], [xr, yu], [xl, yu], [xl, 190]]);
+   // Spannungsmesser an der Quelle, an R1 (oben), an R2 (unten)
+   linie([[120, yo], [120, yu]]);
+   linie([[258, yo], [258, 30], [322, 30], [322, yo]]);
+   linie([[258, yu], [258, 275], [322, 275], [322, yu]]);
+   [[120, yo], [120, yu], [258, yo], [322, yo], [258, yu], [322, yu]].forEach(function(p){
+     ctx.fillStyle = '#1A2530'; ctx.beginPath(); ctx.arc(p[0], p[1], 3, 0, 2 * Math.PI); ctx.fill(); });
+   // Quelle
+   ctx.fillStyle = '#fff'; ctx.strokeStyle = '#1A2530'; ctx.lineWidth = 1.8;
+   ctx.fillRect(40, 110, 50, 80); ctx.strokeRect(40, 110, 50, 80);
+   ctx.fillStyle = '#1A2530'; ctx.font = f(16) + 'px "Noto Sans",Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+   ctx.fillText('G', 65, 140);
+   ctx.lineWidth = 1.4; linie([[53, 165], [77, 165]]); ctx.setLineDash([4, 3]); linie([[53, 172], [77, 172]]); ctx.setLineDash([]);
+   text('+', 32, 104, '#1A2530', 'center', true); text('−', 32, 198, '#1A2530', 'center', true);
+   // Widerstaende
+   ctx.fillStyle = '#fff'; ctx.strokeStyle = '#1A2530'; ctx.lineWidth = 1.8;
+   ctx.fillRect(266, yo - 9, 48, 18); ctx.strokeRect(266, yo - 9, 48, 18);
+   ctx.fillRect(266, yu - 9, 48, 18); ctx.strokeRect(266, yu - 9, 48, 18);
+   // Messgeraete
+   geraet(185, yo, 'A'); geraet(xr, 155, 'A'); geraet(185, yu, 'A');
+   geraet(120, 155, 'V'); geraet(290, 30, 'V'); geraet(290, 275, 'V');
+   // Strombezugspfeile
+   pfeil(210, 56, 240, 56, PINK); text('I₁ = ' + w.I + ' A', 140, 44, PINK, 'left', true);
+   pfeil(412, 104, 412, 130, PINK); text('I₂ =', 414, 180, PINK, 'left', true); text(w.I + ' A', 414, 195, PINK, 'left', true);
+   pfeil(240, 254, 210, 254, PINK); text('I₃ = ' + w.I + ' A', 205, 267, PINK, 'right', true);
+   // Spannungsbezugspfeile (von Plus nach Minus)
+   pfeil(150, 118, 150, 192, BLAU); text('U = ' + w.U + ' V', 158, 155, BLAU, 'left', true);
+   pfeil(268, 90, 312, 90, BLAU); text('U₁ = ' + w.U1 + ' V', 290, 104, BLAU, 'center', true);
+   pfeil(312, 220, 268, 220, BLAU); text('U₂ = ' + w.U2 + ' V', 290, 206, BLAU, 'center', true);
+   text('R₁ = ' + w.R1 + ' Ω', 290, 120, '#1A2530', 'center', false);
+   text('R₂ = ' + w.R2 + ' Ω', 290, 190, '#1A2530', 'center', false);
+ }
+ function werte(){
+   var U = +$('rU').value, R1 = +$('rR1').value, R2 = +$('rR2').value;
+   var I = U / (R1 + R2), U1 = I * R1, U2 = I * R2;
+   return {U: spannung(U), R1: R1, R2: R2, I: strom(I), U1: spannung(U1), U2: spannung(U2), roh: {U: U, U1: U1, U2: U2}};
+ }
+ function zeige(){
+   var w = werte();
+   ['aI1', 'aI2', 'aI3'].forEach(function(id){ $(id).textContent = w.I + nbsp + 'A'; });
+   $('aU1').textContent = w.U1 + nbsp + 'V'; $('aU2').textContent = w.U2 + nbsp + 'V'; $('aU').textContent = w.U + nbsp + 'V';
+   $('wU').textContent = w.U + ' V'; $('wR1').textContent = w.R1 + ' Ω'; $('wR2').textContent = w.R2 + ' Ω';
+   $('aNach').innerHTML = 'Nachrechnung der Einstellung: <i>U</i><sub>1</sub> + <i>U</i><sub>2</sub> − <i>U</i> = ' + w.U1 + nbsp + 'V + ' + w.U2 + nbsp + 'V − ' +
+     w.U + nbsp + 'V = ' + spannung(Math.abs(w.roh.U1 + w.roh.U2 - w.roh.U)) + nbsp + 'V';
+   zeichne(w);
+ }
+ function setzen(id, v){ var r = $(id); v = Math.max(+r.min, Math.min(+r.max, v)); r.value = v; }
+ Array.prototype.forEach.call(document.querySelectorAll('button.pm'), function(b){
+   b.addEventListener('click', function(){ var id = b.getAttribute('data-ziel'); setzen(id, +$(id).value + (+b.getAttribute('data-schritt'))); zeige(); });
+ });
+ ['rU', 'rR1', 'rR2'].forEach(function(id){ $(id).addEventListener('input', zeige); });
+ $('bReset').addEventListener('click', function(){ setzen('rU', START.U); setzen('rR1', START.R1); setzen('rR2', START.R2); zeige(); });
+ window.addEventListener('resize', function(){ setup(); zeige(); });
+ // Pruefzugang fuer die Nachrechnung (390-px-Messung): setzt die Regler und gibt die Anzeigen zurueck
+ window.probe = function(U, R1, R2){ setzen('rU', U); setzen('rR1', R1); setzen('rR2', R2); zeige();
+   return {I1: $('aI1').textContent, I2: $('aI2').textContent, I3: $('aI3').textContent, U1: $('aU1').textContent, U2: $('aU2').textContent, U: $('aU').textContent}; };
+ setup(); zeige();
+})();
+</script>
