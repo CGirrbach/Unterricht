@@ -1,0 +1,250 @@
+<!-- sim_bearbeitung: pflicht -->
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>U30 Simulation: Das Leistungsdreieck bei Drehstrom</title>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--linie:#C7D2DA;
+      --gruen:#2F7D62;--rot:#B23A33;--grau:#5A666F}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Noto Sans',system-ui,sans-serif;color:var(--ink);background:#fff}
+header{border-top:6px solid var(--kupfer);padding:14px 18px 10px}
+h1{margin:0;font-size:clamp(18px,4vw,26px)}
+.ziel{background:var(--kupferhell);border-left:5px solid var(--kupfer);
+      padding:12px 16px;margin:12px 18px;font-size:clamp(14px,3vw,17px)}
+.ziel > b:first-child{display:block;font-size:.82em;letter-spacing:.08em;text-transform:uppercase;
+        color:var(--kupfer);margin-bottom:4px}
+canvas{display:block;width:100%;max-width:960px;margin:0 auto;height:auto}
+.regler{max-width:960px;margin:0 auto;padding:8px 18px 4px}
+.zeile{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:14px 0}
+.zeile label{flex:0 0 210px;font-weight:700;font-size:clamp(14px,3vw,17px)}
+/* Der Regler trug die Vorgabefarbe des Browsers (Blau), die einzige Farbe im Bild, die
+   nicht aus dem Haus stammt, und ausgerechnet am Bedienelement (Befund Linse BLATT,
+   U03/B2 und U04/B5, 01.09.2026). Er trägt jetzt Kupfer wie alles Bedienbare. */
+input[type=range]{flex:1 1 220px;min-width:180px;height:44px;accent-color:var(--kupfer);
+  -webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-moz-range-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;
+  height:26px;margin-top:-9px;border-radius:50%;background:var(--kupfer);border:2px solid #fff;
+  box-shadow:0 0 0 1.4px var(--kupfer)}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;
+  background:var(--kupfer);border:2px solid #fff}
+input[type=range]:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
+.wert{flex:0 0 128px;text-align:right;font-variant-numeric:tabular-nums;
+      font-size:clamp(15px,3.2vw,19px);font-weight:700;color:var(--kupfer)}
+.anzeigen{display:flex;gap:12px;flex-wrap:wrap;max-width:960px;margin:6px auto 0;padding:0 18px}
+.kachel{flex:1 1 150px;border:1.4px solid var(--linie);padding:10px 12px}
+.kachel span{display:block;font-size:.78em;letter-spacing:.06em;color:var(--grau);
+             font-weight:700}
+.kachel b{font-size:clamp(17px,3.6vw,22px)}
+button{font:inherit;font-weight:700;padding:12px 20px;min-height:48px;border:1.6px solid var(--ink);
+       background:#fff;color:var(--ink);cursor:pointer}
+button:hover{background:var(--kupferhell)}
+.fuss{max-width:960px;margin:14px auto 26px;padding:0 18px;font-size:.86em;color:var(--grau)}
+@media (prefers-reduced-motion: reduce){canvas{outline:none}}
+</style><style>
+.vergleich{max-width:960px;margin:10px auto 0;padding:10px 18px;border-left:5px solid var(--gruen);
+  background:#EEF5F2;font-size:clamp(14px,3vw,17px)}
+</style>
+</head><body>
+
+<header>
+<h1>Das Leistungsdreieck bei Drehstrom</h1>
+</header>
+
+<div class="ziel">
+<b>Was Sie herausfinden sollen</b>
+Drei Regler, drei Leistungen. Die <b>Scheinleistung</b> ist die lange Seite, die
+<b>Wirkleistung</b> und die <b>Blindleistung</b> sind die beiden kurzen. Verstellen Sie den
+Wirkfaktor und achten Sie darauf, <b>welche</b> der drei Leistungen sich dabei ändert und
+welche nicht. Und: Bei welchem Wirkfaktor verschwindet das Dreieck?
+</div>
+
+<script type="application/json" id="sim-meta">
+{
+  "erkenntnis": "dass die Scheinleistung nur von Spannung und Strom abhaengt, waehrend der Wirkfaktor allein darueber entscheidet, wie sich diese Scheinleistung in Wirk- und Blindleistung aufteilt; im Leistungsdreieck ist S die Hypotenuse und bleibt bei einer Aenderung von cos phi unveraendert",
+  "startwerte":    {"leiterspannung": 400, "leiterstrom": 6.3, "wirkfaktor": 0.78},
+  "loesungswerte": {"leiterstrom": [8.7, 11.2, 4.62, 42, 72.7, 11.54, 34.64, 23, 9.2, 7.7, 5.7], "wirkfaktor": [0.83, 0.87, 1.0, 0.5]},
+  "quelle": "Europa Fachkunde S. 162 (7.9.6), Europa-Rechenbuch S. 130 (7.11.3), Tabellenbuch S. 48 Formel 6, 9 und 11"
+}
+</script>
+
+<canvas id="buehne" width="960" height="420"
+        data-quelle="Europa Fachkunde S. 162 und Tabellenbuch S. 48, Formel 6, 9 und 11: S = Wurzel(3)*U*I, P = S*cos phi, Q = S*sin phi; im Leistungsdreieck ist S die Hypotenuse"></canvas>
+
+<div class="regler">
+<div class="zeile">
+  <label for="usp">Leiterspannung U</label>
+  <input type="range" id="usp" min="230" max="690" step="10" value="400">
+  <div class="wert" id="uspw">400 V</div>
+</div>
+<div class="zeile">
+  <label for="ist">Leiterstrom I</label>
+  <input type="range" id="ist" min="1" max="40" step="0.1" value="6.3">
+  <div class="wert" id="istw">6,3 A</div>
+</div>
+<div class="zeile">
+  <label for="cos">Wirkfaktor cos &phi;</label>
+  <input type="range" id="cos" min="0.05" max="1" step="0.01" value="0.78">
+  <div class="wert" id="cosw">0,78</div>
+</div>
+<button id="reset" type="button">Zur&uuml;cksetzen</button>
+</div>
+
+<div class="anzeigen">
+  <div class="kachel"><span>Scheinleistung S</span><b id="aS">0 kVA</b></div>
+  <div class="kachel"><span>Wirkleistung P</span><b id="aP">0 kW</b></div>
+  <div class="kachel"><span>Blindleistung Q</span><b id="aQ">0 kvar</b></div>
+  <div class="kachel"><span>Phasenwinkel &phi;</span><b id="aW">0&deg;</b></div>
+</div>
+
+<div class="vergleich" id="vgl">&nbsp;</div>
+
+<div class="fuss">
+Gerechnet wird mit S = &radic;3 &middot; U &middot; I, P = S &middot; cos &phi; und
+Q = S &middot; sin &phi; (Tabellenbuch Seite 48, Formel 6, 9 und 11). Die drei Str&auml;nge sind <b>gleich</b> belastet, die Last also symmetrisch;
+nur dann gibt es einen gemeinsamen Leiterstrom I. Der Blindfaktor folgt aus
+sin &phi; = &radic;(1 &minus; cos&sup2; &phi;), die Last gilt als <b>induktiv</b>.
+</div>
+
+<script>
+"use strict";
+var C = document.getElementById("buehne"), g = C.getContext("2d");
+var usp = document.getElementById("usp"), ist = document.getElementById("ist");
+var cos = document.getElementById("cos");
+var INK = "#1A2530", KUPFER = "#A34E0E", LINIE = "#C7D2DA", GRAU = "#5A666F";
+var GRUEN = "#2F7D62", ROT = "#B23A33", BLAU = "#2C5F8A";
+var W3 = Math.sqrt(3);
+
+/* Zwei Anordnungen derselben Zeichnung. Am Handy (schmaler als 640 px) stand das Querformat
+   960 x 420 auf 390 px verkleinert da: die kleinste Beschriftung (14 px) war dort 5,7 px hoch,
+   unlesbar (06.10.2026). Hochformat 600 x 660: die vier Zahlenwerte stehen als Legende oben,
+   am Dreieck nur noch die Buchstaben S, P und Q; mit vollem Text neben den Seiten wurde das
+   Dreieck auf 600 px zu klein. Schrift 26 px und 20 px, bei 390 px Breite 16,9 und 13 px. */
+var BREIT  = {W: 960, H: 420, X0: 110, Y0: 320, Lmax: 560, oben: 76, achseOben: 46,
+              achseRechts: 930, bogen: 66, massY: 386, klein: 14, legende: false};
+var SCHMAL = {W: 600, H: 660, X0: 70, Y0: 560, Lmax: 470, oben: 130, achseOben: 110,
+              achseRechts: 580, bogen: 70, massY: 640, klein: 20, gross: 26, legende: true};
+var G = BREIT;
+function anordnen() {
+  var neu = (C.parentNode.clientWidth || window.innerWidth) < 640 ? SCHMAL : BREIT;
+  if (neu !== G || C.width !== neu.W) { G = neu; C.width = G.W; C.height = G.H; }
+}
+anordnen();
+
+function zahl(v, n) {
+  return (Math.abs(v) < 5e-4 ? 0 : v).toFixed(n === undefined ? 2 : n).replace(".", ",");
+}
+
+function zeichne() {
+  var U = +usp.value, I = +ist.value, c = +cos.value;
+  var s = W3 * U * I, wp = s * c, q = s * Math.sqrt(1 - c * c);
+  var phi = Math.acos(c) * 180 / Math.PI;
+
+  g.clearRect(0, 0, C.width, C.height);
+
+  /* ---------- das Leistungsdreieck ----------
+     Die Hypotenuse hat IMMER dieselbe Laenge; dafuer wird der Massstab angeschrieben und
+     mitgerechnet. So zeigt die FORM den Wirkfaktor, und die Groesse steht als Zahl daneben.
+     Zuvor war der Massstab an der groesstmoeglichen Scheinleistung festgemacht; bei
+     typischen Werten war das Dreieck dann nur ein Fleck (gesehen am Bild). */
+  var X0 = G.X0, Y0 = G.Y0;
+  /* Die Laenge wird so gewaehlt, dass das Dreieck IMMER ins Bild passt; bei kleinem
+     Wirkfaktor wird es hoch, und ohne Deckel ragte die Spitze aus der Flaeche. */
+  var L = Math.min(G.Lmax, (Y0 - G.oben) / Math.max(0.08, Math.sqrt(1 - c * c)));
+  var px = L * c, py = L * Math.sqrt(1 - c * c);
+  /* kVA je Zentimeter auf dem Bildschirm. Das Canvas wird verkleinert angezeigt, sobald die
+     Seite schmaler als 960 px ist (am Handy auf 390 von 600 px); der Massstab rechnet darum
+     mit der ANGEZEIGTEN Laenge. Bei voller Breite ist der Faktor 1 und alles wie bisher. */
+  var anzeige = (C.clientWidth || C.width) / C.width;
+  var kva_je_cm = (s / 1000) / (L * anzeige / (96 / 2.54));
+  g.strokeStyle = LINIE; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(X0 - 26, Y0); g.lineTo(G.achseRechts, Y0); g.stroke();
+  g.beginPath(); g.moveTo(X0, Y0 + 22); g.lineTo(X0, G.achseOben); g.stroke();
+  g.strokeStyle = GRUEN; g.lineWidth = 7;
+  g.beginPath(); g.moveTo(X0, Y0); g.lineTo(X0 + px, Y0); g.stroke();
+  g.strokeStyle = BLAU; g.lineWidth = 7;
+  g.beginPath(); g.moveTo(X0 + px, Y0); g.lineTo(X0 + px, Y0 - py); g.stroke();
+  g.strokeStyle = KUPFER; g.lineWidth = 5;
+  g.beginPath(); g.moveTo(X0, Y0); g.lineTo(X0 + px, Y0 - py); g.stroke();
+  if (py > 10) {
+    g.strokeStyle = ROT; g.lineWidth = 2;
+    g.beginPath(); g.arc(X0, Y0, G.bogen, -Math.atan2(py, px), 0); g.stroke();
+  }
+  /* Der Winkel steht als Zahl oben rechts; im Dreieck selbst kollidierte er je nach
+     Wirkfaktor mal mit der Hypotenuse, mal mit der Blindleistungsseite. */
+  var lang = Math.hypot(px, py);
+  if (!G.legende) {
+  {
+    g.fillStyle = ROT; g.font = "bold 20px system-ui,sans-serif"; g.textAlign = "right";
+    g.fillText("φ = " + zahl(phi, 1) + "°", 930, 64);
+  }
+  g.font = "bold 18px system-ui,sans-serif";
+  g.fillStyle = GRUEN; g.textAlign = "center";
+  g.fillText("P = " + zahl(wp / 1000) + " kW", X0 + px / 2, Y0 + 30);
+  g.fillStyle = BLAU; g.textAlign = "left";
+  g.fillText("Q = " + zahl(q / 1000) + " kvar", X0 + px + 16, Y0 - py / 2 + 6);
+  /* Die Beschriftung der Hypotenuse steht SENKRECHT zu ihr versetzt, sonst liegt sie
+     bei kleinem Wirkfaktor auf der Linie. */
+  g.fillStyle = KUPFER; g.textAlign = "center";
+  var sText = "S = " + zahl(s / 1000) + " kVA";
+  var sx = X0 + px / 2 - 30 * (py / lang) - 34, sy = Y0 - py / 2 - 30 * (px / lang) - 6;
+  /* Unter cos phi = 0,12 ragte die Beschriftung links aus dem Bild („S" abgeschnitten, am
+     Standbild bei cos phi = 0,05 gesehen, 06.10.2026). Dann steht sie rechts neben der Spitze. */
+  if (sx - g.measureText(sText).width / 2 < 6) {
+    g.textAlign = "left"; sx = X0 + px + 16; sy = Y0 - py + 12;
+  }
+  g.fillText(sText, sx, sy);
+  } else {
+    /* Hochformat: Werte als Legende in zwei Spalten, am Dreieck nur die Buchstaben. */
+    g.font = "bold " + G.gross + "px system-ui,sans-serif"; g.textAlign = "left";
+    g.fillStyle = KUPFER; g.fillText("S = " + zahl(s / 1000) + " kVA", 16, 38);
+    g.fillStyle = GRUEN;  g.fillText("P = " + zahl(wp / 1000) + " kW", 16, 78);
+    g.fillStyle = ROT;    g.fillText("φ = " + zahl(phi, 1) + "°", 318, 38);
+    g.fillStyle = BLAU;   g.fillText("Q = " + zahl(q / 1000) + " kvar", 318, 78);
+    g.fillStyle = GRUEN; g.textAlign = "center";
+    g.fillText("P", X0 + px / 2, Y0 + 36);
+    if (py > 10) {
+      g.fillStyle = BLAU; g.textAlign = "left";
+      g.fillText("Q", X0 + px + 14, Y0 - py / 2 + 9);
+    }
+    g.fillStyle = KUPFER; g.textAlign = "center";
+    g.fillText("S", X0 + px / 2 - 26 * (py / lang), Y0 - py / 2 - 26 * (px / lang) + 9);
+  }
+  g.fillStyle = GRAU; g.font = G.klein + "px system-ui,sans-serif"; g.textAlign = "left";
+  g.fillText("Maßstab dieser Zeichnung: 1 cm ≙ " + zahl(kva_je_cm) + " kVA", X0, G.massY);
+
+  /* ---------- Anzeigen ---------- */
+  document.getElementById("uspw").textContent = U + " V";
+  document.getElementById("istw").textContent = zahl(I, 1) + " A";
+  document.getElementById("cosw").textContent = zahl(c);
+  document.getElementById("aS").textContent = zahl(s / 1000) + " kVA";
+  document.getElementById("aP").textContent = zahl(wp / 1000) + " kW";
+  document.getElementById("aQ").textContent = zahl(q / 1000) + " kvar";
+  document.getElementById("aW").textContent = zahl(phi, 1) + "°";
+
+  var satz;
+  if (c > 0.995) {
+    satz = "Bei cos φ = 1 verschwindet die Blindleistung: das Dreieck wird zu einer Linie, " +
+           "und S und P sind gleich groß. Das Netz überträgt nur noch Wirkleistung.";
+  } else if (c < 0.55) {
+    satz = "Bei cos φ = " + zahl(c) + " ist die Blindleistung mit " + zahl(q / 1000) +
+           " kvar größer als die Wirkleistung mit " + zahl(wp / 1000) +
+           " kW. Das Netz muss " + zahl(s / 1000) + " kVA liefern, nutzbar sind nur " +
+           zahl(wp / 1000) + " kW.";
+  } else {
+    satz = "S = " + zahl(s / 1000) + " kVA hängt nur von U und I ab. Der Wirkfaktor teilt " +
+           "diese Scheinleistung auf: " + zahl(wp / 1000) + " kW Wirkleistung und " +
+           zahl(q / 1000) + " kvar Blindleistung.";
+  }
+  document.getElementById("vgl").textContent = satz;
+}
+
+[usp, ist, cos].forEach(function (e) { e.addEventListener("input", zeichne); });
+document.getElementById("reset").addEventListener("click", function () {
+  usp.value = 400; ist.value = 6.3; cos.value = 0.78; zeichne();
+});
+window.addEventListener("resize", function () { anordnen(); zeichne(); });
+zeichne();
+</script>
+</body></html>
