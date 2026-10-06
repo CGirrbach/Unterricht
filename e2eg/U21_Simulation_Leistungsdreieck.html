@@ -202,8 +202,7 @@ Formel 1 und 7; Z und I nach Seite 40, Formel 4 und 6). Die Spule ist als <b>ide
   document.getElementById('vgl').innerHTML =
     "Beide Dreiecke haben denselben Winkel: <b>"+komma(winkelR,1)+"\u00b0</b> und <b>"
     +komma(winkelL,1)+"\u00b0</b>. "
-    +"P + Q w\u00e4re <b>"+komma(P+Q,0)+"</b>, S ist aber nur <b>"+komma(S,0)+" VA</b>"
-    +", also um "+komma(P+Q-S,0)+" weniger. Eine Hypotenuse ist nie so lang wie beide Katheten zusammen.";
+    +"Eine Hypotenuse ist nie so lang wie beide Katheten zusammen.";
  }
  [wid,bli].forEach(function(e){e.addEventListener('input',zeichne);});
  document.getElementById('reset').addEventListener('click',function(){
