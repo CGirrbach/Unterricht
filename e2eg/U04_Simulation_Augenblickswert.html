@@ -126,7 +126,10 @@ Tabellenbuch steht dieselbe Formel mit &alpha; = 360° · f · t auf Seite 35 (F
 
  // Ein negativer Wert bekommt ein echtes Minuszeichen (U+2212), keinen Bindestrich.
  function zahl(x, stellen){
-  return x.toFixed(stellen).replace('.', ',').replace('-', '\u2212');
+  /* Was auf null gerundet wird, trägt kein Vorzeichen: bei 359° und 1 V stand sonst „−0,0 V“. */
+  var t = x.toFixed(stellen);
+  if (/^-0(\.0*)?$/.test(t)) t = t.slice(1);
+  return t.replace('.', ',').replace('-', '\u2212');
  }
 
  function zeige(){

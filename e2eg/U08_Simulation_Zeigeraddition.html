@@ -117,7 +117,10 @@ ist û = û₁ + û₂; bei φ = 180° bleibt die Differenz der Beträge übrig.
     hoch, unlesbar. Schmal: Zeiger oben, die Angaben darunter (600 auf 510 Bildpunkte), größere
     Schrift, dickere Zeiger. Der Ursprung liegt so, dass auch û₂ = 10 V bei φ = 180° (10 V nach
     links) und û₁ + û₂ = 20 V bei φ = 0° (20 V nach rechts) im Bild bleiben. */
- var BREIT  = {W:960, H:250, X0:150, Y0:214, PX:18, lw:1,   sp:15, bg:46, sz:19},
+ /* Breit (06.10.2026): bei X0 150 und 18 px je Volt ragte û₂ = 10 V bei φ über rund 146° links
+    aus dem Bild. Jetzt reicht der Bereich von X0 − 10 V (15 px) bis X0 + 20 V (495 px), links
+    neben der Beschriftung, die bei 560 px beginnt. */
+ var BREIT  = {W:960, H:250, X0:175, Y0:214, PX:16, lw:1,   sp:15, bg:46, sz:19},
      SCHMAL = {W:600, H:510, X0:210, Y0:230, PX:17, lw:4/3, sp:20, bg:56, sz:28};
  var G = BREIT, X0, Y0, PX;          /* Ursprung und Pixel je Volt */
  function anordnen(){
@@ -135,6 +138,8 @@ ist û = û₁ + û₂; bei φ = 180° bleibt die Differenz der Beträge übrig.
  }
 
  function pfeil(x1,y1,x2,y2,farbe,br,name,seite,anteil){
+  /* Ein Zeiger der Länge null hat keine Richtung: keine Spitze, kein Name (û = 0 bei φ = 180°). */
+  if (Math.hypot(x2-x1, y2-y1) < 2) return;
   ctx.strokeStyle=farbe; ctx.lineWidth=br*G.lw; ctx.lineCap="round";
   ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
   var a=Math.atan2(y1-y2, x2-x1);
@@ -146,15 +151,14 @@ ist û = û₁ + û₂; bei φ = 180° bleibt die Differenz der Beträge übrig.
   /* Am Handy steht der Name quer neben dem Zeiger, nicht auf ihm: bei φ = 0° lagen sonst
      û₁ und û auf derselben Linie übereinander. û₁ und û stehen auf der Seite im
      Uhrzeigersinn (seite −1), û₂ auf der Gegenseite; û bei drei Vierteln seiner Länge. */
-  if(name && G === SCHMAL){
+  if(name){
    var tn = a + seite*Math.PI/2, d = 0.8*G.sz;
    var mx = x1 + anteil*(x2-x1), my = y1 + anteil*(y2-y1);
    ctx.font="bold "+G.sz+"px 'Noto Sans',sans-serif"; ctx.fillStyle=farbe;
    ctx.textAlign='center'; ctx.textBaseline='middle';
    ctx.fillText(name, mx + d*Math.cos(tn), my - d*Math.sin(tn));
    ctx.textAlign='left'; ctx.textBaseline='alphabetic';
-  } else if(name){ ctx.font="bold "+G.sz+"px 'Noto Sans',sans-serif"; ctx.fillStyle=farbe;
-            ctx.fillText(name, (x1+x2)/2 + 10*k*Math.sin(a) + 6*k, (y1+y2)/2 + 10*k*Math.cos(a) - 6*k); }
+  }
  }
 
  function zeichne(){
@@ -188,7 +192,7 @@ ist û = û₁ + û₂; bei φ = 180° bleibt die Differenz der Beträge übrig.
    ctx.fillStyle="#5A666F"; ctx.fillText("û₁ + û₂ = " + zahl(u1+u2,1) + " V", 40, y);
    ctx.fillStyle="#2F7D62"; ctx.fillText("û = " + zahl(s[0],1) + " V", 40, y+42);
    ctx.font="26px 'Noto Sans',sans-serif"; ctx.fillStyle="#5A666F";
-   ctx.fillText("α = " + s[1].toFixed(0) + "°", 40, y+80);
+   ctx.fillText(s[0] < 0.05 ? "α: keiner, denn û = 0" : "α = " + s[1].toFixed(0) + "°", 40, y+80);
    ctx.fillText("Maßstab: 1 V ≙ " + PX + " Bildpunkte", 40, y+114);
    if (phi === 0)   { ctx.fillText("φ = 0°: beide zeigen gleich,", 40, y+148);
                       ctx.fillText("û = û₁ + û₂", 40, y+180); }
@@ -200,7 +204,7 @@ ist û = û₁ + û₂; bei φ = 180° bleibt die Differenz der Beträge übrig.
   ctx.fillStyle="#5A666F"; ctx.fillText("û₁ + û₂ = " + zahl(u1+u2,1) + " V", 560, 58);
   ctx.fillStyle="#2F7D62"; ctx.fillText("û = " + zahl(s[0],1) + " V", 560, 100);
   ctx.font="19px 'Noto Sans',sans-serif"; ctx.fillStyle="#5A666F";
-  ctx.fillText("α = " + s[1].toFixed(0) + "°", 560, 134);
+  ctx.fillText(s[0] < 0.05 ? "α: keiner, denn û = 0" : "α = " + s[1].toFixed(0) + "°", 560, 134);
   ctx.fillText("Maßstab: 1 V ≙ " + PX + " Bildpunkte", 560, 166);
   if (phi === 0)   ctx.fillText("φ = 0°: beide zeigen gleich, û = û₁ + û₂", 560, 200);
   if (phi === 180) ctx.fillText("φ = 180°: gegengerichtet, û = |û₁ − û₂|", 560, 200);
@@ -213,7 +217,7 @@ ist û = û₁ + û₂; bei φ = 180° bleibt die Differenz der Beträge übrig.
   document.getElementById('s2w').textContent = u2 + ' V';
   document.getElementById('sb').textContent = zahl(u1+u2,1) + ' V';
   document.getElementById('ug').textContent = zahl(s[0],1) + ' V';
-  document.getElementById('aw').textContent = s[1].toFixed(0) + '°';
+  document.getElementById('aw').textContent = s[0] < 0.05 ? 'keiner (û = 0)' : s[1].toFixed(0) + '°';
   var e = document.getElementById('vh');
   e.textContent = zahl(s[0]/(u1+u2), 2);
   e.style.color = (phi === 0) ? 'var(--gruen)' : 'var(--grau)';
