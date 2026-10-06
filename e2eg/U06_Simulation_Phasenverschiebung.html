@@ -1,0 +1,300 @@
+<!-- sim_bearbeitung: pflicht -->
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>U06 Simulation: zwei Sinuskurven mit verstellbarer Phasenlage</title>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--linie:#C7D2DA;
+      --gruen:#2F7D62;--rot:#B23A33;--grau:#5A666F}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Noto Sans',system-ui,sans-serif;color:var(--ink);background:#fff}
+header{border-top:6px solid var(--kupfer);padding:14px 18px 10px}
+h1{margin:0;font-size:clamp(18px,4vw,26px)}
+.ziel{background:var(--kupferhell);border-left:5px solid var(--kupfer);
+      padding:12px 16px;margin:12px 18px;font-size:clamp(14px,3vw,17px)}
+.ziel > b:first-child{display:block;font-size:.82em;letter-spacing:.08em;text-transform:uppercase;
+        color:var(--kupfer);margin-bottom:4px}
+canvas{display:block;width:100%;max-width:960px;margin:0 auto;height:auto}
+.regler{max-width:960px;margin:0 auto;padding:8px 18px 4px}
+.zeile{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:14px 0}
+.zeile label{flex:0 0 230px;font-weight:700;font-size:clamp(14px,3vw,17px)}
+/* Der Regler trug die Vorgabefarbe des Browsers (Blau), die einzige Farbe im Bild, die
+   nicht aus dem Haus stammt, und ausgerechnet am Bedienelement (Befund Linse BLATT,
+   U03/B2 und U04/B5, 01.09.2026). Er trägt jetzt Kupfer wie alles Bedienbare. */
+input[type=range]{flex:1 1 220px;min-width:180px;height:44px;accent-color:var(--kupfer);
+  -webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-moz-range-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;
+  height:26px;margin-top:-9px;border-radius:50%;background:var(--kupfer);border:2px solid #fff;
+  box-shadow:0 0 0 1.4px var(--kupfer)}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;
+  background:var(--kupfer);border:2px solid #fff}
+input[type=range]:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
+.wert{flex:0 0 128px;text-align:right;font-variant-numeric:tabular-nums;
+      font-size:clamp(15px,3.2vw,19px);font-weight:700;color:var(--kupfer)}
+.anzeigen{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;
+          max-width:960px;margin:6px auto 0;padding:0 18px}
+.kachel{border:1.4px solid var(--linie);padding:10px 12px}
+.kachel span{display:block;font-size:.78em;letter-spacing:.06em;color:var(--grau);
+             font-weight:700}
+.kachel b{font-size:clamp(17px,3.6vw,22px)}
+.kachel.verdeckt b{color:var(--grau)}
+button{font:inherit;font-weight:700;padding:12px 20px;min-height:48px;border:1.6px solid var(--ink);
+       background:#fff;color:var(--ink);cursor:pointer}
+button:hover{background:var(--kupferhell)}
+.fuss{max-width:960px;margin:14px auto 26px;padding:0 18px;font-size:.86em;color:var(--grau)}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+      line-height:1.15;margin:0 .15em}
+.frac .z{border-bottom:1.2px solid currentColor;padding:0 .25em}
+#pruefbericht{display:none}
+@media (prefers-reduced-motion: reduce){canvas{outline:none}}
+</style></head><body>
+
+<header>
+<h1>Zwei Sinuskurven mit verstellbarer Phasenlage</h1>
+</header>
+
+<div class="ziel">
+<b>Was Sie herausfinden sollen</b>
+Beide Kurven haben <b>dieselbe Frequenz</b> und <b>dieselbe Höhe</b>. Mit dem oberen Schieber
+verschieben Sie u₂ nach links, also zu früheren Zeiten. Beobachten Sie den
+Phasenverschiebungswinkel φ, die Zeitdifferenz Δt und die markierten Nulldurchgänge.
+Entscheiden Sie <b>selbst im Bild</b>, welche Kurve voreilt, und prüfen Sie erst danach mit
+„Antwort zeigen“. Was geschieht, wenn Sie über 180° hinaus schieben, und was bei 360°?
+</div>
+
+<script type="application/json" id="sim-meta">
+{
+  "erkenntnis": "dass eine Phasenverschiebung sowohl als Zeit als auch als Winkel angegeben werden kann, dass man Nulldurchgänge gleicher Richtung vergleicht, die höchstens eine halbe Periode auseinanderliegen, dass die voreilende Kurve diesen Nulldurchgang früher erreicht und im Bild weiter links steht, dass eine Verschiebung um mehr als 180° von der anderen Seite gelesen wird (dann eilt u₁ um 360° minus die Verschiebung vor), dass bei 180° keine Kurve voreilt (gegenphasig) und dass 360° dieselbe Lage ergibt wie 0°",
+  "startwerte":     {"verschiebung": 40, "frequenz": 60},
+  "loesungswerte":  {"verschiebung": 315, "frequenz": 50},
+  "quelle": "Europa Fachkunde S. 134 (Definition, Bild 1b); Tabellenbuch Elektrotechnik S. 35 (Phasenverschiebung: Liniendiagramm mit Δt zwischen gleichsinnigen Nulldurchgängen, φ° = Δt · 360°/T); Europa Fachkunde S. 215 und 219 (gegenphasig, 180°); Technische Mathematik, Lösungen S. 38 (Winkel bis 180° mit voreilend/nacheilend)"
+}
+</script>
+
+<canvas id="buehne" width="960" height="330"
+        data-quelle="Liniendiagramm zweier Sinusspannungen gleicher Frequenz und Höhe; Grundlage Europa Fachkunde S. 134, Bild 1b, und Tabellenbuch Elektrotechnik S. 35 (Phasenverschiebung)"></canvas>
+
+<div class="regler">
+<div class="zeile">
+  <label for="ph">Verschiebung von u₂ nach links</label>
+  <input type="range" id="ph" min="0" max="360" step="1" value="40">
+  <span class="wert" id="phw">40&deg;</span>
+</div>
+<div class="zeile">
+  <label for="fr">Frequenz f</label>
+  <input type="range" id="fr" min="10" max="100" step="1" value="60">
+  <span class="wert" id="frw">60 Hz</span>
+</div>
+<div class="zeile">
+  <button id="antwort" type="button">Antwort zeigen</button>
+  <button id="reset" type="button">Zurücksetzen</button>
+  <button id="halt" type="button">Anhalten</button>
+</div>
+</div>
+
+<div class="anzeigen">
+  <div class="kachel"><span>Periodendauer T</span><b id="tw">16,7 ms</b></div>
+  <div class="kachel"><span>Phasen&shy;verschiebungs&shy;winkel φ</span><b id="pw">40°</b></div>
+  <div class="kachel"><span>Zeitdifferenz &Delta;t</span><b id="dw">1,85 ms</b></div>
+  <div class="kachel verdeckt" id="kv"><span>Es eilt vor</span><b id="vw">?</b></div>
+  <div class="kachel verdeckt" id="kl"><span>Lage</span><b id="lw">?</b></div>
+</div>
+
+<div class="fuss">
+Erreichen zwei periodische Vorgänge <b>gleicher Frequenz</b> zu verschiedenen Zeitpunkten sowohl
+ihre Nulldurchgänge als auch ihre Scheitelwerte, so sind sie phasenverschoben. Die senkrechten
+Markierungen zeigen zwei Nulldurchgänge <b>gleicher Richtung</b> (von Minus nach Plus), die
+höchstens eine halbe Periode auseinanderliegen; ihr Abstand ist Δt. Es gilt
+φ = 360° · <span class="frac"><span class="z">Δt</span><span>T</span></span>
+(Tabellenbuch, Seite 35).
+</div>
+
+<pre id="pruefbericht"></pre>
+
+<script>
+(function(){
+ "use strict";
+ var cv=document.getElementById('buehne'), ctx=cv.getContext('2d');
+ var meta=JSON.parse(document.getElementById('sim-meta').textContent);
+ var s=meta.startwerte.verschiebung, f=meta.startwerte.frequenz;
+ var laeuft=true, raf=null, t0=0, offen=false;
+ var ruhig = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ /* Zwei Anordnungen derselben Zeichnung (06.10.2026). Am Handy (schmaler als 640 px) stand das
+    Querformat (960 auf 330 Bildpunkte) auf zwei Fünftel verkleinert da: Beschriftung 7 bis 8 px
+    hoch, unlesbar (am Standbild in 390 px Breite gesehen). Schmal: dieselben zwei Perioden auf
+    600 auf 430 Bildpunkten, größere Schrift, dickere Linien, lange Beschriftungen zweizeilig. */
+ var BREIT  = {W:960, H:330, X0:90, XE:930, CY:150, A:95,  su:20, sd:18, uy:24, dx2:52,
+               ty:50, zeile:0,  lw:1,   r:5},
+     SCHMAL = {W:600, H:430, X0:50, XE:578, CY:190, A:120, su:28, sd:24, uy:30, dx2:72,
+               ty:60, zeile:30, lw:7/5, r:7};
+ var G = BREIT, X0, XE, CY, A, ZWEI_PI=2*Math.PI;
+ function anordnen(){
+  var neu = (cv.parentNode.clientWidth || window.innerWidth) < 640 ? SCHMAL : BREIT;
+  if (neu !== G || cv.width !== neu.W) { G = neu; cv.width = G.W; cv.height = G.H; }
+  X0=G.X0; XE=G.XE; CY=G.CY; A=G.A;
+ }
+ anordnen();
+
+ function zahl(x, st){ return x.toFixed(st).replace('.', ','); }
+ function T_ms(){ return 1000/f; }
+ function px(a){ return X0 + (XE-X0)*a/(4*Math.PI); }   /* zwei volle Perioden */
+
+ /* Was das BILD zeigt, bei einer Verschiebung von u₂ um sGrad nach links.
+    Verglichen werden Nulldurchgänge gleicher Richtung, die höchstens eine halbe Periode
+    auseinanderliegen (Tabellenbuch S. 35: Δt zwischen zwei fallenden Nulldurchgängen;
+    Technische Mathematik, Lösungen S. 38: Winkel bis 180° mit „voreilend/nacheilend“).
+    Bis zum 26.09.2026 meldete die Kachel für JEDEN Winkel von 1° bis 359° „u₂ eilt vor“;
+    bei 180° gibt das Bild keine voreilende Kurve her, darüber eilt u₁ vor (Befund der
+    Linsen FACH B3, DIDAKTIK B1, BLATT B13). */
+ function bewerte(sGrad){
+  var sr = ((sGrad % 360) + 360) % 360;
+  if (sr === 0)   return {phi: 0,        vor: 'keine', lage: 'phasengleich'};
+  if (sr < 180)   return {phi: sr,       vor: 'u₂',    lage: 'phasenverschoben'};
+  if (sr === 180) return {phi: 180,      vor: 'keine', lage: 'gegenphasig'};
+  return                 {phi: 360 - sr, vor: 'u₁',    lage: 'phasenverschoben'};
+ }
+
+ /* Welche Nulldurchgänge werden markiert? u₁ = sin(a + lauf) steigt bei a₁ = −lauf (mod 2π)
+    durch null, u₂ = sin(a + lauf + s) bei a₁ − s (mod 2π). Markiert wird das NÄCHSTE Paar;
+    liegt eine Marke links vom Bild, rücken beide um eine Periode nach rechts. */
+ function marken(lauf, sGrad){
+  var b = bewerte(sGrad), a1 = ((-lauf) % ZWEI_PI + ZWEI_PI) % ZWEI_PI, d = b.phi*Math.PI/180;
+  if (b.lage === 'phasengleich') return {m: [[1, a1], [2, a1]], balken: []};
+  if (b.lage === 'gegenphasig') {
+   if (a1 < Math.PI) a1 += ZWEI_PI;
+   return {m: [[1, a1], [2, a1 - Math.PI], [2, a1 + Math.PI]],
+           balken: [[a1 - Math.PI, a1], [a1, a1 + Math.PI]]};
+  }
+  if (b.vor === 'u₂') {
+   var a2 = a1 - d;
+   if (a2 < -1e-9) { a1 += ZWEI_PI; a2 += ZWEI_PI; }
+   return {m: [[1, a1], [2, a2]], balken: [[a2, a1]]};
+  }
+  return {m: [[1, a1], [2, a1 + d]], balken: [[a1, a1 + d]]};
+ }
+
+ function kurve(ph, farbe, breite){
+  ctx.strokeStyle=farbe; ctx.lineWidth=breite*G.lw; ctx.beginPath();
+  for(var a=0;a<=4*Math.PI;a+=0.01){
+   var x=px(a), y=CY-A*Math.sin(a+ph);
+   if(a===0)ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+ }
+
+ function marke(a, farbe){
+  var x = px(a);
+  ctx.strokeStyle=farbe; ctx.lineWidth=2*G.lw; ctx.setLineDash([5,4]);
+  ctx.beginPath(); ctx.moveTo(x, CY-A-6); ctx.lineTo(x, CY+A+16); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle=farbe; ctx.beginPath(); ctx.arc(x, CY, G.r, 0, 2*Math.PI); ctx.fill();
+ }
+
+ function zeichne(lauf){
+  ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.font="17px 'Noto Sans',sans-serif"; ctx.lineCap="round";
+  ctx.strokeStyle="#C7D2DA"; ctx.lineWidth=1.4;
+  ctx.beginPath(); ctx.moveTo(X0-40,CY); ctx.lineTo(XE+14,CY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(X0,CY-A-12); ctx.lineTo(X0,CY+A+30); ctx.stroke();
+  var ph2 = s*Math.PI/180;
+  kurve(lauf,       "#1A2530", 2.6);           /* u₁ */
+  kurve(lauf+ph2,   "#A34E0E", 2.6);           /* u₂, um s nach links verschoben */
+  var mk = marken(lauf, s), b = bewerte(s);
+  mk.m.forEach(function(p){ marke(p[1], p[0] === 1 ? "#1A2530" : "#A34E0E"); });
+  ctx.strokeStyle="#2F7D62"; ctx.lineWidth=G.lw*13/5;
+  mk.balken.forEach(function(z){
+   ctx.beginPath(); ctx.moveTo(px(z[0]), CY+A+26); ctx.lineTo(px(z[1]), CY+A+26); ctx.stroke();
+  });
+  ctx.fillStyle="#2F7D62"; ctx.font="bold "+G.sd+"px 'Noto Sans',sans-serif";
+  var dt = zahl(T_ms()*b.phi/360, 2) + " ms", zeilen, tx;
+  if (mk.balken.length === 1) {
+   zeilen = ["Δt = " + dt]; tx = px(Math.min(mk.balken[0][0], mk.balken[0][1])) + 6;
+  } else if (mk.balken.length === 2) {
+   zeilen = G.zeile ? ["nach links wie nach rechts", "Δt = " + dt]
+                    : ["nach links wie nach rechts Δt = " + dt];
+   tx = px(mk.balken[0][0]) + 6;
+  } else {
+   zeilen = G.zeile ? ["Δt = 0 ms:", "die Kurven decken sich"]
+                    : ["Δt = 0 ms: die Kurven decken sich"];
+   tx = X0 + 8;
+  }
+  /* Nie über den rechten Rand hinaus: die längste Zeile endet spätestens 6 px davor. */
+  var lang = 0;
+  zeilen.forEach(function(z){ lang = Math.max(lang, ctx.measureText(z).width); });
+  tx = Math.min(tx, cv.width - 6 - lang);
+  zeilen.forEach(function(z, k){ ctx.fillText(z, tx, CY+A+G.ty + k*G.zeile); });
+  /* Die Beschriftung steht ÜBER dem oberen Ende der Marken (CY−A−6); bis zum 26.09.2026
+     liefen die Marken durch die Schrift (Befund Linse BLATT B12 an der Animation). */
+  ctx.font="bold "+G.su+"px 'Noto Sans',sans-serif";
+  ctx.fillStyle="#1A2530"; ctx.fillText("u₁", X0+8, CY-A-G.uy);
+  ctx.fillStyle="#A34E0E"; ctx.fillText("u₂", X0+8+G.dx2, CY-A-G.uy);
+ }
+
+ function zeige(){
+  var b = bewerte(s);
+  document.getElementById('phw').textContent = s + '°';
+  document.getElementById('frw').textContent = f + ' Hz';
+  document.getElementById('tw').textContent = zahl(T_ms(),1) + ' ms';
+  document.getElementById('pw').textContent = b.phi + '°';
+  document.getElementById('dw').textContent = zahl(T_ms()*b.phi/360,2) + ' ms';
+  var v = document.getElementById('vw'), l = document.getElementById('lw');
+  document.getElementById('kv').className = offen ? 'kachel' : 'kachel verdeckt';
+  document.getElementById('kl').className = offen ? 'kachel' : 'kachel verdeckt';
+  if (!offen) { v.textContent = '?'; l.textContent = '?'; l.style.color = ''; return; }
+  v.textContent = b.vor;
+  l.textContent = b.lage;
+  l.style.color = b.lage === 'phasengleich' ? 'var(--gruen)' : 'var(--ink)';
+ }
+
+ function verbergen(){
+  offen = false; document.getElementById('antwort').textContent = 'Antwort zeigen';
+ }
+ function alles(l){ zeige(); zeichne(l||0); }
+ function loop(ts){ if(!t0)t0=ts; alles(((ts-t0)/1000)*1.2); raf=requestAnimationFrame(loop); }
+
+ /* Prüfmodus für nachrechnung.py: dieselben Funktionen, die zeichnen und anzeigen,
+    für jede Stellung des Schiebers und 36 Laufstellungen; das Ergebnis steht als JSON im
+    unsichtbaren Element #pruefbericht. Die Seite zeichnet dann nichts. */
+ if (/[?&]pruefen\b/.test(location.search)) {
+  zeige();                                   /* Ausgangslage: Antwort verdeckt */
+  var bericht = {start: {vor: document.getElementById('vw').textContent,
+                         lage: document.getElementById('lw').textContent}, stellungen: []};
+  f = 50;
+  for (var sg = 0; sg <= 360; sg++) {
+   s = sg;
+   offen = true; zeige();
+   var z = {s: sg, phi: bewerte(sg).phi,
+            vor: document.getElementById('vw').textContent,
+            lage: document.getElementById('lw').textContent,
+            dt: document.getElementById('dw').textContent, laeufe: []};
+   for (var k = 0; k < 36; k++) {
+    var lauf = ZWEI_PI*k/36, mk = marken(lauf, sg);
+    z.laeufe.push({lauf: lauf, m: mk.m, balken: mk.balken});
+   }
+   bericht.stellungen.push(z);
+  }
+  document.getElementById('pruefbericht').textContent = JSON.stringify(bericht);
+  return;
+ }
+
+ document.getElementById('ph').addEventListener('input', function(e){
+   s = parseInt(e.target.value,10); verbergen(); if(!raf) alles(0); });
+ document.getElementById('fr').addEventListener('input', function(e){
+   f = parseInt(e.target.value,10); if(!raf) alles(0); });
+ document.getElementById('antwort').addEventListener('click', function(){
+   offen = !offen; this.textContent = offen ? 'Antwort verbergen' : 'Antwort zeigen';
+   zeige(); });
+ document.getElementById('reset').addEventListener('click', function(){
+   s = meta.startwerte.verschiebung; f = meta.startwerte.frequenz; verbergen();
+   document.getElementById('ph').value = s; document.getElementById('fr').value = f;
+   if(!raf) alles(0); else zeige(); });
+ document.getElementById('halt').addEventListener('click', function(){
+   if(raf){ cancelAnimationFrame(raf); raf=null; this.textContent='Weiterlaufen'; }
+   else { t0=0; raf=requestAnimationFrame(loop); this.textContent='Anhalten'; } });
+
+ window.addEventListener('resize', function(){ anordnen(); if(!raf) alles(0); });
+ if(ruhig){ alles(0); } else { raf=requestAnimationFrame(loop); }
+})();
+</script>
+</body></html>
