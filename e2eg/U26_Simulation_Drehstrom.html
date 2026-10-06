@@ -1,0 +1,319 @@
+<!-- sim_bearbeitung: pflicht -->
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>U26 Simulation: Drei Zeiger, ein Netz</title>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--linie:#C7D2DA;
+      --gruen:#2F7D62;--rot:#B23A33;--grau:#5A666F}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Noto Sans',system-ui,sans-serif;color:var(--ink);background:#fff}
+header{border-top:6px solid var(--kupfer);padding:14px 18px 10px}
+h1{margin:0;font-size:clamp(18px,4vw,26px)}
+.ziel{background:var(--kupferhell);border-left:5px solid var(--kupfer);
+      padding:12px 16px;margin:12px 18px;font-size:clamp(14px,3vw,17px)}
+.ziel > b:first-child{display:block;font-size:.82em;letter-spacing:.08em;text-transform:uppercase;
+        color:var(--kupfer);margin-bottom:4px}
+canvas{display:block;width:100%;max-width:960px;margin:0 auto;height:auto}
+.regler{max-width:960px;margin:0 auto;padding:8px 18px 4px}
+.zeile{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:14px 0}
+.zeile label{flex:0 0 210px;font-weight:700;font-size:clamp(14px,3vw,17px)}
+/* Der Regler trug die Vorgabefarbe des Browsers (Blau), die einzige Farbe im Bild, die
+   nicht aus dem Haus stammt, und ausgerechnet am Bedienelement (Befund Linse BLATT,
+   U03/B2 und U04/B5, 01.09.2026). Er trägt jetzt Kupfer wie alles Bedienbare. */
+input[type=range]{flex:1 1 220px;min-width:180px;height:44px;accent-color:var(--kupfer);
+  -webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-moz-range-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;
+  height:26px;margin-top:-9px;border-radius:50%;background:var(--kupfer);border:2px solid #fff;
+  box-shadow:0 0 0 1.4px var(--kupfer)}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;
+  background:var(--kupfer);border:2px solid #fff}
+input[type=range]:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
+.wert{flex:0 0 128px;text-align:right;font-variant-numeric:tabular-nums;
+      font-size:clamp(15px,3.2vw,19px);font-weight:700;color:var(--kupfer)}
+.anzeigen{display:flex;gap:12px;flex-wrap:wrap;max-width:960px;margin:6px auto 0;padding:0 18px}
+.kachel{flex:1 1 150px;border:1.4px solid var(--linie);padding:10px 12px}
+.kachel span{display:block;font-size:.78em;letter-spacing:.06em;color:var(--grau);
+             font-weight:700}
+.kachel b{font-size:clamp(17px,3.6vw,22px)}
+button{font:inherit;font-weight:700;padding:12px 20px;min-height:48px;border:1.6px solid var(--ink);
+       background:#fff;color:var(--ink);cursor:pointer}
+button:hover{background:var(--kupferhell)}
+.fuss{max-width:960px;margin:14px auto 26px;padding:0 18px;font-size:.86em;color:var(--grau)}
+@media (prefers-reduced-motion: reduce){canvas{outline:none}}
+</style><style>
+.schalter{max-width:960px;margin:10px auto 0;padding:0 18px;display:flex;gap:0;flex-wrap:wrap}
+.schalter button{flex:1 1 200px;border-right-width:0}
+.schalter button:last-child{border-right-width:1.6px}
+.schalter button[aria-pressed=true]{background:var(--kupfer);color:#fff;border-color:var(--kupfer)}
+.vergleich{max-width:960px;margin:10px auto 0;padding:10px 18px;border-left:5px solid var(--gruen);
+  background:#EEF5F2;font-size:clamp(14px,3vw,17px)}
+</style>
+</head><body>
+
+<header>
+<h1>Drei Zeiger, ein Netz</h1>
+</header>
+
+<div class="ziel">
+<b>Was Sie herausfinden sollen</b>
+Links drehen sich drei Zeiger mit festem Abstand von 120&deg;, rechts entstehen daraus drei
+Sinuskurven. Achten Sie auf die Kachel <b>Summe</b>: Gibt es einen Winkel, bei dem sie
+<b>nicht</b> null ist? Schalten Sie danach die Leiterspannung dazu und vergleichen Sie ihren
+Scheitelwert mit dem einer Strangspannung.
+</div>
+
+<script type="application/json" id="sim-meta">
+{
+  "erkenntnis": "dass die Summe der drei Augenblickswerte in JEDER Zeigerstellung null ist, waehrend jeder einzelne Wert sich staendig aendert, und dass die Leiterspannung als geometrische Differenz zweier Strangspannungen entsteht und deshalb nur den Wurzel-3-fachen und nicht den doppelten Wert erreicht",
+  "startwerte":    {"winkel": 45, "strangspannung": 210},
+  "loesungswerte": {"winkel": [0, 17, 30, 60, 90, 120, 143, 150, 180, 291], "strangspannung": [230, 288.7, 398.4, 132.8]},
+  "quelle": "Europa Fachkunde S. 156 und S. 157, Abschnitt 7.9: drei um 120 Grad verschobene Strangspannungen; Verkettungsfaktor Wurzel 3; u_31 = u_3N minus u_1N"
+}
+</script>
+
+<div class="schalter">
+  <button id="bS" type="button" aria-pressed="true">nur die drei Strangspannungen</button>
+  <button id="bL" type="button" aria-pressed="false">mit der Leiterspannung u<sub>31</sub></button>
+</div>
+
+<canvas id="buehne" width="960" height="430"
+        data-quelle="Europa Fachkunde S. 156, Bild 2 und S. 157, Bild 2 und Bild 3: Zeigerbild und Liniendiagramm des Dreiphasensystems; die Leiterspannung ist die geometrische Differenz zweier Strangspannungen"></canvas>
+
+<div class="regler">
+<div class="zeile">
+  <label for="wnk">Winkel &alpha;</label>
+  <input type="range" id="wnk" min="0" max="360" step="1" value="45">
+  <div class="wert" id="wnkw">45&deg;</div>
+</div>
+<div class="zeile">
+  <label for="ust">Strangspannung U<sub>1N</sub></label>
+  <input type="range" id="ust" min="60" max="420" step="5" value="210">
+  <div class="wert" id="ustw">210 V</div>
+</div>
+<button id="reset" type="button">Zur&uuml;cksetzen</button>
+</div>
+
+<div class="anzeigen">
+  <div class="kachel"><span>u<sub>1N</sub></span><b id="a1">0 V</b></div>
+  <div class="kachel"><span>u<sub>2N</sub></span><b id="a2">0 V</b></div>
+  <div class="kachel"><span>u<sub>3N</sub></span><b id="a3">0 V</b></div>
+  <div class="kachel"><span>Summe</span><b id="aS">0 V</b></div>
+  <div class="kachel"><span>Leiterspannung U</span><b id="aL">0 V</b></div>
+</div>
+
+<div class="vergleich" id="vgl">&nbsp;</div>
+
+<div class="fuss">
+Gerechnet wird mit u<sub>1N</sub> = &ucirc; &middot; sin &alpha;, u<sub>2N</sub> = &ucirc; &middot; sin (&alpha; &minus; 120&deg;)
+und u<sub>3N</sub> = &ucirc; &middot; sin (&alpha; &minus; 240&deg;), dabei ist &ucirc; = &radic;2 &middot; U<sub>1N</sub>.
+Die Leiterspannung entsteht als u<sub>31</sub> = u<sub>3N</sub> &minus; u<sub>1N</sub>, ihr Effektivwert ist
+&radic;3 &middot; U<sub>1N</sub> (Tabellenbuch Seite 48, Formel 3). Der Generator gilt als
+<b>symmetrisch</b>, das Netz als <b>unbelastet</b>.
+</div>
+
+<script>
+"use strict";
+var C  = document.getElementById("buehne");
+var g  = C.getContext("2d");
+var wnk = document.getElementById("wnk"), ust = document.getElementById("ust");
+var bS = document.getElementById("bS"),   bL  = document.getElementById("bL");
+var mitLeiter = false;
+
+var INK = "#1A2530", KUPFER = "#A34E0E", LINIE = "#C7D2DA", GRAU = "#5A666F";
+var GRUEN = "#2F7D62", ROT = "#B23A33", BLAU = "#2C5F8A";
+var FARBE = [KUPFER, GRUEN, BLAU];
+var NAME  = ["1N", "2N", "3N"];
+var W3 = Math.sqrt(3), W2 = Math.sqrt(2);
+
+/* Zwei Anordnungen derselben Zeichnung. Am Handy (schmaler als 640 px) stand das Querformat
+   960 x 430 auf 390 px verkleinert da: Beschriftung 4,9 bis 6,1 px hoch, unlesbar (gemessen
+   06.10.2026). Schmal: Zeigerbild oben, Liniendiagramm darunter, 600 px breit, kleinste
+   Schrift 19, am Handy 19 * 390 / 600 = 12,4 px. */
+var BREIT  = {W: 960, H: 430, MX: 190, MY: 215, R: 138, lr: 26, lf: 15, l31: 24,
+              cap: 13, capZ: 400, capL: 400, X0: 400, X1: 912, Y0: 215, HY: 128,
+              ax: 12, punkt: 4.5, tick: 8};
+var SCHMAL = {W: 600, H: 846, MX: 300, MY: 232, R: 165, lr: 38, lf: 26, l31: 40,
+              cap: 21, capZ: 486, capL: 834, X0: 104, X1: 572, Y0: 650, HY: 120,
+              ax: 19, punkt: 6, tick: 136};
+var G = BREIT;
+function anordnen() {
+  var neu = (C.parentNode.clientWidth || window.innerWidth) < 640 ? SCHMAL : BREIT;
+  if (neu !== G || C.width !== neu.W) { G = neu; C.width = G.W; C.height = G.H; }
+}
+anordnen();
+
+function zahl(v, n) {
+  var s = (Math.abs(v) < 0.05 ? 0 : v).toFixed(n === undefined ? 1 : n);
+  /* toFixed liefert den ASCII-Bindestrich; im Druck und am Schirm gehoert dorthin
+     das echte Minuszeichen. */
+  return s.replace(".", ",").replace("-", "−");
+}
+
+/* Formelzeichen mit Index: fuer ein tiefgestelltes grosses N gibt es kein Unicode-Zeichen,
+   deshalb wird der Index eigens kleiner und tiefer gesetzt. */
+function zeichenMitIndex(gross, index, x, y, groesse) {
+  g.font = "bold " + groesse + "px system-ui,sans-serif";
+  var bH = g.measureText(gross).width;
+  g.font = "bold " + Math.round(groesse * 0.72) + "px system-ui,sans-serif";
+  var bI = g.measureText(index).width;
+  var links = x - (bH + bI) / 2;
+  g.textAlign = "left";
+  g.font = "bold " + groesse + "px system-ui,sans-serif";
+  g.fillText(gross, links, y);
+  g.font = "bold " + Math.round(groesse * 0.72) + "px system-ui,sans-serif";
+  g.fillText(index, links + bH, y + Math.round(groesse * 0.28));
+  g.textAlign = "center";
+}
+
+function zeichne() {
+  var a  = +wnk.value;
+  var U  = +ust.value;
+  var uD = W2 * U;                        // Scheitelwert der Strangspannung
+  var u  = [0, 1, 2].map(function (k) {
+    return uD * Math.sin((a - 120 * k) * Math.PI / 180);
+  });
+  var summe = u[0] + u[1] + u[2];
+  var u31   = u[2] - u[0];
+
+  g.clearRect(0, 0, C.width, C.height);
+  g.lineWidth = 1;
+
+  /* ---------------- links (am Handy oben): das Zeigerbild ---------------- */
+  var MX = G.MX, MY = G.MY, R = G.R;
+  g.strokeStyle = LINIE;
+  g.beginPath(); g.arc(MX, MY, R, 0, 2 * Math.PI); g.stroke();
+  g.beginPath(); g.moveTo(MX - R - 14, MY); g.lineTo(MX + R + 14, MY);
+  g.moveTo(MX, MY - R - 14); g.lineTo(MX, MY + R + 14); g.stroke();
+
+  var spitze = [];
+  for (var k = 0; k < 3; k++) {
+    var w  = (a - 120 * k) * Math.PI / 180;
+    var px = MX + R * Math.cos(w), py = MY - R * Math.sin(w);
+    spitze.push([px, py]);
+    g.strokeStyle = FARBE[k]; g.fillStyle = FARBE[k]; g.lineWidth = 3;
+    g.beginPath(); g.moveTo(MX, MY); g.lineTo(px, py); g.stroke();
+    g.beginPath();                                   // Pfeilspitze
+    g.moveTo(px, py);
+    g.lineTo(px - 12 * Math.cos(w - 0.35), py + 12 * Math.sin(w - 0.35));
+    g.lineTo(px - 12 * Math.cos(w + 0.35), py + 12 * Math.sin(w + 0.35));
+    g.closePath(); g.fill();
+    g.textBaseline = "middle";
+    zeichenMitIndex("U", NAME[k], MX + (R + G.lr) * Math.cos(w),
+                    MY - (R + G.lr) * Math.sin(w), G.lf);
+    /* die Projektion auf die senkrechte Achse ist der Augenblickswert */
+    g.strokeStyle = FARBE[k]; g.lineWidth = 1; g.setLineDash([3, 3]);
+    g.beginPath(); g.moveTo(px, py); g.lineTo(MX, py); g.stroke();
+    g.setLineDash([]);
+  }
+  if (mitLeiter) {                                   // u31 als geometrische Differenz
+    g.strokeStyle = ROT; g.fillStyle = ROT; g.lineWidth = 3;
+    g.beginPath(); g.moveTo(spitze[0][0], spitze[0][1]);
+    g.lineTo(spitze[2][0], spitze[2][1]); g.stroke();
+    g.textBaseline = "middle";
+    zeichenMitIndex("U", "31", (spitze[0][0] + spitze[2][0]) / 2 - G.l31,
+                    (spitze[0][1] + spitze[2][1]) / 2, G.lf);
+  }
+  g.fillStyle = GRAU; g.font = G.cap + "px system-ui,sans-serif"; g.textAlign = "center";
+  g.textBaseline = "alphabetic";
+  g.fillText("Zeigerbild, α = " + a + "°", MX, G.capZ);
+
+  /* ---------------- rechts (am Handy unten): das Liniendiagramm ---------------- */
+  var X0 = G.X0, X1 = G.X1, Y0 = G.Y0, HY = G.HY;
+  var skala = mitLeiter ? uD * W3 : uD;
+  g.strokeStyle = LINIE; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(X0, Y0); g.lineTo(X1, Y0); g.stroke();
+  g.beginPath(); g.moveTo(X0, Y0 - HY - 10); g.lineTo(X0, Y0 + HY + 10); g.stroke();
+  g.fillStyle = GRAU; g.font = G.ax + "px system-ui,sans-serif";
+  g.textAlign = "right"; g.textBaseline = "middle";
+  g.fillText(zahl(skala, 0) + " V", X0 - 6, Y0 - HY);
+  g.fillText("0", X0 - 6, Y0);
+  g.fillText("−" + zahl(skala, 0) + " V", X0 - 6, Y0 + HY);
+  g.textAlign = "center"; g.textBaseline = "top";
+  for (var t = 0; t <= 360; t += 90) {
+    var xt = X0 + (X1 - X0) * t / 360;
+    g.strokeStyle = LINIE;
+    g.beginPath(); g.moveTo(xt, Y0 - 4); g.lineTo(xt, Y0 + 4); g.stroke();
+    g.fillStyle = GRAU; g.fillText(t + "°", xt, Y0 + G.tick);
+  }
+
+  function kurve(farbe, versatz, faktor) {
+    g.strokeStyle = farbe; g.lineWidth = 2.4; g.beginPath();
+    for (var t = 0; t <= 360; t += 2) {
+      var y = faktor * uD * Math.sin((t - versatz) * Math.PI / 180);
+      var X = X0 + (X1 - X0) * t / 360;
+      if (t === 0) { g.moveTo(X, Y0 - HY * y / skala); }
+      else         { g.lineTo(X, Y0 - HY * y / skala); }
+    }
+    g.stroke();
+  }
+  for (var k2 = 0; k2 < 3; k2++) { kurve(FARBE[k2], 120 * k2, 1); }
+  if (mitLeiter) {
+    g.strokeStyle = ROT; g.lineWidth = 2.8; g.beginPath();
+    for (var t2 = 0; t2 <= 360; t2 += 2) {
+      var y2 = uD * (Math.sin((t2 - 240) * Math.PI / 180) - Math.sin(t2 * Math.PI / 180));
+      var X2 = X0 + (X1 - X0) * t2 / 360;
+      if (t2 === 0) { g.moveTo(X2, Y0 - HY * y2 / skala); }
+      else          { g.lineTo(X2, Y0 - HY * y2 / skala); }
+    }
+    g.stroke();
+  }
+  var xa = X0 + (X1 - X0) * a / 360;                 // die Marke fuer den Winkel
+  g.strokeStyle = INK; g.lineWidth = 1.4; g.setLineDash([5, 4]);
+  g.beginPath(); g.moveTo(xa, Y0 - HY - 10); g.lineTo(xa, Y0 + HY + 10); g.stroke();
+  g.setLineDash([]);
+  for (var k3 = 0; k3 < 3; k3++) {
+    g.fillStyle = FARBE[k3];
+    g.beginPath(); g.arc(xa, Y0 - HY * u[k3] / skala, G.punkt, 0, 2 * Math.PI); g.fill();
+  }
+  if (mitLeiter) {
+    g.fillStyle = ROT;
+    g.beginPath(); g.arc(xa, Y0 - HY * u31 / skala, G.punkt, 0, 2 * Math.PI); g.fill();
+  }
+  g.fillStyle = GRAU; g.font = G.cap + "px system-ui,sans-serif"; g.textAlign = "center";
+  g.textBaseline = "alphabetic";
+  g.fillText("Liniendiagramm", (X0 + X1) / 2, G.capL);
+
+  /* ---------------- Kacheln und Satz ---------------- */
+  document.getElementById("wnkw").textContent = a + "°";
+  document.getElementById("ustw").textContent = U + " V";
+  document.getElementById("a1").textContent = zahl(u[0]) + " V";
+  document.getElementById("a2").textContent = zahl(u[1]) + " V";
+  document.getElementById("a3").textContent = zahl(u[2]) + " V";
+  document.getElementById("aS").textContent = zahl(summe) + " V";
+  document.getElementById("aL").textContent = zahl(W3 * U, 0) + " V";
+
+  var satz;
+  if (mitLeiter) {
+    satz = "Der Scheitelwert der Leiterspannung beträgt " + zahl(W3 * uD, 0) +
+           " V, der einer Strangspannung " + zahl(uD, 0) + " V. Das Verhältnis ist " +
+           zahl(W3 * uD / uD, 3) + ", also √3, und nicht 2.";
+  } else if (Math.abs(u[0]) < 6 || Math.abs(u[1]) < 6 || Math.abs(u[2]) < 6) {
+    satz = "Hier ist gerade eine der drei Spannungen null, die beiden anderen sind gleich groß " +
+           "und entgegengesetzt. Drehen Sie weiter: die Summe bleibt trotzdem null.";
+  } else {
+    satz = "Keiner der drei Werte ist null, und keine zwei heben sich gegenseitig auf. " +
+           "Die Summe ist trotzdem " + zahl(summe) + " V.";
+  }
+  document.getElementById("vgl").textContent = satz;
+}
+
+function modus(an) {
+  mitLeiter = an;
+  bS.setAttribute("aria-pressed", an ? "false" : "true");
+  bL.setAttribute("aria-pressed", an ? "true" : "false");
+  zeichne();
+}
+
+wnk.addEventListener("input", zeichne);
+ust.addEventListener("input", zeichne);
+bS.addEventListener("click", function () { modus(false); });
+bL.addEventListener("click", function () { modus(true); });
+document.getElementById("reset").addEventListener("click", function () {
+  wnk.value = 45; ust.value = 210; modus(false);
+});
+window.addEventListener("resize", function () { anordnen(); zeichne(); });
+zeichne();
+</script>
+</body></html>
