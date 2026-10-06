@@ -1,0 +1,236 @@
+<!-- sim_bearbeitung: pflicht -->
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>U22 Simulation: Zwei Verbraucher, ein Netz</title>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--linie:#C7D2DA;
+      --gruen:#2F7D62;--rot:#B23A33;--grau:#5A666F}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Noto Sans',system-ui,sans-serif;color:var(--ink);background:#fff}
+header{border-top:6px solid var(--kupfer);padding:14px 18px 10px}
+h1{margin:0;font-size:clamp(18px,4vw,26px)}
+.ziel{background:var(--kupferhell);border-left:5px solid var(--kupfer);
+      padding:12px 16px;margin:12px 18px;font-size:clamp(14px,3vw,17px)}
+.ziel > b:first-child{display:block;font-size:.82em;letter-spacing:.08em;text-transform:uppercase;
+        color:var(--kupfer);margin-bottom:4px}
+canvas{display:block;width:100%;max-width:960px;margin:0 auto;height:auto}
+.regler{max-width:960px;margin:0 auto;padding:8px 18px 4px}
+.zeile{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:14px 0}
+.zeile label{flex:0 0 210px;font-weight:700;font-size:clamp(14px,3vw,17px)}
+/* Der Regler trug die Vorgabefarbe des Browsers (Blau), die einzige Farbe im Bild, die
+   nicht aus dem Haus stammt, und ausgerechnet am Bedienelement (Befund Linse BLATT,
+   U03/B2 und U04/B5, 01.09.2026). Er trägt jetzt Kupfer wie alles Bedienbare. */
+input[type=range]{flex:1 1 220px;min-width:180px;height:44px;accent-color:var(--kupfer);
+  -webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-moz-range-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;
+  height:26px;margin-top:-9px;border-radius:50%;background:var(--kupfer);border:2px solid #fff;
+  box-shadow:0 0 0 1.4px var(--kupfer)}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;
+  background:var(--kupfer);border:2px solid #fff}
+input[type=range]:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
+.wert{flex:0 0 128px;text-align:right;font-variant-numeric:tabular-nums;
+      font-size:clamp(15px,3.2vw,19px);font-weight:700;color:var(--kupfer)}
+.anzeigen{display:flex;gap:12px;flex-wrap:wrap;max-width:960px;margin:6px auto 0;padding:0 18px}
+.kachel{flex:1 1 150px;border:1.4px solid var(--linie);padding:10px 12px}
+.kachel span{display:block;font-size:.78em;letter-spacing:.06em;color:var(--grau);
+             font-weight:700}
+.kachel b{font-size:clamp(17px,3.6vw,22px)}
+button{font:inherit;font-weight:700;padding:12px 20px;min-height:48px;border:1.6px solid var(--ink);
+       background:#fff;color:var(--ink);cursor:pointer}
+button:hover{background:var(--kupferhell)}
+.fuss{max-width:960px;margin:14px auto 26px;padding:0 18px;font-size:.86em;color:var(--grau)}
+@media (prefers-reduced-motion: reduce){canvas{outline:none}}
+</style>
+<style>
+.schalter{max-width:960px;margin:10px auto 0;padding:0 18px;display:flex;gap:0;flex-wrap:wrap}
+.schalter button{flex:1 1 200px;border-right-width:0}
+.schalter button:last-child{border-right-width:1.6px}
+.schalter button[aria-pressed=true]{background:var(--kupfer);color:#fff;border-color:var(--kupfer)}
+.vergleich{max-width:960px;margin:10px auto 0;padding:10px 18px;border-left:5px solid var(--gruen);
+  background:#EEF5F2;font-size:clamp(14px,3vw,17px)}
+</style></head><body>
+
+<header>
+<h1>Zwei Verbraucher, ein Netz</h1>
+</header>
+
+<div class="ziel">
+<b>Was Sie herausfinden sollen</b>
+Ein Motor und ein Heizk&ouml;rper h&auml;ngen an denselben 230 V. Verstellen Sie die
+Motorleistung, seinen Wirkfaktor und die Heizleistung. Achten Sie darauf, was mit dem
+<b>gemeinsamen Wirkfaktor</b> geschieht, wenn Heizleistung dazukommt, und was mit dem
+<b>Strom</b> geschieht, wenn der Motor bei gleicher Leistung einen schlechteren Wirkfaktor
+hat.
+</div>
+
+<script type="application/json" id="sim-meta">
+{
+  "erkenntnis": "dass sich Wirk- und Blindleistung getrennt addieren und der gemeinsame Wirkfaktor deshalb KEIN Mittelwert ist; ein rein wirksamer Verbraucher hebt ihn an, ohne dass eine einzige Blindleistung verschwindet, und ein schlechter Wirkfaktor kostet Strom in der Leitung, ohne dass mehr Arbeit ankommt",
+  "startwerte":     {"motorleistung": 1500, "wirkfaktor": 0.70, "heizleistung": 500},
+  "loesungswerte":  {"motorleistung": 2200, "wirkfaktor": 0.74, "heizleistung": 2000},
+  "quelle": "Europa-Rechenbuch S. 121, 7.9 und Tabellenbuch S. 37: P addieren, Q addieren, dann S = Wurzel(P² + Q²)"
+}
+</script>
+
+<canvas id="buehne" width="960" height="380"
+        data-quelle="Tabellenbuch S. 37: Leistungsdreieck; die Wirkleistungen zweier Verbraucher addieren sich waagerecht, die Blindleistungen senkrecht, und erst daraus entsteht die gemeinsame Scheinleistung"></canvas>
+
+<div class="regler">
+<div class="zeile">
+  <label for="pm">Motor: Wirkleistung</label>
+  <input type="range" id="pm" min="200" max="4000" step="100" value="1500">
+  <div class="wert" id="pmw">1500 W</div>
+</div>
+<div class="zeile">
+  <label for="cf">Motor: Wirkfaktor</label>
+  <input type="range" id="cf" min="40" max="100" step="1" value="70">
+  <div class="wert" id="cfw">0,70</div>
+</div>
+<div class="zeile">
+  <label for="ph">Heizung: Wirkleistung</label>
+  <input type="range" id="ph" min="0" max="4000" step="100" value="500">
+  <div class="wert" id="phw">500 W</div>
+</div>
+<button id="reset" type="button">Zur&uuml;cksetzen</button>
+</div>
+
+<div class="anzeigen">
+  <div class="kachel"><span>Wirkleistung gesamt</span><b id="aP">2000 W</b></div>
+  <div class="kachel"><span>Blindleistung</span><b id="aQ">1530 var</b></div>
+  <div class="kachel"><span>Strom in der Zuleitung</span><b id="aI">10,95 A</b></div>
+  <div class="kachel"><span>gemeinsamer cos &phi;</span><b id="aC">0,794</b></div>
+</div>
+
+<div class="vergleich" id="vgl">&nbsp;</div>
+
+<div class="fuss">
+Gerechnet wird mit S<sub>Motor</sub> = P<sub>Motor</sub> / cos &phi;,
+Q = &radic;(S<sub>Motor</sub>&sup2; &minus; P<sub>Motor</sub>&sup2;),
+P<sub>ges</sub> = P<sub>Motor</sub> + P<sub>Heizung</sub>,
+S<sub>ges</sub> = &radic;(P<sub>ges</sub>&sup2; + Q&sup2;) und I = S<sub>ges</sub> / U
+bei U = 230 V (Tabellenbuch, Seite 37, Formel 1, 5 und 11). Der Heizk&ouml;rper gilt
+als <b>rein wirksam</b>.
+</div>
+
+<script>
+(function(){
+ var U=230;
+ var cv=document.getElementById('buehne'), ctx=cv.getContext('2d');
+ var pm=document.getElementById('pm'), cf=document.getElementById('cf'), ph=document.getElementById('ph');
+ var INK="#1A2530",KUP="#A34E0E",GRUEN="#12503C",GRAU="#C7D2DA",ROT="#B23A33";
+ /* Zwei Anordnungen derselben Zeichnung. Am Handy (schmaler als 640 px) stand das Querformat
+    960 x 380 auf rund zwei Fuenftel verkleinert da: Beschriftung 6 bis 7 px, unlesbar (am
+    Standbild in 390 px Breite gesehen, 06.10.2026). Schmal: dieselbe Zeichnung auf einer 480 px
+    breiten Flaeche (Faktor k = 1,1), groessere Schrift, der Erklaersatz zweizeilig; die
+    kleinste Schrift (17 px) steht bei 390 px Breite knapp 14 px hoch. Liegen die Woerter
+    „Motor“ und „Heizung“ aufeinander, steht „Heizung“ eine Zeile hoeher; liegt S auf dem
+    Winkelzeichen, rueckt S darunter (nur schmal). Kleine Leistungen (unter rund 1,6 kW)
+    zeichnete die breite Fassung so klein, dass Q, φ und S am Handy aufeinanderlagen (am
+    Standbild gesehen: 200 W Motor, cos φ = 0,40, 100 W Heizung); schmal ist die laengere
+    Seite des Dreiecks deshalb mindestens 160 px lang. Die Form, also der Winkel, bleibt.
+    Das Winkelzeichen steht schmal auf der Winkelhalbierenden ausserhalb des Bogens; bei
+    Winkeln unter 35° unter der Hypotenuse, weil es sonst auf ihr laege. */
+ var BREIT = {W:960, H:380, k:1, X0:140, Y0:110, gL:16, gS:17, phi:18, txt:16, dT:27,
+              saetze:["Die Wirkleistungen liegen hintereinander. Die Blindleistung kommt nur vom Motor."]};
+ var SCHMAL = {W:480, H:416, k:1.1, X0:40, Y0:84, gL:20, gS:22, phi:22, txt:17, dT:28,
+               saetze:["Die Wirkleistungen liegen hintereinander.", "Die Blindleistung kommt nur vom Motor."],
+               ausweichen:true, mindest:160};
+ var G = BREIT;
+ function anordnen(){
+  var neu = (cv.parentNode.clientWidth || window.innerWidth) < 640 ? SCHMAL : BREIT;
+  if(neu !== G || cv.width !== neu.W){ G = neu; cv.width = G.W; cv.height = G.H; }
+ }
+ anordnen();
+ function komma(x,n){return x.toFixed(n).replace(".",",");}
+ function pfeil(x1,y1,x2,y2,farbe,br){
+  if(Math.abs(x2-x1)<0.5 && Math.abs(y2-y1)<0.5) return;
+  ctx.strokeStyle=farbe;ctx.lineWidth=br*G.k;ctx.lineCap="round";
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+  var a=Math.atan2(y1-y2,x2-x1);
+  ctx.beginPath();ctx.moveTo(x2,y2);
+  var s=14*G.k;
+  ctx.lineTo(x2-s*Math.cos(a-0.38),y2+s*Math.sin(a-0.38));
+  ctx.lineTo(x2-s*Math.cos(a+0.38),y2+s*Math.sin(a+0.38));
+  ctx.closePath();ctx.fillStyle=farbe;ctx.fill();
+ }
+ function zeichne(){
+  var Pm=+pm.value, cos=+cf.value/100, Ph=+ph.value;
+  var Sm=Pm/cos, Q=Math.sqrt(Math.max(0,Sm*Sm-Pm*Pm));
+  var Pg=Pm+Ph, Sg=Math.hypot(Pg,Q), I=Sg/U, cosg=Pg/Sg;
+  ctx.clearRect(0,0,cv.width,cv.height);
+  var k=G.k;
+  var PX=Math.min(0.09, 330/Math.max(500,Pg));
+  var PY=Math.min(0.09, 150/Math.max(300,Q));
+  var SK=Math.min(PX,PY)*k;
+  if(G.mindest && Math.max(Pg,Q)*SK<G.mindest) SK=G.mindest/Math.max(Pg,Q,1);
+  var X0=G.X0,Y0=G.Y0;
+  ctx.strokeStyle=GRAU;ctx.lineWidth=1.3;
+  ctx.beginPath();ctx.moveTo(X0-30*k,Y0);ctx.lineTo(X0+380*k,Y0);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(X0,Y0-20*k);ctx.lineTo(X0,Y0+200*k);ctx.stroke();
+  /* die beiden Wirkleistungen hintereinander auf der Waagerechten */
+  pfeil(X0,Y0,X0+Pm*SK,Y0,KUP,5);
+  ctx.fillStyle=KUP;ctx.font="bold "+G.gL+"px 'Noto Sans',sans-serif";
+  var mx=X0+Pm*SK*0.5-24*k;
+  ctx.fillText("Motor",mx,Y0-12*k);
+  if(Ph>0){
+   pfeil(X0+Pm*SK,Y0,X0+Pg*SK,Y0,GRUEN,5);
+   var hx=X0+Pm*SK+Ph*SK*0.5-30*k, hy=Y0-12*k;
+   if(G.ausweichen && hx<mx+ctx.measureText("Motor").width+8) hy-=1.25*G.gL;
+   ctx.fillStyle=GRUEN;ctx.fillText("Heizung",hx,hy);
+  }
+  /* die Blindleistung des Motors, senkrecht */
+  ctx.strokeStyle="#8A959D";ctx.lineWidth=1.4;ctx.setLineDash([6,5]);
+  ctx.beginPath();ctx.moveTo(X0+Pg*SK,Y0);ctx.lineTo(X0+Pg*SK,Y0+Q*SK);
+  ctx.lineTo(X0,Y0+Q*SK);ctx.stroke();ctx.setLineDash([]);
+  pfeil(X0+Pg*SK,Y0,X0+Pg*SK,Y0+Q*SK,INK,4.4);
+  ctx.fillStyle=INK;ctx.font="bold "+G.gL+"px 'Noto Sans',sans-serif";
+  ctx.fillText("Q",X0+Pg*SK+12*k,Y0+Math.max(28*k,Q*SK)*0.6);
+  pfeil(X0,Y0,X0+Pg*SK,Y0+Q*SK,ROT,5.6);
+  ctx.fillStyle=ROT;ctx.font="bold "+G.gS+"px 'Noto Sans',sans-serif";
+  var sx=X0+Pg*SK*0.45, sy=Y0+Math.max(26*k,Q*SK)*0.62+18*k;
+  var fx=X0+58*k, fy=Y0+22*k;
+  if(G.ausweichen && Q>0){
+   var th=Math.atan2(Q,Pg), be=(th>=35*Math.PI/180) ? th/2 : th+0.35, rr=52*k+0.6*G.phi;
+   ctx.font="bold "+G.phi+"px 'Noto Sans',sans-serif"; var fw=ctx.measureText("\u03c6").width;
+   fx=X0+rr*Math.cos(be)-fw/2; fy=Y0+rr*Math.sin(be)+0.35*G.phi;
+   ctx.font="bold "+G.gS+"px 'Noto Sans',sans-serif";
+   var sw=ctx.measureText("S").width;
+   if(sx<fx+fw+4 && fx<sx+sw+4 && sy-0.8*G.gS<fy+4 && sy>fy-0.8*G.phi-4)
+    sy=fy+G.gS+6;
+  }
+  ctx.fillText("S",sx,sy);
+  if(Pg>0 && Q>0){
+   ctx.strokeStyle=ROT;ctx.lineWidth=2.4*k;
+   ctx.beginPath();ctx.arc(X0,Y0,52*k,0,Math.atan2(Q,Pg));ctx.stroke();
+   ctx.fillStyle=ROT;ctx.font="bold "+G.phi+"px 'Noto Sans',sans-serif";
+   ctx.fillText("\u03c6",fx,fy);
+  }
+  ctx.font=G.txt+"px 'Noto Sans',sans-serif";ctx.fillStyle="#5A666F";
+  var ty=Y0+235*k;
+  for(var z=0; z<G.saetze.length; z++){ ctx.fillText(G.saetze[z],X0-30*k,ty); ty+=G.dT; }
+  ctx.fillText("Scheinleistung S = "+komma(Sg,0)+" VA",X0-30*k,ty);
+  document.getElementById('pmw').textContent=Pm+" W";
+  document.getElementById('cfw').textContent=komma(cos,2);
+  document.getElementById('phw').textContent=Ph+" W";
+  document.getElementById('aP').textContent=komma(Pg,0)+" W";
+  document.getElementById('aQ').textContent=komma(Q,0)+" var";
+  document.getElementById('aI').textContent=komma(I,2)+" A";
+  document.getElementById('aC').textContent=komma(cosg,3);
+  var mittel = Ph>0 ? (cos+1)/2 : cos;
+  document.getElementById('vgl').innerHTML =
+    "Der Motor allein h&auml;tte cos &phi; = <b>"+komma(cos,2)+"</b>, gemeinsam sind es <b>"
+    +komma(cosg,3)+"</b>. Der Mittelwert w&auml;re "+komma(mittel,3)
+    +", also <b>etwas anderes</b>. "
+    +"Str&ouml;me addiert w&auml;ren "+komma(Sm/U+Ph/U,2)+" A statt "+komma(I,2)+" A.";
+ }
+ [pm,cf,ph].forEach(function(e){e.addEventListener('input',zeichne);});
+ document.getElementById('reset').addEventListener('click',function(){
+  pm.value=1500; cf.value=70; ph.value=500; zeichne();
+ });
+ window.addEventListener('resize', function(){ anordnen(); zeichne(); });
+ zeichne();
+})();
+</script>
+</body></html>
