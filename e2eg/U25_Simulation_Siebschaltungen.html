@@ -1,0 +1,270 @@
+<!-- sim_bearbeitung: pflicht -->
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>U25 Simulation: Vier Siebschaltungen</title>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--linie:#C7D2DA;
+      --gruen:#2F7D62;--rot:#B23A33;--grau:#5A666F}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Noto Sans',system-ui,sans-serif;color:var(--ink);background:#fff}
+header{border-top:6px solid var(--kupfer);padding:14px 18px 10px}
+h1{margin:0;font-size:clamp(18px,4vw,26px)}
+.ziel{background:var(--kupferhell);border-left:5px solid var(--kupfer);
+      padding:12px 16px;margin:12px 18px;font-size:clamp(14px,3vw,17px)}
+.ziel > b:first-child{display:block;font-size:.82em;letter-spacing:.08em;text-transform:uppercase;
+        color:var(--kupfer);margin-bottom:4px}
+canvas{display:block;width:100%;max-width:960px;margin:0 auto;height:auto}
+.regler{max-width:960px;margin:0 auto;padding:8px 18px 4px}
+.zeile{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:14px 0}
+.zeile label{flex:0 0 210px;font-weight:700;font-size:clamp(14px,3vw,17px)}
+/* Der Regler trug die Vorgabefarbe des Browsers (Blau), die einzige Farbe im Bild, die
+   nicht aus dem Haus stammt, und ausgerechnet am Bedienelement (Befund Linse BLATT,
+   U03/B2 und U04/B5, 01.09.2026). Er trägt jetzt Kupfer wie alles Bedienbare. */
+input[type=range]{flex:1 1 220px;min-width:180px;height:44px;accent-color:var(--kupfer);
+  -webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-moz-range-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;
+  height:26px;margin-top:-9px;border-radius:50%;background:var(--kupfer);border:2px solid #fff;
+  box-shadow:0 0 0 1.4px var(--kupfer)}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;
+  background:var(--kupfer);border:2px solid #fff}
+input[type=range]:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
+.wert{flex:0 0 128px;text-align:right;font-variant-numeric:tabular-nums;
+      font-size:clamp(15px,3.2vw,19px);font-weight:700;color:var(--kupfer)}
+.anzeigen{display:flex;gap:12px;flex-wrap:wrap;max-width:960px;margin:6px auto 0;padding:0 18px}
+.kachel{flex:1 1 150px;border:1.4px solid var(--linie);padding:10px 12px}
+.kachel span{display:block;font-size:.78em;letter-spacing:.06em;color:var(--grau);
+             font-weight:700}
+.kachel b{font-size:clamp(17px,3.6vw,22px)}
+button{font:inherit;font-weight:700;padding:12px 20px;min-height:48px;border:1.6px solid var(--ink);
+       background:#fff;color:var(--ink);cursor:pointer}
+button:hover{background:var(--kupferhell)}
+.fuss{max-width:960px;margin:14px auto 26px;padding:0 18px;font-size:.86em;color:var(--grau)}
+@media (prefers-reduced-motion: reduce){canvas{outline:none}}
+</style>
+<style>
+.schalter{max-width:960px;margin:10px auto 0;padding:0 18px;display:flex;gap:0;flex-wrap:wrap}
+.schalter button{flex:1 1 200px;border-right-width:0}
+.schalter button:last-child{border-right-width:1.6px}
+.schalter button[aria-pressed=true]{background:var(--kupfer);color:#fff;border-color:var(--kupfer)}
+.vergleich{max-width:960px;margin:10px auto 0;padding:10px 18px;border-left:5px solid var(--gruen);
+  background:#EEF5F2;font-size:clamp(14px,3vw,17px)}
+</style>
+<style>
+.schalter{max-width:960px;margin:10px auto 0;padding:0 18px;display:flex;gap:0;flex-wrap:wrap}
+.schalter button{flex:1 1 160px;border-right-width:0}
+.schalter button:last-child{border-right-width:1.6px}
+.schalter button[aria-pressed=true]{background:var(--kupfer);color:#fff;border-color:var(--kupfer)}
+</style>
+</head><body>
+
+<header>
+<h1>Vier Siebschaltungen</h1>
+</header>
+
+<div class="ziel">
+<b>Was Sie herausfinden sollen</b>
+Vier Schaltungen aus je zwei Bauteilen. Die Kurve zeigt, welcher <b>Anteil</b> der
+Eingangsspannung bei welcher Frequenz am Ausgang ankommt. Vergleichen Sie Hochpass und
+Tiefpass desselben Bauteilpaares und achten Sie auf die <b>Grenzfrequenz</b>: was zeigt die
+Anzeige dort, und welcher Winkel geh&ouml;rt dazu?
+</div>
+
+<script type="application/json" id="sim-meta">
+{
+  "erkenntnis": "dass Hoch- und Tiefpass dieselbe Schaltung sind und sich nur darin unterscheiden, an welchem Bauteil die Ausgangsspannung abgegriffen wird; ihre Kurven sind gespiegelt und schneiden sich bei der Grenzfrequenz, wo beide genau 70,7 Prozent zeigen und der Winkel 45 Grad betraegt",
+  "startwerte":     {"art": "RC-Hochpass", "wirkwiderstand": 1200, "kapazitaet": 47, "induktivitaet": 33},
+  "loesungswerte":  {"wirkwiderstand": 800, "kapazitaet": 2500, "induktivitaet": 300},
+  "quelle": "Europa-Rechenbuch S. 122 und S. 123, 7.10.1 und 7.10.2: U2/U1 = Z2/Z1; bei f_c ist X = R"
+}
+</script>
+
+<div class="schalter">
+  <button id="b1" type="button" aria-pressed="true">RC-Hochpass</button>
+  <button id="b2" type="button" aria-pressed="false">RC-Tiefpass</button>
+  <button id="b3" type="button" aria-pressed="false">RL-Hochpass</button>
+  <button id="b4" type="button" aria-pressed="false">RL-Tiefpass</button>
+</div>
+
+<canvas id="buehne" width="960" height="400"
+        data-quelle="Europa-Rechenbuch S. 122 und S. 123: Frequenzgang eines Hoch- beziehungsweise Tiefpasses; bei der Grenzfrequenz betraegt die Ausgangsspannung 70,7 Prozent der Eingangsspannung"></canvas>
+
+<div class="regler">
+<div class="zeile">
+  <label for="frq">Frequenz f</label>
+  <input type="range" id="frq" min="1" max="100" step="1" value="50">
+  <div class="wert" id="frqw">2822 Hz</div>
+</div>
+<div class="zeile">
+  <label for="wid">Wirkwiderstand R</label>
+  <input type="range" id="wid" min="200" max="5000" step="100" value="1200">
+  <div class="wert" id="widw">1200 &#8486;</div>
+</div>
+<div class="zeile" id="zC">
+  <label for="kap">Kapazit&auml;t C</label>
+  <input type="range" id="kap" min="5" max="200" step="1" value="47">
+  <div class="wert" id="kapw">47 nF</div>
+</div>
+<div class="zeile" id="zL" style="display:none">
+  <label for="ind">Induktivit&auml;t L</label>
+  <input type="range" id="ind" min="5" max="200" step="1" value="33">
+  <div class="wert" id="indw">33 mH</div>
+</div>
+<button id="reset" type="button">Zur&uuml;cksetzen</button>
+</div>
+
+<div class="anzeigen">
+  <div class="kachel"><span>Grenzfrequenz</span><b id="aF">2822 Hz</b></div>
+  <div class="kachel"><span>Anteil bei dieser Frequenz</span><b id="aA">70,7 %</b></div>
+  <div class="kachel"><span>Winkel &phi;</span><b id="aP">45,0&deg;</b></div>
+  <div class="kachel"><span>Bereich</span><b id="aB">Grenzfrequenz</b></div>
+</div>
+
+<div class="vergleich" id="vgl">&nbsp;</div>
+
+<div class="fuss">
+Gerechnet wird beim RC-Glied mit X<sub>C</sub> = 1 / (2 &middot; &pi; &middot; f &middot; C)
+und f<sub>c</sub> = 1 / (2 &middot; &pi; &middot; R &middot; C), beim RL-Glied mit
+X<sub>L</sub> = 2 &middot; &pi; &middot; f &middot; L und
+f<sub>c</sub> = R / (2 &middot; &pi; &middot; L). Der Anteil ist jeweils
+Z<sub>2</sub> / &radic;(R&sup2; + X&sup2;) (Tabellenbuch Seite 47, Einfache Filter: Formel 1, 2 und 3).
+Die Quelle gilt als <b>ideal</b>, der Ausgang als <b>unbelastet</b>.
+</div>
+
+<script>
+(function(){
+ var art="RC-Hochpass";
+ var cv=document.getElementById('buehne'), ctx=cv.getContext('2d');
+ var frq=document.getElementById('frq'), wid=document.getElementById('wid'),
+     kap=document.getElementById('kap'), ind=document.getElementById('ind');
+ var INK="#1A2530",KUP="#A34E0E",GRUEN="#12503C",GRAU="#C7D2DA",ROT="#B23A33";
+ function komma(x,n){return x.toFixed(n).replace(".",",");}
+ // Zwei Anordnungen derselben Zeichnung. Am Handy (schmaler als 640 px) stand das Querformat
+ // 960 x 400 auf 390 px verkleinert da: Beschriftung 5,7 bis 6,5 px hoch, unlesbar (gemessen
+ // 06.10.2026). Schmal: 600 px breit, kleinste Schrift 19, am Handy 19 * 390 / 600 = 12,4 px.
+ var BREIT = {W:960, H:400, X0:90, Y0:310, BR:620, HO:230, achse:15, klein:14, marke:14, rot:15,
+              zahl:14, text:16, idxMin:0, lx:-70, ly:14, uy:20, ry:40, mx:"links", ux:90, uy2:68,
+              unten:["Frequenzachse logarithmisch, je zwei Zehnerpotenzen um die Grenzfrequenz"]};
+ var SCHMAL = {W:600, H:490, X0:84, Y0:340, BR:470, HO:280, achse:22, klein:19, marke:22, rot:22,
+               zahl:21, text:22, idxMin:19, lx:10, ly:24, uy:28, ry:60, mx:"rechts", ux:24, uy2:104,
+               unten:["Frequenzachse logarithmisch, je zwei", "Zehnerpotenzen um die Grenzfrequenz"]};
+ var G = BREIT;
+ function anordnen(){
+  var neu = (cv.parentNode.clientWidth || window.innerWidth) < 640 ? SCHMAL : BREIT;
+  if(neu !== G || cv.width !== neu.W){ G = neu; cv.width = G.W; cv.height = G.H; }
+ }
+ anordnen();
+ /* Text mit tiefgestellten Indizes; das Canvas kennt kein <sub>. teile: [[Text, tief?], ...] */
+ function tiefText(teile, x, y, groesse, fett){
+  var f=(fett?"bold ":"")+groesse+"px 'Noto Sans',sans-serif";
+  var fi=(fett?"bold ":"")+Math.max(G.idxMin, Math.round(0.72*groesse))+"px 'Noto Sans',sans-serif";
+  for(var i=0;i<teile.length;i++){
+   ctx.font = teile[i][1] ? fi : f;
+   ctx.fillText(teile[i][0], x, teile[i][1] ? y+0.3*groesse : y);
+   x += ctx.measureText(teile[i][0]).width + (teile[i][1] ? 1 : 0);
+  }
+  return x;
+ }
+ function grenz(R,C,L){ return art.indexOf("RC")===0 ? 1/(2*Math.PI*R*C) : R/(2*Math.PI*L); }
+ function anteil(f,R,C,L){
+  if(art.indexOf("RC")===0){
+   var XC=1/(2*Math.PI*f*C), Z=Math.hypot(R,XC);
+   return art==="RC-Hochpass" ? R/Z : XC/Z;
+  }
+  var XL=2*Math.PI*f*L, Z2=Math.hypot(R,XL);
+  return art==="RL-Hochpass" ? XL/Z2 : R/Z2;
+ }
+ function winkel(f,R,C,L){
+  if(art.indexOf("RC")===0){
+   var XC=1/(2*Math.PI*f*C);
+   return art==="RC-Hochpass" ? Math.atan(XC/R) : Math.atan(R/XC);
+  }
+  var XL=2*Math.PI*f*L;
+  return art==="RL-Hochpass" ? Math.atan(R/XL) : Math.atan(XL/R);
+ }
+ function zeichne(){
+  var R=+wid.value, C=+kap.value*1e-9, L=+ind.value/1000;
+  var fc=grenz(R,C,L);
+  var f=fc*Math.pow(10,(+frq.value-50)/25);   /* Regler: zwei Zehnerpotenzen um f_c */
+  ctx.clearRect(0,0,cv.width,cv.height);
+  var X0=G.X0,Y0=G.Y0,BR=G.BR,HO=G.HO;
+  ctx.strokeStyle=INK;ctx.lineWidth=1.6;
+  ctx.beginPath();ctx.moveTo(X0,Y0);ctx.lineTo(X0+BR+20,Y0);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(X0,Y0);ctx.lineTo(X0,Y0-HO-20);ctx.stroke();
+  ctx.fillStyle=INK;
+  tiefText([["U",0],["2",1],[" / U",0],["1",1]],X0+G.lx,Y0-HO-G.ly,G.achse,false);
+  ctx.font=G.achse+"px 'Noto Sans',sans-serif";
+  ctx.fillText("f",X0+BR+26,Y0+5);
+  /* logarithmische Frequenzachse von f_c/100 bis f_c*100 */
+  function xpos(fx){ return X0 + (Math.log10(fx/fc)+2)/4*BR; }
+  ctx.strokeStyle=KUP;ctx.lineWidth=3.2;ctx.beginPath();
+  for(var px=0; px<=BR; px++){
+   var fx=fc*Math.pow(10,(px/BR*4)-2);
+   var y=Y0-anteil(fx,R,C,L)*HO;
+   if(px===0) ctx.moveTo(X0+px,y); else ctx.lineTo(X0+px,y);
+  }
+  ctx.stroke();
+  ctx.strokeStyle=GRAU;ctx.lineWidth=1.3;ctx.setLineDash([5,4]);
+  ctx.beginPath();ctx.moveTo(X0,Y0-HO);ctx.lineTo(X0+BR,Y0-HO);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(X0,Y0-0.707*HO);ctx.lineTo(X0+BR,Y0-0.707*HO);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(xpos(fc),Y0);ctx.lineTo(xpos(fc),Y0-HO);ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle="#5A666F";ctx.font=G.klein+"px 'Noto Sans',sans-serif";
+  ctx.fillText("100 %",X0-60,Y0-HO+5);
+  ctx.fillText("70,7 %",X0-64,Y0-0.707*HO+5);
+  ctx.fillStyle=GRUEN;
+  tiefText([["f",0],["c",1],[" = "+komma(fc,0)+" Hz",0]],xpos(fc)-40,Y0+G.uy,G.marke,true);
+  /* die eingestellte Frequenz als Punkt */
+  var a=anteil(f,R,C,L);
+  ctx.fillStyle=ROT;
+  ctx.beginPath();ctx.arc(xpos(f),Y0-a*HO,8,0,2*Math.PI);ctx.fill();
+  ctx.strokeStyle=ROT;ctx.lineWidth=1.6;ctx.setLineDash([4,4]);
+  ctx.beginPath();ctx.moveTo(xpos(f),Y0-a*HO);ctx.lineTo(xpos(f),Y0);ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle=ROT;ctx.font="bold "+G.rot+"px 'Noto Sans',sans-serif";
+  var tf=komma(f,0)+" Hz", xf=xpos(f)-28;
+  if(G.mx==="rechts"){ xf=Math.max(4, Math.min(xf, cv.width-4-ctx.measureText(tf).width)); }
+  ctx.fillText(tf,xf,Y0+G.ry);
+  ctx.fillStyle=INK;ctx.font=G.zahl+"px 'Noto Sans',sans-serif";
+  ctx.fillText(komma(fc/100,0)+" Hz",X0-20,Y0+G.uy);
+  if(G.mx==="links"){ ctx.fillText(komma(fc*100,0)+" Hz",X0+BR-96,Y0+G.uy); }
+  else { ctx.textAlign='right'; ctx.fillText(komma(fc*100,0)+" Hz",cv.width-4,Y0+G.uy); ctx.textAlign='left'; }
+  ctx.fillStyle="#5A666F";ctx.font=G.text+"px 'Noto Sans',sans-serif";
+  for(var k=0;k<G.unten.length;k++){ ctx.fillText(G.unten[k],G.ux,Y0+G.uy2+k*1.3*G.text); }
+  document.getElementById('frqw').textContent=komma(f,0)+" Hz";
+  document.getElementById('widw').textContent=R+" Ω";
+  document.getElementById('kapw').textContent=(+kap.value)+" nF";
+  document.getElementById('indw').textContent=(+ind.value)+" mH";
+  document.getElementById('aF').textContent=komma(fc,0)+" Hz";
+  document.getElementById('aA').textContent=komma(a*100,1)+" %";
+  document.getElementById('aP').textContent=komma(winkel(f,R,C,L)*180/Math.PI,1)+"°";
+  var lage = Math.abs(f/fc-1)<0.02 ? "Grenzfrequenz"
+           : (a>0.707 ? "Durchlassbereich" : "Sperrbereich");
+  document.getElementById('aB').textContent=lage;
+  document.getElementById('vgl').innerHTML =
+    "<b>"+art+"</b>: bei "+komma(f,0)+" Hz kommen <b>"+komma(a*100,1)
+    +" %</b> durch. Die Grenzfrequenz liegt bei <b>"+komma(fc,0)+" Hz</b>; dort sind es"
+    +" immer genau 70,7 % und 45°.";
+ }
+ function setzeArt(neu){
+  art=neu;
+  [["b1","RC-Hochpass"],["b2","RC-Tiefpass"],["b3","RL-Hochpass"],["b4","RL-Tiefpass"]]
+   .forEach(function(e){ document.getElementById(e[0])
+     .setAttribute('aria-pressed', e[1]===art ? "true":"false"); });
+  document.getElementById('zC').style.display = art.indexOf("RC")===0 ? "" : "none";
+  document.getElementById('zL').style.display = art.indexOf("RL")===0 ? "" : "none";
+  zeichne();
+ }
+ [frq,wid,kap,ind].forEach(function(e){e.addEventListener('input',zeichne);});
+ [["b1","RC-Hochpass"],["b2","RC-Tiefpass"],["b3","RL-Hochpass"],["b4","RL-Tiefpass"]]
+  .forEach(function(e){ document.getElementById(e[0])
+    .addEventListener('click',function(){setzeArt(e[1]);}); });
+ document.getElementById('reset').addEventListener('click',function(){
+  frq.value=50; wid.value=1200; kap.value=47; ind.value=33; setzeArt("RC-Hochpass");
+ });
+ window.addEventListener('resize', function(){ anordnen(); zeichne(); });
+ zeichne();
+})();
+</script>
+</body></html>
