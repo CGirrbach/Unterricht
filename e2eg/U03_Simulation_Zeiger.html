@@ -1,0 +1,217 @@
+<!-- sim_bearbeitung: pflicht -->
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>U03 Simulation: der rotierende Zeiger und die Kreisfrequenz</title>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--linie:#C7D2DA;
+      --gruen:#2F7D62;--rot:#B23A33;--grau:#5A666F}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Noto Sans',system-ui,sans-serif;color:var(--ink);background:#fff}
+header{border-top:6px solid var(--kupfer);padding:14px 18px 10px}
+h1{margin:0;font-size:clamp(18px,4vw,26px)}
+.ziel{background:var(--kupferhell);border-left:5px solid var(--kupfer);
+      padding:12px 16px;margin:12px 18px;font-size:clamp(14px,3vw,17px)}
+.ziel > b:first-child{display:block;font-size:.82em;letter-spacing:.08em;text-transform:uppercase;
+        color:var(--kupfer);margin-bottom:4px}
+canvas{display:block;width:100%;max-width:960px;margin:0 auto;height:auto}
+.regler{max-width:960px;margin:0 auto;padding:8px 18px 4px}
+.zeile{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:14px 0}
+.zeile label{flex:0 0 210px;font-weight:700;font-size:clamp(14px,3vw,17px)}
+/* Der Regler trug die Vorgabefarbe des Browsers (Blau), die einzige Farbe im Bild, die
+   nicht aus dem Haus stammt, und ausgerechnet am Bedienelement (Befund Linse BLATT,
+   U03/B2 und U04/B5, 01.09.2026). Er trägt jetzt Kupfer wie alles Bedienbare. */
+input[type=range]{flex:1 1 220px;min-width:180px;height:44px;accent-color:var(--kupfer);
+  -webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-moz-range-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;
+  height:26px;margin-top:-9px;border-radius:50%;background:var(--kupfer);border:2px solid #fff;
+  box-shadow:0 0 0 1.4px var(--kupfer)}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;
+  background:var(--kupfer);border:2px solid #fff}
+input[type=range]:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
+.wert{flex:0 0 128px;text-align:right;font-variant-numeric:tabular-nums;
+      font-size:clamp(15px,3.2vw,19px);font-weight:700;color:var(--kupfer)}
+.anzeigen{display:flex;gap:12px;flex-wrap:wrap;max-width:960px;margin:6px auto 0;padding:0 18px}
+.kachel{flex:1 1 150px;border:1.4px solid var(--linie);padding:10px 12px}
+.kachel span{display:block;font-size:.78em;letter-spacing:.06em;color:var(--grau);
+             font-weight:700}
+.kachel b{font-size:clamp(17px,3.6vw,22px)}
+button{font:inherit;font-weight:700;padding:12px 20px;min-height:48px;border:1.6px solid var(--ink);
+       background:#fff;color:var(--ink);cursor:pointer}
+button:hover{background:var(--kupferhell)}
+.fuss{max-width:960px;margin:14px auto 26px;padding:0 18px;font-size:.86em;color:var(--grau)}
+@media (prefers-reduced-motion: reduce){canvas{outline:none}}
+</style></head><body>
+
+<header>
+<h1>Der rotierende Zeiger und die Kreisfrequenz</h1>
+</header>
+
+<div class="ziel">
+<b>Was Sie herausfinden sollen</b>
+Verstellen Sie die Frequenz und beobachten Sie <b>drei</b> Dinge zugleich: wie schnell sich der
+Zeiger dreht, wie lang eine Periode dauert, und welchen Winkel der Zeiger in einer Sekunde
+überstreicht. Finden Sie heraus, <b>wie die Kreisfrequenz mit der Frequenz zusammenhängt</b> und
+warum sie im Bogenmaß angegeben wird.
+</div>
+
+<script type="application/json" id="sim-meta">
+{
+  "erkenntnis": "dass die Sinuslinie aus einer gleichmäßigen Drehung entsteht und die Kreisfrequenz die Winkelgeschwindigkeit dieses Zeigers im Bogenmaß ist",
+  "startwerte":     {"frequenz": 30},
+  "loesungswerte":  {"frequenz": 50},
+  "quelle": "siehe data-quelle an canvas#buehne und div.fuss"
+}
+</script>
+
+<canvas id="buehne" width="960" height="420"
+        data-quelle="Europa Fachkunde S. 129, Bild 2 (Zeigerdarstellung) und S. 130 (Kreisfrequenz)"></canvas>
+
+<div class="regler">
+<div class="zeile">
+  <label for="f">Frequenz f</label>
+  <input type="range" id="f" min="10" max="100" step="1" value="30">
+  <span class="wert" id="fw">30 Hz</span>
+</div>
+<div class="zeile">
+  <button id="reset" type="button">Zurücksetzen</button>
+  <button id="halt" type="button">Anhalten</button>
+</div>
+</div>
+
+<div class="anzeigen">
+  <div class="kachel"><span>Periodendauer T</span><b id="tw">33,3 ms</b></div>
+  <div class="kachel"><span>Kreisfrequenz ω</span><b id="ww">188 1/s</b></div>
+  <!-- Diese Kachel hieß „Winkel in 1 s" und zeigte Umdrehungen, also nie einen Winkel
+       (Befund Linse BLATT, U03/B1, 01.09.2026). Aufgabe 1 c) verlangt aber, den
+       überstrichenen WINKEL je Sekunde abzulesen. Sie zeigt jetzt beides und nennt
+       jedes beim richtigen Namen. -->
+  <div class="kachel"><span>Umdrehungen in 1 s</span><b id="aw">30</b></div>
+  <div class="kachel"><span>Überstrichener Winkel in 1 s</span><b id="bw">188 rad</b></div>
+  <!-- Der Hinweis sollte die ganze Zeile füllen (grid-column), .anzeigen ist aber ein Flex-
+       Behälter: er stand als schmale Spalte zwischen den Kacheln, am Handy ein Wort je Zeile
+       (06.10.2026). Jetzt volle Breite unter den vier Kacheln. -->
+  <div class="kachel" style="flex:1 1 100%"><span>Achtung: die Anzeige läuft <b>25-fach verlangsamt</b></span><b style="font-size:0.9em">Der Zeiger auf dem Bildschirm braucht für eine Umdrehung 25-mal so lange wie in Wirklichkeit. Zählen Sie mit, so finden Sie 1,2 Umdrehungen je Sekunde statt 30. Die Zahlen in den Kacheln gelten für die <b>wirkliche</b> Frequenz.</b></div>
+</div>
+
+<div class="fuss" data-quelle="Europa Fachkunde S. 129 (Zeigerdarstellung) und S. 130 (Kreisfrequenz)">
+Die Zeigerlänge entspricht dem Scheitelwert. Die Drehzahl je Sekunde des umlaufenden Zeigers ist
+gleich der Frequenz. Die Kreisfrequenz gibt an, welchen Drehwinkel
+im Bogenmaß der Zeiger je Sekunde überstreicht. Vergleichen Sie die Kacheln „Umdrehungen in 1 s“ und „Überstrichener Winkel in 1 s“: eine volle Umdrehung sind 2π rad, also ist der überstrichene Winkel je Sekunde genau 2 · π · f, und das ist die Kreisfrequenz.
+</div>
+
+<script>
+(function(){
+ "use strict";
+ var cv=document.getElementById('buehne'), ctx=cv.getContext('2d');
+ var meta=JSON.parse(document.getElementById('sim-meta').textContent);
+ var start=meta.startwerte.frequenz;
+ var f=start, ang=0, laeuft=true, raf=null;
+ var ruhig = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ /* Zwei Anordnungen derselben Zeichnung (06.10.2026). Am Handy (schmaler als 640 px) stand das
+    Querformat (960 auf 420 Bildpunkte) auf zwei Fünftel verkleinert da: Schrift rund 7 px hoch,
+    unlesbar. Schmal: Kreis oben, Sinuslinie darunter mit eigener Achse (600 auf 745
+    Bildpunkte), größere Schrift, dickere Linien. In der breiten Anordnung liegen Kreis und
+    Sinuslinie auf derselben Achse (CY2 = CY). */
+ var BREIT  = {W:960, H:420, CX:180, CY:210, R:140, X0:380, BW:550, CY2:210,
+               sz:17, lw:1,   dot:8,  ta:34, ux:22, uy:8,  ax:6},
+     SCHMAL = {W:600, H:745, CX:300, CY:185, R:150, X0:50,  BW:510, CY2:567,
+               sz:28, lw:4/3, dot:10, ta:42, ux:30, uy:10, ax:10};
+ var G = BREIT, CX, CY, R, X0, W, CY2;
+ function anordnen(){
+  var neu = (cv.parentNode.clientWidth || window.innerWidth) < 640 ? SCHMAL : BREIT;
+  if (neu !== G || cv.width !== neu.W) { G = neu; cv.width = G.W; cv.height = G.H; }
+  CX=G.CX; CY=G.CY; R=G.R; X0=G.X0; W=G.BW; CY2=G.CY2;
+ }
+ anordnen();
+
+ function zeige(){
+  document.getElementById('fw').textContent = f + ' Hz';
+  var T = 1/f;
+  document.getElementById('tw').textContent =
+    (T*1000).toFixed(1).replace('.',',') + ' ms';
+  var w = 2*Math.PI*f;
+  document.getElementById('ww').textContent = Math.round(w) + ' 1/s';
+  document.getElementById('aw').textContent = String(f);
+  // Der überstrichene Winkel je Sekunde IST die Kreisfrequenz, nur in rad ausgewiesen:
+  // eine volle Umdrehung sind 2π rad, also f Umdrehungen · 2π = ω.
+  document.getElementById('bw').textContent = Math.round(w) + ' rad';
+ }
+
+ function zeichne(){
+  ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.font = G.sz+"px 'Noto Sans',sans-serif";
+  /* Einheitskreis */
+  ctx.strokeStyle="#C7D2DA"; ctx.lineWidth=1.4*G.lw;
+  if (G === SCHMAL) {
+   ctx.beginPath(); ctx.moveTo(CX-R-30,CY); ctx.lineTo(CX+R+30,CY); ctx.stroke();
+   ctx.beginPath(); ctx.moveTo(X0-10,CY2); ctx.lineTo(X0+W+6,CY2); ctx.stroke();
+  } else {
+   ctx.beginPath(); ctx.moveTo(CX-R-30,CY); ctx.lineTo(930,CY); ctx.stroke();
+  }
+  ctx.strokeStyle="#1A2530"; ctx.lineWidth=1.8*G.lw;
+  ctx.beginPath(); ctx.arc(CX,CY,R,0,2*Math.PI); ctx.stroke();
+  /* überstrichener Bogen im Bogenmaß */
+  ctx.strokeStyle="#2F7D62"; ctx.lineWidth=7*G.lw;
+  ctx.beginPath(); ctx.arc(CX,CY,R,0,-ang,true); ctx.stroke();
+  /* Sinuslinie */
+  ctx.strokeStyle="#EBD3BC"; ctx.lineWidth=2*G.lw;
+  ctx.beginPath();
+  for(var a=0;a<=2*Math.PI;a+=0.03){
+    var x=X0+(a/(2*Math.PI))*W, y=CY2-R*Math.sin(a);
+    a===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+  ctx.strokeStyle="#A34E0E"; ctx.lineWidth=4*G.lw; ctx.beginPath();
+  var bis=Math.min(ang,2*Math.PI);
+  for(var b=0;b<=bis;b+=0.03){
+    var x2=X0+(b/(2*Math.PI))*W, y2=CY2-R*Math.sin(b);
+    b===0?ctx.moveTo(x2,y2):ctx.lineTo(x2,y2);
+  }
+  ctx.stroke();
+  /* Zeiger */
+  var tx=CX+R*Math.cos(ang), ty=CY-R*Math.sin(ang);
+  ctx.strokeStyle="#A34E0E"; ctx.lineWidth=4*G.lw;
+  ctx.beginPath(); ctx.moveTo(CX,CY); ctx.lineTo(tx,ty); ctx.stroke();
+  ctx.fillStyle="#A34E0E";
+  ctx.beginPath(); ctx.arc(tx,ty,G.dot,0,2*Math.PI); ctx.fill();
+  /* Beschriftung: Winkel in Grad UND im Bogenmaß */
+  var grad = (ang*180/Math.PI) % 360;
+  ctx.fillStyle="#2F7D62";
+  ctx.fillText('α = ' + grad.toFixed(0) + '°  =  '
+               + ((ang%(2*Math.PI))).toFixed(2).replace('.',',') + ' rad',
+               CX-R, CY+R+G.ta);
+  ctx.fillStyle="#8A959D";
+  ctx.fillText('u', X0-G.ux, CY2-R-G.uy);
+  ctx.fillText('α', X0+W+G.ax, CY2+6);
+ }
+
+ var letzte=null;
+ function takt(t){
+  if(letzte===null) letzte=t;
+  var dt=(t-letzte)/1000; letzte=t;
+  if(laeuft) ang += 2*Math.PI*(f/25)*dt;      /* verlangsamt, damit man mitkommt */
+  if(ang>2*Math.PI) ang-=2*Math.PI;
+  zeichne();
+  raf=requestAnimationFrame(takt);
+ }
+
+ document.getElementById('f').addEventListener('input', function(e){
+   f=parseInt(e.target.value,10); zeige();
+ });
+ document.getElementById('reset').addEventListener('click', function(){
+   f=start; document.getElementById('f').value=start; ang=0; zeige(); zeichne();
+ });
+ var halt=document.getElementById('halt');
+ halt.addEventListener('click', function(){
+   laeuft=!laeuft; halt.textContent = laeuft ? 'Anhalten' : 'Weiter';
+ });
+
+ window.addEventListener('resize', function(){ anordnen(); zeichne(); });
+ zeige();
+ if(ruhig){ ang=Math.PI/3; laeuft=false; halt.textContent='Weiter'; zeichne(); }
+ else { raf=requestAnimationFrame(takt); }
+})();
+</script>
+</body></html>
