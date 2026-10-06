@@ -288,7 +288,7 @@ function zeichne() {
   if (mitLeiter) {
     satz = "Der Scheitelwert der Leiterspannung beträgt " + zahl(W3 * uD, 0) +
            " V, der einer Strangspannung " + zahl(uD, 0) + " V. Das Verhältnis ist " +
-           zahl(W3 * uD / uD, 3) + ", also √3, und nicht 2.";
+           zahl(W3 * uD / uD, 3) + ", also √3.";
   } else if (Math.abs(u[0]) < 6 || Math.abs(u[1]) < 6 || Math.abs(u[2]) < 6) {
     satz = "Hier ist gerade eine der drei Spannungen null, die beiden anderen sind gleich groß " +
            "und entgegengesetzt. Drehen Sie weiter: die Summe bleibt trotzdem null.";
