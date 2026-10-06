@@ -1,0 +1,240 @@
+<!-- sim_bearbeitung: pflicht -->
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>U05 Simulation: zwei Lampen, Gleichspannung gegen Wechselspannung</title>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--linie:#C7D2DA;
+      --gruen:#2F7D62;--rot:#B23A33;--grau:#5A666F}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Noto Sans',system-ui,sans-serif;color:var(--ink);background:#fff}
+header{border-top:6px solid var(--kupfer);padding:14px 18px 10px}
+h1{margin:0;font-size:clamp(18px,4vw,26px)}
+.ziel{background:var(--kupferhell);border-left:5px solid var(--kupfer);
+      padding:12px 16px;margin:12px 18px;font-size:clamp(14px,3vw,17px)}
+.ziel > b:first-child{display:block;font-size:.82em;letter-spacing:.08em;text-transform:uppercase;
+        color:var(--kupfer);margin-bottom:4px}
+canvas{display:block;width:100%;max-width:960px;margin:0 auto;height:auto}
+.regler{max-width:960px;margin:0 auto;padding:8px 18px 4px}
+.zeile{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:14px 0}
+.zeile label{flex:0 0 210px;font-weight:700;font-size:clamp(14px,3vw,17px)}
+/* Der Regler trug die Vorgabefarbe des Browsers (Blau), die einzige Farbe im Bild, die
+   nicht aus dem Haus stammt, und ausgerechnet am Bedienelement (Befund Linse BLATT,
+   U03/B2 und U04/B5, 01.09.2026). Er trägt jetzt Kupfer wie alles Bedienbare. */
+input[type=range]{flex:1 1 220px;min-width:180px;height:44px;accent-color:var(--kupfer);
+  -webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-moz-range-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;
+  height:26px;margin-top:-9px;border-radius:50%;background:var(--kupfer);border:2px solid #fff;
+  box-shadow:0 0 0 1.4px var(--kupfer)}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;
+  background:var(--kupfer);border:2px solid #fff}
+input[type=range]:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
+.wert{flex:0 0 128px;text-align:right;font-variant-numeric:tabular-nums;
+      font-size:clamp(15px,3.2vw,19px);font-weight:700;color:var(--kupfer)}
+.anzeigen{display:flex;gap:12px;flex-wrap:wrap;max-width:960px;margin:6px auto 0;padding:0 18px}
+.kachel{flex:1 1 150px;border:1.4px solid var(--linie);padding:10px 12px}
+.kachel span{display:block;font-size:.78em;letter-spacing:.06em;color:var(--grau);
+             font-weight:700}
+.kachel b{font-size:clamp(17px,3.6vw,22px)}
+button{font:inherit;font-weight:700;padding:12px 20px;min-height:48px;border:1.6px solid var(--ink);
+       background:#fff;color:var(--ink);cursor:pointer}
+button:hover{background:var(--kupferhell)}
+.fuss{max-width:960px;margin:14px auto 26px;padding:0 18px;font-size:.86em;color:var(--grau)}
+@media (prefers-reduced-motion: reduce){canvas{outline:none}}
+</style></head><body>
+
+<header>
+<h1>Zwei Lampen: Gleichspannung gegen Wechselspannung</h1>
+</header>
+
+<div class="ziel">
+<b>Was Sie herausfinden sollen</b>
+Beide Lampen sind gleich. Die linke hängt an einer <b>Wechselspannung</b>, die rechte an einer
+einstellbaren <b>Gleichspannung</b>. Stellen Sie die Gleichspannung so ein, dass beide
+<b>gleich hell</b> leuchten. Finden Sie heraus, <b>in welchem Verhältnis</b> diese
+Gleichspannung zum Scheitelwert der Wechselspannung steht, ob dieses Verhältnis vom
+Scheitelwert abhängt, und warum der Mittelwert der Wechselspannung dafür nichts taugt.
+</div>
+
+<script type="application/json" id="sim-meta">
+{
+  "erkenntnis": "dass die Gleichspannung, die dieselbe Wärmewirkung erzeugt, immer 0,707 des Scheitelwerts beträgt (unabhängig vom Scheitelwert selbst), und dass der arithmetische Mittelwert der Wechselspannung null ist, die Leistung aber nie negativ wird",
+  "startwerte":     {"scheitelwert": 20, "gleichspannung": 8},
+  "loesungswerte":  {"scheitelwert": 34, "gleichspannung": 24},
+  "quelle": "Europa Fachkunde S. 131, Versuch mit zwei gleichen Signallampen und Bild 1 (Sinusleistung)"
+}
+</script>
+
+<canvas id="buehne" width="960" height="285"
+        data-quelle="Europa Fachkunde S. 131: Versuch mit zwei gleichen Signallampen; Bild 1 zeigt die Sinusleistung p = u · i"></canvas>
+
+<div class="regler">
+<div class="zeile">
+  <label for="us">Scheitelwert û (links)</label>
+  <input type="range" id="us" min="5" max="50" step="1" value="20">
+  <span class="wert" id="usw">20 V</span>
+</div>
+<div class="zeile">
+  <label for="ug">Gleichspannung (rechts)</label>
+  <!-- Zehntelschritte: der gesuchte Wert ist 0,707 · û und trifft fast nie eine ganze Zahl.
+       Mit Volt-Schritten kann der Schüler „gleich hell" nicht erreichen (am Standbild
+       gesehen: 20 V gegen 14 V zeigt zweimal 2,0 W und trotzdem „nein"). -->
+  <input type="range" id="ug" min="0" max="50" step="0.1" value="8">
+  <span class="wert" id="ugw">8,0 V</span>
+</div>
+<div class="zeile">
+  <button id="reset" type="button">Zurücksetzen</button>
+</div>
+</div>
+
+<div class="anzeigen">
+  <div class="kachel"><span>Mittlere Leistung links</span><b id="pl">2,0 W</b></div>
+  <div class="kachel"><span>Leistung rechts</span><b id="pr">0,6 W</b></div>
+  <div class="kachel"><span>Gleichspannung ÷ û</span><b id="vh">0,400</b></div>
+  <div class="kachel"><span>Gleich hell?</span><b id="gl">nein</b></div>
+</div>
+
+<div class="fuss">
+Beide Lampen haben denselben Ohm'schen Widerstand R = 100 Ω. Links schwankt die Leistung
+p = u · i; sie wird nie negativ und hat die doppelte Frequenz der Spannung.
+Die waagerechte Linie ist ihr Mittelwert. Rechts ist die Leistung konstant.
+Gleiche Helligkeit heißt: <b>gleiche mittlere Leistung</b>, und damit dieselbe Wärmewirkung.
+</div>
+
+<script>
+(function(){
+ "use strict";
+ var cv=document.getElementById('buehne'), ctx=cv.getContext('2d');
+ var meta=JSON.parse(document.getElementById('sim-meta').textContent);
+ var uh=meta.startwerte.scheitelwert, ug=meta.startwerte.gleichspannung;
+ var R=100, raf=null, t0=0;
+ var ruhig = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+ // Zwei Anordnungen derselben Zeichnung. Am Handy (schmaler als 640 px) stand das Querformat
+ // 960 x 285 auf ein Drittel verkleinert da: Beschriftung rund 6 px hoch, unlesbar (am
+ // Standbild in 390 px Breite gesehen, 06.10.2026). Hochformat: Lampen oben, Kurve darunter.
+ var BREIT = {W:960, H:285, schrift:17, klein:15, lx1:150, lx2:400, ly:104, lr:44,
+              X0:560, XE:930, YP:178, AP:100, legende:["p der Wechselspannung (Mittelwert gestrichelt)"]};
+ var SCHMAL = {W:600, H:660, schrift:25, klein:22, lx1:160, lx2:440, ly:118, lr:62,
+               X0:92, XE:580, YP:580, AP:230, legende:["p der Wechselspannung", "(Mittelwert gestrichelt)"]};
+ var G = BREIT;
+ function anordnen(){
+  var neu = (cv.parentNode.clientWidth || window.innerWidth) < 640 ? SCHMAL : BREIT;
+  if(neu !== G || cv.width !== neu.W){ G = neu; cv.width = G.W; cv.height = G.H; }
+ }
+ anordnen();
+
+ function zahl(x, st){ return x.toFixed(st).replace('.', ','); }
+ function pMittelWechsel(){ return (uh*uh)/(2*R); }   // Mittelwert von û²·sin²/R ist û²/(2R)
+ function pGleich(){ return (ug*ug)/R; }
+ var PMAX = (50*50)/100;                              // größte vorkommende Leistung
+ // Helligkeit ist nicht proportional zur Leistung: linear aufgetragen sähen 2,0 W und 0,6 W
+ // beide dunkel und fast gleich aus, und genau das soll der Schüler ja unterscheiden können.
+ // Die Wurzelkennlinie (Exponent 0,35) spreizt den unteren Bereich, bleibt aber streng
+ // monoton: mehr Leistung ist IMMER heller, und gleiche Leistung ist IMMER gleich hell.
+ function helligkeit(p){ return Math.pow(Math.max(p,0)/PMAX, 0.35); }
+
+ function lampe(x, y, r, anteil, beschriftung){
+  var a = Math.max(0, Math.min(1, anteil));
+  // Die Farbe wandert von kaltem Grau zu warmem Gelb, und der Schein wächst mit. Ein bloßer
+  // Alpha-Wert mit Sockel ließ 2,0 W und 0,6 W fast gleich aussehen; dann ist die Aufgabe
+  // „stellen Sie auf gleiche Helligkeit" nicht lösbar (am Standbild gesehen, 01.09.2026).
+  var rr = Math.round(232 + (255-232)*a),
+      gg = Math.round(232 + (206-232)*a),
+      bb = Math.round(228 + (110-228)*a);
+  var schein = r*(1.15 + 1.85*a);
+  var g = ctx.createRadialGradient(x, y, r*0.6, x, y, schein);
+  g.addColorStop(0, 'rgba(255,196,92,'+(0.72*a)+')');
+  g.addColorStop(1, 'rgba(255,196,92,0)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, schein, 0, 2*Math.PI); ctx.fill();
+  ctx.fillStyle = 'rgb('+rr+','+gg+','+bb+')';
+  ctx.beginPath(); ctx.arc(x, y, r, 0, 2*Math.PI); ctx.fill();
+  ctx.strokeStyle = '#1A2530'; ctx.lineWidth = 2.2;
+  ctx.beginPath(); ctx.arc(x, y, r, 0, 2*Math.PI); ctx.stroke();
+  ctx.fillStyle = '#8A959D';
+  ctx.fillRect(x-0.3*r, y+r-2, 0.6*r, 0.36*r);
+  ctx.fillStyle = '#5A666F'; ctx.font = G.schrift+"px 'Noto Sans',sans-serif";
+  ctx.textAlign = 'center'; ctx.fillText(beschriftung, x, y+r+1.05*r); ctx.textAlign = 'left';
+ }
+
+ function zeichne(ph){
+  ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.font=G.schrift+"px 'Noto Sans',sans-serif";
+  var pw = pMittelWechsel(), pg = pGleich();
+  lampe(G.lx1, G.ly, G.lr, helligkeit(pw), 'an Wechselspannung');
+  lampe(G.lx2, G.ly, G.lr, helligkeit(pg), 'an Gleichspannung');
+
+  // Leistungsverlauf rechts daneben (am Handy darunter)
+  var X0=G.X0, XE=G.XE, YP=G.YP, AP=G.AP;
+  ctx.strokeStyle="#C7D2DA"; ctx.lineWidth=1.4;
+  ctx.beginPath(); ctx.moveTo(X0-14,YP); ctx.lineTo(XE+10,YP); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(X0,YP-AP-18); ctx.lineTo(X0,YP+24); ctx.stroke();
+  // Die Höhe richtet sich nach dem EINGESTELLTEN Wert, nicht nach dem größtmöglichen.
+  // Fest auf 25 W skaliert, schwang die Kurve bei û = 20 V in einem 17 Pixel schmalen Band,
+  // und die beiden Linien, deren Übereinstimmung der ganze Versuch zeigen soll, lagen fünf
+  // Pixel auseinander (Befund Linse BLATT, U05/B1, 01.09.2026, nachgemessen am Standbild).
+  // Der Bezug ist die größere der beiden Leistungen, damit beide ins Bild passen.
+  var bezug = Math.max(uh*uh/R, pg, 0.01);
+  var skala = AP / (bezug * 1.12);        // Pixel je Watt, mit etwas Luft nach oben
+  // p = u·i der Wechselspannung
+  ctx.strokeStyle="#A34E0E"; ctx.lineWidth=2.6; ctx.beginPath();
+  for(var a=0;a<=4*Math.PI;a+=0.02){
+   var s=Math.sin(a+ph), p=(uh*uh/R)*s*s;
+   var x=X0+(XE-X0)*a/(4*Math.PI), y=YP-p*skala;
+   if(a===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+  // Mittelwert links
+  ctx.strokeStyle="#A34E0E"; ctx.lineWidth=2; ctx.setLineDash([8,5]);
+  ctx.beginPath(); ctx.moveTo(X0,YP-pw*skala); ctx.lineTo(XE,YP-pw*skala); ctx.stroke();
+  // konstante Leistung rechts
+  ctx.strokeStyle="#2F7D62"; ctx.setLineDash([]); ctx.lineWidth=2.6;
+  ctx.beginPath(); ctx.moveTo(X0,YP-pg*skala); ctx.lineTo(XE,YP-pg*skala); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle="#A34E0E";
+  for(var k=0;k<G.legende.length;k++){
+   ctx.fillText(G.legende[k], X0+4, YP-AP-24-(G.legende.length-1-k)*1.3*G.schrift);
+  }
+  ctx.fillStyle="#2F7D62"; ctx.fillText("Leistung der Gleichspannung", X0+4, YP+1.6*G.schrift+16);
+  // Der Maßstab wandert mit; deshalb steht er am oberen Ende der Achse.
+  ctx.fillStyle="#8A959D"; ctx.font=G.klein+"px 'Noto Sans',sans-serif";
+  ctx.textAlign='right';
+  ctx.fillText(zahl(bezug*1.12,1)+" W", X0-20, YP-AP+6);
+  ctx.fillText("0", X0-20, YP+6);
+  ctx.textAlign='left';
+  ctx.font=G.schrift+"px 'Noto Sans',sans-serif";
+ }
+
+ function zeige(){
+  document.getElementById('usw').textContent = uh + ' V';
+  document.getElementById('ugw').textContent = zahl(ug,1) + ' V';
+  var pw = pMittelWechsel(), pg = pGleich();
+  document.getElementById('pl').textContent = zahl(pw,1) + ' W';
+  document.getElementById('pr').textContent = zahl(pg,1) + ' W';
+  document.getElementById('vh').textContent = zahl(ug/uh,3);
+  // 2 % der Leistung entsprechen rund 1 % der Spannung; mit Zehntelschritten ist das
+  // erreichbar. Enger darf es nicht sein, sonst ist die Aufgabe am Regler nicht lösbar.
+  var gleich = Math.abs(pw-pg) <= 0.021*Math.max(pw,0.0001);
+  var e = document.getElementById('gl');
+  e.textContent = gleich ? 'ja' : 'nein';
+  e.style.color = gleich ? 'var(--gruen)' : 'var(--grau)';
+ }
+
+ function alles(){ zeige(); zeichne(0); }
+ function loop(ts){ if(!t0)t0=ts; zeige(); zeichne(((ts-t0)/1000)*1.4); raf=requestAnimationFrame(loop); }
+
+ document.getElementById('us').addEventListener('input', function(e){
+   uh = parseInt(e.target.value,10); if(!raf) alles(); });
+ document.getElementById('ug').addEventListener('input', function(e){
+   ug = parseFloat(e.target.value); if(!raf) alles(); });
+ document.getElementById('reset').addEventListener('click', function(){
+   uh = meta.startwerte.scheitelwert; ug = meta.startwerte.gleichspannung;
+   document.getElementById('us').value = uh; document.getElementById('ug').value = ug;
+   if(!raf) alles(); });
+
+ window.addEventListener('resize', function(){ anordnen(); if(!raf) alles(); });
+ if(ruhig){ alles(); } else { raf = requestAnimationFrame(loop); }
+})();
+</script>
+</body></html>
