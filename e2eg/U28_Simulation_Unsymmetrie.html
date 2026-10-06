@@ -1,0 +1,279 @@
+<!-- sim_bearbeitung: pflicht -->
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>U28 Simulation: Der schiefe Stern</title>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--linie:#C7D2DA;
+      --gruen:#2F7D62;--rot:#B23A33;--grau:#5A666F}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Noto Sans',system-ui,sans-serif;color:var(--ink);background:#fff}
+header{border-top:6px solid var(--kupfer);padding:14px 18px 10px}
+h1{margin:0;font-size:clamp(18px,4vw,26px)}
+.ziel{background:var(--kupferhell);border-left:5px solid var(--kupfer);
+      padding:12px 16px;margin:12px 18px;font-size:clamp(14px,3vw,17px)}
+.ziel > b:first-child{display:block;font-size:.82em;letter-spacing:.08em;text-transform:uppercase;
+        color:var(--kupfer);margin-bottom:4px}
+canvas{display:block;width:100%;max-width:960px;margin:0 auto;height:auto}
+.regler{max-width:960px;margin:0 auto;padding:8px 18px 4px}
+.zeile{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:14px 0}
+.zeile label{flex:0 0 210px;font-weight:700;font-size:clamp(14px,3vw,17px)}
+/* Der Regler trug die Vorgabefarbe des Browsers (Blau), die einzige Farbe im Bild, die
+   nicht aus dem Haus stammt, und ausgerechnet am Bedienelement (Befund Linse BLATT,
+   U03/B2 und U04/B5, 01.09.2026). Er trägt jetzt Kupfer wie alles Bedienbare. */
+input[type=range]{flex:1 1 220px;min-width:180px;height:44px;accent-color:var(--kupfer);
+  -webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-moz-range-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;
+  height:26px;margin-top:-9px;border-radius:50%;background:var(--kupfer);border:2px solid #fff;
+  box-shadow:0 0 0 1.4px var(--kupfer)}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;
+  background:var(--kupfer);border:2px solid #fff}
+input[type=range]:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
+.wert{flex:0 0 128px;text-align:right;font-variant-numeric:tabular-nums;
+      font-size:clamp(15px,3.2vw,19px);font-weight:700;color:var(--kupfer)}
+.anzeigen{display:flex;gap:12px;flex-wrap:wrap;max-width:960px;margin:6px auto 0;padding:0 18px}
+.kachel{flex:1 1 150px;border:1.4px solid var(--linie);padding:10px 12px}
+.kachel span{display:block;font-size:.78em;letter-spacing:.06em;color:var(--grau);
+             font-weight:700}
+.kachel b{font-size:clamp(17px,3.6vw,22px)}
+button{font:inherit;font-weight:700;padding:12px 20px;min-height:48px;border:1.6px solid var(--ink);
+       background:#fff;color:var(--ink);cursor:pointer}
+button:hover{background:var(--kupferhell)}
+.fuss{max-width:960px;margin:14px auto 26px;padding:0 18px;font-size:.86em;color:var(--grau)}
+@media (prefers-reduced-motion: reduce){canvas{outline:none}}
+</style><style>
+.schalter{max-width:960px;margin:10px auto 0;padding:0 18px;display:flex;gap:0;flex-wrap:wrap}
+.schalter button{flex:1 1 200px;border-right-width:0}
+.schalter button:last-child{border-right-width:1.6px}
+.schalter button[aria-pressed=true]{background:var(--kupfer);color:#fff;border-color:var(--kupfer)}
+.vergleich{max-width:960px;margin:10px auto 0;padding:10px 18px;border-left:5px solid var(--gruen);
+  background:#EEF5F2;font-size:clamp(14px,3vw,17px)}
+</style>
+</head><body>
+
+<header>
+<h1>Der schiefe Stern</h1>
+</header>
+
+<div class="ziel">
+<b>Was Sie herausfinden sollen</b>
+Drei Widerst&auml;nde im Stern, jeder einzeln einstellbar. Die erste Zeichnung zeigt die drei
+Stromzeiger, die zweite, wie sie <b>aneinandergelegt</b> werden. Solange sich die Kette
+schlie&szlig;t, ist I<sub>N</sub> null. Suchen Sie die Einstellung, bei der I<sub>N</sub> am
+gr&ouml;&szlig;ten wird, und pr&uuml;fen Sie, ob I<sub>N</sub> jemals gr&ouml;&szlig;er
+werden kann als der gr&ouml;&szlig;te einzelne Leiterstrom.
+</div>
+
+<script type="application/json" id="sim-meta">
+{
+  "erkenntnis": "dass der Neutralleiterstrom die GEOMETRISCHE Summe der drei Leiterstroeme ist und genau dann null wird, wenn alle drei gleich sind; dass er bei Ausfall eines Stranges den vollen Strangstrom der uebrigen erreicht und den groessten Einzelstrom bei gleichartiger Last nie uebersteigt",
+  "startwerte":    {"widerstand1": 18, "widerstand2": 27, "widerstand3": 45},
+  "loesungswerte": {"widerstand": [10, 20, 30, 40, 60], "strom": [23, 11.5, 7.7, 5.8, 5, 3.33]},
+  "quelle": "Europa-Rechenbuch S. 125 (Sternschaltung, unsymmetrische gleichartige Last), Europa Fachkunde S. 159 (7.9.3, Versuch 4), Tabellenbuch S. 48"
+}
+</script>
+
+<canvas id="buehne" width="960" height="400"
+        data-quelle="Europa Fachkunde S. 159, Bild 1 und Bild 2: unsymmetrisch belastete Sternschaltung; der Neutralleiterstrom ist die geometrische Summe der drei um 120 Grad versetzten Leiterstroeme"></canvas>
+
+<div class="regler">
+<div class="zeile">
+  <label for="r1">Strang 1: R<sub>1</sub></label>
+  <input type="range" id="r1" min="8" max="80" step="1" value="18">
+  <div class="wert" id="r1w">18 &#8486;</div>
+</div>
+<div class="zeile">
+  <label for="r2">Strang 2: R<sub>2</sub></label>
+  <input type="range" id="r2" min="8" max="80" step="1" value="27">
+  <div class="wert" id="r2w">27 &#8486;</div>
+</div>
+<div class="zeile">
+  <label for="r3">Strang 3: R<sub>3</sub></label>
+  <input type="range" id="r3" min="8" max="80" step="1" value="45">
+  <div class="wert" id="r3w">45 &#8486;</div>
+</div>
+<button id="gleich" type="button">alle drei gleich</button>
+<button id="reset" type="button">Zur&uuml;cksetzen</button>
+</div>
+
+<div class="anzeigen">
+  <div class="kachel"><span>I<sub>1</sub></span><b id="a1">0 A</b></div>
+  <div class="kachel"><span>I<sub>2</sub></span><b id="a2">0 A</b></div>
+  <div class="kachel"><span>I<sub>3</sub></span><b id="a3">0 A</b></div>
+  <div class="kachel"><span>Neutralleiterstrom I<sub>N</sub></span><b id="aN">0 A</b></div>
+  <div class="kachel"><span>gr&ouml;&szlig;ter Einzelstrom</span><b id="aM">0 A</b></div>
+</div>
+
+<div class="vergleich" id="vgl">&nbsp;</div>
+
+<div class="fuss">
+Netz 400/230 V. Gerechnet wird mit I = U<sub>Str</sub> / R<sub>Str</sub> und
+U<sub>Str</sub> = 400 V / &radic;3 = 230,9 V; der Neutralleiter ist <b>angeschlossen</b>, deshalb
+liegen an allen drei Str&auml;ngen dieselben 230,9 V. I<sub>N</sub> entsteht als geometrische
+Summe der drei um 120&deg; versetzten Leiterstr&ouml;me (Tabellenbuch Seite 49,
+Formel 1 bis 4). Alle drei Verbraucher sind <b>Wirkwiderst&auml;nde</b>
+(cos &phi; = 1); die Zuleitungen gelten als widerstandsfrei.
+</div>
+
+<script>
+"use strict";
+var C = document.getElementById("buehne"), g = C.getContext("2d");
+var R = [document.getElementById("r1"), document.getElementById("r2"), document.getElementById("r3")];
+var INK = "#1A2530", KUPFER = "#A34E0E", LINIE = "#C7D2DA", GRAU = "#5A666F";
+var GRUEN = "#2F7D62", ROT = "#B23A33", BLAU = "#2C5F8A";
+var FARBE = [KUPFER, GRUEN, BLAU];
+var U_STR = 400 / Math.sqrt(3);
+
+/* Zwei Anordnungen derselben Zeichnung. Am Handy (schmaler als 640 px) stand das Querformat
+   960 x 400 auf 390 px verkleinert da: Beschriftung 4,9 bis 6,9 px hoch, unlesbar (gemessen
+   06.10.2026). Schmal: die drei Zeiger oben, die aneinandergelegten darunter, Zeichnung um
+   den Faktor 1,5 groesser, 600 px breit, kleinste Schrift 19, am Handy 12,4 px. */
+var BREIT  = {W: 960, H: 400, sk: 1, MX: 220, MY: 195, AX: 620, AY: 195, capZ: 372, capK: 372,
+              bogenF: 12, cap: 13, lf: 16, lfN: 17, kette: 15, pfeil: 13};
+var SCHMAL = {W: 600, H: 830, sk: 1.5, MX: 300, MY: 215, AX: 300, AY: 600, capZ: 392, capK: 812,
+              bogenF: 19, cap: 21, lf: 26, lfN: 27, kette: 23, pfeil: 18};
+var G = BREIT;
+function anordnen() {
+  var neu = (C.parentNode.clientWidth || window.innerWidth) < 640 ? SCHMAL : BREIT;
+  if (neu !== G || C.width !== neu.W) { G = neu; C.width = G.W; C.height = G.H; }
+}
+anordnen();
+
+function zahl(v, n) {
+  var s = (Math.abs(v) < 5e-4 ? 0 : v).toFixed(n === undefined ? 2 : n);
+  return s.replace(".", ",").replace("-", "−");
+}
+
+function zeichenMitIndex(gross, index, x, y, groesse) {
+  g.font = "bold " + groesse + "px system-ui,sans-serif";
+  var bH = g.measureText(gross).width;
+  g.font = "bold " + Math.round(groesse * 0.72) + "px system-ui,sans-serif";
+  var bI = g.measureText(index).width;
+  var links = x - (bH + bI) / 2;
+  g.textAlign = "left";
+  g.font = "bold " + groesse + "px system-ui,sans-serif";
+  g.fillText(gross, links, y);
+  g.font = "bold " + Math.round(groesse * 0.72) + "px system-ui,sans-serif";
+  g.fillText(index, links + bH, y + Math.round(groesse * 0.28));
+  g.textAlign = "center";
+}
+
+function pfeil(x0, y0, x1, y1, farbe, dick) {
+  var w = Math.atan2(y1 - y0, x1 - x0), sp = G.pfeil;
+  g.strokeStyle = farbe; g.fillStyle = farbe; g.lineWidth = dick;
+  g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke();
+  g.beginPath(); g.moveTo(x1, y1);
+  g.lineTo(x1 - sp * Math.cos(w - 0.35), y1 - sp * Math.sin(w - 0.35));
+  g.lineTo(x1 - sp * Math.cos(w + 0.35), y1 - sp * Math.sin(w + 0.35));
+  g.closePath(); g.fill();
+}
+
+function zeichne() {
+  var r = R.map(function (e) { return +e.value; });
+  var i = r.map(function (x) { return U_STR / x; });
+  var winkel = [90, -30, 210];                 /* 120 Grad auseinander */
+  var sx = 0, sy = 0;
+  for (var k = 0; k < 3; k++) {
+    sx += i[k] * Math.cos(winkel[k] * Math.PI / 180);
+    sy += i[k] * Math.sin(winkel[k] * Math.PI / 180);
+  }
+  var iN = Math.sqrt(sx * sx + sy * sy);
+  var groesste = Math.max(i[0], i[1], i[2]);
+  var sk = G.sk;
+  var mass = 105 * sk / Math.max(groesste, 1e-6);   /* Pixel je Ampere, damit alles ins Bild passt */
+
+  g.clearRect(0, 0, C.width, C.height);
+
+  /* ---------- links (am Handy oben): die drei Zeiger vom gemeinsamen Ursprung ---------- */
+  var MX = G.MX, MY = G.MY, KR = 118 * sk;
+  g.strokeStyle = LINIE; g.lineWidth = 1; g.setLineDash([5, 5]);
+  for (var s = 0; s < 3; s++) {
+    var ws = winkel[s] * Math.PI / 180;
+    g.beginPath(); g.moveTo(MX, MY);
+    g.lineTo(MX + KR * Math.cos(ws), MY - KR * Math.sin(ws)); g.stroke();
+  }
+  g.setLineDash([]);
+  /* Der Bogen muss die 120 Grad zwischen I_1 (90 Grad) und I_2 (minus 30 Grad) zeigen.
+     Im Zeichenkoordinatensystem laeuft y nach UNTEN, deshalb von -90 nach +30 Grad. */
+  g.strokeStyle = GRAU; g.lineWidth = 1.6;
+  g.beginPath(); g.arc(MX, MY, 34 * sk, -Math.PI / 2, Math.PI / 6); g.stroke();
+  g.fillStyle = GRAU; g.font = G.bogenF + "px system-ui,sans-serif"; g.textAlign = "center";
+  g.fillText("120°", MX + 52 * sk * Math.cos(Math.PI / 6), MY - 52 * sk * Math.sin(Math.PI / 6) - 6 * sk);
+  for (var k2 = 0; k2 < 3; k2++) {
+    var w2 = winkel[k2] * Math.PI / 180;
+    var px = MX + i[k2] * mass * Math.cos(w2), py = MY - i[k2] * mass * Math.sin(w2);
+    pfeil(MX, MY, px, py, FARBE[k2], 3.4);
+    g.fillStyle = FARBE[k2]; g.textBaseline = "middle";
+    /* Bei kleinem Strom lag die Beschriftung auf dem Ursprung und dem Winkelbogen; sie
+       steht deshalb mindestens ausserhalb des Bogens. */
+    var ab = Math.max(i[k2] * mass, 44 * sk) + 24 * sk;
+    zeichenMitIndex("I", String(k2 + 1), MX + ab * Math.cos(w2),
+                    MY - ab * Math.sin(w2), G.lf);
+    g.textBaseline = "alphabetic";
+  }
+  g.fillStyle = GRAU; g.font = G.cap + "px system-ui,sans-serif"; g.textAlign = "center";
+  g.fillText("die drei Leiterströme, 120° auseinander", MX, G.capZ);
+
+  /* ---------- rechts (am Handy unten): dieselben Zeiger aneinandergelegt ---------- */
+  var AX = G.AX, AY = G.AY;
+  var lx = AX, ly = AY;
+  g.strokeStyle = LINIE; g.lineWidth = 1.4; g.setLineDash([4, 3]);
+  g.beginPath(); g.arc(AX, AY, 5, 0, 2 * Math.PI); g.stroke(); g.setLineDash([]);
+  for (var k3 = 0; k3 < 3; k3++) {
+    var w3 = winkel[k3] * Math.PI / 180;
+    var nx = lx + i[k3] * mass * Math.cos(w3), ny = ly - i[k3] * mass * Math.sin(w3);
+    pfeil(lx, ly, nx, ny, FARBE[k3], 3);
+    lx = nx; ly = ny;
+  }
+  if (iN * mass > 6) {
+    pfeil(AX, AY, lx, ly, ROT, 4);
+    g.fillStyle = ROT; g.textBaseline = "middle";
+    zeichenMitIndex("I", "N", (AX + lx) / 2 + 26 * sk, (AY + ly) / 2, G.lfN);
+    g.textBaseline = "alphabetic";
+  } else {
+    g.fillStyle = ROT;
+    g.beginPath(); g.arc(AX, AY, 8, 0, 2 * Math.PI); g.fill();
+    g.font = "bold " + G.kette + "px system-ui,sans-serif"; g.textAlign = "center";
+    g.fillText("die Kette schließt sich", AX, AY + 40 * sk);
+  }
+  g.fillStyle = GRAU; g.font = G.cap + "px system-ui,sans-serif"; g.textAlign = "center";
+  g.fillText("dieselben Zeiger, aneinandergelegt", AX, G.capK);
+
+  /* ---------- Kacheln und Satz ---------- */
+  for (var k4 = 0; k4 < 3; k4++) {
+    document.getElementById("r" + (k4 + 1) + "w").textContent = r[k4] + " Ω";
+    document.getElementById("a" + (k4 + 1)).textContent = zahl(i[k4]) + " A";
+  }
+  document.getElementById("aN").textContent = zahl(iN) + " A";
+  document.getElementById("aM").textContent = zahl(groesste) + " A";
+
+  var satz;
+  if (iN < 0.02) {
+    satz = "Alle drei Ströme sind gleich groß. Die Kette der aneinandergelegten Zeiger schließt sich, und der " +
+           "Neutralleiter führt keinen Strom.";
+  } else if (iN > groesste - 0.02) {
+    satz = "I_N erreicht hier den größten Einzelstrom. Das geschieht genau dann, wenn nur " +
+           "noch ein Strang Strom führt.";
+  } else {
+    satz = "I_N beträgt " + zahl(iN) + " A, der größte Einzelstrom " + zahl(groesste) +
+           " A. Bei gleichartiger Last bleibt I_N immer unter dem größten Einzelstrom " +
+           "oder erreicht ihn höchstens.";
+  }
+  /* Bis 06.10.2026 stand hier "Iₙ" mit einem tiefgestellten KLEINEN n (Unicode); das
+     Formelzeichen ist I mit grossem N als Index. Der Satz besteht nur aus festen Texten und
+     Zahlen, darum darf er als HTML mit <sub> gesetzt werden. */
+  document.getElementById("vgl").innerHTML = satz.replace(/I_N/g, "I<sub>N</sub>");
+}
+
+R.forEach(function (e) { e.addEventListener("input", zeichne); });
+document.getElementById("gleich").addEventListener("click", function () {
+  R[1].value = R[0].value; R[2].value = R[0].value; zeichne();
+});
+document.getElementById("reset").addEventListener("click", function () {
+  R[0].value = 18; R[1].value = 27; R[2].value = 45; zeichne();
+});
+window.addEventListener("resize", function () { anordnen(); zeichne(); });
+zeichne();
+</script>
+</body></html>
