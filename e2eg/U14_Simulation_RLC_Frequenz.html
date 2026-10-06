@@ -1,0 +1,229 @@
+<!-- sim_bearbeitung: pflicht -->
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>U14 Simulation: R, X_L und X_C über der Frequenz</title>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--linie:#C7D2DA;
+      --gruen:#2F7D62;--rot:#B23A33;--grau:#5A666F}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Noto Sans',system-ui,sans-serif;color:var(--ink);background:#fff}
+header{border-top:6px solid var(--kupfer);padding:14px 18px 10px}
+h1{margin:0;font-size:clamp(18px,4vw,26px)}
+.ziel{background:var(--kupferhell);border-left:5px solid var(--kupfer);
+      padding:12px 16px;margin:12px 18px;font-size:clamp(14px,3vw,17px)}
+.ziel > b:first-child{display:block;font-size:.82em;letter-spacing:.08em;text-transform:uppercase;
+        color:var(--kupfer);margin-bottom:4px}
+canvas{display:block;width:100%;max-width:960px;margin:0 auto;height:auto}
+.regler{max-width:960px;margin:0 auto;padding:8px 18px 4px}
+.zeile{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:14px 0}
+.zeile label{flex:0 0 210px;font-weight:700;font-size:clamp(14px,3vw,17px)}
+/* Der Regler trug die Vorgabefarbe des Browsers (Blau), die einzige Farbe im Bild, die
+   nicht aus dem Haus stammt, und ausgerechnet am Bedienelement (Befund Linse BLATT,
+   U03/B2 und U04/B5, 01.09.2026). Er trägt jetzt Kupfer wie alles Bedienbare. */
+input[type=range]{flex:1 1 220px;min-width:180px;height:44px;accent-color:var(--kupfer);
+  -webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-moz-range-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;
+  height:26px;margin-top:-9px;border-radius:50%;background:var(--kupfer);border:2px solid #fff;
+  box-shadow:0 0 0 1.4px var(--kupfer)}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;
+  background:var(--kupfer);border:2px solid #fff}
+input[type=range]:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
+.wert{flex:0 0 128px;text-align:right;font-variant-numeric:tabular-nums;
+      font-size:clamp(15px,3.2vw,19px);font-weight:700;color:var(--kupfer)}
+.anzeigen{display:flex;gap:12px;flex-wrap:wrap;max-width:960px;margin:6px auto 0;padding:0 18px}
+.kachel{flex:1 1 150px;border:1.4px solid var(--linie);padding:10px 12px}
+.kachel span{display:block;font-size:.78em;letter-spacing:.06em;color:var(--grau);
+             font-weight:700}
+.kachel b{font-size:clamp(17px,3.6vw,22px)}
+button{font:inherit;font-weight:700;padding:12px 20px;min-height:48px;border:1.6px solid var(--ink);
+       background:#fff;color:var(--ink);cursor:pointer}
+button:hover{background:var(--kupferhell)}
+.fuss{max-width:960px;margin:14px auto 26px;padding:0 18px;font-size:.86em;color:var(--grau)}
+@media (prefers-reduced-motion: reduce){canvas{outline:none}}
+</style></head><body>
+
+<header>
+<h1>R, X<sub>L</sub> und X<sub>C</sub> über der Frequenz</h1>
+</header>
+
+<div class="ziel">
+<b>Was Sie herausfinden sollen</b>
+Drei Bauteile liegen an derselben Wechselspannung. Verändern Sie die <b>Frequenz</b> und
+verfolgen Sie <b>alle drei</b> Widerstandswerte zugleich. Finden Sie heraus, <b>welche Form</b>
+jede der drei Kurven hat, welche davon sich mit der Frequenz gar nicht ändert, und ob es eine
+Frequenz gibt, bei der X<sub>L</sub> und X<sub>C</sub> <b>gleich groß</b> sind.
+</div>
+
+<script type="application/json" id="sim-meta">
+{
+  "erkenntnis": "dass der Wirkwiderstand von der Frequenz unabhaengig ist (waagerechte Gerade), X_L proportional zur Frequenz waechst (Gerade durch den Ursprung) und X_C umgekehrt proportional faellt (Hyperbel); die beiden Blindwiderstaende schneiden sich bei genau einer Frequenz",
+  "startwerte":     {"frequenz": 700, "induktivitaet": 150, "kapazitaet": 300, "wirkwiderstand": 800},
+  "loesungswerte":  {"frequenz": 1125, "induktivitaet": 100, "kapazitaet": 200, "wirkwiderstand": 1000},
+  "quelle": "Europa Fachkunde S. 135, Bild 2 (X_L ueber f) und S. 144, Bild 2 (X_C ueber f); Europa-Rechenbuch S. 99 und S. 100"
+}
+</script>
+
+<canvas id="buehne" width="960" height="380"
+        data-quelle="Europa Fachkunde S. 135, Bild 2 und S. 144, Bild 2: X_L waechst proportional zur Frequenz, X_C faellt umgekehrt proportional; der Wirkwiderstand bleibt gleich"></canvas>
+
+<div class="regler">
+<div class="zeile">
+  <label for="fr">Frequenz f</label>
+  <input type="range" id="fr" min="50" max="2000" step="25" value="700">
+  <span class="wert" id="frw">700 Hz</span>
+</div>
+<div class="zeile">
+  <label for="ind">Induktivität L</label>
+  <input type="range" id="ind" min="20" max="400" step="10" value="150">
+  <span class="wert" id="indw">150 mH</span>
+</div>
+<div class="zeile">
+  <label for="kap">Kapazität C</label>
+  <input type="range" id="kap" min="50" max="500" step="10" value="300">
+  <span class="wert" id="kapw">300 nF</span>
+</div>
+<div class="zeile">
+  <label for="wid">Wirkwiderstand R</label>
+  <input type="range" id="wid" min="200" max="2000" step="50" value="800">
+  <span class="wert" id="widw">800 &#8486;</span>
+</div>
+<div class="zeile">
+  <button id="reset" type="button">Zurücksetzen</button>
+</div>
+</div>
+
+<div class="anzeigen">
+  <div class="kachel"><span>Wirkwiderstand R</span><b id="aR">800 &#8486;</b></div>
+  <div class="kachel"><span>Blindwiderstand X<sub>L</sub></span><b id="aL">660 &#8486;</b></div>
+  <div class="kachel"><span>Blindwiderstand X<sub>C</sub></span><b id="aC">758 &#8486;</b></div>
+  <div class="kachel"><span>X<sub>L</sub> = X<sub>C</sub> bei</span><b id="aF">750 Hz</b></div>
+</div>
+
+<div class="fuss">
+Gerechnet wird mit X<sub>L</sub> = 2 &middot; &pi; &middot; f &middot; L und
+X<sub>C</sub> = 1 / (2 &middot; &pi; &middot; f &middot; C) (Tabellenbuch, Seite 40, Formel 1
+bis 3); der Wirkwiderstand R hängt nicht von der Frequenz ab. Spule und Kondensator sind als
+<b>ideal</b> angenommen, ihre Verluste also null.
+</div>
+
+<script>
+(function(){
+ var cv=document.getElementById('buehne'), ctx=cv.getContext('2d');
+ var fr=document.getElementById('fr'), ind=document.getElementById('ind'),
+     kap=document.getElementById('kap'), wid=document.getElementById('wid');
+ var INK="#1A2530",KUP="#A34E0E",GRUEN="#12503C",GRAU="#C7D2DA";
+ var FMAX=2000, WMAX=2500;   /* WMAX: obere Grenze der Achse */
+ /* Zwei Anordnungen derselben Zeichnung. Am Handy (schmaler als 640 px) stand das Querformat
+    960 x 380 auf rund zwei Fuenftel verkleinert da: Beschriftung 7 bis 8 px hoch, die Tiefzahl
+    von X_L und X_C rund 5 px, unlesbar (am Standbild in 390 px Breite gesehen, 06.10.2026).
+    Schmal: 600 px breite Zeichenflaeche, hoeher als breit, groessere Schrift; die kleinste
+    Schrift (Tiefzahl 20 px) steht bei 390 px Breite 13 px hoch. Die Achsenbeschriftung
+    steht dort UEBER der Zeichenflaeche, weil oben rechts die X_L-Gerade durchlaeuft. */
+ var BREIT = {W:960, H:380, X0:90, Y0:320, XE:900, YE:40, gross:20, normal:17, kursiv:18,
+              punkt:7, ring:10, strich:3.2, dxL:46, dyL:12, dyC:16, dyR:14,
+              null0:[-16,22], ende:[-64,24], f:[18,6], titel:[-150,16,'left']};
+ var SCHMAL = {W:600, H:566, X0:84, Y0:510, XE:552, YE:76, gross:30, normal:22, kursiv:26,
+               punkt:10, ring:14, strich:4, dxL:64, dyL:16, dyC:22, dyR:18,
+               null0:[-22,30], ende:[-84,34], f:[14,8], titel:[0,-30,'right']};
+ var G=BREIT, X0, Y0, XE, YE;
+ function anordnen(){
+  var neu = (cv.parentNode.clientWidth || window.innerWidth) < 640 ? SCHMAL : BREIT;
+  if(neu !== G || cv.width !== neu.W){ G = neu; cv.width = G.W; cv.height = G.H; }
+  X0=G.X0; Y0=G.Y0; XE=G.XE; YE=G.YE;
+ }
+ anordnen();
+ function xl(f,L){return 2*Math.PI*f*L/1000;}
+ function xc(f,C){return 1/(2*Math.PI*f*C*1e-9);}
+ function komma(x,n){return x.toFixed(n).replace(".",",");}
+ function tief(c,h,i,x,y,farbe,g){
+  c.fillStyle=farbe;c.font="bold "+g+"px 'Noto Sans',sans-serif";c.fillText(h,x,y);
+  var b=c.measureText(h).width;
+  c.font="bold "+Math.round(g*0.66)+"px 'Noto Sans',sans-serif";
+  c.fillText(i,x+b+1,y+Math.round(g*0.22));
+ }
+ function px(f){return X0+(XE-X0)*f/FMAX;}
+ function py(w){return Y0-(Y0-YE)*Math.min(w,WMAX)/WMAX;}
+ function zeichne(){
+  var f=+fr.value, L=+ind.value, C=+kap.value, R=+wid.value;
+  var XL=xl(f,L), XC=xc(f,C);
+  var f0=1/(2*Math.PI*Math.sqrt(L/1000*C*1e-9));
+  ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.strokeStyle=GRAU;ctx.lineWidth=1.8;
+  ctx.beginPath();ctx.moveTo(X0,Y0);ctx.lineTo(XE+16,Y0);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(X0,Y0);ctx.lineTo(X0,YE-8);ctx.stroke();
+  ctx.strokeStyle="#EDF1F4";ctx.lineWidth=1;
+  for(var g=500;g<=FMAX;g+=500){
+   ctx.beginPath();ctx.moveTo(px(g),Y0);ctx.lineTo(px(g),YE);ctx.stroke();
+  }
+  /* R: waagerechte Gerade */
+  ctx.strokeStyle=INK;ctx.lineWidth=G.strich;
+  ctx.beginPath();ctx.moveTo(X0,py(R));ctx.lineTo(XE,py(R));ctx.stroke();
+  /* X_L: Gerade durch den Ursprung */
+  /* Die Gerade wird ABGESCHNITTEN, wenn sie den oberen Rand erreicht; sonst laeuft sie
+     dort waagerecht weiter und sieht aus, als bliebe X_L konstant (Befund 02.09.2026). */
+  ctx.strokeStyle=KUP;ctx.lineWidth=G.strich;
+  ctx.beginPath();
+  var begonnen=false;
+  for(var a=0;a<=FMAX;a+=10){
+   var w=xl(a,L); if(w>WMAX) break;
+   if(!begonnen){ctx.moveTo(px(a),py(w));begonnen=true;}else ctx.lineTo(px(a),py(w));
+  }
+  ctx.stroke();
+  /* X_C: Hyperbel */
+  ctx.strokeStyle=GRUEN;ctx.lineWidth=G.strich;
+  ctx.beginPath();
+  var erst=true;
+  for(var b=30;b<=FMAX;b+=5){
+   var w=xc(b,C); if(w>WMAX) continue;
+   if(erst){ctx.moveTo(px(b),py(w));erst=false;}else ctx.lineTo(px(b),py(w));
+  }
+  ctx.stroke();
+  /* die eingestellte Frequenz */
+  ctx.strokeStyle="#8A959D";ctx.lineWidth=1.6;ctx.setLineDash([6,5]);
+  ctx.beginPath();ctx.moveTo(px(f),Y0);ctx.lineTo(px(f),YE);ctx.stroke();
+  ctx.setLineDash([]);
+  [[R,INK],[XL,KUP],[XC,GRUEN]].forEach(function(p){
+   if(p[0]<=WMAX){ctx.fillStyle=p[1];ctx.beginPath();
+     ctx.arc(px(f),py(p[0]),G.punkt,0,2*Math.PI);ctx.fill();}
+  });
+  /* Schnittpunkt der beiden Blindwiderstaende */
+  if(f0<=FMAX){
+   ctx.strokeStyle="#B23A33";ctx.lineWidth=2;
+   ctx.beginPath();ctx.arc(px(f0),py(xl(f0,L)),G.ring,0,2*Math.PI);ctx.stroke();
+  }
+  /* Beschriftung */
+  /* Die Beschriftung folgt der Geraden nur so weit, wie diese gezeichnet wird. */
+  var fL=Math.min(FMAX*0.86, WMAX/(2*Math.PI*L/1000)*0.74);
+  tief(ctx,"X","L",px(fL)-G.dxL,py(xl(fL,L))-G.dyL,KUP,G.gross);
+  tief(ctx,"X","C",px(FMAX*0.30),py(xc(FMAX*0.30,C))-G.dyC,GRUEN,G.gross);
+  ctx.fillStyle=INK;ctx.font="bold "+G.gross+"px 'Noto Sans',sans-serif";
+  ctx.fillText("R",px(FMAX*0.62),py(R)-G.dyR);
+  ctx.fillStyle="#5A666F";ctx.font=G.normal+"px 'Noto Sans',sans-serif";
+  ctx.fillText("0",X0+G.null0[0],Y0+G.null0[1]);
+  ctx.fillText("2000 Hz",XE+G.ende[0],Y0+G.ende[1]);
+  ctx.font="italic "+G.kursiv+"px 'Noto Sans',sans-serif";ctx.fillText("f",XE+G.f[0],Y0+G.f[1]);
+  ctx.font=G.normal+"px 'Noto Sans',sans-serif";
+  ctx.textAlign=G.titel[2];
+  ctx.fillText("Widerstand in Ω",XE+G.titel[0],YE+G.titel[1]);
+  ctx.textAlign="left";
+  /* Anzeigen */
+  document.getElementById('frw').textContent=f+" Hz";
+  document.getElementById('indw').textContent=L+" mH";
+  document.getElementById('kapw').textContent=C+" nF";
+  document.getElementById('widw').textContent=R+" Ω";
+  document.getElementById('aR').textContent=R+" Ω";
+  document.getElementById('aL').textContent=komma(XL,0)+" Ω";
+  document.getElementById('aC').textContent=komma(XC,0)+" Ω";
+  document.getElementById('aF').textContent=komma(f0,0)+" Hz";
+ }
+ [fr,ind,kap,wid].forEach(function(e){e.addEventListener('input',zeichne);});
+ document.getElementById('reset').addEventListener('click',function(){
+  fr.value=700; ind.value=150; kap.value=300; wid.value=800; zeichne();
+ });
+ window.addEventListener('resize', function(){ anordnen(); zeichne(); });
+ zeichne();
+})();
+</script>
+</body></html>
