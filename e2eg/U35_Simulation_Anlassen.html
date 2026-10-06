@@ -1,0 +1,325 @@
+<!-- sim_bearbeitung: pflicht -->
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>U35 Simulation: Direkt oder Stern-Dreieck?</title>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--linie:#C7D2DA;
+      --gruen:#2F7D62;--rot:#B23A33;--grau:#5A666F}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Noto Sans',system-ui,sans-serif;color:var(--ink);background:#fff}
+header{border-top:6px solid var(--kupfer);padding:14px 18px 10px}
+h1{margin:0;font-size:clamp(18px,4vw,26px)}
+.ziel{background:var(--kupferhell);border-left:5px solid var(--kupfer);
+      padding:12px 16px;margin:12px 18px;font-size:clamp(14px,3vw,17px)}
+.ziel > b:first-child{display:block;font-size:.82em;letter-spacing:.08em;text-transform:uppercase;
+        color:var(--kupfer);margin-bottom:4px}
+canvas{display:block;width:100%;max-width:960px;margin:0 auto;height:auto}
+.regler{max-width:960px;margin:0 auto;padding:8px 18px 4px}
+.zeile{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:14px 0}
+.zeile label{flex:0 0 250px;font-weight:700;font-size:clamp(14px,3vw,17px)}
+input[type=range]{flex:1 1 220px;min-width:180px;height:44px;accent-color:var(--kupfer);
+  -webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-moz-range-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;
+  height:26px;margin-top:-9px;border-radius:50%;background:var(--kupfer);border:2px solid #fff;
+  box-shadow:0 0 0 1.4px var(--kupfer)}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;
+  background:var(--kupfer);border:2px solid #fff}
+input[type=range]:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
+.wert{flex:0 0 128px;text-align:right;font-variant-numeric:tabular-nums;
+      font-size:clamp(15px,3.2vw,19px);font-weight:700;color:var(--kupfer)}
+.anzeigen{display:flex;gap:12px;flex-wrap:wrap;max-width:960px;margin:6px auto 0;padding:0 18px}
+.kachel{flex:1 1 150px;border:1.4px solid var(--linie);padding:10px 12px}
+.kachel span{display:block;font-size:.78em;letter-spacing:.06em;color:var(--grau);font-weight:700}
+.kachel b{font-size:clamp(17px,3.6vw,22px)}
+button{font:inherit;font-weight:700;padding:12px 20px;min-height:48px;border:1.6px solid var(--ink);
+       background:#fff;color:var(--ink);cursor:pointer}
+button:hover{background:var(--kupferhell)}
+.fuss{max-width:960px;margin:14px auto 26px;padding:0 18px;font-size:.86em;color:var(--grau)}
+.vergleich{max-width:960px;margin:10px auto 0;padding:10px 18px;border-left:5px solid var(--gruen);
+  background:#EEF5F2;font-size:clamp(14px,3vw,17px)}
+.vergleich.warn{border-left-color:var(--rot);background:#FBEEED}
+/* Die Zeichnung bewegt sich nicht von selbst; bei reduzierter Bewegung ist nichts
+   abzuschalten. Die Regel steht hier wie in den anderen Simulationen der Reihe. */
+@media (prefers-reduced-motion: reduce){canvas{outline:none}}
+</style>
+</head><body>
+
+<header>
+<h1>Direkt oder Stern-Dreieck?</h1>
+</header>
+
+<div class="ziel">
+<b>Was Sie herausfinden sollen</b>
+Der Sternanlauf senkt den Anlaufstrom auf ein Drittel. Das klingt nach einem reinen Gewinn.
+Verstellen Sie das <b>Widerstandsmoment</b> der Arbeitsmaschine und achten Sie darauf, ab
+welchem Wert der Motor in Stern <b>nicht mehr anl&auml;uft</b>, in Dreieck aber noch. Was folgt
+daraus f&uuml;r die Frage, welche Antriebe man so anlassen darf?
+</div>
+
+<script type="application/json" id="sim-meta">
+{
+  "erkenntnis": "dass der Sternanlauf Anlaufstrom UND Anlaufmoment auf ein Drittel senkt, weil das Moment vom Quadrat der Spannung abhaengt; deshalb ist er nur fuer Antriebe brauchbar, deren Widerstandsmoment unter einem Drittel des Anlaufmoments bleibt",
+  "startwerte":    {"widerstandsmoment": 20},
+  "loesungswerte": {"widerstandsmoment": [10, 31, 20.6, 53.6, 18]},
+  "quelle": "Europa-Rechenbuch S. 248, Bild 3 (pixelweise ausgemessen); Europa Fachkunde S. 497 (Bild 2, M ~ U^2); Tabellenbuch S. 532 Formel 12"
+}
+</script>
+
+<canvas id="buehne" width="960" height="480"
+        data-quelle="Europa-Rechenbuch S. 248, Bild 3: Drehmomentkennlinie eines 5,5-kW-Kaefiglaeufermotors, pixelweise ausgemessen; die Sternkurve ist ein Drittel davon (Europa Fachkunde S. 497: M ~ U^2, Tabellenbuch S. 532 Formel 12)"></canvas>
+
+<div class="regler">
+<div class="zeile">
+  <label for="last">Widerstandsmoment M<sub>W</sub></label>
+  <input type="range" id="last" min="0" max="100" step="1" value="20">
+  <div class="wert" id="lastw">20 Nm</div>
+</div>
+<button id="reset" type="button">Zur&uuml;cksetzen</button>
+</div>
+
+<div class="anzeigen">
+  <div class="kachel"><span>Anlaufmoment in Dreieck</span><b id="aMD">79 Nm</b></div>
+  <div class="kachel"><span>Anlaufmoment in Stern</span><b id="aMY">26 Nm</b></div>
+  <div class="kachel"><span>Anlaufstrom in Dreieck</span><b id="aID">76 A</b></div>
+  <div class="kachel"><span>Anlaufstrom in Stern</span><b id="aIY">25 A</b></div>
+</div>
+
+<div class="vergleich" id="vgl">&nbsp;</div>
+
+<div class="fuss">
+Die Dreieckkennlinie ist <b>keine Formel</b>, sondern die <b>gemessene</b> Kennlinie des
+5,5-kW-K&auml;figl&auml;ufermotors aus U34, Punkt f&uuml;r Punkt &uuml;bertragen: 217 Punkte. Die Sternkennlinie entsteht daraus durch Multiplikation mit
+<b>1/3</b>: in Stern liegt an jedem Strang nur 1/&radic;3 = 0,577 der Leiterspannung, und weil
+das Moment vom <b>Quadrat</b> der Spannung abh&auml;ngt, ist (1/&radic;3)<sup>2</sup> = 1/3
+(Tabellenbuch Seite 532, Formel 12). Der Anlaufstrom sinkt im
+selben Verh&auml;ltnis. Ob der Motor anl&auml;uft, entscheidet sich daran, ob seine Kennlinie
+&uuml;ber dem Widerstandsmoment liegt.
+</div>
+
+<script>
+"use strict";
+var KURVE = [[40.0, 79.2], [50.0, 79.2], [60.0, 79.2], [70.0, 79.2], [80.0, 79.2], [90.0, 79.2], [100.0, 79.3], [110.0, 79.3], [120.0, 79.3], [130.0, 79.4], [140.0, 79.6], [150.0, 79.6], [160.0, 79.7], [170.0, 79.8], [180.0, 79.9], [190.0, 80.0], [200.0, 80.1], [210.0, 80.3], [220.0, 80.3], [230.0, 80.4], [240.0, 80.5], [250.0, 80.6], [260.0, 80.9], [270.0, 81.1], [280.0, 81.1], [290.0, 81.4], [300.0, 81.4], [310.0, 81.8], [320.0, 81.9], [330.0, 82.1], [340.0, 82.3], [350.0, 82.5], [360.0, 82.7], [370.0, 82.8], [380.0, 83.0], [390.0, 83.2], [400.0, 83.3], [410.0, 83.6], [420.0, 83.8], [430.0, 84.0], [440.0, 84.2], [450.0, 84.5], [460.0, 84.6], [470.0, 84.9], [480.0, 85.1], [490.0, 85.3], [500.0, 85.6], [510.0, 85.7], [520.0, 85.9], [530.0, 86.3], [540.0, 86.5], [550.0, 86.6], [560.0, 86.9], [570.0, 87.1], [580.0, 87.4], [590.0, 87.7], [600.0, 88.0], [610.0, 88.2], [620.0, 88.2], [630.0, 88.7], [640.0, 89.2], [650.0, 89.3], [660.0, 89.6], [670.0, 89.8], [680.0, 90.0], [690.0, 90.3], [700.0, 90.5], [710.0, 90.8], [720.0, 91.1], [730.0, 91.4], [740.0, 91.6], [750.0, 91.9], [760.0, 92.3], [770.0, 92.5], [780.0, 92.7], [790.0, 92.9], [800.0, 93.1], [810.0, 93.5], [820.0, 93.9], [830.0, 94.1], [840.0, 94.3], [850.0, 94.7], [860.0, 95.0], [870.0, 95.3], [880.0, 95.6], [890.0, 95.8], [900.0, 96.0], [910.0, 96.3], [920.0, 96.7], [930.0, 97.0], [940.0, 97.4], [950.0, 97.6], [960.0, 97.8], [970.0, 98.0], [980.0, 98.3], [990.0, 98.6], [1000.0, 99.7], [1010.0, 99.3], [1020.0, 99.5], [1030.0, 99.7], [1040.0, 100.1], [1050.0, 100.2], [1060.0, 100.5], [1070.0, 100.6], [1080.0, 100.8], [1090.0, 101.2], [1100.0, 101.4], [1110.0, 101.6], [1120.0, 101.7], [1130.0, 102.0], [1140.0, 102.1], [1150.0, 102.2], [1160.0, 102.3], [1220.0, 102.3], [1230.0, 102.1], [1239.0, 102.0], [1248.4, 101.5], [1262.6, 101.0], [1270.4, 100.5], [1278.3, 100.0], [1286.2, 99.5], [1290.9, 99.0], [1295.6, 98.5], [1298.7, 98.0], [1301.9, 97.5], [1308.2, 97.0], [1311.3, 96.5], [1314.5, 96.0], [1317.6, 95.5], [1319.2, 95.0], [1323.9, 94.5], [1327.0, 94.0], [1328.6, 93.5], [1330.2, 93.0], [1334.9, 92.5], [1336.5, 92.0], [1338.1, 91.5], [1342.8, 90.5], [1345.9, 90.0], [1349.1, 89.5], [1350.6, 88.5], [1353.8, 87.5], [1356.9, 86.5], [1360.1, 85.5], [1361.6, 85.0], [1363.2, 84.5], [1364.8, 84.0], [1366.4, 83.5], [1367.9, 83.0], [1369.5, 82.5], [1371.1, 81.5], [1372.6, 81.0], [1374.2, 80.0], [1375.8, 79.5], [1377.4, 78.5], [1380.5, 78.0], [1382.1, 76.0], [1385.2, 75.5], [1388.4, 73.5], [1389.9, 73.0], [1391.5, 71.5], [1393.1, 70.5], [1394.7, 69.5], [1396.2, 70.0], [1397.8, 67.0], [1399.4, 66.5], [1400.9, 65.0], [1402.5, 65.5], [1404.1, 63.5], [1405.7, 63.0], [1407.2, 61.5], [1408.8, 60.0], [1411.9, 59.5], [1413.5, 57.5], [1415.1, 56.5], [1416.7, 54.5], [1418.2, 53.5], [1419.8, 52.5], [1423.0, 51.5], [1424.5, 50.5], [1426.1, 48.5], [1427.7, 48.0], [1429.2, 47.0], [1430.8, 46.0], [1432.4, 45.5], [1434.0, 43.5], [1435.5, 43.0], [1437.1, 42.5], [1438.7, 41.0], [1440.3, 39.5], [1441.8, 39.0], [1443.4, 37.5], [1445.0, 37.0], [1446.5, 36.0], [1448.1, 35.0], [1451.3, 33.5], [1452.8, 33.0], [1456.0, 31.5], [1457.5, 31.0], [1459.1, 30.0], [1460.7, 27.5], [1462.3, 26.5], [1465.4, 25.0], [1467.0, 22.5], [1468.6, 22.0], [1470.1, 20.5], [1471.7, 19.5], [1473.3, 20.0], [1474.8, 18.0], [1476.4, 17.0], [1478.0, 16.5], [1479.6, 14.5], [1481.1, 11.5], [1482.7, 11.0], [1484.3, 7.0], [1485.8, 6.5], [1487.4, 3.5]];
+var STROM = [[40.0, 76.0], [50.0, 75.8], [60.0, 75.7], [70.0, 75.5], [80.0, 75.3], [90.0, 75.2], [100.0, 74.9], [110.0, 74.7], [120.0, 74.4], [130.0, 74.2], [140.0, 73.9], [150.0, 73.7], [160.0, 73.6], [170.0, 73.4], [180.0, 73.1], [190.0, 73.0], [200.0, 72.6], [210.0, 72.4], [220.0, 72.2], [230.0, 72.1], [240.0, 71.8], [250.0, 71.4], [260.0, 71.2], [270.0, 71.0], [280.0, 70.7], [290.0, 70.7], [300.0, 70.5], [310.0, 70.3], [320.0, 70.0], [330.0, 69.9], [340.0, 69.6], [350.0, 69.3], [360.0, 69.1], [370.0, 69.0], [380.0, 68.5], [390.0, 68.3], [400.0, 68.1], [410.0, 67.9], [420.0, 67.6], [430.0, 67.4], [440.0, 67.2], [450.0, 66.8], [460.0, 66.6], [470.0, 66.4], [480.0, 66.1], [490.0, 66.0], [500.0, 65.6], [510.0, 65.2], [520.0, 65.0], [530.0, 64.6], [540.0, 64.5], [550.0, 64.1], [560.0, 63.9], [570.0, 63.7], [580.0, 63.3], [590.0, 63.1], [600.0, 62.9], [610.0, 62.5], [620.0, 62.1], [630.0, 61.9], [640.0, 61.7], [650.0, 61.3], [660.0, 60.9], [670.0, 60.8], [680.0, 60.6], [690.0, 60.4], [700.0, 59.7], [710.0, 59.3], [720.0, 59.0], [730.0, 58.8], [740.0, 58.5], [750.0, 58.2], [760.0, 57.7], [770.0, 57.5], [780.0, 57.1], [790.0, 56.9], [800.0, 56.5], [810.0, 55.9], [820.0, 55.6], [830.0, 55.3], [840.0, 55.0], [850.0, 54.5], [860.0, 54.2], [870.0, 53.8], [880.0, 53.2], [890.0, 53.0], [900.0, 52.8], [910.0, 52.5], [920.0, 51.7], [930.0, 51.3], [940.0, 50.9], [950.0, 50.6], [960.0, 50.3], [970.0, 49.7], [980.0, 49.4], [990.0, 49.0], [1000.0, 47.2], [1010.0, 47.6], [1020.0, 47.3], [1030.0, 46.7], [1040.0, 46.3], [1050.0, 45.7], [1060.0, 45.4], [1070.0, 44.9], [1080.0, 44.2], [1090.0, 43.6], [1100.0, 42.9], [1110.0, 42.5], [1120.0, 42.0], [1130.0, 41.4], [1140.0, 40.6], [1150.0, 40.2], [1160.0, 39.3], [1170.0, 38.8], [1180.0, 38.2], [1190.0, 37.7], [1200.0, 36.7], [1210.0, 36.0], [1220.0, 35.3], [1230.0, 34.6], [1240.0, 33.9], [1250.0, 32.8], [1260.0, 32.3], [1270.0, 31.6], [1280.0, 30.8], [1290.0, 30.0], [1300.0, 29.0], [1310.0, 28.0], [1320.0, 27.0], [1330.0, 26.1], [1340.0, 25.1], [1350.0, 24.0], [1360.0, 22.9], [1370.0, 21.9], [1380.0, 20.6], [1390.0, 19.4], [1400.0, 18.0], [1410.0, 17.1], [1420.0, 15.3], [1430.0, 13.7], [1440.0, 12.4], [1450.0, 11.8], [1460.0, 8.2], [1470.0, 6.9]];
+var C = document.getElementById("buehne"), g = C.getContext("2d");
+var last = document.getElementById("last");
+var INK="#1A2530", KUPFER="#A34E0E", LINIE="#C7D2DA", GRAU="#5A666F",
+    GRUEN="#2F7D62", ROT="#B23A33", BLAU="#2C5F8A";
+var MAdreieck = KURVE[0][1], IAdreieck = STROM[0][1];
+var NS = 1500.0, MMAX = 110;
+/* Zwei Anordnungen derselben Zeichnung. Am Handy (schmaler als 640 px) stand das Querformat
+   960 x 480 auf 390 px verkleinert da: die kleinste Beschriftung (13 px) war dort 5,3 px hoch,
+   unlesbar (06.10.2026). Hochformat 600 x 660: die beiden Anlassarten als Zeilen oben, das
+   Diagramm darunter ueber die volle Breite. Kleinste Schrift 19 px (die Indizes), bei 390 px
+   Breite 12,5 px; alles andere 20 px und mehr. */
+var BREIT  = {W: 960, H: 480, X0: 90, X1: 600, Y0: 400, Y1: 55,  fT: 13, fA: 13, fK: 15, tickOff: 20,
+              tickY: 4, axOff: 42, rotOff: 44, schmal: false};
+var SCHMAL = {W: 600, H: 660, X0: 92, X1: 560, Y0: 586, Y1: 230, fT: 20, fA: 20, fK: 24, tickOff: 28,
+              tickY: 6, axOff: 58, rotOff: 66, schmal: true};
+var G = BREIT, X0 = G.X0, X1 = G.X1, Y0 = G.Y0, Y1 = G.Y1;
+function anordnen() {
+  var neu = (C.parentNode.clientWidth || window.innerWidth) < 640 ? SCHMAL : BREIT;
+  if (neu !== G || C.width !== neu.W) { G = neu; C.width = G.W; C.height = G.H; }
+  X0 = G.X0; X1 = G.X1; Y0 = G.Y0; Y1 = G.Y1;
+}
+anordnen();
+
+/* Gross mit tiefgestelltem Index. Vorher standen im Bild „Mᴡ“ und „Mₐ“, „Iₐ“ mit
+   Ersatzzeichen (kleines w, kleines a); die Formelzeichen heissen M_W, M_A und I_A wie im
+   Arbeitsblatt. Das Canvas kennt kein <sub>. Gibt die Breite des Geschriebenen zurueck. */
+function mitIndex(gross, idx, rest, x, y, px_, fett) {
+  var a = fett ? "bold " : "";
+  g.textAlign = "left";
+  g.font = a + px_ + "px system-ui,sans-serif"; g.fillText(gross, x, y);
+  var w = g.measureText(gross).width;
+  g.font = a + Math.round(px_ * 0.8) + "px system-ui,sans-serif";   /* Index 80 %: am Handy 12 px und mehr */
+  g.fillText(idx, x + w, y + Math.round(px_ * 0.28));
+  var w2 = g.measureText(idx).width;
+  g.font = a + px_ + "px system-ui,sans-serif"; g.fillText(rest, x + w + w2, y);
+  return w + w2 + g.measureText(rest).width;
+}
+function werteZeile(m, i, x, y, px_) {
+  var b = mitIndex("M", "A", " = " + zahl(m, 0) + " Nm   ", x, y, px_, false);
+  mitIndex("I", "A", " = " + zahl(i, 0) + " A", x + b, y, px_, false);
+}
+
+function zahl(v, n) { return (Math.abs(v) < 5e-4 ? 0 : v).toFixed(n).replace(".", ","); }
+function px(n) { return X0 + n / NS * (X1 - X0); }
+function py(m) { return Y0 - m / MMAX * (Y0 - Y1); }
+
+function bild() {
+  var MW = +last.value;
+  g.clearRect(0, 0, C.width, C.height);
+
+  g.strokeStyle = LINIE; g.lineWidth = 1;
+  g.font = G.fT + "px system-ui,sans-serif"; g.fillStyle = GRAU; g.textAlign = "center";
+  for (var nn = 0; nn <= 1500; nn += 300) {
+    g.beginPath(); g.moveTo(px(nn), Y1); g.lineTo(px(nn), Y0); g.stroke();
+    g.fillText(nn, px(nn), Y0 + G.tickOff);
+  }
+  g.textAlign = "right";
+  for (var mm = 0; mm <= 100; mm += 20) {
+    g.beginPath(); g.moveTo(X0, py(mm)); g.lineTo(X1, py(mm)); g.stroke();
+    g.fillText(mm, X0 - 8, py(mm) + G.tickY);
+  }
+  g.strokeStyle = INK; g.lineWidth = 1.8;
+  g.beginPath(); g.moveTo(X0, Y1 - 8); g.lineTo(X0, Y0); g.lineTo(X1 + 14, Y0); g.stroke();
+  g.textAlign = "center"; g.fillStyle = GRAU; g.font = G.fA + "px system-ui,sans-serif";
+  g.fillText("Drehzahl n in 1/min", (X0 + X1) / 2, Y0 + G.axOff);
+  g.save(); g.translate(X0 - G.rotOff, (Y0 + Y1) / 2); g.rotate(-Math.PI / 2);
+  g.fillText("Drehmoment M in Nm", 0, 0); g.restore();
+
+  /* Dreieck */
+  g.strokeStyle = INK; g.lineWidth = 3; g.beginPath();
+  KURVE.forEach(function (t, i) {
+    if (i === 0) { g.moveTo(px(t[0]), py(t[1])); } else { g.lineTo(px(t[0]), py(t[1])); }
+  });
+  g.stroke();
+
+  /* Stern: ein Drittel */
+  g.strokeStyle = BLAU; g.lineWidth = 3; g.setLineDash([7, 5]); g.beginPath();
+  KURVE.forEach(function (t, i) {
+    if (i === 0) { g.moveTo(px(t[0]), py(t[1] / 3)); } else { g.lineTo(px(t[0]), py(t[1] / 3)); }
+  });
+  g.stroke(); g.setLineDash([]);
+
+  /* das Widerstandsmoment */
+  g.strokeStyle = KUPFER; g.lineWidth = 2.6;
+  g.beginPath(); g.moveTo(X0, py(MW)); g.lineTo(X1, py(MW)); g.stroke();
+
+  /* Die drei Beschriftungen. Die Lastgerade laeuft ueber die ganze Breite und strich je
+     nach Einstellung eine der festen Beschriftungen durch; bei 20 Nm lag „M_W = 20 Nm" auf der
+     gestrichelten Sternkurve (am Standbild gesehen, 06.10.2026). Jede Beschriftung prueft
+     darum ihre Lage gegen Gerade, Kurven und die schon gesetzten Beschriftungen und weicht
+     auf die andere Seite aus. */
+  var belegt = [];
+  /* unten mit Platz fuer die Unterlaengen (Klammern, g): 0,3 Schriftgroessen plus 2 px */
+  function linieTrifft(o, u) { var yl = py(MW); return yl >= o - 4 && yl <= u + 0.3 * G.fK + 2; }
+  function kurveTrifft(x0, x1, o, u) {
+    for (var k = 0; k < KURVE.length; k++) {
+      var X = px(KURVE[k][0]);
+      if (X < x0 || X > x1) { continue; }
+      var y1 = py(KURVE[k][1]), y3 = py(KURVE[k][1] / 3);
+      if ((y1 >= o - 3 && y1 <= u + 3) || (y3 >= o - 3 && y3 <= u + 3)) { return true; }
+    }
+    return false;
+  }
+  function kastenTrifft(x0, x1, o, u) {
+    return belegt.some(function (b) { return x0 < b[2] && x1 > b[0] && o < b[3] && u > b[1]; });
+  }
+  function sternMax(x0, x1) {
+    var m = 0;
+    KURVE.forEach(function (t) { var X = px(t[0]); if (X >= x0 && X <= x1) { m = Math.max(m, t[1] / 3); } });
+    return m;
+  }
+  var K60 = KURVE[60] ? KURVE[60][1] : 82, hK = G.fK * 0.75;
+  g.font = "bold " + G.fK + "px system-ui,sans-serif"; g.textAlign = "left";
+  /* Dreieck: ueber der Kurve, sonst darunter */
+  var xD = px(330), wD = g.measureText("Dreieck").width;
+  var yD = py(K60) - (G.schmal ? 18 : 14);
+  if (linieTrifft(yD - hK, yD)) {
+    /* darunter: die Oberkante der Schrift 6 px unter dem tiefsten Kurvenpunkt im Bereich */
+    var kMin = 999;
+    KURVE.forEach(function (t) { var X = px(t[0]); if (X >= xD && X <= xD + wD) { kMin = Math.min(kMin, t[1]); } });
+    yD = py(kMin) + 6 + hK;
+  }
+  g.fillStyle = INK; g.fillText("Dreieck", xD, yD);
+  belegt.push([xD, yD - hK, xD + wD, yD + 4]);
+  /* Stern: unter der gestrichelten Kurve, sonst darueber */
+  var tS = "Stern (ein Drittel)", xS = px(330), wS = g.measureText(tS).width;
+  var yS = py(K60 / 3) + (G.schmal ? 32 : 26);
+  if (linieTrifft(yS - hK, yS)) { yS = py(sternMax(xS, xS + wS)) - 10; }
+  g.fillStyle = BLAU; g.fillText(tS, xS, yS);
+  belegt.push([xS, yS - hK, xS + wS, yS + 4]);
+  /* Lastgerade: links darueber, links darunter, rechts darueber, rechts darunter */
+  g.font = "bold " + G.fK + "px system-ui,sans-serif";
+  var wW = g.measureText("M = " + zahl(MW, 0) + " Nm").width + G.fK * 0.7;
+  var lagen = [[X0 + 10, py(MW) - 9], [X0 + 10, py(MW) + G.fK + 6],
+               [X1 - wW - 40, py(MW) - 9], [X1 - wW - 40, py(MW) + G.fK + 6]];
+  var lage = lagen[0];
+  for (var q = 0; q < lagen.length; q++) {
+    var lx = lagen[q][0], ly = lagen[q][1];
+    if (ly - hK < 4 || ly + 4 > Y0 - 2) { continue; }
+    if (kurveTrifft(lx, lx + wW, ly - hK, ly + 4) || kastenTrifft(lx, lx + wW, ly - hK, ly + 4)) { continue; }
+    lage = lagen[q]; break;
+  }
+  g.fillStyle = KUPFER;
+  mitIndex("M", "W", " = " + zahl(MW, 0) + " Nm", lage[0], lage[1], G.fK, true);
+
+  var laeuftD = MW < MAdreieck, laeuftY = MW < MAdreieck / 3;
+
+  if (G.schmal) {
+  /* Hochformat: zwei Zeilenpaare ueber dem Diagramm, der Befund rechtsbuendig daneben */
+  g.textAlign = "left";
+  g.fillStyle = INK; g.font = "bold 24px system-ui,sans-serif";
+  g.fillText("Direktanlauf (Dreieck)", 16, 34);
+  g.fillStyle = GRAU; werteZeile(MAdreieck, IAdreieck, 16, 68, 24);
+  g.font = "bold 22px system-ui,sans-serif"; g.fillStyle = laeuftD ? GRUEN : ROT;
+  g.textAlign = "right"; g.fillText(laeuftD ? "läuft an" : "läuft NICHT an", 584, 34);
+  g.textAlign = "left";
+  g.fillStyle = INK; g.font = "bold 24px system-ui,sans-serif";
+  g.fillText("Stern-Dreieck-Anlauf", 16, 110);
+  g.fillStyle = GRAU; werteZeile(MAdreieck / 3, IAdreieck / 3, 16, 144, 24);
+  g.font = "bold 22px system-ui,sans-serif"; g.fillStyle = laeuftY ? GRUEN : ROT;
+  g.textAlign = "right"; g.fillText(laeuftY ? "läuft an" : "läuft NICHT an", 584, 110);
+  g.textAlign = "left";
+  g.fillStyle = GRAU; g.font = "20px system-ui,sans-serif";
+  g.fillText("Grenze in Stern: " + zahl(MAdreieck / 3, 0) + " Nm  ·  in Dreieck: " +
+             zahl(MAdreieck, 0) + " Nm", 16, 180);
+  } else {
+  var TX = 660;
+  g.textAlign = "left";
+  g.fillStyle = INK; g.font = "bold 22px system-ui,sans-serif";
+  g.fillText("Direktanlauf (Dreieck)", TX, 90);
+  g.fillStyle = GRAU; werteZeile(MAdreieck, IAdreieck, TX, 118, 17);
+  g.font = "bold 21px system-ui,sans-serif"; g.fillStyle = laeuftD ? GRUEN : ROT;
+  g.fillText(laeuftD ? "läuft an" : "läuft NICHT an", TX, 150);
+
+  g.fillStyle = INK; g.font = "bold 22px system-ui,sans-serif";
+  g.fillText("Stern-Dreieck-Anlauf", TX, 220);
+  g.fillStyle = GRAU; werteZeile(MAdreieck / 3, IAdreieck / 3, TX, 248, 17);
+  g.font = "bold 21px system-ui,sans-serif"; g.fillStyle = laeuftY ? GRUEN : ROT;
+  g.fillText(laeuftY ? "läuft an" : "läuft NICHT an", TX, 280);
+
+  g.fillStyle = GRAU; g.font = "15px system-ui,sans-serif";
+  g.fillText("Grenze in Stern: " + zahl(MAdreieck / 3, 0) + " Nm", TX, 330);
+  g.fillText("Grenze in Dreieck: " + zahl(MAdreieck, 0) + " Nm", TX, 354);
+  }
+
+  document.getElementById("lastw").textContent = zahl(MW, 0) + " Nm";
+  document.getElementById("aMD").textContent = zahl(MAdreieck, 0) + " Nm";
+  document.getElementById("aMY").textContent = zahl(MAdreieck / 3, 0) + " Nm";
+  document.getElementById("aID").textContent = zahl(IAdreieck, 0) + " A";
+  document.getElementById("aIY").textContent = zahl(IAdreieck / 3, 0) + " A";
+
+  var kasten = document.getElementById("vgl"), satz;
+  kasten.className = "vergleich";
+  if (!laeuftD) {
+    kasten.className = "vergleich warn";
+    satz = "Bei " + zahl(MW, 0) + " Nm läuft der Motor in KEINER Schaltung an: das " +
+           "Widerstandsmoment liegt über seinem Anlaufmoment von " + zahl(MAdreieck, 0) + " Nm. " +
+           "Hier hilft kein Anlassverfahren, sondern nur ein größerer Motor.";
+  } else if (!laeuftY) {
+    kasten.className = "vergleich warn";
+    satz = "Bei " + zahl(MW, 0) + " Nm läuft der Motor in Dreieck an, in Stern aber NICHT " +
+           "mehr: " + zahl(MAdreieck / 3, 0) + " Nm reichen gegen " + zahl(MW, 0) + " Nm nicht aus. " +
+           "Er würde in Sternschaltung stehen bleiben und dabei weiter Anlaufstrom ziehen. " +
+           "Für diesen Antrieb ist Stern-Dreieck ungeeignet.";
+  } else {
+    satz = "Bei " + zahl(MW, 0) + " Nm läuft der Motor in beiden Schaltungen an. Mit " +
+           "Stern-Dreieck beginnt er mit nur " + zahl(IAdreieck / 3, 0) + " A statt " +
+           zahl(IAdreieck, 0) + " A, und das Netz bleibt ruhig. Solange das Widerstandsmoment " +
+           "unter " + zahl(MAdreieck / 3, 0) + " Nm bleibt, ist das die bessere Wahl.";
+  }
+  kasten.textContent = satz;
+}
+
+last.addEventListener("input", bild);
+document.getElementById("reset").addEventListener("click", function () {
+  last.value = 20; bild();
+});
+window.addEventListener("resize", function () { anordnen(); bild(); });
+bild();
+</script>
+</body></html>
