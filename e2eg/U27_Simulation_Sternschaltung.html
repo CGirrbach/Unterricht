@@ -1,0 +1,333 @@
+<!-- sim_bearbeitung: pflicht -->
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>U27 Simulation: Der Stern unter Last</title>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--linie:#C7D2DA;
+      --gruen:#2F7D62;--rot:#B23A33;--grau:#5A666F}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Noto Sans',system-ui,sans-serif;color:var(--ink);background:#fff}
+header{border-top:6px solid var(--kupfer);padding:14px 18px 10px}
+h1{margin:0;font-size:clamp(18px,4vw,26px)}
+.ziel{background:var(--kupferhell);border-left:5px solid var(--kupfer);
+      padding:12px 16px;margin:12px 18px;font-size:clamp(14px,3vw,17px)}
+.ziel > b:first-child{display:block;font-size:.82em;letter-spacing:.08em;text-transform:uppercase;
+        color:var(--kupfer);margin-bottom:4px}
+canvas{display:block;width:100%;max-width:960px;margin:0 auto;height:auto}
+.regler{max-width:960px;margin:0 auto;padding:8px 18px 4px}
+.zeile{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:14px 0}
+.zeile label{flex:0 0 210px;font-weight:700;font-size:clamp(14px,3vw,17px)}
+/* Der Regler trug die Vorgabefarbe des Browsers (Blau), die einzige Farbe im Bild, die
+   nicht aus dem Haus stammt, und ausgerechnet am Bedienelement (Befund Linse BLATT,
+   U03/B2 und U04/B5, 01.09.2026). Er trägt jetzt Kupfer wie alles Bedienbare. */
+input[type=range]{flex:1 1 220px;min-width:180px;height:44px;accent-color:var(--kupfer);
+  -webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-moz-range-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;
+  height:26px;margin-top:-9px;border-radius:50%;background:var(--kupfer);border:2px solid #fff;
+  box-shadow:0 0 0 1.4px var(--kupfer)}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;
+  background:var(--kupfer);border:2px solid #fff}
+input[type=range]:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
+.wert{flex:0 0 128px;text-align:right;font-variant-numeric:tabular-nums;
+      font-size:clamp(15px,3.2vw,19px);font-weight:700;color:var(--kupfer)}
+.anzeigen{display:flex;gap:12px;flex-wrap:wrap;max-width:960px;margin:6px auto 0;padding:0 18px}
+.kachel{flex:1 1 150px;border:1.4px solid var(--linie);padding:10px 12px}
+.kachel span{display:block;font-size:.78em;letter-spacing:.06em;color:var(--grau);
+             font-weight:700}
+.kachel b{font-size:clamp(17px,3.6vw,22px)}
+button{font:inherit;font-weight:700;padding:12px 20px;min-height:48px;border:1.6px solid var(--ink);
+       background:#fff;color:var(--ink);cursor:pointer}
+button:hover{background:var(--kupferhell)}
+.fuss{max-width:960px;margin:14px auto 26px;padding:0 18px;font-size:.86em;color:var(--grau)}
+@media (prefers-reduced-motion: reduce){canvas{outline:none}}
+</style><style>
+.schalter{max-width:960px;margin:10px auto 0;padding:0 18px;display:flex;gap:0;flex-wrap:wrap}
+.schalter button{flex:1 1 200px;border-right-width:0}
+.schalter button:last-child{border-right-width:1.6px}
+.schalter button[aria-pressed=true]{background:var(--kupfer);color:#fff;border-color:var(--kupfer)}
+.vergleich{max-width:960px;margin:10px auto 0;padding:10px 18px;border-left:5px solid var(--gruen);
+  background:#EEF5F2;font-size:clamp(14px,3vw,17px)}
+</style>
+</head><body>
+
+<header>
+<h1>Der Stern unter Last</h1>
+</header>
+
+<div class="ziel">
+<b>Was Sie herausfinden sollen</b>
+Drei gleiche Widerst&auml;nde h&auml;ngen im Stern am Drehstromnetz. Verstellen Sie den
+Widerstand und die Netzspannung und achten Sie darauf, <b>welche Anzeige sich mitbewegt und
+welche nicht</b>. Eine der f&uuml;nf Kacheln r&uuml;hrt sich in keiner einzigen Einstellung.
+Welche ist es, und warum?
+</div>
+
+<script type="application/json" id="sim-meta">
+{
+  "erkenntnis": "dass in der Sternschaltung der Leiterstrom dem Strangstrom GLEICH ist, waehrend die Strangspannung nur der Wurzel-3-te Teil der Leiterspannung bleibt, und dass der Neutralleiterstrom bei symmetrischer Last in JEDER Einstellung null ist, gleichgueltig wie gross Widerstand und Netzspannung sind",
+  "startwerte":    {"strangwiderstand": 57, "netzspannung": 400},
+  "loesungswerte": {"strangwiderstand": [44, 38, 32, 24, 22.3, 19.2, 15, 13.3, 8.42], "strom": [6, 7.2, 5.2, 9.58, 10.3, 12, 17.3, 27.4, 1.59]},
+  "quelle": "Europa-Rechenbuch S. 124 (7.11.1), Europa Fachkunde S. 158 (7.9.3), Tabellenbuch S. 48 Formel 1 und 3"
+}
+</script>
+
+<div class="schalter">
+  <button id="bZ" type="button" aria-pressed="true">Zeigerbild der Str&ouml;me</button>
+  <button id="bL" type="button" aria-pressed="false">Liniendiagramm der Str&ouml;me</button>
+</div>
+
+<canvas id="buehne" width="960" height="430"
+        data-quelle="Europa Fachkunde S. 158, Bild 1, Bild 2 und Bild 4: Sternschaltung mit symmetrischer Last; I = I_Str, U = Wurzel(3)*U_Str, I_N = 0 bei symmetrischer Last"></canvas>
+
+<div class="regler">
+<div class="zeile">
+  <label for="rst">Strangwiderstand R<sub>Str</sub></label>
+  <input type="range" id="rst" min="8" max="80" step="1" value="57">
+  <div class="wert" id="rstw">57 &#8486;</div>
+</div>
+<div class="zeile">
+  <label for="unt">Netzspannung U</label>
+  <input type="range" id="unt" min="230" max="690" step="10" value="400">
+  <div class="wert" id="untw">400 V</div>
+</div>
+<button id="reset" type="button">Zur&uuml;cksetzen</button>
+</div>
+
+<div class="anzeigen">
+  <div class="kachel"><span>Strangspannung U<sub>Str</sub></span><b id="aUs">0 V</b></div>
+  <div class="kachel"><span>Strangstrom I<sub>Str</sub></span><b id="aIs">0 A</b></div>
+  <div class="kachel"><span>Leiterstrom I</span><b id="aIl">0 A</b></div>
+  <div class="kachel"><span>Neutralleiterstrom I<sub>N</sub></span><b id="aIn">0 A</b></div>
+  <div class="kachel"><span>Wirkleistung P</span><b id="aP">0 W</b></div>
+</div>
+
+<div class="vergleich" id="vgl">&nbsp;</div>
+
+<div class="fuss">
+Gerechnet wird mit U<sub>Str</sub> = U / &radic;3, I<sub>Str</sub> = U<sub>Str</sub> / R<sub>Str</sub>,
+I = I<sub>Str</sub> und P = 3 &middot; U<sub>Str</sub> &middot; I<sub>Str</sub>
+(Tabellenbuch Seite 48, Formel 1 und Formel 3).
+Die drei Str&auml;nge sind <b>gleich</b>, die Last also symmetrisch, und alle drei Widerst&auml;nde
+sind <b>Wirkwiderst&auml;nde</b> (cos &phi; = 1). Die Zuleitungen gelten als widerstandsfrei.
+</div>
+
+<script>
+"use strict";
+var C = document.getElementById("buehne"), g = C.getContext("2d");
+var rst = document.getElementById("rst"), unt = document.getElementById("unt");
+var bZ = document.getElementById("bZ"), bL = document.getElementById("bL");
+var zeigerbild = true;
+
+var INK = "#1A2530", KUPFER = "#A34E0E", LINIE = "#C7D2DA", GRAU = "#5A666F";
+var GRUEN = "#2F7D62", ROT = "#B23A33", BLAU = "#2C5F8A";
+var FARBE = [KUPFER, GRUEN, BLAU];
+var W3 = Math.sqrt(3);
+
+/* Zwei Anordnungen derselben Zeichnung. Am Handy (schmaler als 640 px) stand das Querformat
+   960 x 430 auf 390 px verkleinert da: Beschriftung 4,5 bis 6,1 px hoch, unlesbar (gemessen
+   06.10.2026). Schmal: Schaltbild oben (um den Faktor 1,75 vergroessert), Zeigerbild oder
+   Liniendiagramm darunter, 600 px breit, kleinste Schrift 19, am Handy 12,4 px. */
+var BREIT  = {W: 960, H: 430, sk: 1, ox: 0, oy: 0, capS: [150, 405], cap: 13,
+              MX: 620, MY: 200, R0: 118, lf: 15, lr: 26, satz: 14, satzY: 42, capP: 405,
+              X0: 420, X1: 930, Y0: 200, HK: 118, ax: 12, tick: 8, titel: 14, titelY: 18,
+              capL: 405};
+var SCHMAL = {W: 600, H: 930, sk: 1.75, ox: 4, oy: -42, capS: [300, 452], cap: 21,
+              MX: 300, MY: 676, R0: 150, lf: 26, lr: 38, satz: 21, satzY: 52, capP: 916,
+              X0: 104, X1: 572, Y0: 676, HK: 150, ax: 19, tick: 160, titel: 21, titelY: 26,
+              capL: 916};
+var G = BREIT;
+function anordnen() {
+  var neu = (C.parentNode.clientWidth || window.innerWidth) < 640 ? SCHMAL : BREIT;
+  if (neu !== G || C.width !== neu.W) { G = neu; C.width = G.W; C.height = G.H; }
+}
+anordnen();
+
+function zahl(v, n) {
+  var s = (Math.abs(v) < 5e-4 ? 0 : v).toFixed(n === undefined ? 2 : n);
+  return s.replace(".", ",").replace("-", "−");
+}
+
+/* Formelzeichen mit Index: fuer ein tiefgestelltes grosses N oder "Str" gibt es kein
+   Unicode-Zeichen, deshalb wird der Index eigens kleiner und tiefer gesetzt. */
+function zeichenMitIndex(gross, index, x, y, groesse) {
+  g.font = "bold " + groesse + "px system-ui,sans-serif";
+  var bH = g.measureText(gross).width;
+  g.font = "bold " + Math.round(groesse * 0.72) + "px system-ui,sans-serif";
+  var bI = g.measureText(index).width;
+  var links = x - (bH + bI) / 2;
+  g.textAlign = "left";
+  g.font = "bold " + groesse + "px system-ui,sans-serif";
+  g.fillText(gross, links, y);
+  g.font = "bold " + Math.round(groesse * 0.72) + "px system-ui,sans-serif";
+  g.fillText(index, links + bH, y + Math.round(groesse * 0.28));
+  g.textAlign = "center";
+}
+
+function schaltbild(iStr) {
+  /* Die drei Straenge als Stern, links im Bild (am Handy oben, vergroessert). Die
+     Strichstaerke der Strompfeile waechst mit dem Strom, damit die Wirkung des Reglers
+     auch im Bild und nicht nur in den Kacheln sichtbar wird. */
+  var X = 40, Y0 = 56, dY = 58, MX = 262, MY = Y0 + 3 * dY - 26;
+  var dick = Math.max(1.6, Math.min(7, iStr / 4));
+  g.save();
+  g.translate(G.ox, G.oy); g.scale(G.sk, G.sk);
+  g.strokeStyle = INK; g.lineWidth = 1.6;
+  for (var k = 0; k < 3; k++) {
+    var y = Y0 + k * dY;
+    /* Farbe und Strichstaerke standen am Ende des vorigen Durchlaufs noch auf dem
+       Strompfeil; die Leitung des naechsten Leiters erbte sie und wurde farbig und dick. */
+    g.strokeStyle = INK; g.lineWidth = 1.6;
+    g.beginPath(); g.moveTo(X, y); g.lineTo(X + 120, y); g.stroke();
+    g.fillStyle = INK; g.font = "bold 15px system-ui,sans-serif"; g.textAlign = "left";
+    g.fillText("L" + (k + 1), X - 28, y + 5);
+    /* Strangwiderstand */
+    g.strokeStyle = INK; g.lineWidth = 1.6;
+    g.strokeRect(X + 120, y - 11, 46, 22);
+    g.fillStyle = GRAU; g.font = "12px system-ui,sans-serif"; g.textAlign = "center";
+    g.fillText("R", X + 143, y + 4);
+    /* Weg zum Sternpunkt */
+    g.strokeStyle = INK; g.lineWidth = 1.6;
+    g.beginPath(); g.moveTo(X + 166, y); g.lineTo(MX, y); g.lineTo(MX, MY); g.stroke();
+    /* Strompfeil */
+    g.strokeStyle = FARBE[k]; g.lineWidth = dick;
+    g.beginPath(); g.moveTo(X + 56, y - 15); g.lineTo(X + 100, y - 15); g.stroke();
+    g.fillStyle = FARBE[k];
+    g.beginPath(); g.moveTo(X + 110, y - 15); g.lineTo(X + 98, y - 21);
+    g.lineTo(X + 98, y - 9); g.closePath(); g.fill();
+  }
+  /* Sternpunkt und Neutralleiter */
+  g.fillStyle = INK;
+  g.beginPath(); g.arc(MX, MY, 5, 0, 2 * Math.PI); g.fill();
+  g.strokeStyle = INK; g.lineWidth = 1.6;
+  g.beginPath(); g.moveTo(MX, MY); g.lineTo(MX, Y0 + 3 * dY + 22);
+  g.lineTo(X, Y0 + 3 * dY + 22); g.stroke();
+  g.fillStyle = INK; g.font = "bold 15px system-ui,sans-serif"; g.textAlign = "left";
+  g.fillText("N", X - 26, Y0 + 3 * dY + 27);
+  g.fillStyle = ROT; g.font = "bold 15px system-ui,sans-serif"; g.textAlign = "center";
+  g.fillText("I", X + 78, Y0 + 3 * dY + 12);
+  g.font = "bold 11px system-ui,sans-serif";
+  g.fillText("N", X + 84, Y0 + 3 * dY + 16);
+  g.font = "bold 15px system-ui,sans-serif";
+  g.fillText("= 0 A", X + 118, Y0 + 3 * dY + 12);
+  g.restore();
+  g.fillStyle = GRAU; g.font = G.cap + "px system-ui,sans-serif"; g.textAlign = "center";
+  g.fillText("Sternschaltung, symmetrische Last", G.capS[0], G.capS[1]);
+}
+
+function zeichne() {
+  var R = +rst.value, U = +unt.value;
+  var uStr = U / W3, iStr = uStr / R, P = 3 * uStr * iStr;
+  g.clearRect(0, 0, C.width, C.height);
+  g.textBaseline = "alphabetic";
+  schaltbild(iStr);
+
+  var MX = G.MX, MY = G.MY, R0 = G.R0;
+  /* Zeigerlaenge waechst mit dem Strom (im Massstab des Kreises) */
+  var mass = Math.min(R0, (14 + iStr * 3.4) * R0 / 118);
+  if (zeigerbild) {
+    g.strokeStyle = LINIE; g.lineWidth = 1;
+    g.beginPath(); g.arc(MX, MY, R0, 0, 2 * Math.PI); g.stroke();
+    g.beginPath(); g.moveTo(MX - R0 - 14, MY); g.lineTo(MX + R0 + 14, MY);
+    g.moveTo(MX, MY - R0 - 14); g.lineTo(MX, MY + R0 + 14); g.stroke();
+    for (var k = 0; k < 3; k++) {
+      var w = (90 - 120 * k) * Math.PI / 180;
+      var px = MX + mass * Math.cos(w), py = MY - mass * Math.sin(w);
+      g.strokeStyle = FARBE[k]; g.fillStyle = FARBE[k]; g.lineWidth = 3.4;
+      g.beginPath(); g.moveTo(MX, MY); g.lineTo(px, py); g.stroke();
+      g.beginPath(); g.moveTo(px, py);
+      g.lineTo(px - 13 * Math.cos(w - 0.35), py + 13 * Math.sin(w - 0.35));
+      g.lineTo(px - 13 * Math.cos(w + 0.35), py + 13 * Math.sin(w + 0.35));
+      g.closePath(); g.fill();
+      g.textBaseline = "middle";
+      zeichenMitIndex("I", String(k + 1), MX + (mass + G.lr) * Math.cos(w),
+                      MY - (mass + G.lr) * Math.sin(w), G.lf);
+      g.textBaseline = "alphabetic";
+    }
+    /* die geometrische Summe liegt im Ursprung */
+    g.fillStyle = ROT;
+    g.beginPath(); g.arc(MX, MY, 7, 0, 2 * Math.PI); g.fill();
+    /* Der Satz lag quer über dem Zeiger I_2; er steht jetzt unter dem Kreis. */
+    g.fillStyle = ROT; g.font = "bold " + G.satz + "px system-ui,sans-serif"; g.textAlign = "center";
+    g.fillText("Die drei Zeiger addieren sich geometrisch zu 0 A", MX, MY + R0 + G.satzY);
+    g.fillStyle = GRAU; g.font = G.cap + "px system-ui,sans-serif"; g.textAlign = "center";
+    g.fillText("Zeigerbild der Ströme", MX, G.capP);
+  } else {
+    var X0 = G.X0, X1 = G.X1, Y0 = G.Y0, HK = G.HK;
+    var scheitel = Math.sqrt(2) * iStr;
+    var skala = Math.max(0.5, scheitel * 1.12);   /* die Skala folgt dem Strom */
+    g.strokeStyle = LINIE; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(X0, Y0); g.lineTo(X1, Y0); g.stroke();
+    g.beginPath(); g.moveTo(X0, Y0 - HK - 12); g.lineTo(X0, Y0 + HK + 12); g.stroke();
+    g.fillStyle = GRAU; g.font = G.ax + "px system-ui,sans-serif";
+    g.textAlign = "right"; g.textBaseline = "middle";
+    g.fillText(zahl(skala, 1) + " A", X0 - 6, Y0 - HK);
+    g.fillText("0", X0 - 6, Y0);
+    g.fillText("−" + zahl(skala, 1) + " A", X0 - 6, Y0 + HK);
+    g.textAlign = "center"; g.textBaseline = "top";
+    for (var t = 0; t <= 360; t += 90) {
+      var xt = X0 + (X1 - X0) * t / 360;
+      g.strokeStyle = LINIE;
+      g.beginPath(); g.moveTo(xt, Y0 - 4); g.lineTo(xt, Y0 + 4); g.stroke();
+      g.fillStyle = GRAU; g.fillText(t + "°", xt, Y0 + G.tick);
+    }
+    g.textBaseline = "alphabetic";
+    for (var k2 = 0; k2 < 3; k2++) {
+      g.strokeStyle = FARBE[k2]; g.lineWidth = 2.6; g.beginPath();
+      for (var t2 = 0; t2 <= 360; t2 += 2) {
+        var y = scheitel * Math.sin((t2 - 120 * k2) * Math.PI / 180);
+        var X = X0 + (X1 - X0) * t2 / 360;
+        var Y = Y0 - HK * Math.max(-1, Math.min(1, y / skala));
+        if (t2 === 0) { g.moveTo(X, Y); } else { g.lineTo(X, Y); }
+      }
+      g.stroke();
+    }
+    g.strokeStyle = ROT; g.lineWidth = 3;
+    g.beginPath(); g.moveTo(X0, Y0); g.lineTo(X1, Y0); g.stroke();
+    g.fillStyle = ROT; g.font = "bold " + G.titel + "px system-ui,sans-serif"; g.textAlign = "left";
+    g.fillText("i₁ + i₂ + i₃ = 0  (die rote Linie)", X0 + 12, Y0 - HK - G.titelY);
+    g.fillStyle = GRAU; g.font = G.cap + "px system-ui,sans-serif"; g.textAlign = "center";
+    g.fillText("Liniendiagramm der Ströme", (X0 + X1) / 2, G.capL);
+  }
+
+  document.getElementById("rstw").textContent = R + " Ω";
+  document.getElementById("untw").textContent = U + " V";
+  document.getElementById("aUs").textContent = zahl(uStr, 1) + " V";
+  document.getElementById("aIs").textContent = zahl(iStr) + " A";
+  document.getElementById("aIl").textContent = zahl(iStr) + " A";
+  document.getElementById("aIn").textContent = "0 A";
+  document.getElementById("aP").textContent =
+    (P >= 1000 ? zahl(P / 1000) + " kW" : zahl(P, 0) + " W");
+
+  var satz;
+  if (Math.abs(U - 400) < 1) {
+    satz = "Im 400-V-Netz beträgt die Strangspannung " + zahl(uStr, 1) +
+           " V. Strangstrom und Leiterstrom sind beide " + zahl(iStr) +
+           " A, denn in der Sternschaltung liegen Strang und Leiter in Reihe.";
+  } else {
+    satz = "Bei " + U + " V Leiterspannung liegen " + zahl(uStr, 1) +
+           " V an jedem Strang, also der √3-te Teil. Der Strom folgt der Spannung: " +
+           zahl(iStr) + " A. Der Neutralleiterstrom bleibt 0 A.";
+  }
+  document.getElementById("vgl").textContent = satz;
+}
+
+function modus(z) {
+  zeigerbild = z;
+  bZ.setAttribute("aria-pressed", z ? "true" : "false");
+  bL.setAttribute("aria-pressed", z ? "false" : "true");
+  zeichne();
+}
+
+rst.addEventListener("input", zeichne);
+unt.addEventListener("input", zeichne);
+bZ.addEventListener("click", function () { modus(true); });
+bL.addEventListener("click", function () { modus(false); });
+document.getElementById("reset").addEventListener("click", function () {
+  rst.value = 57; unt.value = 400; modus(true);
+});
+window.addEventListener("resize", function () { anordnen(); zeichne(); });
+zeichne();
+</script>
+</body></html>
