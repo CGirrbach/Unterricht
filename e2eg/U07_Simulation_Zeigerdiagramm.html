@@ -1,0 +1,215 @@
+<!-- sim_bearbeitung: pflicht -->
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>U07 Simulation: vom drehenden Zeiger zum stehenden Zeigerdiagramm</title>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--linie:#C7D2DA;
+      --gruen:#2F7D62;--rot:#B23A33;--grau:#5A666F}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Noto Sans',system-ui,sans-serif;color:var(--ink);background:#fff}
+header{border-top:6px solid var(--kupfer);padding:14px 18px 10px}
+h1{margin:0;font-size:clamp(18px,4vw,26px)}
+.ziel{background:var(--kupferhell);border-left:5px solid var(--kupfer);
+      padding:12px 16px;margin:12px 18px;font-size:clamp(14px,3vw,17px)}
+.ziel > b:first-child{display:block;font-size:.82em;letter-spacing:.08em;text-transform:uppercase;
+        color:var(--kupfer);margin-bottom:4px}
+canvas{display:block;width:100%;max-width:960px;margin:0 auto;height:auto}
+.regler{max-width:960px;margin:0 auto;padding:8px 18px 4px}
+.zeile{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:14px 0}
+.zeile label{flex:0 0 210px;font-weight:700;font-size:clamp(14px,3vw,17px)}
+/* Der Regler trug die Vorgabefarbe des Browsers (Blau), die einzige Farbe im Bild, die
+   nicht aus dem Haus stammt, und ausgerechnet am Bedienelement (Befund Linse BLATT,
+   U03/B2 und U04/B5, 01.09.2026). Er trägt jetzt Kupfer wie alles Bedienbare. */
+input[type=range]{flex:1 1 220px;min-width:180px;height:44px;accent-color:var(--kupfer);
+  -webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-moz-range-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;
+  height:26px;margin-top:-9px;border-radius:50%;background:var(--kupfer);border:2px solid #fff;
+  box-shadow:0 0 0 1.4px var(--kupfer)}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;
+  background:var(--kupfer);border:2px solid #fff}
+input[type=range]:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
+.wert{flex:0 0 128px;text-align:right;font-variant-numeric:tabular-nums;
+      font-size:clamp(15px,3.2vw,19px);font-weight:700;color:var(--kupfer)}
+.anzeigen{display:flex;gap:12px;flex-wrap:wrap;max-width:960px;margin:6px auto 0;padding:0 18px}
+.kachel{flex:1 1 150px;border:1.4px solid var(--linie);padding:10px 12px}
+.kachel span{display:block;font-size:.78em;letter-spacing:.06em;color:var(--grau);
+             font-weight:700}
+.kachel b{font-size:clamp(17px,3.6vw,22px)}
+button{font:inherit;font-weight:700;padding:12px 20px;min-height:48px;border:1.6px solid var(--ink);
+       background:#fff;color:var(--ink);cursor:pointer}
+button:hover{background:var(--kupferhell)}
+.fuss{max-width:960px;margin:14px auto 26px;padding:0 18px;font-size:.86em;color:var(--grau)}
+@media (prefers-reduced-motion: reduce){canvas{outline:none}}
+</style></head><body>
+
+<header>
+<h1>Vom drehenden Zeiger zum stehenden Zeigerdiagramm</h1>
+</header>
+
+<div class="ziel">
+<b>Was Sie herausfinden sollen</b>
+Zwei Zeiger drehen sich. Halten Sie sie <b>mehrmals zu verschiedenen Zeitpunkten</b> an und
+achten Sie auf <b>zwei</b> Angaben: die Lage des einzelnen Zeigers und den <b>Winkel zwischen</b>
+beiden. Finden Sie heraus, <b>welche der beiden sich ändert</b>, warum man die Zeiger deshalb
+stehend zeichnen darf, und was geschieht, wenn die beiden Frequenzen <b>verschieden</b> sind.
+</div>
+
+<script type="application/json" id="sim-meta">
+{
+  "erkenntnis": "dass der Winkel zwischen zwei Zeigern gleicher Frequenz beim Anhalten immer derselbe ist, unabhängig vom Zeitpunkt, und dass genau deshalb ein stehendes Zeigerdiagramm nichts verliert; bei verschiedenen Frequenzen wandert er dagegen ständig",
+  "startwerte":     {"phase": 40, "frequenz2": 50},
+  "loesungswerte":  {"phase": 60, "frequenz2": 60},
+  "quelle": "Europa Fachkunde S. 129 (7.2.1 Zeigerdarstellung von Sinusgrößen, vier Vereinbarungen)"
+}
+</script>
+
+<canvas id="buehne" width="960" height="330"
+        data-quelle="Europa Fachkunde S. 129, Bild 2 (Zeigerdarstellung): Zeigerlänge = Scheitelwert, Drehrichtung entgegen dem Uhrzeigersinn"></canvas>
+
+<div class="regler">
+<div class="zeile">
+  <label for="ph">Phasenverschiebung &phi;</label>
+  <input type="range" id="ph" min="0" max="180" step="1" value="40">
+  <span class="wert" id="phw">40&deg;</span>
+</div>
+<div class="zeile">
+  <label for="f2">Frequenz des 2. Zeigers</label>
+  <input type="range" id="f2" min="30" max="70" step="1" value="50">
+  <span class="wert" id="f2w">50 Hz</span>
+</div>
+<div class="zeile">
+  <button id="halt" type="button">Anhalten</button>
+  <button id="reset" type="button">Zurücksetzen</button>
+</div>
+</div>
+
+<div class="anzeigen">
+  <div class="kachel"><span>Lage von û₁</span><b id="a1">0&deg;</b></div>
+  <div class="kachel"><span>Lage von û₂</span><b id="a2">40&deg;</b></div>
+  <div class="kachel"><span>Winkel dazwischen</span><b id="dw">40&deg;</b></div>
+  <div class="kachel"><span>Frequenzen</span><b id="fw">gleich</b></div>
+</div>
+
+<div class="fuss">
+Die Zeigerlänge entspricht dem Scheitelwert, die Drehrichtung ist entgegengesetzt dem
+Uhrzeigersinn. Der erste Zeiger ist der <b>Bezugszeiger</b>;
+im gezeichneten Zeigerdiagramm legt man ihn waagerecht. Solange beide Frequenzen gleich sind,
+bleibt der Winkel dazwischen bei jedem Anhalten derselbe; deshalb geht beim stehenden Bild
+nichts verloren.
+</div>
+
+<script>
+(function(){
+ "use strict";
+ var cv=document.getElementById('buehne'), ctx=cv.getContext('2d');
+ var meta=JSON.parse(document.getElementById('sim-meta').textContent);
+ var phi=meta.startwerte.phase, f2=meta.startwerte.frequenz2;
+ var f1=50, lauf=0, raf=null, t0=0, steht=false;
+ var ruhig = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ /* Zwei Anordnungen derselben Zeichnung (06.10.2026). Am Handy (schmaler als 640 px) stand das
+    Querformat (960 auf 330 Bildpunkte) auf zwei Fünftel verkleinert da: Schrift 7 bis 10 px hoch,
+    unlesbar. Schmal: Kreis oben, die Angaben darunter (600 auf 610 Bildpunkte), größere
+    Schrift, dickere Zeiger, die lange Zeile zweizeilig. */
+ var BREIT  = {W:960, H:330, CX:250, CY:160, R:118, lw:1,   sp:14, bg:52, sz:19},
+     SCHMAL = {W:600, H:610, CX:300, CY:210, R:150, lw:4/3, sp:19, bg:66, sz:28};
+ var G = BREIT, CX, CY, R;
+ function anordnen(){
+  var neu = (cv.parentNode.clientWidth || window.innerWidth) < 640 ? SCHMAL : BREIT;
+  if (neu !== G || cv.width !== neu.W) { G = neu; cv.width = G.W; cv.height = G.H; }
+  CX=G.CX; CY=G.CY; R=G.R;
+ }
+ anordnen();
+ var UD1=4, UD2=3;                    /* Scheitelwerte in V, wie auf dem Arbeitsblatt */
+
+ function grad(x){ return ((x*180/Math.PI) % 360 + 360) % 360; }
+
+ function zeiger(winkel, laenge, farbe, name){
+  var tx=CX+laenge*Math.cos(winkel), ty=CY-laenge*Math.sin(winkel);
+  ctx.strokeStyle=farbe; ctx.lineWidth=4.4*G.lw; ctx.lineCap="round";
+  ctx.beginPath(); ctx.moveTo(CX,CY); ctx.lineTo(tx,ty); ctx.stroke();
+  /* Pfeilspitze */
+  var a=Math.atan2(CY-ty, tx-CX);
+  ctx.beginPath();
+  ctx.moveTo(tx,ty);
+  ctx.lineTo(tx-G.sp*Math.cos(a-0.38), ty+G.sp*Math.sin(a-0.38));
+  ctx.lineTo(tx-G.sp*Math.cos(a+0.38), ty+G.sp*Math.sin(a+0.38));
+  ctx.closePath(); ctx.fillStyle=farbe; ctx.fill();
+  var k=G.sz/19;
+  ctx.font="bold "+G.sz+"px 'Noto Sans',sans-serif"; ctx.fillStyle=farbe;
+  ctx.fillText(name, tx+10*k*Math.cos(a)+4*k, ty-10*k*Math.sin(a)-6*k);
+  return [tx,ty];
+ }
+
+ function zeichne(){
+  ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.font="17px 'Noto Sans',sans-serif";
+  /* Achsen und Kreis */
+  ctx.strokeStyle="#C7D2DA"; ctx.lineWidth=1.4;
+  ctx.beginPath(); ctx.moveTo(CX-R-40,CY); ctx.lineTo(CX+R+40,CY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(CX,CY-R-34); ctx.lineTo(CX,CY+R+34); ctx.stroke();
+  ctx.strokeStyle="#E3E8EC"; ctx.lineWidth=1.4;
+  ctx.beginPath(); ctx.arc(CX,CY,R,0,2*Math.PI); ctx.stroke();
+  var w1 = lauf, w2 = lauf*(f2/f1) + phi*Math.PI/180;
+  /* Winkelbogen zwischen beiden */
+  ctx.strokeStyle="#2F7D62"; ctx.lineWidth=5*G.lw;
+  ctx.beginPath(); ctx.arc(CX,CY,G.bg,-w2,-w1); ctx.stroke();
+  zeiger(w1, R*UD1/4, "#1A2530", "û₁");
+  zeiger(w2, R*UD2/4, "#A34E0E", "û₂");
+  /* Beschriftung rechts (am Handy unter dem Kreis) */
+  var d = grad(w2-w1);
+  if (G === SCHMAL) {
+   var y = CY+R+84;
+   ctx.font="bold 32px 'Noto Sans',sans-serif"; ctx.fillStyle="#2F7D62";
+   ctx.fillText("Winkel dazwischen: " + d.toFixed(0) + "°", 40, y);
+   ctx.font="26px 'Noto Sans',sans-serif"; ctx.fillStyle="#5A666F";
+   ctx.fillText("û₁ = 4 V  ·  û₂ = 3 V", 40, y+40);
+   ctx.fillText(steht ? "angehalten" : "läuft", 40, y+74);
+   ctx.fillText(f1===f2 ? "gleiche Frequenz:" : "verschiedene Frequenz:", 40, y+112);
+   ctx.fillText(f1===f2 ? "der Winkel bleibt" : "der Winkel wandert", 40, y+144);
+   return;
+  }
+  ctx.font="bold 24px 'Noto Sans',sans-serif";
+  ctx.fillStyle="#2F7D62";
+  ctx.fillText("Winkel dazwischen: " + d.toFixed(0) + "°", CX+R+70, 92);
+  ctx.font="18px 'Noto Sans',sans-serif"; ctx.fillStyle="#5A666F";
+  ctx.fillText("û₁ = 4 V  ·  û₂ = 3 V", CX+R+70, 128);
+  ctx.fillText(steht ? "angehalten" : "läuft", CX+R+70, 158);
+  ctx.fillText(f1===f2 ? "gleiche Frequenz: der Winkel bleibt"
+                       : "verschiedene Frequenz: der Winkel wandert", CX+R+70, 196);
+ }
+
+ function zeige(){
+  var w1 = lauf, w2 = lauf*(f2/f1) + phi*Math.PI/180;
+  document.getElementById('phw').textContent = phi + '°';
+  document.getElementById('f2w').textContent = f2 + ' Hz';
+  document.getElementById('a1').textContent = grad(w1).toFixed(0) + '°';
+  document.getElementById('a2').textContent = grad(w2).toFixed(0) + '°';
+  document.getElementById('dw').textContent = grad(w2-w1).toFixed(0) + '°';
+  var e = document.getElementById('fw');
+  e.textContent = (f1===f2) ? 'gleich' : 'verschieden';
+  e.style.color = (f1===f2) ? 'var(--gruen)' : 'var(--kupfer)';
+ }
+
+ function alles(){ zeige(); zeichne(); }
+ function loop(ts){ if(!t0)t0=ts; lauf=((ts-t0)/1000)*1.1; alles(); raf=requestAnimationFrame(loop); }
+
+ document.getElementById('ph').addEventListener('input', function(e){
+   phi = parseInt(e.target.value,10); if(!raf) alles(); });
+ document.getElementById('f2').addEventListener('input', function(e){
+   f2 = parseInt(e.target.value,10); if(!raf) alles(); });
+ document.getElementById('halt').addEventListener('click', function(){
+   if(raf){ cancelAnimationFrame(raf); raf=null; steht=true; this.textContent='Weiterlaufen'; }
+   else { steht=false; t0=0; raf=requestAnimationFrame(loop); this.textContent='Anhalten'; }
+   alles(); });
+ document.getElementById('reset').addEventListener('click', function(){
+   phi=meta.startwerte.phase; f2=meta.startwerte.frequenz2;
+   document.getElementById('ph').value=phi; document.getElementById('f2').value=f2;
+   if(!raf) alles(); });
+
+ window.addEventListener('resize', function(){ anordnen(); if(!raf) alles(); });
+ if(ruhig){ alles(); } else { raf=requestAnimationFrame(loop); }
+})();
+</script>
+</body></html>
