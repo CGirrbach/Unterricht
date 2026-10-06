@@ -1,0 +1,273 @@
+<!-- sim_bearbeitung: pflicht -->
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>U29 Simulation: Stern oder Dreieck</title>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--linie:#C7D2DA;
+      --gruen:#2F7D62;--rot:#B23A33;--grau:#5A666F}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Noto Sans',system-ui,sans-serif;color:var(--ink);background:#fff}
+header{border-top:6px solid var(--kupfer);padding:14px 18px 10px}
+h1{margin:0;font-size:clamp(18px,4vw,26px)}
+.ziel{background:var(--kupferhell);border-left:5px solid var(--kupfer);
+      padding:12px 16px;margin:12px 18px;font-size:clamp(14px,3vw,17px)}
+.ziel > b:first-child{display:block;font-size:.82em;letter-spacing:.08em;text-transform:uppercase;
+        color:var(--kupfer);margin-bottom:4px}
+canvas{display:block;width:100%;max-width:960px;margin:0 auto;height:auto}
+.regler{max-width:960px;margin:0 auto;padding:8px 18px 4px}
+.zeile{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:14px 0}
+.zeile label{flex:0 0 210px;font-weight:700;font-size:clamp(14px,3vw,17px)}
+/* Der Regler trug die Vorgabefarbe des Browsers (Blau), die einzige Farbe im Bild, die
+   nicht aus dem Haus stammt, und ausgerechnet am Bedienelement (Befund Linse BLATT,
+   U03/B2 und U04/B5, 01.09.2026). Er trägt jetzt Kupfer wie alles Bedienbare. */
+input[type=range]{flex:1 1 220px;min-width:180px;height:44px;accent-color:var(--kupfer);
+  -webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-moz-range-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;
+  height:26px;margin-top:-9px;border-radius:50%;background:var(--kupfer);border:2px solid #fff;
+  box-shadow:0 0 0 1.4px var(--kupfer)}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;
+  background:var(--kupfer);border:2px solid #fff}
+input[type=range]:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
+.wert{flex:0 0 128px;text-align:right;font-variant-numeric:tabular-nums;
+      font-size:clamp(15px,3.2vw,19px);font-weight:700;color:var(--kupfer)}
+.anzeigen{display:flex;gap:12px;flex-wrap:wrap;max-width:960px;margin:6px auto 0;padding:0 18px}
+.kachel{flex:1 1 150px;border:1.4px solid var(--linie);padding:10px 12px}
+.kachel span{display:block;font-size:.78em;letter-spacing:.06em;color:var(--grau);
+             font-weight:700}
+.kachel b{font-size:clamp(17px,3.6vw,22px)}
+button{font:inherit;font-weight:700;padding:12px 20px;min-height:48px;border:1.6px solid var(--ink);
+       background:#fff;color:var(--ink);cursor:pointer}
+button:hover{background:var(--kupferhell)}
+.fuss{max-width:960px;margin:14px auto 26px;padding:0 18px;font-size:.86em;color:var(--grau)}
+@media (prefers-reduced-motion: reduce){canvas{outline:none}}
+</style><style>
+.schalter{max-width:960px;margin:10px auto 0;padding:0 18px;display:flex;gap:0;flex-wrap:wrap}
+.schalter button{flex:1 1 200px;border-right-width:0}
+.schalter button:last-child{border-right-width:1.6px}
+.schalter button[aria-pressed=true]{background:var(--kupfer);color:#fff;border-color:var(--kupfer)}
+.vergleich{max-width:960px;margin:10px auto 0;padding:10px 18px;border-left:5px solid var(--gruen);
+  background:#EEF5F2;font-size:clamp(14px,3vw,17px)}
+</style>
+</head><body>
+
+<header>
+<h1>Stern oder Dreieck</h1>
+</header>
+
+<div class="ziel">
+<b>Was Sie herausfinden sollen</b>
+<b>Dieselben</b> drei Widerst&auml;nde, <b>dasselbe</b> Netz, zwei Schaltungen. Schalten Sie hin
+und her und achten Sie auf die vier Kacheln: Welche Gr&ouml;&szlig;e w&auml;chst um
+&radic;3, welche um <b>3</b>? Und &auml;ndert sich daran etwas, wenn Sie den Strangwiderstand
+verstellen?
+</div>
+
+<script type="application/json" id="sim-meta">
+{
+  "erkenntnis": "dass dieselben drei Widerstaende in Dreieckschaltung die DREIFACHE Leistung aufnehmen, weil sowohl die Strangspannung als auch der Strangstrom um Wurzel 3 wachsen, und dass dieses Verhaeltnis vom Widerstandswert unabhaengig ist",
+  "startwerte":    {"strangwiderstand": 33, "schaltung": "Dreieck"},
+  "loesungswerte": {"strangwiderstand": [40, 44, 18, 22, 80], "strom": [10, 17.3, 22.2, 38.5, 18.2, 31.5, 5, 8.66, 27, 15.6]},
+  "quelle": "Europa Fachkunde S. 160 (7.9.4), Europa-Rechenbuch S. 127 (7.11.2), Tabellenbuch S. 48 Formel 1 bis 4 und Formel 12"
+}
+</script>
+
+<div class="schalter">
+  <button id="bY" type="button" aria-pressed="false">Sternschaltung (Y)</button>
+  <button id="bD" type="button" aria-pressed="true">Dreieckschaltung (&#916;)</button>
+</div>
+
+<canvas id="buehne" width="960" height="410"
+        data-quelle="Europa Fachkunde S. 160, Bild 1 und Europa-Rechenbuch S. 127, Bild 1: dieselben drei Strangwiderstaende in Stern- und in Dreieckschaltung am 400-V-Netz; Tabellenbuch S. 48, Formel 12: P_Dreieck = 3 mal P_Stern"></canvas>
+
+<div class="regler">
+<div class="zeile">
+  <label for="rst">Strangwiderstand R<sub>Str</sub></label>
+  <input type="range" id="rst" min="10" max="100" step="1" value="33">
+  <div class="wert" id="rstw">33 &#8486;</div>
+</div>
+<button id="reset" type="button">Zur&uuml;cksetzen</button>
+</div>
+
+<div class="anzeigen">
+  <div class="kachel"><span>Strangspannung U<sub>Str</sub></span><b id="aUs">0 V</b></div>
+  <div class="kachel"><span>Strangstrom I<sub>Str</sub></span><b id="aIs">0 A</b></div>
+  <div class="kachel"><span>Leiterstrom I</span><b id="aIl">0 A</b></div>
+  <div class="kachel"><span>Wirkleistung P</span><b id="aP">0 kW</b></div>
+</div>
+
+<div class="vergleich" id="vgl">&nbsp;</div>
+
+<div class="fuss">
+Netz 400 V. In der <b>Sternschaltung</b> gilt U<sub>Str</sub> = U / &radic;3 und I = I<sub>Str</sub>,
+in der <b>Dreieckschaltung</b> U<sub>Str</sub> = U und I = &radic;3 &middot; I<sub>Str</sub>
+(Tabellenbuch Seite 48, Formel 1 bis 4). Die Leistung ist in beiden F&auml;llen
+P = 3 &middot; U<sub>Str</sub> &middot; I<sub>Str</sub>. Alle drei Str&auml;nge sind gleiche, reine
+<b>Wirkwiderst&auml;nde</b> (cos &phi; = 1); die Zuleitungen gelten als widerstandsfrei.
+</div>
+
+<script>
+"use strict";
+var C = document.getElementById("buehne"), g = C.getContext("2d");
+var rst = document.getElementById("rst");
+var bY = document.getElementById("bY"), bD = document.getElementById("bD");
+var dreieck = true;
+var INK = "#1A2530", KUPFER = "#A34E0E", LINIE = "#C7D2DA", GRAU = "#5A666F";
+var GRUEN = "#2F7D62", ROT = "#B23A33", BLAU = "#2C5F8A";
+var U = 400, W3 = Math.sqrt(3);
+
+/* Zwei Anordnungen derselben Zeichnung. Am Handy (schmaler als 640 px) stand das Querformat
+   960 x 410 auf 390 px verkleinert da: die kleinste Beschriftung (14 px) war dort 5,7 px hoch,
+   unlesbar (06.10.2026). Hochformat: Schaltbild oben, Balken darunter, beide um den Faktor k
+   vergroessert; die Schrift waechst mit (14 px mal 1,43 = 20 px, bei 390 px Breite 13 px).
+   s = Verschiebung des Schaltbilds, b = des Balkenbilds; capY = Hoehe der Unterschrift. */
+var BREIT  = {W: 960, H: 410, k: 1,    sx: 0,  sy: 0,   bx: 0,    by: 0,   capY: 330};
+var SCHMAL = {W: 600, H: 830, k: 1.43, sx: -4, sy: -74, bx: -715, by: 305, capY: 272};
+var G = BREIT;
+function anordnen() {
+  var neu = (C.parentNode.clientWidth || window.innerWidth) < 640 ? SCHMAL : BREIT;
+  if (neu !== G || C.width !== neu.W) { G = neu; C.width = G.W; C.height = G.H; }
+}
+anordnen();
+
+function zahl(v, n) {
+  return (Math.abs(v) < 5e-4 ? 0 : v).toFixed(n === undefined ? 2 : n).replace(".", ",");
+}
+
+function widerstand(x, y, w, h, farbe, winkel) {
+  g.save();
+  g.translate(x, y);
+  if (winkel) { g.rotate(winkel); }
+  g.fillStyle = "#fff";
+  g.fillRect(-w / 2, -h / 2, w, h);
+  g.strokeStyle = farbe; g.lineWidth = 2;
+  g.strokeRect(-w / 2, -h / 2, w, h);
+  g.restore();
+}
+
+function schaltbild(farbe) {
+  var X = 60, Y = 70, dY = 62, MX = 300;
+  g.strokeStyle = INK; g.lineWidth = 1.6;
+  for (var k = 0; k < 3; k++) {
+    var y = Y + k * dY;
+    g.beginPath(); g.moveTo(X, y); g.lineTo(X + 90, y); g.stroke();
+    g.fillStyle = INK; g.font = "bold 15px system-ui,sans-serif"; g.textAlign = "left";
+    g.fillText("L" + (k + 1), X - 30, y + 5);
+  }
+  if (!dreieck) {
+    /* Stern: jeder Strang vom Aussenleiter zum gemeinsamen Punkt */
+    var SY = Y + dY;
+    for (var s = 0; s < 3; s++) {
+      var y2 = Y + s * dY;
+      g.strokeStyle = INK; g.lineWidth = 1.6;
+      g.beginPath(); g.moveTo(X + 90, y2); g.lineTo(X + 150, y2); g.stroke();
+      widerstand(X + 175, y2, 50, 22, farbe);
+      g.beginPath(); g.moveTo(X + 200, y2); g.lineTo(MX, y2); g.lineTo(MX, SY); g.stroke();
+    }
+    g.fillStyle = INK;
+    g.beginPath(); g.arc(MX, SY, 5, 0, 2 * Math.PI); g.fill();
+    /* Das Wort stand mittig unter dem Punkt und lag damit auf der senkrechten Leitung
+       (am Standbild gesehen, 06.10.2026); es steht jetzt rechts neben dem Punkt. */
+    g.fillStyle = GRAU; g.font = "14px system-ui,sans-serif"; g.textAlign = "left";
+    g.fillText("Sternpunkt", MX + 12, SY + 5);
+    g.textAlign = "center";
+    g.fillText("Sternschaltung: jeder Strang liegt an U / √3 = 231 V", 220, G.capY);
+  } else {
+    /* Dreieck: jeder Strang zwischen zwei Aussenleitern */
+    var A = [[X + 250, Y], [X + 320, Y + 2 * dY], [X + 180, Y + 2 * dY]];
+    for (var e = 0; e < 3; e++) {
+      var z = A[e], n = A[(e + 1) % 3];
+      g.strokeStyle = INK; g.lineWidth = 1.6;
+      g.beginPath(); g.moveTo(z[0], z[1]); g.lineTo(n[0], n[1]); g.stroke();
+      widerstand((z[0] + n[0]) / 2, (z[1] + n[1]) / 2, 46, 20, farbe,
+                 Math.atan2(n[1] - z[1], n[0] - z[0]));
+    }
+    /* Zuleitungen an die drei Ecken */
+    g.strokeStyle = INK; g.lineWidth = 1.6;
+    g.beginPath(); g.moveTo(X + 90, Y); g.lineTo(A[0][0], A[0][1]); g.stroke();
+    g.beginPath(); g.moveTo(X + 90, Y + dY); g.lineTo(X + 140, Y + dY);
+    g.lineTo(X + 140, Y + 2 * dY + 40); g.lineTo(A[1][0], Y + 2 * dY + 40);
+    g.lineTo(A[1][0], A[1][1]); g.stroke();
+    g.beginPath(); g.moveTo(X + 90, Y + 2 * dY); g.lineTo(A[2][0], A[2][1]); g.stroke();
+    for (var p2 = 0; p2 < 3; p2++) {
+      g.fillStyle = INK;
+      g.beginPath(); g.arc(A[p2][0], A[p2][1], 5, 0, 2 * Math.PI); g.fill();
+    }
+    g.fillStyle = GRAU; g.font = "14px system-ui,sans-serif"; g.textAlign = "center";
+    g.fillText("Dreieckschaltung: jeder Strang liegt an U = 400 V", 220, G.capY);
+  }
+}
+
+function balken(pY, pD) {
+  var X0 = 560, Y0 = 300, BR = 110, MAX = Math.max(pY, pD);
+  var H = 220;
+  g.strokeStyle = LINIE; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(X0 - 30, Y0); g.lineTo(X0 + 330, Y0); g.stroke();
+  var paare = [["Stern", pY, X0 + 40, dreieck ? LINIE : GRUEN],
+               ["Dreieck", pD, X0 + 210, dreieck ? KUPFER : LINIE]];
+  for (var i = 0; i < 2; i++) {
+    var h = H * paare[i][1] / MAX;
+    g.fillStyle = paare[i][3];
+    g.fillRect(paare[i][2] - BR / 2, Y0 - h, BR, h);
+    g.fillStyle = INK; g.font = "bold 17px system-ui,sans-serif"; g.textAlign = "center";
+    g.fillText(zahl(paare[i][1] / 1000, 1) + " kW", paare[i][2], Y0 - h - 10);
+    g.fillStyle = GRAU; g.font = "15px system-ui,sans-serif";
+    g.fillText(paare[i][0], paare[i][2], Y0 + 22);
+  }
+  g.fillStyle = ROT; g.font = "bold 18px system-ui,sans-serif"; g.textAlign = "center";
+  g.fillText("dreifach", X0 + 125, Y0 - H - 34);
+  g.strokeStyle = ROT; g.lineWidth = 2;
+  g.beginPath();
+  g.moveTo(X0 + 40, Y0 - H * pY / MAX - 24); g.lineTo(X0 + 40, Y0 - H - 28);
+  g.lineTo(X0 + 210, Y0 - H - 28); g.lineTo(X0 + 210, Y0 - H * pD / MAX - 24); g.stroke();
+  g.fillStyle = GRAU; g.font = "14px system-ui,sans-serif";
+  g.fillText("aufgenommene Wirkleistung", X0 + 125, Y0 + 52);
+}
+
+function zeichne() {
+  var R = +rst.value;
+  var uStr = dreieck ? U : U / W3;
+  var iStr = uStr / R;
+  var iL = dreieck ? W3 * iStr : iStr;
+  var P = 3 * uStr * iStr;
+  var pY = 3 * (U / W3) * ((U / W3) / R);
+  var pD = 3 * U * (U / R);
+
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  g.clearRect(0, 0, C.width, C.height);
+  g.setTransform(G.k, 0, 0, G.k, G.sx, G.sy);
+  schaltbild(dreieck ? KUPFER : GRUEN);
+  g.setTransform(G.k, 0, 0, G.k, G.bx, G.by);
+  balken(pY, pD);
+  g.setTransform(1, 0, 0, 1, 0, 0);
+
+  document.getElementById("rstw").textContent = R + " Ω";
+  document.getElementById("aUs").textContent = zahl(uStr, 1) + " V";
+  document.getElementById("aIs").textContent = zahl(iStr) + " A";
+  document.getElementById("aIl").textContent = zahl(iL) + " A";
+  document.getElementById("aP").textContent = zahl(P / 1000) + " kW";
+
+  document.getElementById("vgl").textContent =
+    "Bei " + R + " Ω nimmt derselbe Verbraucher im Stern " + zahl(pY / 1000) +
+    " kW auf und im Dreieck " + zahl(pD / 1000) + " kW. Das Verhältnis ist " +
+    zahl(pD / pY, 2) + ", und es bleibt bei jedem Widerstandswert dasselbe: der " +
+    "Strangwiderstand kürzt sich heraus.";
+}
+
+function modus(d) {
+  dreieck = d;
+  bD.setAttribute("aria-pressed", d ? "true" : "false");
+  bY.setAttribute("aria-pressed", d ? "false" : "true");
+  zeichne();
+}
+rst.addEventListener("input", zeichne);
+bY.addEventListener("click", function () { modus(false); });
+bD.addEventListener("click", function () { modus(true); });
+document.getElementById("reset").addEventListener("click", function () {
+  rst.value = 33; modus(true);
+});
+window.addEventListener("resize", function () { anordnen(); zeichne(); });
+zeichne();
+</script>
+</body></html>
