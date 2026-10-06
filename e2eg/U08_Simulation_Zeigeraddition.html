@@ -1,0 +1,234 @@
+<!-- sim_bearbeitung: pflicht -->
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>U08 Simulation: Zeigeraddition, zwei Zeiger und eine Summe</title>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--linie:#C7D2DA;
+      --gruen:#2F7D62;--rot:#B23A33;--grau:#5A666F}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Noto Sans',system-ui,sans-serif;color:var(--ink);background:#fff}
+header{border-top:6px solid var(--kupfer);padding:14px 18px 10px}
+h1{margin:0;font-size:clamp(18px,4vw,26px)}
+.ziel{background:var(--kupferhell);border-left:5px solid var(--kupfer);
+      padding:12px 16px;margin:12px 18px;font-size:clamp(14px,3vw,17px)}
+.ziel > b:first-child{display:block;font-size:.82em;letter-spacing:.08em;text-transform:uppercase;
+        color:var(--kupfer);margin-bottom:4px}
+canvas{display:block;width:100%;max-width:960px;margin:0 auto;height:auto}
+.regler{max-width:960px;margin:0 auto;padding:8px 18px 4px}
+.zeile{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:14px 0}
+.zeile label{flex:0 0 210px;font-weight:700;font-size:clamp(14px,3vw,17px)}
+/* Der Regler trug die Vorgabefarbe des Browsers (Blau), die einzige Farbe im Bild, die
+   nicht aus dem Haus stammt, und ausgerechnet am Bedienelement (Befund Linse BLATT,
+   U03/B2 und U04/B5, 01.09.2026). Er trägt jetzt Kupfer wie alles Bedienbare. */
+input[type=range]{flex:1 1 220px;min-width:180px;height:44px;accent-color:var(--kupfer);
+  -webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-moz-range-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;
+  height:26px;margin-top:-9px;border-radius:50%;background:var(--kupfer);border:2px solid #fff;
+  box-shadow:0 0 0 1.4px var(--kupfer)}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;
+  background:var(--kupfer);border:2px solid #fff}
+input[type=range]:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
+.wert{flex:0 0 128px;text-align:right;font-variant-numeric:tabular-nums;
+      font-size:clamp(15px,3.2vw,19px);font-weight:700;color:var(--kupfer)}
+.anzeigen{display:flex;gap:12px;flex-wrap:wrap;max-width:960px;margin:6px auto 0;padding:0 18px}
+.kachel{flex:1 1 150px;border:1.4px solid var(--linie);padding:10px 12px}
+.kachel span{display:block;font-size:.78em;letter-spacing:.06em;color:var(--grau);
+             font-weight:700}
+.kachel b{font-size:clamp(17px,3.6vw,22px)}
+button{font:inherit;font-weight:700;padding:12px 20px;min-height:48px;border:1.6px solid var(--ink);
+       background:#fff;color:var(--ink);cursor:pointer}
+button:hover{background:var(--kupferhell)}
+.fuss{max-width:960px;margin:14px auto 26px;padding:0 18px;font-size:.86em;color:var(--grau)}
+@media (prefers-reduced-motion: reduce){canvas{outline:none}}
+</style></head><body>
+
+<header>
+<h1>Zeigeraddition: zwei Zeiger, eine Summe</h1>
+</header>
+
+<div class="ziel">
+<b>Was Sie herausfinden sollen</b>
+Zwei Wechselspannungen gleicher Frequenz werden addiert. Verändern Sie den Winkel φ und
+vergleichen Sie <b>zwei</b> Zahlen: die <b>Summe der Beträge</b> û₁ + û₂ und die tatsächliche
+<b>Gesamtspannung</b> û. Finden Sie heraus, wann beide gleich sind, wie klein û werden kann,
+und warum eine zusätzliche Spannung die Gesamtspannung sogar <b>verkleinern</b> kann.
+</div>
+
+<script type="application/json" id="sim-meta">
+{
+  "erkenntnis": "dass die Summe zweier Wechselgrößen nicht die Summe ihrer Beträge ist: sie ist nur bei φ = 0° so groß, sinkt mit wachsendem φ und erreicht bei φ = 180° die Differenz der Beträge",
+  "startwerte":     {"phase": 40, "scheitel1": 6, "scheitel2": 4},
+  "loesungswerte":  {"phase": 90, "scheitel1": 8, "scheitel2": 6},
+  "quelle": "Europa-Rechenbuch S. 96, 7.4.1 Addition von Wechselgrößen im Zeigerbild, Bild 2 (Geometrische Addition)"
+}
+</script>
+
+<canvas id="buehne" width="960" height="250"
+        data-quelle="Europa-Rechenbuch S. 96, Bild 2 (Geometrische Addition): der zweite Zeiger wird parallel an die Spitze des ersten verschoben, die Diagonale ist die Gesamtspannung"></canvas>
+
+<div class="regler">
+<div class="zeile">
+  <label for="ph">Phasenverschiebung &phi;</label>
+  <input type="range" id="ph" min="0" max="180" step="1" value="40">
+  <span class="wert" id="phw">40&deg;</span>
+</div>
+<div class="zeile">
+  <label for="s1">Scheitelwert û₁</label>
+  <input type="range" id="s1" min="1" max="10" step="1" value="6">
+  <span class="wert" id="s1w">6 V</span>
+</div>
+<div class="zeile">
+  <label for="s2">Scheitelwert û₂</label>
+  <input type="range" id="s2" min="1" max="10" step="1" value="4">
+  <span class="wert" id="s2w">4 V</span>
+</div>
+<div class="zeile">
+  <button id="reset" type="button">Zurücksetzen</button>
+</div>
+</div>
+
+<div class="anzeigen">
+  <div class="kachel"><span>Summe der Beträge û₁ + û₂</span><b id="sb">10,0 V</b></div>
+  <div class="kachel"><span>Gesamtspannung û</span><b id="ug">9,4 V</b></div>
+  <div class="kachel"><span>Winkel &alpha; zwischen û₁ und û</span><b id="aw">16&deg;</b></div>
+  <div class="kachel"><span>Verhältnis û ÷ (û₁ + û₂)</span><b id="vh">0,94</b></div>
+</div>
+
+<div class="fuss">
+Sinusförmige Wechselgrößen gleicher Frequenz werden im Zeigerbild <b>geometrisch</b> addiert:
+der zweite Zeiger wird parallel an die Spitze des ersten verschoben, und die <b>Diagonale</b> des
+Parallelogramms ist die Gesamtspannung. Nur bei φ = 0°
+ist û = û₁ + û₂; bei φ = 180° bleibt die Differenz der Beträge übrig.
+</div>
+
+<script>
+(function(){
+ "use strict";
+ var cv=document.getElementById('buehne'), ctx=cv.getContext('2d');
+ var meta=JSON.parse(document.getElementById('sim-meta').textContent);
+ var phi=meta.startwerte.phase, u1=meta.startwerte.scheitel1, u2=meta.startwerte.scheitel2;
+ // 18 Bildpunkte je Volt: bei û = 10 V und φ = 90° reicht der Zeiger 180 Punkte nach oben
+ // und bleibt damit im Bild. Mit 22 Punkten stand die Zeichnung unten und die obere Hälfte
+ // blieb leer (am Standbild gesehen, 01.09.2026).
+ /* Zwei Anordnungen derselben Zeichnung (06.10.2026). Am Handy (schmaler als 640 px) stand das
+    Querformat (960 auf 250 Bildpunkte) auf zwei Fünftel verkleinert da: Schrift 7 bis 10 px
+    hoch, unlesbar. Schmal: Zeiger oben, die Angaben darunter (600 auf 510 Bildpunkte), größere
+    Schrift, dickere Zeiger. Der Ursprung liegt so, dass auch û₂ = 10 V bei φ = 180° (10 V nach
+    links) und û₁ + û₂ = 20 V bei φ = 0° (20 V nach rechts) im Bild bleiben. */
+ var BREIT  = {W:960, H:250, X0:150, Y0:214, PX:18, lw:1,   sp:15, bg:46, sz:19},
+     SCHMAL = {W:600, H:510, X0:210, Y0:230, PX:17, lw:4/3, sp:20, bg:56, sz:28};
+ var G = BREIT, X0, Y0, PX;          /* Ursprung und Pixel je Volt */
+ function anordnen(){
+  var neu = (cv.parentNode.clientWidth || window.innerWidth) < 640 ? SCHMAL : BREIT;
+  if (neu !== G || cv.width !== neu.W) { G = neu; cv.width = G.W; cv.height = G.H; }
+  X0=G.X0; Y0=G.Y0; PX=G.PX;
+ }
+ anordnen();
+
+ function zahl(x, st){ return x.toFixed(st).replace('.', ','); }
+ function summe(){
+  var r = Math.sqrt(u1*u1 + u2*u2 + 2*u1*u2*Math.cos(phi*Math.PI/180));
+  var a = Math.atan2(u2*Math.sin(phi*Math.PI/180), u1 + u2*Math.cos(phi*Math.PI/180));
+  return [r, a*180/Math.PI];
+ }
+
+ function pfeil(x1,y1,x2,y2,farbe,br,name,seite,anteil){
+  ctx.strokeStyle=farbe; ctx.lineWidth=br*G.lw; ctx.lineCap="round";
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+  var a=Math.atan2(y1-y2, x2-x1);
+  ctx.beginPath(); ctx.moveTo(x2,y2);
+  ctx.lineTo(x2-G.sp*Math.cos(a-0.38), y2+G.sp*Math.sin(a-0.38));
+  ctx.lineTo(x2-G.sp*Math.cos(a+0.38), y2+G.sp*Math.sin(a+0.38));
+  ctx.closePath(); ctx.fillStyle=farbe; ctx.fill();
+  var k=G.sz/19;
+  /* Am Handy steht der Name quer neben dem Zeiger, nicht auf ihm: bei φ = 0° lagen sonst
+     û₁ und û auf derselben Linie übereinander. û₁ und û stehen auf der Seite im
+     Uhrzeigersinn (seite −1), û₂ auf der Gegenseite; û bei drei Vierteln seiner Länge. */
+  if(name && G === SCHMAL){
+   var tn = a + seite*Math.PI/2, d = 0.8*G.sz;
+   var mx = x1 + anteil*(x2-x1), my = y1 + anteil*(y2-y1);
+   ctx.font="bold "+G.sz+"px 'Noto Sans',sans-serif"; ctx.fillStyle=farbe;
+   ctx.textAlign='center'; ctx.textBaseline='middle';
+   ctx.fillText(name, mx + d*Math.cos(tn), my - d*Math.sin(tn));
+   ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+  } else if(name){ ctx.font="bold "+G.sz+"px 'Noto Sans',sans-serif"; ctx.fillStyle=farbe;
+            ctx.fillText(name, (x1+x2)/2 + 10*k*Math.sin(a) + 6*k, (y1+y2)/2 + 10*k*Math.cos(a) - 6*k); }
+ }
+
+ function zeichne(){
+  ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.font="17px 'Noto Sans',sans-serif";
+  var r = phi*Math.PI/180;
+  var p1 = [X0 + u1*PX, Y0];                                   /* Spitze û1 */
+  var p2 = [X0 + u2*PX*Math.cos(r), Y0 - u2*PX*Math.sin(r)];   /* Spitze û2 */
+  var ps = [p1[0] + (p2[0]-X0), p1[1] + (p2[1]-Y0)];           /* Spitze der Summe */
+  /* Achsen */
+  ctx.strokeStyle="#C7D2DA"; ctx.lineWidth=1.4;
+  ctx.beginPath(); ctx.moveTo(X0-40,Y0); ctx.lineTo(X0+11*PX+40,Y0); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(X0,Y0+28); ctx.lineTo(X0,Y0-10*PX-14); ctx.stroke();
+  /* Parallelogramm: die beiden verschobenen Zeiger gestrichelt */
+  ctx.strokeStyle="#8A959D"; ctx.lineWidth=1.8*G.lw; ctx.setLineDash([6,5]);
+  ctx.beginPath(); ctx.moveTo(p1[0],p1[1]); ctx.lineTo(ps[0],ps[1]); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(p2[0],p2[1]); ctx.lineTo(ps[0],ps[1]); ctx.stroke();
+  ctx.setLineDash([]);
+  /* Winkelbogen φ */
+  ctx.strokeStyle="#2F7D62"; ctx.lineWidth=4*G.lw;
+  ctx.beginPath(); ctx.arc(X0,Y0,G.bg,-r,0); ctx.stroke();
+  /* Die drei Zeiger */
+  pfeil(X0,Y0,p1[0],p1[1],"#1A2530",4.4,"û₁",-1,0.5);
+  pfeil(X0,Y0,p2[0],p2[1],"#A34E0E",4.4,"û₂",1,0.5);
+  pfeil(X0,Y0,ps[0],ps[1],"#2F7D62",5.2,"û",-1,0.75);
+  /* Beschriftung rechts (am Handy unter der Zeichnung) */
+  var s = summe();
+  if (G === SCHMAL) {
+   var y = Y0+80;
+   ctx.font="bold 32px 'Noto Sans',sans-serif";
+   ctx.fillStyle="#5A666F"; ctx.fillText("û₁ + û₂ = " + zahl(u1+u2,1) + " V", 40, y);
+   ctx.fillStyle="#2F7D62"; ctx.fillText("û = " + zahl(s[0],1) + " V", 40, y+42);
+   ctx.font="26px 'Noto Sans',sans-serif"; ctx.fillStyle="#5A666F";
+   ctx.fillText("α = " + s[1].toFixed(0) + "°", 40, y+80);
+   ctx.fillText("Maßstab: 1 V ≙ " + PX + " Bildpunkte", 40, y+114);
+   if (phi === 0)   { ctx.fillText("φ = 0°: beide zeigen gleich,", 40, y+148);
+                      ctx.fillText("û = û₁ + û₂", 40, y+180); }
+   if (phi === 180) { ctx.fillText("φ = 180°: gegengerichtet,", 40, y+148);
+                      ctx.fillText("û = |û₁ − û₂|", 40, y+180); }
+   return;
+  }
+  ctx.font="bold 25px 'Noto Sans',sans-serif";
+  ctx.fillStyle="#5A666F"; ctx.fillText("û₁ + û₂ = " + zahl(u1+u2,1) + " V", 560, 58);
+  ctx.fillStyle="#2F7D62"; ctx.fillText("û = " + zahl(s[0],1) + " V", 560, 100);
+  ctx.font="19px 'Noto Sans',sans-serif"; ctx.fillStyle="#5A666F";
+  ctx.fillText("α = " + s[1].toFixed(0) + "°", 560, 134);
+  ctx.fillText("Maßstab: 1 V ≙ " + PX + " Bildpunkte", 560, 166);
+  if (phi === 0)   ctx.fillText("φ = 0°: beide zeigen gleich, û = û₁ + û₂", 560, 200);
+  if (phi === 180) ctx.fillText("φ = 180°: gegengerichtet, û = |û₁ − û₂|", 560, 200);
+ }
+
+ function zeige(){
+  var s = summe();
+  document.getElementById('phw').textContent = phi + '°';
+  document.getElementById('s1w').textContent = u1 + ' V';
+  document.getElementById('s2w').textContent = u2 + ' V';
+  document.getElementById('sb').textContent = zahl(u1+u2,1) + ' V';
+  document.getElementById('ug').textContent = zahl(s[0],1) + ' V';
+  document.getElementById('aw').textContent = s[1].toFixed(0) + '°';
+  var e = document.getElementById('vh');
+  e.textContent = zahl(s[0]/(u1+u2), 2);
+  e.style.color = (phi === 0) ? 'var(--gruen)' : 'var(--grau)';
+ }
+
+ function alles(){ zeige(); zeichne(); }
+ document.getElementById('ph').addEventListener('input', function(e){ phi=parseInt(e.target.value,10); alles(); });
+ document.getElementById('s1').addEventListener('input', function(e){ u1=parseInt(e.target.value,10); alles(); });
+ document.getElementById('s2').addEventListener('input', function(e){ u2=parseInt(e.target.value,10); alles(); });
+ document.getElementById('reset').addEventListener('click', function(){
+   phi=meta.startwerte.phase; u1=meta.startwerte.scheitel1; u2=meta.startwerte.scheitel2;
+   document.getElementById('ph').value=phi; document.getElementById('s1').value=u1;
+   document.getElementById('s2').value=u2; alles(); });
+ window.addEventListener('resize', function(){ anordnen(); alles(); });
+ alles();
+})();
+</script>
+</body></html>
