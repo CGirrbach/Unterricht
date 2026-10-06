@@ -1,0 +1,216 @@
+<!-- sim_bearbeitung: pflicht -->
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>U21 Simulation: Zwei Dreiecke, ein Winkel</title>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--linie:#C7D2DA;
+      --gruen:#2F7D62;--rot:#B23A33;--grau:#5A666F}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Noto Sans',system-ui,sans-serif;color:var(--ink);background:#fff}
+header{border-top:6px solid var(--kupfer);padding:14px 18px 10px}
+h1{margin:0;font-size:clamp(18px,4vw,26px)}
+.ziel{background:var(--kupferhell);border-left:5px solid var(--kupfer);
+      padding:12px 16px;margin:12px 18px;font-size:clamp(14px,3vw,17px)}
+.ziel > b:first-child{display:block;font-size:.82em;letter-spacing:.08em;text-transform:uppercase;
+        color:var(--kupfer);margin-bottom:4px}
+canvas{display:block;width:100%;max-width:960px;margin:0 auto;height:auto}
+.regler{max-width:960px;margin:0 auto;padding:8px 18px 4px}
+.zeile{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:14px 0}
+.zeile label{flex:0 0 210px;font-weight:700;font-size:clamp(14px,3vw,17px)}
+/* Der Regler trug die Vorgabefarbe des Browsers (Blau), die einzige Farbe im Bild, die
+   nicht aus dem Haus stammt, und ausgerechnet am Bedienelement (Befund Linse BLATT,
+   U03/B2 und U04/B5, 01.09.2026). Er trägt jetzt Kupfer wie alles Bedienbare. */
+input[type=range]{flex:1 1 220px;min-width:180px;height:44px;accent-color:var(--kupfer);
+  -webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-moz-range-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;
+  height:26px;margin-top:-9px;border-radius:50%;background:var(--kupfer);border:2px solid #fff;
+  box-shadow:0 0 0 1.4px var(--kupfer)}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;
+  background:var(--kupfer);border:2px solid #fff}
+input[type=range]:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
+.wert{flex:0 0 128px;text-align:right;font-variant-numeric:tabular-nums;
+      font-size:clamp(15px,3.2vw,19px);font-weight:700;color:var(--kupfer)}
+.anzeigen{display:flex;gap:12px;flex-wrap:wrap;max-width:960px;margin:6px auto 0;padding:0 18px}
+.kachel{flex:1 1 150px;border:1.4px solid var(--linie);padding:10px 12px}
+.kachel span{display:block;font-size:.78em;letter-spacing:.06em;color:var(--grau);
+             font-weight:700}
+.kachel b{font-size:clamp(17px,3.6vw,22px)}
+button{font:inherit;font-weight:700;padding:12px 20px;min-height:48px;border:1.6px solid var(--ink);
+       background:#fff;color:var(--ink);cursor:pointer}
+button:hover{background:var(--kupferhell)}
+.fuss{max-width:960px;margin:14px auto 26px;padding:0 18px;font-size:.86em;color:var(--grau)}
+@media (prefers-reduced-motion: reduce){canvas{outline:none}}
+</style>
+<style>
+.schalter{max-width:960px;margin:10px auto 0;padding:0 18px;display:flex;gap:0;flex-wrap:wrap}
+.schalter button{flex:1 1 200px;border-right-width:0}
+.schalter button:last-child{border-right-width:1.6px}
+.schalter button[aria-pressed=true]{background:var(--kupfer);color:#fff;border-color:var(--kupfer)}
+.vergleich{max-width:960px;margin:10px auto 0;padding:10px 18px;border-left:5px solid var(--gruen);
+  background:#EEF5F2;font-size:clamp(14px,3vw,17px)}
+</style></head><body>
+
+<header>
+<h1>Zwei Dreiecke, ein Winkel</h1>
+</header>
+
+<div class="ziel">
+<b>Was Sie herausfinden sollen</b>
+Links das <b>Widerstandsdreieck</b>, rechts das <b>Leistungsdreieck</b> derselben Schaltung
+an 230 V. Verstellen Sie R und X<sub>L</sub> und vergleichen Sie beide Bilder. Achten Sie
+darauf, was mit dem <b>Winkel</b> geschieht und wann die Wirkleistung gr&ouml;&szlig;er wird
+als die Blindleistung. Und pr&uuml;fen Sie: ist S jemals so gro&szlig; wie P plus Q?
+</div>
+
+<script type="application/json" id="sim-meta">
+{
+  "erkenntnis": "dass Widerstandsdreieck und Leistungsdreieck AEHNLICH sind - derselbe Winkel, nur mit I² multipliziert; und dass die Scheinleistung nie die Summe aus Wirk- und Blindleistung ist, sondern immer die Hypotenuse, also kleiner als die Summe",
+  "startwerte":     {"wirkwiderstand": 90, "blindwiderstand": 130},
+  "loesungswerte":  {"wirkwiderstand": 110, "blindwiderstand": 188},
+  "quelle": "Europa-Rechenbuch S. 121, 7.9 und Tabellenbuch S. 37: S = U·I, P = U·I·cos phi, Q = U·I·sin phi, S = Wurzel(P² + Q²)"
+}
+</script>
+
+<canvas id="buehne" width="960" height="360"
+        data-quelle="Tabellenbuch S. 37: Widerstandsdreieck und Leistungsdreieck der Reihenschaltung aus Wirkwiderstand und induktivem Blindwiderstand; beide Dreiecke sind aehnlich"></canvas>
+
+<div class="regler">
+<div class="zeile">
+  <label for="wid">Wirkwiderstand R</label>
+  <input type="range" id="wid" min="20" max="400" step="10" value="90">
+  <div class="wert" id="widw">90 &#8486;</div>
+</div>
+<div class="zeile">
+  <label for="bli">Blindwiderstand X<sub>L</sub></label>
+  <input type="range" id="bli" min="0" max="400" step="10" value="130">
+  <div class="wert" id="bliw">130 &#8486;</div>
+</div>
+<button id="reset" type="button">Zur&uuml;cksetzen</button>
+</div>
+
+<div class="anzeigen">
+  <div class="kachel"><span>Wirkleistung P</span><b id="aP">191 W</b></div>
+  <div class="kachel"><span>Blindleistung Q</span><b id="aQ">275 var</b></div>
+  <div class="kachel"><span>Scheinleistung S</span><b id="aS">335 VA</b></div>
+  <div class="kachel"><span>Wirkfaktor cos &phi;</span><b id="aC">0,57</b></div>
+</div>
+
+<div class="vergleich" id="vgl">&nbsp;</div>
+
+<div class="fuss">
+Gerechnet wird mit Z = &radic;(R&sup2; + X<sub>L</sub>&sup2;), I = U / Z, P = I&sup2; &middot; R,
+Q = I&sup2; &middot; X<sub>L</sub> und S = U &middot; I bei U = 230 V (Tabellenbuch, Seite 37,
+Formel 1 und 7; Z und I nach Seite 40, Formel 4 und 6). Die Spule ist als <b>ideal</b> angenommen.
+</div>
+
+<script>
+(function(){
+ var U=230;
+ var cv=document.getElementById('buehne'), ctx=cv.getContext('2d');
+ var wid=document.getElementById('wid'), bli=document.getElementById('bli');
+ var INK="#1A2530",KUP="#A34E0E",GRAU="#C7D2DA",ROT="#B23A33";
+ /* Zwei Anordnungen derselben Zeichnung. Am Handy (schmaler als 640 px) standen die beiden
+    Dreiecke nebeneinander im Querformat 960 x 360 auf rund zwei Fuenftel verkleinert da:
+    Beschriftung 6 bis 7 px, die Tiefzahl von X_L und Q_L rund 5 px, unlesbar (am Standbild
+    in 390 px Breite gesehen, 06.10.2026). Schmal: die beiden Dreiecke UNTEREINANDER, jedes um
+    den Faktor k = 1,25 groesser, auf einer 480 px breiten Flaeche; die kleinste Schrift
+    (Tiefzahl 15 px) steht bei 390 px Breite gut 12 px hoch. */
+ var BREIT = {W:960, H:360, k:1, X1:120, Y1:110, X2:560, Y2:110, g:17, gS:18, titel:18, phi:19,
+              txt:16, TY1:330, TY2:330};
+ var SCHMAL = {W:480, H:726, k:1.25, X1:56, Y1:74, X2:56, Y2:436, g:22, gS:23, titel:22, phi:24,
+               txt:17, TY1:349, TY2:711, ausweichen:true};
+ /* ausweichen (nur schmal): in Grenzstellungen lag die Beschriftung der Hypotenuse auf dem
+    Winkelzeichen (R = 400 Ω, X_L = 20 Ω) oder zwischen den Linien des fast senkrechten
+    Dreiecks (R = 20 Ω, X_L = 400 Ω), am Standbild gesehen. Dann rueckt sie unter das
+    Winkelzeichen bzw. links neben die senkrechte Achse. */
+ var G = BREIT;
+ function anordnen(){
+  var neu = (cv.parentNode.clientWidth || window.innerWidth) < 640 ? SCHMAL : BREIT;
+  if(neu !== G || cv.width !== neu.W){ G = neu; cv.width = G.W; cv.height = G.H; }
+ }
+ anordnen();
+ function komma(x,n){return x.toFixed(n).replace(".",",");}
+ function tief(c,h,i,x,y,farbe,g){
+  c.fillStyle=farbe;c.font="bold "+g+"px 'Noto Sans',sans-serif";c.fillText(h,x,y);
+  var b=c.measureText(h).width;
+  c.font="bold "+Math.round(g*0.66)+"px 'Noto Sans',sans-serif";
+  c.fillText(i,x+b+1,y+Math.round(g*0.22));
+ }
+ function pfeil(x1,y1,x2,y2,farbe,br){
+  if(Math.abs(x2-x1)<0.5 && Math.abs(y2-y1)<0.5) return;
+  ctx.strokeStyle=farbe;ctx.lineWidth=br*G.k;ctx.lineCap="round";
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+  var a=Math.atan2(y1-y2,x2-x1);
+  ctx.beginPath();ctx.moveTo(x2,y2);
+  var s=14*G.k;
+  ctx.lineTo(x2-s*Math.cos(a-0.38),y2+s*Math.sin(a-0.38));
+  ctx.lineTo(x2-s*Math.cos(a+0.38),y2+s*Math.sin(a+0.38));
+  ctx.closePath();ctx.fillStyle=farbe;ctx.fill();
+ }
+ function dreieck(X0,Y0,waagerecht,senkrecht,PX,titel,nw,iw,nb,ib,ns,is_,farbe){
+  var k=G.k;
+  ctx.strokeStyle=GRAU;ctx.lineWidth=1.3;
+  ctx.beginPath();ctx.moveTo(X0-30*k,Y0);ctx.lineTo(X0+250*k,Y0);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(X0,Y0-20*k);ctx.lineTo(X0,Y0+190*k);ctx.stroke();
+  ctx.fillStyle=INK;ctx.font="bold "+G.titel+"px 'Noto Sans',sans-serif";
+  ctx.fillText(titel,X0-30*k,Y0-40*k);
+  pfeil(X0,Y0,X0+waagerecht*PX,Y0,INK,4.4);
+  tief(ctx,nw,iw,X0+waagerecht*PX*0.5-10*k,Y0-12*k,INK,G.g);
+  pfeil(X0+waagerecht*PX,Y0,X0+waagerecht*PX,Y0+senkrecht*PX,KUP,4.4);
+  tief(ctx,nb,ib,X0+waagerecht*PX+12*k,Y0+Math.max(30*k,senkrecht*PX)*0.6,KUP,G.g);
+  pfeil(X0,Y0,X0+waagerecht*PX,Y0+senkrecht*PX,ROT,5.2);
+  var sx=X0+waagerecht*PX*0.45-6*k, sy=Y0+Math.max(26*k,senkrecht*PX)*0.62+16*k;
+  if(G.ausweichen){
+   ctx.font="bold "+G.gS+"px 'Noto Sans',sans-serif"; var sw=ctx.measureText(ns).width;
+   if(waagerecht*PX<40*k){ sx=X0-10*k-sw; }
+   else if(senkrecht>0.01 && sx<X0+50*k+0.8*G.phi+4 && X0+50*k<sx+sw+4 && sy>Y0+22*k-0.8*G.phi-4 && sy-0.8*G.gS<Y0+22*k+4){
+    sy=Y0+22*k+G.gS+6;
+   }
+  }
+  tief(ctx,ns,is_,sx,sy,ROT,G.gS);
+  if(waagerecht>0.01 && senkrecht>0.01){
+   ctx.strokeStyle=ROT;ctx.lineWidth=2.4*k;
+   ctx.beginPath();ctx.arc(X0,Y0,44*k,0,Math.atan2(senkrecht,waagerecht));ctx.stroke();
+   ctx.fillStyle=ROT;ctx.font="bold "+G.phi+"px 'Noto Sans',sans-serif";
+   ctx.fillText("\u03c6",X0+50*k,Y0+22*k);
+  }
+ }
+ function zeichne(){
+  var R=+wid.value, X=+bli.value;
+  var Z=Math.hypot(R,X), I=U/Z;
+  var P=I*I*R, Q=I*I*X, S=U*I;
+  ctx.clearRect(0,0,cv.width,cv.height);
+  var PXw=140*G.k/Math.max(20,Math.max(R,X));
+  var PXl=140*G.k/Math.max(1,Math.max(P,Q));
+  dreieck(G.X1,G.Y1,R,X,PXw,"Widerstandsdreieck","R","","X","L","Z","");
+  dreieck(G.X2,G.Y2,P,Q,PXl,"Leistungsdreieck","P","","Q","L","S","");
+  /* Keine Formelzeichen mit Unterstrich in den Fliesstext: die Zeiger sind bereits
+     beschriftet, und die Kacheln unten nennen alle Werte. Hier steht nur, was sonst
+     nirgends steht. */
+  ctx.font=G.txt+"px 'Noto Sans',sans-serif";ctx.fillStyle="#5A666F";
+  ctx.fillText("Scheinwiderstand Z = "+komma(Z,0)+" \u03a9   bei I = "+komma(I,3)+" A",G.X1,G.TY1);
+  ctx.fillText("mit dem Quadrat des Stromes multipliziert",G.X2,G.TY2);
+  document.getElementById('widw').textContent=R+" \u03a9";
+  document.getElementById('bliw').textContent=X+" \u03a9";
+  document.getElementById('aP').textContent=komma(P,0)+" W";
+  document.getElementById('aQ').textContent=komma(Q,0)+" var";
+  document.getElementById('aS').textContent=komma(S,0)+" VA";
+  document.getElementById('aC').textContent=komma(P/S,2);
+  var winkelR=Math.atan2(X,R)*180/Math.PI, winkelL=Math.atan2(Q,P)*180/Math.PI;
+  document.getElementById('vgl').innerHTML =
+    "Beide Dreiecke haben denselben Winkel: <b>"+komma(winkelR,1)+"\u00b0</b> und <b>"
+    +komma(winkelL,1)+"\u00b0</b>. "
+    +"P + Q w\u00e4re <b>"+komma(P+Q,0)+"</b>, S ist aber nur <b>"+komma(S,0)+" VA</b>"
+    +", also um "+komma(P+Q-S,0)+" weniger. Eine Hypotenuse ist nie so lang wie beide Katheten zusammen.";
+ }
+ [wid,bli].forEach(function(e){e.addEventListener('input',zeichne);});
+ document.getElementById('reset').addEventListener('click',function(){
+  wid.value=90; bli.value=130; zeichne();
+ });
+ window.addEventListener('resize', function(){ anordnen(); zeichne(); });
+ zeichne();
+})();
+</script>
+</body></html>
