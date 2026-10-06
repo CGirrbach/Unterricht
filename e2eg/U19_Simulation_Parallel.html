@@ -1,0 +1,251 @@
+<!-- sim_bearbeitung: pflicht -->
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>U19 Simulation: Stromdreieck und Scheinwiderstand der Parallelschaltung</title>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--linie:#C7D2DA;
+      --gruen:#2F7D62;--rot:#B23A33;--grau:#5A666F}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Noto Sans',system-ui,sans-serif;color:var(--ink);background:#fff}
+header{border-top:6px solid var(--kupfer);padding:14px 18px 10px}
+h1{margin:0;font-size:clamp(18px,4vw,26px)}
+.ziel{background:var(--kupferhell);border-left:5px solid var(--kupfer);
+      padding:12px 16px;margin:12px 18px;font-size:clamp(14px,3vw,17px)}
+.ziel > b:first-child{display:block;font-size:.82em;letter-spacing:.08em;text-transform:uppercase;
+        color:var(--kupfer);margin-bottom:4px}
+canvas{display:block;width:100%;max-width:960px;margin:0 auto;height:auto}
+.regler{max-width:960px;margin:0 auto;padding:8px 18px 4px}
+.zeile{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:14px 0}
+.zeile label{flex:0 0 210px;font-weight:700;font-size:clamp(14px,3vw,17px)}
+/* Der Regler trug die Vorgabefarbe des Browsers (Blau), die einzige Farbe im Bild, die
+   nicht aus dem Haus stammt, und ausgerechnet am Bedienelement (Befund Linse BLATT,
+   U03/B2 und U04/B5, 01.09.2026). Er trägt jetzt Kupfer wie alles Bedienbare. */
+input[type=range]{flex:1 1 220px;min-width:180px;height:44px;accent-color:var(--kupfer);
+  -webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-moz-range-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;
+  height:26px;margin-top:-9px;border-radius:50%;background:var(--kupfer);border:2px solid #fff;
+  box-shadow:0 0 0 1.4px var(--kupfer)}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;
+  background:var(--kupfer);border:2px solid #fff}
+input[type=range]:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
+.wert{flex:0 0 128px;text-align:right;font-variant-numeric:tabular-nums;
+      font-size:clamp(15px,3.2vw,19px);font-weight:700;color:var(--kupfer)}
+.anzeigen{display:flex;gap:12px;flex-wrap:wrap;max-width:960px;margin:6px auto 0;padding:0 18px}
+.kachel{flex:1 1 150px;border:1.4px solid var(--linie);padding:10px 12px}
+.kachel span{display:block;font-size:.78em;letter-spacing:.06em;color:var(--grau);
+             font-weight:700}
+.kachel b{font-size:clamp(17px,3.6vw,22px)}
+button{font:inherit;font-weight:700;padding:12px 20px;min-height:48px;border:1.6px solid var(--ink);
+       background:#fff;color:var(--ink);cursor:pointer}
+button:hover{background:var(--kupferhell)}
+.fuss{max-width:960px;margin:14px auto 26px;padding:0 18px;font-size:.86em;color:var(--grau)}
+@media (prefers-reduced-motion: reduce){canvas{outline:none}}
+</style>
+<style>
+.schalter{max-width:960px;margin:10px auto 0;padding:0 18px;display:flex;gap:0;flex-wrap:wrap}
+.schalter button{flex:1 1 200px;border-right-width:0}
+.schalter button:last-child{border-right-width:1.6px}
+.schalter button[aria-pressed=true]{background:var(--kupfer);color:#fff;border-color:var(--kupfer)}
+.vergleich{max-width:960px;margin:10px auto 0;padding:10px 18px;border-left:5px solid var(--gruen);
+  background:#EEF5F2;font-size:clamp(14px,3vw,17px)}
+</style>
+</head><body>
+
+<header>
+<h1>Parallelschaltung: Stromdreieck und Scheinwiderstand</h1>
+</header>
+
+<div class="ziel">
+<b>Was Sie herausfinden sollen</b>
+Wirkwiderstand und Blindwiderstand liegen <b>parallel</b> an 230 V. Der Strom teilt sich auf.
+Verstellen Sie R, das Bauteil und die Frequenz und beobachten Sie das <b>Stromdreieck</b>.
+Achten Sie besonders auf den Scheinwiderstand Z: <b>vergleichen Sie ihn mit R und mit X</b>.
+Schalten Sie am Ende von der Spule auf den Kondensator um und sehen Sie nach, was sich
+&auml;ndert und was gleich bleibt.
+</div>
+
+<script type="application/json" id="sim-meta">
+{
+  "erkenntnis": "dass in der Parallelschaltung die STROEME geometrisch addiert werden und der Scheinwiderstand Z deshalb IMMER kleiner ist als jeder einzelne Zweigwiderstand; bei der Spule eilt der Gesamtstrom der Spannung nach, beim Kondensator eilt er vor, waehrend alle Formeln dieselben bleiben",
+  "startwerte":     {"bauteil": "Spule", "frequenz": 55, "wirkwiderstand": 200, "induktivitaet": 1.0, "kapazitaet": 4.0},
+  "loesungswerte":  {"frequenz": 50, "wirkwiderstand": 330, "induktivitaet": 1.4, "kapazitaet": 3.6},
+  "quelle": "Europa-Rechenbuch S. 110 und S. 114, 7.7.1 und 7.7.3: I = Wurzel(I_w² + I_b²), Y = Wurzel(G² + B²), Z = 1/Y"
+}
+</script>
+
+<div class="schalter">
+  <button id="bL" type="button" aria-pressed="true">R und Spule</button>
+  <button id="bC" type="button" aria-pressed="false">R und Kondensator</button>
+</div>
+
+<canvas id="buehne" width="960" height="360"
+        data-quelle="Europa-Rechenbuch S. 110 Bild 2 und S. 114 Bild 2: Stromdreieck der Parallelschaltung; der Wirkstrom liegt in Richtung der Spannung, der Blindstrom steht senkrecht darauf"></canvas>
+
+<div class="regler">
+<div class="zeile">
+  <label for="fr">Frequenz f</label>
+  <input type="range" id="fr" min="20" max="120" step="1" value="55">
+  <div class="wert" id="frw">55 Hz</div>
+</div>
+<div class="zeile">
+  <label for="wid">Wirkwiderstand R</label>
+  <input type="range" id="wid" min="50" max="400" step="10" value="200">
+  <div class="wert" id="widw">200 &#8486;</div>
+</div>
+<div class="zeile" id="zL">
+  <label for="ind">Induktivit&auml;t L</label>
+  <input type="range" id="ind" min="2" max="30" step="1" value="10">
+  <div class="wert" id="indw">1,0 H</div>
+</div>
+<div class="zeile" id="zC" style="display:none">
+  <label for="kap">Kapazit&auml;t C</label>
+  <input type="range" id="kap" min="10" max="200" step="1" value="40">
+  <div class="wert" id="kapw">4,0 &micro;F</div>
+</div>
+<button id="reset" type="button">Zur&uuml;cksetzen</button>
+</div>
+
+<div class="anzeigen">
+  <div class="kachel"><span>Scheinwiderstand Z</span><b id="aZ">173 &#8486;</b></div>
+  <div class="kachel"><span>Gesamtstrom I</span><b id="aI">1,33 A</b></div>
+  <div class="kachel"><span>Winkel &phi;</span><b id="aP">30,1&deg;</b></div>
+  <div class="kachel"><span>Verhalten</span><b id="aV">induktiv</b></div>
+</div>
+
+<div class="vergleich" id="vgl">&nbsp;</div>
+
+<div class="fuss">
+Gerechnet wird mit I<sub>w</sub> = U / R, I<sub>b</sub> = U / X,
+I = &radic;(I<sub>w</sub>&sup2; + I<sub>b</sub>&sup2;) und Z = U / I bei U = 230 V
+(Tabellenbuch, Seite 41, Formel 2 und 3). Spule und Kondensator sind als <b>ideal</b>
+angenommen; der Wirkwiderstand liegt als eigener Zweig daneben.
+</div>
+
+<script>
+(function(){
+ var U=230, modus="L";
+ var cv=document.getElementById('buehne'), ctx=cv.getContext('2d');
+ var fr=document.getElementById('fr'), ind=document.getElementById('ind'),
+     kap=document.getElementById('kap'), wid=document.getElementById('wid');
+ var bL=document.getElementById('bL'), bC=document.getElementById('bC');
+ var INK="#1A2530",KUP="#A34E0E",GRUEN="#12503C",GRAU="#C7D2DA",ROT="#B23A33";
+ /* Zwei Anordnungen derselben Zeichnung. Am Handy (schmaler als 640 px) stand das Querformat
+    960 x 360 auf rund zwei Fuenftel verkleinert da: Zahlen 7 px hoch, die Tiefzahlen der
+    Formelzeichen rund 5 px, unlesbar (am Standbild in 390 px Breite gesehen, 06.10.2026).
+    Schmal: Stromdreieck oben (um den Faktor k = 1,25 groesser), die Zahlen darunter in zwei
+    Spalten (links die Stroeme, rechts die Widerstaende), groessere Schrift; die kleinste
+    Schrift (Tiefzahl 17 px) steht bei 390 px Breite gut 12 px hoch. Die Beschriftung der
+    Bezugslinie steht schmal rechtsbuendig an ihrem Ende, sonst liefe sie ueber den Rand. */
+ var BREIT = {W:960, H:360, k:1, X0:210, Y0:170, g:17, gU:19, gZ:18, txt:18, mass:17, kursiv:17,
+              TX:620, TY:48, dZ:34, ab:40, spalten:false};
+ var SCHMAL = {W:540, H:612, k:1.25, X0:92, Y0:212, g:26, gU:28, gZ:26, txt:22, mass:19, kursiv:22,
+               TX:24, TY:470, dZ:38, ab:50, spalten:true, TX2:300};
+ var G = BREIT;
+ function anordnen(){
+  var neu = (cv.parentNode.clientWidth || window.innerWidth) < 640 ? SCHMAL : BREIT;
+  if(neu !== G || cv.width !== neu.W){ G = neu; cv.width = G.W; cv.height = G.H; }
+ }
+ anordnen();
+ function komma(x,n){return x.toFixed(n).replace(".",",");}
+ function tief(c,h,i,x,y,farbe,g){
+  c.fillStyle=farbe;c.font="bold "+g+"px 'Noto Sans',sans-serif";c.fillText(h,x,y);
+  var b=c.measureText(h).width;
+  c.font="bold "+Math.round(g*0.66)+"px 'Noto Sans',sans-serif";
+  c.fillText(i,x+b+1,y+Math.round(g*0.22));
+ }
+ function pfeil(x1,y1,x2,y2,farbe,br){
+  if(Math.abs(x2-x1)<0.5 && Math.abs(y2-y1)<0.5) return;
+  ctx.strokeStyle=farbe;ctx.lineWidth=br*G.k;ctx.lineCap="round";
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+  var a=Math.atan2(y1-y2,x2-x1);
+  ctx.beginPath();ctx.moveTo(x2,y2);
+  var s=15*G.k;
+  ctx.lineTo(x2-s*Math.cos(a-0.38),y2+s*Math.sin(a-0.38));
+  ctx.lineTo(x2-s*Math.cos(a+0.38),y2+s*Math.sin(a+0.38));
+  ctx.closePath();ctx.fillStyle=farbe;ctx.fill();
+ }
+ function zeichne(){
+  var f=+fr.value, R=+wid.value, L=+ind.value/10, C=+kap.value/10*1e-6;
+  var X = (modus==="L") ? 2*Math.PI*f*L : 1/(2*Math.PI*f*C);
+  var Iw=U/R, Ib=U/X, I=Math.hypot(Iw,Ib), Z=U/I;
+  var phi=Math.atan(Ib/Iw);
+  var blindfarbe = (modus==="L") ? KUP : GRUEN;
+  var richtung = (modus==="L") ? 1 : -1;   /* Spule: nach unten. Kondensator: nach oben. */
+  ctx.clearRect(0,0,cv.width,cv.height);
+  var k=G.k;
+  var PX=Math.min(150, 130/Math.max(0.05,Math.max(Iw,Ib,I)))*k;
+  var X0=G.X0,Y0=G.Y0;
+  /* Bezugsachse: die gemeinsame Spannung */
+  ctx.strokeStyle=GRAU;ctx.lineWidth=1.4;
+  ctx.beginPath();ctx.moveTo(X0-40*k,Y0);ctx.lineTo(X0+340*k,Y0);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(X0,Y0+150*k);ctx.lineTo(X0,Y0-150*k);ctx.stroke();
+  ctx.font="italic "+G.kursiv+"px 'Noto Sans',sans-serif";ctx.fillStyle="#5A666F";
+  if(G.spalten){ ctx.textAlign="right"; ctx.fillText("U (gemeinsam)",X0+340*k,Y0-10*k); ctx.textAlign="left"; }
+  else ctx.fillText("U (gemeinsam)",X0+250,Y0-10);
+  /* Wirkstrom in Richtung der Spannung */
+  pfeil(X0,Y0,X0+Iw*PX,Y0,INK,4.6);
+  tief(ctx,"I","w",X0+Iw*PX*0.5-10*k,(richtung>0?Y0-14*k:Y0+26*k),INK,G.g);
+  /* Blindstrom senkrecht dazu */
+  pfeil(X0,Y0,X0,Y0+richtung*Ib*PX,blindfarbe,4.2);
+  tief(ctx,"I",(modus==="L")?"bL":"bC",X0-52*k,Y0+richtung*Math.max(30*k,Ib*PX)*0.6,blindfarbe,G.g);
+  /* Hilfslinien und Summe */
+  ctx.strokeStyle="#8A959D";ctx.lineWidth=1.4;ctx.setLineDash([6,5]);
+  ctx.beginPath();ctx.moveTo(X0+Iw*PX,Y0);ctx.lineTo(X0+Iw*PX,Y0+richtung*Ib*PX);
+  ctx.lineTo(X0,Y0+richtung*Ib*PX);ctx.stroke();ctx.setLineDash([]);
+  pfeil(X0,Y0,X0+Iw*PX,Y0+richtung*Ib*PX,ROT,5.4);
+  tief(ctx,"I","",X0+Iw*PX+12*k,Y0+richtung*Math.max(28*k,Ib*PX)+(richtung>0?24*k:-12*k),ROT,G.gU);
+  /* Zahlen rechts (am Handy darunter, in zwei Spalten) */
+  var TX=G.TX, ty=G.TY;
+  function zeile(name,idx,wert,farbe){
+   tief(ctx,name,idx,TX,ty,farbe,G.gZ);
+   ctx.font=G.txt+"px 'Noto Sans',sans-serif";ctx.fillStyle=farbe;
+   ctx.fillText(" = "+wert, TX+G.ab, ty);
+   ty+=G.dZ;
+  }
+  zeile("I","w",komma(Iw,3)+" A",INK);
+  zeile("I",(modus==="L")?"bL":"bC",komma(Ib,3)+" A",blindfarbe);
+  zeile("I","",komma(I,3)+" A",ROT);
+  var tyMass;
+  if(G.spalten){ tyMass=ty; TX=G.TX2; ty=G.TY; } else { ty+=10; }
+  zeile("R","",komma(R,0)+" \u03A9",INK);
+  zeile("X",(modus==="L")?"L":"C",komma(X,0)+" \u03A9",blindfarbe);
+  zeile("Z","",komma(Z,0)+" \u03A9",ROT);
+  if(G.spalten){ TX=G.TX; ty=tyMass; }
+  ctx.font=G.mass+"px 'Noto Sans',sans-serif";ctx.fillStyle="#5A666F";
+  ctx.fillText("Ma\u00dfstab: 1 A \u2259 "+komma(PX,0)+" Bildpunkte",TX,ty+16);
+  /* Anzeigen */
+  document.getElementById('frw').textContent=f+" Hz";
+  document.getElementById('widw').textContent=R+" \u03A9";
+  document.getElementById('indw').textContent=komma(L,1)+" H";
+  document.getElementById('kapw').textContent=komma(C*1e6,1)+" \u00b5F";
+  document.getElementById('aZ').textContent=komma(Z,0)+" \u03A9";
+  document.getElementById('aI').textContent=komma(I,2)+" A";
+  document.getElementById('aP').textContent=komma(phi*180/Math.PI,1)+"\u00b0";
+  document.getElementById('aV').textContent=(modus==="L")?"induktiv":"kapazitiv";
+  var kleinster=Math.min(R,X);
+  document.getElementById('vgl').innerHTML =
+    "Z = <b>"+komma(Z,0)+" \u03A9</b> gegen R = "+komma(R,0)+" \u03A9 und X = "+komma(X,0)+
+    " \u03A9. Der kleinere Zweig ist "+komma(kleinster,0)+" \u03A9, und Z liegt "+
+    "<b>"+komma(kleinster-Z,0)+" \u03A9 darunter</b>.";
+ }
+ function setzeModus(m){
+  modus=m;
+  bL.setAttribute('aria-pressed', m==="L" ? "true":"false");
+  bC.setAttribute('aria-pressed', m==="C" ? "true":"false");
+  document.getElementById('zL').style.display = (m==="L") ? "" : "none";
+  document.getElementById('zC').style.display = (m==="C") ? "" : "none";
+  zeichne();
+ }
+ [fr,ind,kap,wid].forEach(function(e){e.addEventListener('input',zeichne);});
+ bL.addEventListener('click',function(){setzeModus("L");});
+ bC.addEventListener('click',function(){setzeModus("C");});
+ document.getElementById('reset').addEventListener('click',function(){
+  fr.value=55; wid.value=200; ind.value=10; kap.value=40; setzeModus("L");
+ });
+ window.addEventListener('resize', function(){ anordnen(); zeichne(); });
+ zeichne();
+})();
+</script>
+</body></html>
