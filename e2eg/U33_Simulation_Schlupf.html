@@ -1,0 +1,289 @@
+<!-- sim_bearbeitung: pflicht -->
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>U33 Simulation: Drehfeld und Läufer, der Schlupf</title>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--linie:#C7D2DA;
+      --gruen:#2F7D62;--rot:#B23A33;--grau:#5A666F}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Noto Sans',system-ui,sans-serif;color:var(--ink);background:#fff}
+header{border-top:6px solid var(--kupfer);padding:14px 18px 10px}
+h1{margin:0;font-size:clamp(18px,4vw,26px)}
+.ziel{background:var(--kupferhell);border-left:5px solid var(--kupfer);
+      padding:12px 16px;margin:12px 18px;font-size:clamp(14px,3vw,17px)}
+.ziel > b:first-child{display:block;font-size:.82em;letter-spacing:.08em;text-transform:uppercase;
+        color:var(--kupfer);margin-bottom:4px}
+canvas{display:block;width:100%;max-width:960px;margin:0 auto;height:auto}
+.regler{max-width:960px;margin:0 auto;padding:8px 18px 4px}
+.zeile{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:14px 0}
+.zeile label{flex:0 0 210px;font-weight:700;font-size:clamp(14px,3vw,17px)}
+/* Alles Bedienbare traegt Kupfer, nie die Vorgabefarbe des Browsers. */
+input[type=range]{flex:1 1 220px;min-width:180px;height:44px;accent-color:var(--kupfer);
+  -webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-moz-range-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;
+  height:26px;margin-top:-9px;border-radius:50%;background:var(--kupfer);border:2px solid #fff;
+  box-shadow:0 0 0 1.4px var(--kupfer)}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;
+  background:var(--kupfer);border:2px solid #fff}
+input[type=range]:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
+.wert{flex:0 0 128px;text-align:right;font-variant-numeric:tabular-nums;
+      font-size:clamp(15px,3.2vw,19px);font-weight:700;color:var(--kupfer)}
+.anzeigen{display:flex;gap:12px;flex-wrap:wrap;max-width:960px;margin:6px auto 0;padding:0 18px}
+.kachel{flex:1 1 150px;border:1.4px solid var(--linie);padding:10px 12px}
+.kachel span{display:block;font-size:.78em;letter-spacing:.06em;color:var(--grau);
+             font-weight:700}
+.kachel b{font-size:clamp(17px,3.6vw,22px)}
+button{font:inherit;font-weight:700;padding:12px 20px;min-height:48px;border:1.6px solid var(--ink);
+       background:#fff;color:var(--ink);cursor:pointer}
+button:hover{background:var(--kupferhell)}
+.fuss{max-width:960px;margin:14px auto 26px;padding:0 18px;font-size:.86em;color:var(--grau)}
+.vergleich{max-width:960px;margin:10px auto 0;padding:10px 18px;border-left:5px solid var(--gruen);
+  background:#EEF5F2;font-size:clamp(14px,3vw,17px)}
+</style>
+</head><body>
+
+<header>
+<h1>Drehfeld und L&auml;ufer: der Schlupf</h1>
+</header>
+
+<div class="ziel">
+<b>Was Sie herausfinden sollen</b>
+Zwei Zeiger laufen um: der <b>&auml;u&szlig;ere</b> ist das Drehfeld, der <b>innere</b> der L&auml;ufer.
+Ziehen Sie den Schlupf langsam von 0 % bis 100 % und achten Sie auf zwei Dinge: wie sich der
+Abstand zwischen beiden Zeigern &auml;ndert, und was mit der <b>Frequenz der L&auml;uferspannung
+f<sub>L</sub></b> geschieht. Was bedeutet der Zustand s = 0 f&uuml;r das Drehmoment?
+</div>
+
+<script type="application/json" id="sim-meta">
+{
+  "erkenntnis": "dass der Schlupf misst, wie weit der Laeufer hinter dem Drehfeld zurueckbleibt, und dass die Frequenz der Laeuferspannung genau an diesem Schlupf haengt: bei s = 0 wird nichts induziert und es gibt kein Drehmoment, bei Stillstand liegt die volle Netzfrequenz im Laeufer; deshalb ist der Schlupf keine Unvollkommenheit, sondern die Voraussetzung des Antriebs",
+  "startwerte":    {"polpaarzahl": 2, "schlupf": 12},
+  "loesungswerte": {"schlupf": [3, 4, 5, 3.33, 4.33], "polpaarzahl": [2, 3]},
+  "quelle": "Europa-Rechenbuch S. 247 (12.3.4) mit Formelkasten und Faustzahl, Europa Fachkunde S. 494, Tabellenbuch S. 532 Formel 13 und 14"
+}
+</script>
+
+<canvas id="buehne" width="960" height="440"
+        data-quelle="Europa-Rechenbuch S. 247, Formelkasten zu 12.3.4: der Laeufer bleibt um die Drehzahldifferenz hinter dem Drehfeld zurueck; der Schlupf s ist dieser Rueckstand in Prozent, und die Laeuferfrequenz f_L = f * s / 100 % haengt allein daran"></canvas>
+
+<div class="regler">
+<div class="zeile">
+  <label for="pol">Polpaarzahl p</label>
+  <input type="range" id="pol" min="1" max="4" step="1" value="2">
+  <div class="wert" id="polw">2</div>
+</div>
+<div class="zeile">
+  <label for="slp">Schlupf s</label>
+  <input type="range" id="slp" min="0" max="100" step="1" value="12">
+  <div class="wert" id="slpw">12 %</div>
+</div>
+<button id="reset" type="button">Zur&uuml;cksetzen</button>
+</div>
+
+<div class="anzeigen">
+  <div class="kachel"><span>Drehfelddrehzahl n<sub>s</sub></span><b id="aS">1500 1/min</b></div>
+  <div class="kachel"><span>L&auml;uferdrehzahl n</span><b id="aN">1320 1/min</b></div>
+  <div class="kachel"><span>Differenz &Delta;n = n<sub>s</sub> &minus; n</span><b id="aD">180 1/min</b></div>
+  <div class="kachel"><span>L&auml;uferfrequenz f<sub>L</sub></span><b id="aF">6,00 Hz</b></div>
+</div>
+
+<div class="vergleich" id="vgl">&nbsp;</div>
+
+<div class="fuss">
+Gerechnet wird mit n<sub>s</sub> = f / p, s = (n<sub>s</sub> &minus; n) / n<sub>s</sub> &middot; 100 %
+und f<sub>L</sub> = f &middot; s / 100 % (Tabellenbuch Seite 532, Formel 5, 13 und 10; die
+L&auml;uferdrehzahl n folgt aus Formel 14). Die Netzfrequenz ist hier fest auf <b>50 Hz</b> eingestellt. Das Bild l&auml;uft
+<b>verlangsamt</b>: das Drehfeld braucht hier zwei Sekunden f&uuml;r eine Umdrehung, unabh&auml;ngig
+von der eingestellten Drehzahl. Die <b>Zahlen</b> in den Kacheln sind die wirklichen. Der
+L&auml;ufer ist vereinfacht als Scheibe mit acht St&auml;ben gezeichnet.
+Die <b>Ausgangsstellung</b> liegt mit 12 % bewusst etwas &uuml;ber dem &uuml;blichen Band, damit der R&uuml;ckstand des L&auml;ufers gleich zu sehen ist. Ziehen Sie den Regler auf 4 %, um den Betriebsfall zu sehen, und auf 100 % f&uuml;r den Einschaltaugenblick.
+</div>
+
+<script>
+"use strict";
+var C = document.getElementById("buehne"), g = C.getContext("2d");
+var pol = document.getElementById("pol"), slp = document.getElementById("slp");
+var INK = "#1A2530", KUPFER = "#A34E0E", LINIE = "#C7D2DA", GRAU = "#5A666F";
+var GRUEN = "#2F7D62", ROT = "#B23A33", BLAU = "#2C5F8A";
+var NETZ = 50.0;
+var raf = null, t0 = 0;
+
+/* Zwei Anordnungen derselben Zeichnung. Am Handy (schmaler als 640 px) stand das Querformat
+   960 x 440 auf 390 px verkleinert da: die kleinste Beschriftung (14 px) war dort 5,7 px hoch,
+   unlesbar (06.10.2026). Hochformat 600 x 900: Staender und Laeufer oben, 1,4fach
+   (Verschiebung ax, ay), Zahlen, Balken und Rechnung darunter. Kleinste Schrift 20 px, der
+   Index L 19 px; bei 390 px Breite 13 und 12,5 px. */
+var BREIT  = {W: 960, H: 440, k: 1,   ax: 0,    ay: 0,     fA: 14, X0: 470, y1: 74,  y2: 112,
+              y3: 150, f1: 25, f3: 20, BY: 205, BW: 430, BH: 30, fF: 22, fS: 14, sl: 20,
+              r1: 300, r2: 330, fR: 19, ix: 0.72};
+var SCHMAL = {W: 600, H: 900, k: 1.4, ax: -7.8, ay: -62.8, fA: 15, X0: 20,  y1: 590, y2: 634,
+              y3: 676, f1: 30, f3: 22, BY: 740, BW: 560, BH: 36, fF: 26, fS: 20, sl: 26,
+              r1: 842, r2: 876, fR: 24, ix: 0.8};
+var G = BREIT;
+function anordnen() {
+  var neu = (C.parentNode.clientWidth || window.innerWidth) < 640 ? SCHMAL : BREIT;
+  if (neu !== G || C.width !== neu.W) { G = neu; C.width = G.W; C.height = G.H; }
+}
+anordnen();
+
+/* f mit tiefgestelltem grossem L. Vorher stand im Bild „fₗ“ mit kleinem l als Index; das
+   Formelzeichen heisst f_L (Tabellenbuch S. 532, Formel 10). Das Canvas kennt kein <sub>. */
+function mitIndex(gross, idx, rest, x, y, px, fett) {
+  var a = fett ? "bold " : "";
+  g.textAlign = "left";
+  g.font = a + px + "px system-ui,sans-serif"; g.fillText(gross, x, y);
+  var w = g.measureText(gross).width;
+  g.font = a + Math.round(px * G.ix) + "px system-ui,sans-serif";
+  g.fillText(idx, x + w, y + Math.round(px * 0.28));
+  var w2 = g.measureText(idx).width;
+  g.font = a + px + "px system-ui,sans-serif"; g.fillText(rest, x + w + w2, y);
+}
+
+function zahl(v, n) {
+  return (Math.abs(v) < 5e-4 ? 0 : v).toFixed(n === undefined ? 2 : n).replace(".", ",");
+}
+
+function bild(winkel) {
+  var pp = +pol.value, s = +slp.value;
+  var ns = NETZ / pp;                    /* 1/s */
+  var nsM = ns * 60.0;                   /* 1/min */
+  var nM = nsM * (1 - s / 100.0);
+  var dn = nsM - nM;
+  var fL = NETZ * s / 100.0;
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  g.clearRect(0, 0, C.width, C.height);
+  g.setTransform(G.k, 0, 0, G.k, G.ax, G.ay);
+
+  /* ---------- links: Ständerbohrung mit Drehfeld, darin der Läufer ---------- */
+  var MX = 220, MY = 210, RA = 158, RI = 112, RL = 92;
+  g.fillStyle = "#DCEBF5";
+  g.beginPath(); g.arc(MX, MY, RA, 0, 2 * Math.PI);
+  g.arc(MX, MY, RI, 0, 2 * Math.PI, true); g.fill();
+  g.strokeStyle = INK; g.lineWidth = 2;
+  g.beginPath(); g.arc(MX, MY, RA, 0, 2 * Math.PI); g.stroke();
+  g.beginPath(); g.arc(MX, MY, RI, 0, 2 * Math.PI); g.stroke();
+
+  /* das Drehfeld: 2p Pole als Bögen auf der Bohrung */
+  for (var q = 0; q < 2 * pp; q++) {
+    var wf = winkel + q * Math.PI / pp;
+    var nord = (q % 2) === 0;
+    var halb = Math.PI / (2 * pp) * 0.78;
+    g.strokeStyle = nord ? ROT : BLAU; g.lineWidth = 13;
+    g.beginPath(); g.arc(MX, MY, RI - 8, wf - halb, wf + halb); g.stroke();
+  }
+
+  /* der Läufer als Scheibe mit acht Stäben; er bleibt um den Schlupf zurück */
+  var wl = winkel * (1 - s / 100.0);
+  g.fillStyle = "#F0F2F4";
+  g.beginPath(); g.arc(MX, MY, RL, 0, 2 * Math.PI); g.fill();
+  g.strokeStyle = INK; g.lineWidth = 2;
+  g.beginPath(); g.arc(MX, MY, RL, 0, 2 * Math.PI); g.stroke();
+  for (var b = 0; b < 8; b++) {
+    var wb = wl + b * Math.PI / 4;
+    g.fillStyle = KUPFER;
+    g.beginPath();
+    g.arc(MX + (RL - 15) * Math.cos(wb), MY + (RL - 15) * Math.sin(wb), 7, 0, 2 * Math.PI);
+    g.fill();
+  }
+
+  /* die beiden Marken: aussen das Feld, innen der Läufer */
+  g.strokeStyle = ROT; g.lineWidth = 4;
+  g.beginPath(); g.moveTo(MX, MY);
+  g.lineTo(MX + (RI - 22) * Math.cos(winkel), MY + (RI - 22) * Math.sin(winkel)); g.stroke();
+  g.strokeStyle = KUPFER; g.lineWidth = 4;
+  g.beginPath(); g.moveTo(MX, MY);
+  g.lineTo(MX + (RL - 30) * Math.cos(wl), MY + (RL - 30) * Math.sin(wl)); g.stroke();
+  g.fillStyle = INK;
+  g.beginPath(); g.arc(MX, MY, 6, 0, 2 * Math.PI); g.fill();
+
+  /* der Winkel, um den der Läufer zurückliegt */
+  if (s > 0.5) {
+    g.strokeStyle = GRAU; g.lineWidth = 2; g.setLineDash([5, 4]);
+    g.beginPath(); g.arc(MX, MY, RL + 12, wl, winkel); g.stroke();
+    g.setLineDash([]);
+  }
+  g.fillStyle = GRAU; g.font = G.fA + "px system-ui,sans-serif"; g.textAlign = "center";
+  g.fillText("rot: das Drehfeld  ·  kupfer: der Läufer", MX, MY + RA + 40);
+  g.fillText((2 * pp) + " Pole, also p = " + pp, MX, MY + RA + 62);
+  g.setTransform(1, 0, 0, 1, 0, 0);
+
+  /* ---------- rechts: die Zahlen und der Balken für f_L ---------- */
+  var X0 = G.X0;
+  g.textAlign = "left";
+  g.fillStyle = INK; g.font = "bold " + G.f1 + "px system-ui,sans-serif";
+  g.fillText("n" + "ₛ" + " = " + zahl(nsM, 0) + " 1/min", X0, G.y1);
+  g.fillStyle = KUPFER;
+  g.fillText("n  = " + zahl(nM, 0) + " 1/min", X0, G.y2);
+  g.fillStyle = GRAU; g.font = G.f3 + "px system-ui,sans-serif";
+  g.fillText("Δn = " + zahl(dn, 0) + " 1/min   entspricht s = " + zahl(s, 0) + " %", X0, G.y3);
+
+  /* Balken: f_L von 0 bis 50 Hz */
+  var BX = X0, BY = G.BY, BW = G.BW, BH = G.BH;
+  g.strokeStyle = LINIE; g.lineWidth = 1.4;
+  g.strokeRect(BX, BY, BW, BH);
+  g.fillStyle = GRUEN;
+  g.fillRect(BX + 1, BY + 1, (BW - 2) * (fL / NETZ), BH - 2);
+  g.fillStyle = INK;
+  mitIndex("f", "L", " = " + zahl(fL, 2) + " Hz", BX, BY - 12, G.fF, true);
+  g.fillStyle = GRAU; g.font = G.fS + "px system-ui,sans-serif";
+  g.fillText("0 Hz", BX, BY + BH + G.sl);
+  g.textAlign = "right"; g.fillText("50 Hz = Netzfrequenz", BX + BW, BY + BH + G.sl);
+  g.textAlign = "left";
+
+  /* die Rechnung ausgeschrieben */
+  g.fillStyle = INK; g.font = G.fR + "px system-ui,sans-serif";
+  g.fillText("s = (" + zahl(nsM, 0) + " − " + zahl(nM, 0) + ") / " + zahl(nsM, 0) +
+             " · 100 % = " + zahl(s, 0) + " %", X0, G.r1);
+  mitIndex("f", "L", " = 50 Hz · " + zahl(s, 0) + " % / 100 % = " + zahl(fL, 2) + " Hz",
+           X0, G.r2, G.fR, false);
+
+  document.getElementById("polw").textContent = pp;
+  document.getElementById("slpw").textContent = zahl(s, 0) + " %";
+  document.getElementById("aS").textContent = zahl(nsM, 0) + " 1/min";
+  document.getElementById("aN").textContent = zahl(nM, 0) + " 1/min";
+  document.getElementById("aD").textContent = zahl(dn, 0) + " 1/min";
+  document.getElementById("aF").textContent = zahl(fL, 2) + " Hz";
+
+  var satz;
+  if (s === 0) {
+    satz = "s = 0: Der Läufer läuft genau mit dem Drehfeld. Das Feld zieht nicht mehr an ihm " +
+           "vorbei, es wird nichts induziert, es fließt kein Läuferstrom, es gibt KEIN " +
+           "Drehmoment. Dieser Zustand hält sich nicht von selbst.";
+  } else if (s === 100) {
+    satz = "s = 100 %: Der Läufer steht still, das Drehfeld läuft weiter. Im Läufer liegt die " +
+           "volle Netzfrequenz von 50 Hz. Genau so ist es im Einschaltaugenblick, und daher " +
+           "kommt der große Anlaufstrom.";
+  } else if (s >= 3 && s <= 8) {
+    satz = "s = " + zahl(s, 0) + " % liegt im üblichen Band 3 % bis 8 % für " +
+           "Asynchronmotoren. Der Läufer bleibt um " + zahl(dn, 0) + " 1/min zurück, und " +
+           "im Läufer liegen nur " + zahl(fL, 2) + " Hz.";
+  } else if (s < 3) {
+    satz = "s = " + zahl(s, 0) + " % liegt UNTER dem üblichen Band 3 % bis 8 %. So wenig Schlupf " +
+           "hat ein Asynchronmotor nur im Leerlauf, wenn ihn fast nichts bremst.";
+  } else {
+    satz = "s = " + zahl(s, 0) + " % liegt ÜBER dem üblichen Band 3 % bis 8 %. So viel Schlupf " +
+           "tritt nur beim Anlaufen oder bei Überlast auf; im Dauerbetrieb würde der Motor " +
+           "dabei zu heiß.";
+  }
+  document.getElementById("vgl").textContent = satz;
+}
+
+function loop(ts) {
+  if (!t0) { t0 = ts; }
+  bild(((ts - t0) / 2000) * 2 * Math.PI);      /* das Drehfeld: eine Umdrehung in zwei Sekunden */
+  raf = requestAnimationFrame(loop);
+}
+
+[pol, slp].forEach(function (e) { e.addEventListener("input", function () { bild(0.6); }); });
+document.getElementById("reset").addEventListener("click", function () {
+  pol.value = 2; slp.value = 12; bild(0.6);
+});
+window.addEventListener("resize", function () { anordnen(); if (!raf) { bild(0.6); } });
+bild(0.6);
+if (!window.matchMedia || !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  raf = requestAnimationFrame(loop);
+}
+</script>
+</body></html>
