@@ -1,0 +1,276 @@
+<!-- sim_bearbeitung: pflicht -->
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>U31 Simulation: Kompensieren</title>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--linie:#C7D2DA;
+      --gruen:#2F7D62;--rot:#B23A33;--grau:#5A666F}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Noto Sans',system-ui,sans-serif;color:var(--ink);background:#fff}
+header{border-top:6px solid var(--kupfer);padding:14px 18px 10px}
+h1{margin:0;font-size:clamp(18px,4vw,26px)}
+.ziel{background:var(--kupferhell);border-left:5px solid var(--kupfer);
+      padding:12px 16px;margin:12px 18px;font-size:clamp(14px,3vw,17px)}
+.ziel > b:first-child{display:block;font-size:.82em;letter-spacing:.08em;text-transform:uppercase;
+        color:var(--kupfer);margin-bottom:4px}
+canvas{display:block;width:100%;max-width:960px;margin:0 auto;height:auto}
+.regler{max-width:960px;margin:0 auto;padding:8px 18px 4px}
+.zeile{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:14px 0}
+.zeile label{flex:0 0 210px;font-weight:700;font-size:clamp(14px,3vw,17px)}
+/* Der Regler trug die Vorgabefarbe des Browsers (Blau), die einzige Farbe im Bild, die
+   nicht aus dem Haus stammt, und ausgerechnet am Bedienelement (Befund Linse BLATT,
+   U03/B2 und U04/B5, 01.09.2026). Er trägt jetzt Kupfer wie alles Bedienbare. */
+input[type=range]{flex:1 1 220px;min-width:180px;height:44px;accent-color:var(--kupfer);
+  -webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-moz-range-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;
+  height:26px;margin-top:-9px;border-radius:50%;background:var(--kupfer);border:2px solid #fff;
+  box-shadow:0 0 0 1.4px var(--kupfer)}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;
+  background:var(--kupfer);border:2px solid #fff}
+input[type=range]:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
+.wert{flex:0 0 128px;text-align:right;font-variant-numeric:tabular-nums;
+      font-size:clamp(15px,3.2vw,19px);font-weight:700;color:var(--kupfer)}
+.anzeigen{display:flex;gap:12px;flex-wrap:wrap;max-width:960px;margin:6px auto 0;padding:0 18px}
+.kachel{flex:1 1 150px;border:1.4px solid var(--linie);padding:10px 12px}
+.kachel span{display:block;font-size:.78em;letter-spacing:.06em;color:var(--grau);
+             font-weight:700}
+.kachel b{font-size:clamp(17px,3.6vw,22px)}
+button{font:inherit;font-weight:700;padding:12px 20px;min-height:48px;border:1.6px solid var(--ink);
+       background:#fff;color:var(--ink);cursor:pointer}
+button:hover{background:var(--kupferhell)}
+.fuss{max-width:960px;margin:14px auto 26px;padding:0 18px;font-size:.86em;color:var(--grau)}
+@media (prefers-reduced-motion: reduce){canvas{outline:none}}
+</style><style>
+.vergleich{max-width:960px;margin:10px auto 0;padding:10px 18px;border-left:5px solid var(--gruen);
+  background:#EEF5F2;font-size:clamp(14px,3vw,17px)}
+</style>
+</head><body>
+
+<header>
+<h1>Kompensieren</h1>
+</header>
+
+<div class="ziel">
+<b>Was Sie herausfinden sollen</b>
+Ein Drehstromverbraucher mit fester Wirkleistung soll einen besseren Wirkfaktor bekommen.
+Der linke Balken zeigt, was das Netz <b>vorher</b> liefern muss, der rechte, was
+<b>nachher</b>. Ziehen Sie den zweiten Wirkfaktor langsam nach rechts und achten Sie auf
+die n&ouml;tige <b>Kapazit&auml;t</b>: Wie teuer wird das letzte St&uuml;ck bis 1,00?
+</div>
+
+<script type="application/json" id="sim-meta">
+{
+  "erkenntnis": "dass die noetige Kondensatorkapazitaet zum angestrebten Wirkfaktor hin immer steiler waechst; von cos phi 0,95 auf 1,00 steigt sie noch einmal um fast die Haelfte, waehrend der Strom kaum noch sinkt; deshalb kompensiert man auf 0,9 bis 0,95 und nicht auf 1",
+  "startwerte":    {"wirkleistung": 12, "wirkfaktor_vor": 0.72, "wirkfaktor_nach": 0.95},
+  "loesungswerte": {"wirkleistung": [15, 5.5, 55, 17.6, 20.6, 40.2, 37], "wirkfaktor": [0.7, 0.9, 0.6, 0.92, 0.74, 0.454]},
+  "quelle": "Europa-Rechenbuch S. 132 und S. 134 (7.12), Tabellenbuch S. 328 Formel 5, 8 und 14"
+}
+</script>
+
+<canvas id="buehne" width="960" height="400"
+        data-quelle="Europa-Rechenbuch S. 134 und Tabellenbuch S. 328, Formel 5, 8 und 14: Q_C = P mal (tan phi_1 minus tan phi_2), C = Q_C durch omega mal U Quadrat, C_Str = C durch 3"></canvas>
+
+<div class="regler">
+<div class="zeile">
+  <label for="pw">Wirkleistung P</label>
+  <input type="range" id="pw" min="2" max="60" step="0.1" value="12">
+  <div class="wert" id="pww">12,0 kW</div>
+</div>
+<div class="zeile">
+  <label for="c1">cos &phi; <b>vor</b> der Kompensation</label>
+  <input type="range" id="c1" min="0.4" max="0.95" step="0.01" value="0.72">
+  <div class="wert" id="c1w">0,72</div>
+</div>
+<div class="zeile">
+  <label for="c2">cos &phi; <b>nach</b> der Kompensation</label>
+  <input type="range" id="c2" min="0.5" max="1" step="0.01" value="0.95">
+  <div class="wert" id="c2w">0,95</div>
+</div>
+<button id="reset" type="button">Zur&uuml;cksetzen</button>
+</div>
+
+<div class="anzeigen">
+  <div class="kachel"><span>Blindleistung Q<sub>C</sub></span><b id="aQ">0 kvar</b></div>
+  <div class="kachel"><span>Gesamtkapazit&auml;t C</span><b id="aC">0 &micro;F</b></div>
+  <div class="kachel"><span>Strangkapazit&auml;t C<sub>Str</sub></span><b id="aCs">0 &micro;F</b></div>
+  <div class="kachel"><span>Strom vorher</span><b id="aI1">0 A</b></div>
+  <div class="kachel"><span>Strom nachher</span><b id="aI2">0 A</b></div>
+</div>
+
+<div class="vergleich" id="vgl">&nbsp;</div>
+
+<div class="fuss">
+Netz 400 V, 50 Hz. Gerechnet wird mit Q<sub>C</sub> = P &middot; (tan &phi;<sub>1</sub> &minus;
+tan &phi;<sub>2</sub>), C = Q<sub>C</sub> / (&omega; &middot; U&sup2;) und
+C<sub>Str</sub> = C / 3 f&uuml;r die Kondensatoren in <b>Dreieck</b>schaltung
+(Tabellenbuch Seite 328, Formel 5, 8 und 14). Die Str&ouml;me folgen aus
+I = P / (&radic;3 &middot; U &middot; cos &phi;). Die <b>Wirkleistung bleibt unver&auml;ndert</b>;
+die Kompensation &auml;ndert nur den Blindanteil.
+</div>
+
+<script>
+"use strict";
+var C = document.getElementById("buehne"), g = C.getContext("2d");
+var pw = document.getElementById("pw"), c1 = document.getElementById("c1"),
+    c2 = document.getElementById("c2");
+var INK = "#1A2530", KUPFER = "#A34E0E", LINIE = "#C7D2DA", GRAU = "#5A666F";
+var GRUEN = "#2F7D62", ROT = "#B23A33", BLAU = "#2C5F8A";
+var W3 = Math.sqrt(3), U = 400, OM = 2 * Math.PI * 50;
+
+function zahl(v, n) {
+  return (Math.abs(v) < 5e-4 ? 0 : v).toFixed(n === undefined ? 2 : n).replace(".", ",");
+}
+function tanc(c) { return Math.tan(Math.acos(Math.min(1, Math.max(0.001, c)))); }
+
+/* Zwei Anordnungen derselben Zeichnung. Am Handy (schmaler als 640 px) stand das Querformat
+   960 x 400 auf 390 px verkleinert da: die kleinste Beschriftung (14 px) war dort 5,7 px hoch,
+   unlesbar (06.10.2026). Hochformat 600 x 620: die Kondensatorbatterie als Zahlenblock oben,
+   die beiden Saeulen darunter; Q_C steht dort im Zahlenblock, zwischen den Saeulen war fuer die
+   groessere Schrift kein Platz. Kleinste Schrift 19 px (der Index C), bei 390 px Breite
+   12,4 px; alles andere 20 px und mehr (13 px). */
+var BREIT  = {W: 960, H: 400, Y0: 300, HB: 250, BR: 120, x1: 180, x2: 420, ax0: 60, ax1: 560,
+              fS: 18, fN: 17, fI: 15, schmal: false};
+var SCHMAL = {W: 600, H: 620, Y0: 566, HB: 280, BR: 140, x1: 160, x2: 440, ax0: 40, ax1: 580,
+              fS: 22, fN: 20, fI: 20, schmal: true};
+var G = BREIT;
+function anordnen() {
+  var neu = (C.parentNode.clientWidth || window.innerWidth) < 640 ? SCHMAL : BREIT;
+  if (neu !== G || C.width !== neu.W) { G = neu; C.width = G.W; C.height = G.H; }
+}
+anordnen();
+
+/* Q mit tiefgestelltem C. Vorher stand im Bild „Q_C" mit Unterstrich; das Canvas kennt kein
+   <sub>, der Index wird deshalb kleiner und tiefer gesetzt (Hausregel R3). */
+function qc_text(rest, x, y, px) {
+  g.textAlign = "left";
+  g.font = "bold " + px + "px system-ui,sans-serif"; g.fillText("Q", x, y);
+  var w = g.measureText("Q").width;
+  g.font = "bold " + Math.round(px * 0.72) + "px system-ui,sans-serif";
+  g.fillText("C", x + w, y + Math.round(px * 0.28));
+  var w2 = g.measureText("C").width;
+  g.font = "bold " + px + "px system-ui,sans-serif"; g.fillText(rest, x + w + w2, y);
+}
+
+function saeule(x, p, q, name, farbe) {
+  /* Eine Saeule aus Wirk- und Blindanteil, uebereinander. Die Hoehe ist die
+     SCHEINleistung, denn die muss das Netz uebertragen. */
+  var MASS = G.HB / 90;                   /* Pixel je kVA, fest, damit die beiden vergleichbar bleiben */
+  var s = Math.sqrt(p * p + q * q);
+  var Y0 = G.Y0, BR = G.BR;
+  var hp = Math.min(G.HB, p * MASS), hq = Math.min(G.HB - hp, q * MASS);
+  g.fillStyle = GRUEN; g.fillRect(x - BR / 2, Y0 - hp, BR, hp);
+  g.fillStyle = BLAU;  g.fillRect(x - BR / 2, Y0 - hp - hq, BR, hq);
+  g.strokeStyle = INK; g.lineWidth = 1.4;
+  g.strokeRect(x - BR / 2, Y0 - hp - hq, BR, hp + hq);
+  g.fillStyle = INK; g.font = "bold " + G.fS + "px system-ui,sans-serif"; g.textAlign = "center";
+  g.fillText("S = " + zahl(s) + " kVA", x, Y0 - hp - hq - 14);
+  g.fillStyle = farbe; g.font = "bold " + G.fN + "px system-ui,sans-serif";
+  g.fillText(name, x, Y0 + G.fN + 9);
+  g.fillStyle = "#fff"; g.font = "bold " + G.fI + "px system-ui,sans-serif";
+  if (hp > G.fI + 7) { g.fillText("P " + zahl(p, 1), x, Y0 - hp / 2 + G.fI / 3); }
+  if (hq > G.fI + 7) { g.fillText("Q " + zahl(q, 1), x, Y0 - hp - hq / 2 + G.fI / 3); }
+}
+
+function zeichne() {
+  var P = +pw.value, k1 = +c1.value, k2 = +c2.value;
+  if (k2 < k1) { k2 = k1; c2.value = k1; }
+  var q1 = P * tanc(k1), q2 = P * tanc(k2), qc = q1 - q2;
+  var cges = qc * 1000 / (OM * U * U);
+  var i1 = P * 1000 / (W3 * U * k1), i2 = P * 1000 / (W3 * U * k2);
+
+  g.clearRect(0, 0, C.width, C.height);
+  g.strokeStyle = LINIE; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(G.ax0, G.Y0); g.lineTo(G.ax1, G.Y0); g.stroke();
+  saeule(G.x1, P, q1, "vor der Kompensation", GRAU);
+  saeule(G.x2, P, q2, "nach der Kompensation", KUPFER);
+  /* der weggenommene Anteil */
+  g.strokeStyle = ROT; g.lineWidth = 2.4; g.setLineDash([6, 4]);
+  var MASS = G.HB / 90;
+  /* Die Linie beginnt an der Oberkante der GEZEICHNETEN Saeule. Vorher rechnete sie ohne
+     die Kappung der Saeule auf 90 kVA und lief bei grosser Blindleistung ueber den oberen
+     Bildrand; „Q_C = …" stand dann ausserhalb des Bildes (gesehen bei 60 kW, 0,40 auf 1,00,
+     06.10.2026). */
+  function oben(q) {
+    var hp = Math.min(G.HB, P * MASS);
+    return G.Y0 - hp - Math.min(G.HB - hp, q * MASS);
+  }
+  g.beginPath();
+  g.moveTo(G.x1 + G.BR / 2, oben(q1));
+  g.lineTo(G.x2 - G.BR / 2, oben(q2));
+  g.stroke(); g.setLineDash([]);
+
+  if (!G.schmal) {
+  g.fillStyle = ROT;
+  /* Bei kleinem Q_C lag die Beschriftung auf gleicher Hoehe wie „S = …" der rechten Saeule
+     und ueberdeckte sie (gesehen bei cos phi vorher = nachher, 06.10.2026); sie steht dann
+     hoeher, im Normalfall unveraendert. */
+  qc_text(" = " + zahl(qc) + " kvar", 250,
+          Math.max(18, Math.min(oben(q1) - 16, oben(q2) - 37)), 17);
+
+  /* rechts die Kapazität als Text */
+  g.fillStyle = GRAU; g.font = "17px system-ui,sans-serif"; g.textAlign = "left";
+  g.fillText("dafür nötige Kondensatorbatterie", 620, 120);
+  g.fillStyle = KUPFER; g.font = "bold 38px system-ui,sans-serif";
+  g.fillText(zahl(cges * 1e6, 0) + " µF", 620, 168);
+  g.fillStyle = GRAU; g.font = "17px system-ui,sans-serif";
+  g.fillText("gesamt, im Dreieck je Strang", 620, 200);
+  g.fillStyle = KUPFER; g.font = "bold 30px system-ui,sans-serif";
+  g.fillText(zahl(cges * 1e6 / 3, 0) + " µF", 620, 238);
+  g.fillStyle = INK; g.font = "17px system-ui,sans-serif";
+  g.fillText("Strom: " + zahl(i1, 1) + " A → " + zahl(i2, 1) + " A", 620, 286);
+  g.fillStyle = GRAU; g.font = "14px system-ui,sans-serif";
+  g.fillText("Faustzahl zur Probe: 20 µF je kvar bei 400 V", 620, 320);
+  } else {
+  /* Hochformat: Zahlenblock oben, zwei Spalten fuer gesamt und je Strang */
+  g.textAlign = "left";
+  g.fillStyle = GRAU; g.font = "20px system-ui,sans-serif";
+  g.fillText("dafür nötige Kondensatorbatterie", 16, 30);
+  g.fillText("gesamt", 16, 64);
+  g.fillText("im Dreieck je Strang", 310, 64);
+  g.fillStyle = KUPFER; g.font = "bold 40px system-ui,sans-serif";
+  g.fillText(zahl(cges * 1e6, 0) + " µF", 16, 108);
+  g.font = "bold 34px system-ui,sans-serif";
+  g.fillText(zahl(cges * 1e6 / 3, 0) + " µF", 310, 108);
+  g.fillStyle = ROT;
+  qc_text(" = " + zahl(qc) + " kvar (rot gestrichelt)", 16, 150, 26);   /* Index 19 px */
+  g.fillStyle = INK; g.font = "20px system-ui,sans-serif";
+  g.fillText("Strom: " + zahl(i1, 1) + " A → " + zahl(i2, 1) + " A", 16, 180);
+  g.fillStyle = GRAU; g.font = "20px system-ui,sans-serif";
+  g.fillText("Faustzahl zur Probe: 20 µF je kvar bei 400 V", 16, 210);
+  }
+
+  document.getElementById("pww").textContent = zahl(P, 1) + " kW";
+  document.getElementById("c1w").textContent = zahl(k1);
+  document.getElementById("c2w").textContent = zahl(k2);
+  document.getElementById("aQ").textContent = zahl(qc) + " kvar";
+  document.getElementById("aC").textContent = zahl(cges * 1e6, 0) + " µF";
+  document.getElementById("aCs").textContent = zahl(cges * 1e6 / 3, 0) + " µF";
+  document.getElementById("aI1").textContent = zahl(i1, 1) + " A";
+  document.getElementById("aI2").textContent = zahl(i2, 1) + " A";
+
+  var satz;
+  if (k2 > 0.995) {
+    satz = "Bei cos φ = 1,00 ist die Blindleistung ganz weg. Dafür braucht es " +
+           zahl(cges * 1e6, 0) + " µF, und der Strom sinkt gegenüber cos φ = 0,95 nur noch " +
+           "wenig. Das letzte Stück ist das teuerste.";
+  } else if (Math.abs(k2 - k1) < 0.005) {
+    satz = "Vorher und nachher sind gleich: es wird nichts kompensiert, und es braucht " +
+           "keine Kondensatoren.";
+  } else {
+    satz = "Der Strom sinkt von " + zahl(i1, 1) + " A auf " + zahl(i2, 1) + " A, also um " +
+           zahl((1 - i2 / i1) * 100, 0) + " %. Die Wirkleistung bleibt dabei bei " +
+           zahl(P, 1) + " kW.";
+  }
+  document.getElementById("vgl").textContent = satz.replace("Q_C", "Q_C");
+}
+
+[pw, c1, c2].forEach(function (e) { e.addEventListener("input", zeichne); });
+document.getElementById("reset").addEventListener("click", function () {
+  pw.value = 12; c1.value = 0.72; c2.value = 0.95; zeichne();
+});
+window.addEventListener("resize", function () { anordnen(); zeichne(); });
+zeichne();
+</script>
+</body></html>
