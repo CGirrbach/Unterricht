@@ -218,12 +218,9 @@ als <b>rein wirksam</b>.
   document.getElementById('aQ').textContent=komma(Q,0)+" var";
   document.getElementById('aI').textContent=komma(I,2)+" A";
   document.getElementById('aC').textContent=komma(cosg,3);
-  var mittel = Ph>0 ? (cos+1)/2 : cos;
   document.getElementById('vgl').innerHTML =
     "Der Motor allein h&auml;tte cos &phi; = <b>"+komma(cos,2)+"</b>, gemeinsam sind es <b>"
-    +komma(cosg,3)+"</b>. Der Mittelwert w&auml;re "+komma(mittel,3)
-    +", also <b>etwas anderes</b>. "
-    +"Str&ouml;me addiert w&auml;ren "+komma(Sm/U+Ph/U,2)+" A statt "+komma(I,2)+" A.";
+    +komma(cosg,3)+"</b>.";
  }
  [pm,cf,ph].forEach(function(e){e.addEventListener('input',zeichne);});
  document.getElementById('reset').addEventListener('click',function(){
