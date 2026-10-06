@@ -1,0 +1,241 @@
+<!-- sim_bearbeitung: pflicht -->
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>U18 Simulation: Zeigerbild und Scheinwiderstand der RLC-Reihe</title>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--linie:#C7D2DA;
+      --gruen:#2F7D62;--rot:#B23A33;--grau:#5A666F}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Noto Sans',system-ui,sans-serif;color:var(--ink);background:#fff}
+header{border-top:6px solid var(--kupfer);padding:14px 18px 10px}
+h1{margin:0;font-size:clamp(18px,4vw,26px)}
+.ziel{background:var(--kupferhell);border-left:5px solid var(--kupfer);
+      padding:12px 16px;margin:12px 18px;font-size:clamp(14px,3vw,17px)}
+.ziel > b:first-child{display:block;font-size:.82em;letter-spacing:.08em;text-transform:uppercase;
+        color:var(--kupfer);margin-bottom:4px}
+canvas{display:block;width:100%;max-width:960px;margin:0 auto;height:auto}
+.regler{max-width:960px;margin:0 auto;padding:8px 18px 4px}
+.zeile{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:14px 0}
+.zeile label{flex:0 0 210px;font-weight:700;font-size:clamp(14px,3vw,17px)}
+/* Der Regler trug die Vorgabefarbe des Browsers (Blau), die einzige Farbe im Bild, die
+   nicht aus dem Haus stammt, und ausgerechnet am Bedienelement (Befund Linse BLATT,
+   U03/B2 und U04/B5, 01.09.2026). Er trägt jetzt Kupfer wie alles Bedienbare. */
+input[type=range]{flex:1 1 220px;min-width:180px;height:44px;accent-color:var(--kupfer);
+  -webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-moz-range-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;
+  height:26px;margin-top:-9px;border-radius:50%;background:var(--kupfer);border:2px solid #fff;
+  box-shadow:0 0 0 1.4px var(--kupfer)}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;
+  background:var(--kupfer);border:2px solid #fff}
+input[type=range]:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
+.wert{flex:0 0 128px;text-align:right;font-variant-numeric:tabular-nums;
+      font-size:clamp(15px,3.2vw,19px);font-weight:700;color:var(--kupfer)}
+.anzeigen{display:flex;gap:12px;flex-wrap:wrap;max-width:960px;margin:6px auto 0;padding:0 18px}
+.kachel{flex:1 1 150px;border:1.4px solid var(--linie);padding:10px 12px}
+.kachel span{display:block;font-size:.78em;letter-spacing:.06em;color:var(--grau);
+             font-weight:700}
+.kachel b{font-size:clamp(17px,3.6vw,22px)}
+button{font:inherit;font-weight:700;padding:12px 20px;min-height:48px;border:1.6px solid var(--ink);
+       background:#fff;color:var(--ink);cursor:pointer}
+button:hover{background:var(--kupferhell)}
+.fuss{max-width:960px;margin:14px auto 26px;padding:0 18px;font-size:.86em;color:var(--grau)}
+@media (prefers-reduced-motion: reduce){canvas{outline:none}}
+</style></head><body>
+
+<header>
+<h1>RLC-Reihe: Zeigerbild und Scheinwiderstand</h1>
+</header>
+
+<div class="ziel">
+<b>Was Sie herausfinden sollen</b>
+Wirkwiderstand, Spule und Kondensator liegen <b>in Reihe</b> an 230 V. Verstellen Sie
+Frequenz, Induktivität und Kapazität und beobachten Sie das <b>Zeigerbild der Spannungen</b>.
+Finden Sie heraus, wann die Schaltung <b>induktiv</b> und wann <b>kapazitiv</b> ist, was
+geschieht, wenn die beiden Blindspannungen <b>gleich groß</b> werden, und ob eine
+Teilspannung <b>größer als 230 V</b> werden kann.
+</div>
+
+<script type="application/json" id="sim-meta">
+{
+  "erkenntnis": "dass sich die beiden Blindspannungen gegenseitig aufheben, weil sie in entgegengesetzte Richtungen zeigen; die Schaltung verhaelt sich induktiv oder kapazitiv je nachdem, welche ueberwiegt, und einzelne Teilspannungen koennen weit groesser sein als die Gesamtspannung",
+  "startwerte":     {"frequenz": 60, "induktivitaet": 1.5, "kapazitaet": 8, "wirkwiderstand": 120},
+  "loesungswerte":  {"frequenz": 50, "induktivitaet": 2.0, "kapazitaet": 5.6, "wirkwiderstand": 80},
+  "quelle": "Europa-Rechenbuch S. 108/109, 7.6.5: U_b = U_bL − U_bC, X = X_L − X_C, U = Wurzel(U_w² + U_b²)"
+}
+</script>
+
+<canvas id="buehne" width="960" height="420"
+        data-quelle="Europa-Rechenbuch S. 108, Tabelle und Bild: Reihenschaltung aus R, X_L und X_C; die beiden Blindspannungszeiger zeigen in entgegengesetzte Richtungen"></canvas>
+
+<div class="regler">
+<div class="zeile">
+  <label for="fr">Frequenz f</label>
+  <input type="range" id="fr" min="20" max="120" step="1" value="60">
+  <span class="wert" id="frw">60 Hz</span>
+</div>
+<div class="zeile">
+  <label for="ind">Induktivität L</label>
+  <input type="range" id="ind" min="5" max="40" step="1" value="15">
+  <span class="wert" id="indw">1,5 H</span>
+</div>
+<div class="zeile">
+  <label for="kap">Kapazität C</label>
+  <input type="range" id="kap" min="20" max="200" step="1" value="80">
+  <span class="wert" id="kapw">8,0 µF</span>
+</div>
+<div class="zeile">
+  <label for="wid">Wirkwiderstand R</label>
+  <input type="range" id="wid" min="20" max="400" step="10" value="120">
+  <span class="wert" id="widw">120 &#8486;</span>
+</div>
+<div class="zeile">
+  <button id="reset" type="button">Zurücksetzen</button>
+</div>
+</div>
+
+<div class="anzeigen">
+  <div class="kachel"><span>Scheinwiderstand Z</span><b id="aZ">263 Ω</b></div>
+  <div class="kachel"><span>Strom I</span><b id="aI">0,88 A</b></div>
+  <div class="kachel"><span>Winkel &phi;</span><b id="aP">62,9°</b></div>
+  <div class="kachel"><span>Verhalten</span><b id="aV">induktiv</b></div>
+</div>
+
+<div class="fuss">
+Gerechnet wird mit X<sub>L</sub> = 2 &middot; &pi; &middot; f &middot; L,
+X<sub>C</sub> = 1 / (2 &middot; &pi; &middot; f &middot; C), X = X<sub>L</sub> &minus; X<sub>C</sub>,
+Z = &radic;(R² + X²) und I = U / Z bei U = 230 V (Tabellenbuch, Seite 40, Formel 1 bis 3, 6 und 16). Spule und
+Kondensator sind als <b>ideal</b> angenommen; der Wirkwiderstand steht getrennt daneben.
+</div>
+
+<script>
+(function(){
+ var U=230;
+ var cv=document.getElementById('buehne'), ctx=cv.getContext('2d');
+ var fr=document.getElementById('fr'), ind=document.getElementById('ind'),
+     kap=document.getElementById('kap'), wid=document.getElementById('wid');
+ var INK="#1A2530",KUP="#A34E0E",GRUEN="#12503C",GRAU="#C7D2DA",ROT="#B23A33";
+ /* Zwei Anordnungen derselben Zeichnung. Am Handy (schmaler als 640 px) stand das Querformat
+    960 x 420 auf rund zwei Fuenftel verkleinert da: Zahlen 7 px hoch, die Tiefzahlen der
+    Formelzeichen rund 5 px, unlesbar (am Standbild in 390 px Breite gesehen, 06.10.2026).
+    Schmal: Zeigerbild oben (um den Faktor k = 1,25 groesser), die Zahlen darunter in zwei
+    Spalten (links die Spannungen, rechts die Blindwiderstaende), groessere Schrift; die
+    kleinste Schrift (Tiefzahl 17 px) steht bei 390 px Breite gut 12 px hoch. */
+ var BREIT = {W:960, H:420, k:1, X0:250, Y0:210, g:17, gU:19, gZ:18, txt:18, mass:17,
+              TX:640, TY:70, dZ:34, ab:42, spalten:false};
+ var SCHMAL = {W:540, H:742, k:1.25, X0:80, Y0:250, g:26, gU:28, gZ:26, txt:22, mass:19,
+               TX:24, TY:552, dZ:38, ab:52, spalten:true, TX2:322, ausweichen:true};
+ /* ausweichen (nur schmal): in Grenzstellungen lagen Beschriftungen aufeinander (am Standbild
+    gesehen: f = 120 Hz, L = 4 H, C = 20 µF, R = 20 Ω: U_w ueber U_bC; f = 20 Hz, L = 0,5 H,
+    C = 2 µF, R = 400 Ω: U ueber U_bC). Dann steht U_bC tiefer als U_w, und U wandert links
+    neben die senkrechte Achse, sobald es eine andere Beschriftung beruehren wuerde. */
+ var G = BREIT;
+ function anordnen(){
+  var neu = (cv.parentNode.clientWidth || window.innerWidth) < 640 ? SCHMAL : BREIT;
+  if(neu !== G || cv.width !== neu.W){ G = neu; cv.width = G.W; cv.height = G.H; }
+ }
+ anordnen();
+ function komma(x,n){return x.toFixed(n).replace(".",",");}
+ function tief(c,h,i,x,y,farbe,g){
+  c.fillStyle=farbe;c.font="bold "+g+"px 'Noto Sans',sans-serif";c.fillText(h,x,y);
+  var b=c.measureText(h).width;
+  c.font="bold "+Math.round(g*0.66)+"px 'Noto Sans',sans-serif";
+  c.fillText(i,x+b+1,y+Math.round(g*0.22));
+ }
+ function pfeil(x1,y1,x2,y2,farbe,br){
+  if(Math.abs(x2-x1)<0.5 && Math.abs(y2-y1)<0.5) return;
+  ctx.strokeStyle=farbe;ctx.lineWidth=br*G.k;ctx.lineCap="round";
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+  var a=Math.atan2(y1-y2,x2-x1);
+  ctx.beginPath();ctx.moveTo(x2,y2);
+  var s=15*G.k;
+  ctx.lineTo(x2-s*Math.cos(a-0.38),y2+s*Math.sin(a-0.38));
+  ctx.lineTo(x2-s*Math.cos(a+0.38),y2+s*Math.sin(a+0.38));
+  ctx.closePath();ctx.fillStyle=farbe;ctx.fill();
+ }
+ function zeichne(){
+  var f=+fr.value, L=+ind.value/10, C=+kap.value/10*1e-6, R=+wid.value;
+  var XL=2*Math.PI*f*L, XC=1/(2*Math.PI*f*C), X=XL-XC;
+  var Z=Math.sqrt(R*R+X*X), I=U/Z;
+  var Uw=I*R, UbL=I*XL, UbC=I*XC, Ub=UbL-UbC;
+  var phi=Math.atan2(X,R);
+  ctx.clearRect(0,0,cv.width,cv.height);
+  /* Maßstab so waehlen, dass die groesste Teilspannung ins Bild passt */
+  var groesst=Math.max(Uw,UbL,UbC,U);
+  var k=G.k;
+  var PX=Math.min(2.2, 150/Math.max(1,groesst))*k;
+  var X0=G.X0,Y0=G.Y0;
+  ctx.strokeStyle=GRAU;ctx.lineWidth=1.4;
+  ctx.beginPath();ctx.moveTo(X0-40*k,Y0);ctx.lineTo(X0+330*k,Y0);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(X0,Y0+180*k);ctx.lineTo(X0,Y0-180*k);ctx.stroke();
+  /* die beiden Blindzeiger, entgegengesetzt, vom Ursprung aus */
+  pfeil(X0,Y0,X0,Y0-UbL*PX,KUP,4.2);
+  pfeil(X0,Y0,X0,Y0+UbC*PX,GRUEN,4.2);
+  var ybL=Y0-Math.min(170*k,UbL*PX)-10*k;
+  tief(ctx,"U","bL",X0+12*k,ybL,KUP,G.g);
+  var ybC=Y0+Math.min(170*k,UbC*PX)+16*k;
+  if(G.ausweichen) ybC=Math.max(ybC, Y0+22*k+G.g+6);
+  tief(ctx,"U","bC",X0+16*k,ybC,GRUEN,G.g);
+  /* die Wirkspannung und die Summe */
+  pfeil(X0,Y0,X0+Uw*PX,Y0,INK,4.6);
+  tief(ctx,"U","w",X0+Uw*PX+10*k,Y0+22*k,INK,G.g);
+  ctx.strokeStyle="#8A959D";ctx.lineWidth=1.4;ctx.setLineDash([6,5]);
+  ctx.beginPath();ctx.moveTo(X0+Uw*PX,Y0);ctx.lineTo(X0+Uw*PX,Y0-Ub*PX);
+  ctx.lineTo(X0,Y0-Ub*PX);ctx.stroke();ctx.setLineDash([]);
+  pfeil(X0,Y0,X0+Uw*PX,Y0-Ub*PX,ROT,5.4);
+  var uy=Ub*PX; uy = uy>=0 ? Y0-Math.max(24*k,uy)-10*k : Y0-Math.min(-24*k,uy)+24*k;
+  var ux=X0+Uw*PX+10*k;
+  if(G.ausweichen){
+   /* Rechtecke der Beschriftungen: [links, oben, rechts, unten] */
+   ctx.font="bold "+G.gU+"px 'Noto Sans',sans-serif"; var wU=ctx.measureText("U").width;
+   var bU=[ux, uy-0.8*G.gU, ux+wU, uy];
+   var andere=[[X0+12*k, ybL-0.8*G.g, X0+12*k+2.4*G.g, ybL+0.3*G.g],
+               [X0+16*k, ybC-0.8*G.g, X0+16*k+2.4*G.g, ybC+0.3*G.g],
+               [X0+Uw*PX+10*k, Y0+22*k-0.8*G.g, X0+Uw*PX+10*k+1.8*G.g, Y0+22*k+0.3*G.g]];
+   var stoesst=andere.some(function(a){
+    return bU[0]<a[2]+4 && a[0]<bU[2]+4 && bU[1]<a[3]+4 && a[1]<bU[3]+4; });
+   if(stoesst) ux=X0-10*k-wU;
+  }
+  tief(ctx,"U","",ux,uy,ROT,G.gU);
+  /* Zahlen rechts */
+  var TX=G.TX, ty=G.TY;
+  ctx.font=G.txt+"px 'Noto Sans',sans-serif";
+  function zeile(name,idx,wert,farbe){
+   tief(ctx,name,idx,TX,ty,farbe,G.gZ);
+   ctx.font=G.txt+"px 'Noto Sans',sans-serif";ctx.fillStyle=farbe;
+   ctx.fillText(" = "+wert, TX+G.ab, ty);
+   ty+=G.dZ;
+  }
+  zeile("U","w",komma(Uw,0)+" V",INK);
+  zeile("U","bL",komma(UbL,0)+" V",KUP);
+  zeile("U","bC",komma(UbC,0)+" V",GRUEN);
+  zeile("U","",komma(Math.hypot(Uw,Ub),0)+" V  (Netz: 230 V)",ROT);
+  var tyMass;
+  if(G.spalten){ tyMass=ty; TX=G.TX2; ty=G.TY; } else { ty+=10; }
+  zeile("X","L",komma(XL,0)+" Ω",KUP);
+  zeile("X","C",komma(XC,0)+" Ω",GRUEN);
+  if(G.spalten){ TX=G.TX; ty=tyMass; }
+  ctx.font=G.mass+"px 'Noto Sans',sans-serif";ctx.fillStyle="#5A666F";
+  ctx.fillText("Maßstab: 1 V ≙ "+komma(PX,2)+" Bildpunkte",TX,ty+16);
+  /* Anzeigen */
+  document.getElementById('frw').textContent=f+" Hz";
+  document.getElementById('indw').textContent=komma(L,1)+" H";
+  document.getElementById('kapw').textContent=komma(C*1e6,1)+" µF";
+  document.getElementById('widw').textContent=R+" Ω";
+  document.getElementById('aZ').textContent=komma(Z,0)+" Ω";
+  document.getElementById('aI').textContent=komma(I,2)+" A";
+  document.getElementById('aP').textContent=komma(phi*180/Math.PI,1)+"°";
+  var v = Math.abs(X)<0.5 ? "beides hebt sich auf"
+        : (X>0 ? "induktiv" : "kapazitiv");
+  document.getElementById('aV').textContent=v;
+ }
+ [fr,ind,kap,wid].forEach(function(e){e.addEventListener('input',zeichne);});
+ document.getElementById('reset').addEventListener('click',function(){
+  fr.value=60; ind.value=15; kap.value=80; wid.value=120; zeichne();
+ });
+ window.addEventListener('resize', function(){ anordnen(); zeichne(); });
+ zeichne();
+})();
+</script>
+</body></html>
