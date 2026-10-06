@@ -1,0 +1,225 @@
+<!-- sim_bearbeitung: pflicht -->
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>U23 Simulation: Die Resonanzkurve</title>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--linie:#C7D2DA;
+      --gruen:#2F7D62;--rot:#B23A33;--grau:#5A666F}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Noto Sans',system-ui,sans-serif;color:var(--ink);background:#fff}
+header{border-top:6px solid var(--kupfer);padding:14px 18px 10px}
+h1{margin:0;font-size:clamp(18px,4vw,26px)}
+.ziel{background:var(--kupferhell);border-left:5px solid var(--kupfer);
+      padding:12px 16px;margin:12px 18px;font-size:clamp(14px,3vw,17px)}
+.ziel > b:first-child{display:block;font-size:.82em;letter-spacing:.08em;text-transform:uppercase;
+        color:var(--kupfer);margin-bottom:4px}
+canvas{display:block;width:100%;max-width:960px;margin:0 auto;height:auto}
+.regler{max-width:960px;margin:0 auto;padding:8px 18px 4px}
+.zeile{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:14px 0}
+.zeile label{flex:0 0 210px;font-weight:700;font-size:clamp(14px,3vw,17px)}
+/* Der Regler trug die Vorgabefarbe des Browsers (Blau), die einzige Farbe im Bild, die
+   nicht aus dem Haus stammt, und ausgerechnet am Bedienelement (Befund Linse BLATT,
+   U03/B2 und U04/B5, 01.09.2026). Er trägt jetzt Kupfer wie alles Bedienbare. */
+input[type=range]{flex:1 1 220px;min-width:180px;height:44px;accent-color:var(--kupfer);
+  -webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-moz-range-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;
+  height:26px;margin-top:-9px;border-radius:50%;background:var(--kupfer);border:2px solid #fff;
+  box-shadow:0 0 0 1.4px var(--kupfer)}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;
+  background:var(--kupfer);border:2px solid #fff}
+input[type=range]:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
+.wert{flex:0 0 128px;text-align:right;font-variant-numeric:tabular-nums;
+      font-size:clamp(15px,3.2vw,19px);font-weight:700;color:var(--kupfer)}
+.anzeigen{display:flex;gap:12px;flex-wrap:wrap;max-width:960px;margin:6px auto 0;padding:0 18px}
+.kachel{flex:1 1 150px;border:1.4px solid var(--linie);padding:10px 12px}
+.kachel span{display:block;font-size:.78em;letter-spacing:.06em;color:var(--grau);
+             font-weight:700}
+.kachel b{font-size:clamp(17px,3.6vw,22px)}
+button{font:inherit;font-weight:700;padding:12px 20px;min-height:48px;border:1.6px solid var(--ink);
+       background:#fff;color:var(--ink);cursor:pointer}
+button:hover{background:var(--kupferhell)}
+.fuss{max-width:960px;margin:14px auto 26px;padding:0 18px;font-size:.86em;color:var(--grau)}
+@media (prefers-reduced-motion: reduce){canvas{outline:none}}
+</style>
+<style>
+.schalter{max-width:960px;margin:10px auto 0;padding:0 18px;display:flex;gap:0;flex-wrap:wrap}
+.schalter button{flex:1 1 200px;border-right-width:0}
+.schalter button:last-child{border-right-width:1.6px}
+.schalter button[aria-pressed=true]{background:var(--kupfer);color:#fff;border-color:var(--kupfer)}
+.vergleich{max-width:960px;margin:10px auto 0;padding:10px 18px;border-left:5px solid var(--gruen);
+  background:#EEF5F2;font-size:clamp(14px,3vw,17px)}
+</style></head><body>
+
+<header>
+<h1>Die Resonanzkurve</h1>
+</header>
+
+<div class="ziel">
+<b>Was Sie herausfinden sollen</b>
+Ein Reihenschwingkreis aus R, L und C an 24 V. Die Kurve zeigt den Strom &uuml;ber der
+Frequenz. Verstellen Sie die drei Bauteile und achten Sie darauf, <b>welches von ihnen die
+Spitze verschiebt</b> und welches sie nur h&ouml;her oder niedriger macht. Sehen Sie sich
+dabei die Spannung an der Spule an.
+</div>
+
+<script type="application/json" id="sim-meta">
+{
+  "erkenntnis": "dass die Resonanzfrequenz NUR von L und C abhaengt: der Wirkwiderstand verschiebt die Spitze nicht, er drueckt sie nur herunter und macht die Kurve breiter; und dass die Spannung an Spule und Kondensator bei Resonanz das Q-fache der angelegten Spannung betraegt",
+  "startwerte":     {"wirkwiderstand": 8, "induktivitaet": 120, "kapazitaet": 20},
+  "loesungswerte":  {"wirkwiderstand": 2.2, "induktivitaet": 1800, "kapazitaet": 5.6},
+  "quelle": "Europa-Rechenbuch S. 119, 7.8.1 und Tabellenbuch S. 40, Formel 19 bis 22"
+}
+</script>
+
+<canvas id="buehne" width="960" height="400"
+        data-quelle="Europa-Rechenbuch S. 119, Bild 1: Resonanzkurve fuer den Strom ueber der Frequenz, mit der Bandbreite zwischen den beiden Grenzfrequenzen bei 70,7 Prozent des Hoechstwertes"></canvas>
+
+<div class="regler">
+<div class="zeile">
+  <label for="wid">Wirkwiderstand R</label>
+  <input type="range" id="wid" min="1" max="60" step="1" value="8">
+  <div class="wert" id="widw">8 &#8486;</div>
+</div>
+<div class="zeile">
+  <label for="ind">Induktivit&auml;t L</label>
+  <input type="range" id="ind" min="20" max="400" step="10" value="120">
+  <div class="wert" id="indw">120 mH</div>
+</div>
+<div class="zeile">
+  <label for="kap">Kapazit&auml;t C</label>
+  <input type="range" id="kap" min="5" max="80" step="1" value="20">
+  <div class="wert" id="kapw">20 &micro;F</div>
+</div>
+<button id="reset" type="button">Zur&uuml;cksetzen</button>
+</div>
+
+<div class="anzeigen">
+  <div class="kachel"><span>Resonanzfrequenz</span><b id="aF">102,7 Hz</b></div>
+  <div class="kachel"><span>Strom bei Resonanz</span><b id="aI">3,00 A</b></div>
+  <div class="kachel"><span>G&uuml;te Q</span><b id="aQ">9,68</b></div>
+  <div class="kachel"><span>Spannung an der Spule</span><b id="aU">232 V</b></div>
+</div>
+
+<div class="vergleich" id="vgl">&nbsp;</div>
+
+<div class="fuss">
+Gerechnet wird mit f<sub>r</sub> = 1 / (2 &middot; &pi; &middot; &radic;(L &middot; C)),
+Z = &radic;(R&sup2; + (X<sub>L</sub> &minus; X<sub>C</sub>)&sup2;), I = U / Z,
+Q = 2 &middot; &pi; &middot; f<sub>r</sub> &middot; L / R und b = f<sub>r</sub> / Q bei
+U = 24 V (Tabellenbuch Seite 40, Formel 6, 16, 21 und 22 und der G&uuml;tefaktor). Die Spule ist bis auf ihren
+Wirkwiderstand als <b>ideal</b> angenommen.
+</div>
+
+<script>
+(function(){
+ var U=24;
+ var cv=document.getElementById('buehne'), ctx=cv.getContext('2d');
+ var wid=document.getElementById('wid'), ind=document.getElementById('ind'), kap=document.getElementById('kap');
+ var INK="#1A2530",KUP="#A34E0E",GRUEN="#12503C",GRAU="#C7D2DA",ROT="#B23A33";
+ function komma(x,n){return x.toFixed(n).replace(".",",");}
+ // Zwei Anordnungen derselben Zeichnung. Am Handy (schmaler als 640 px) stand das Querformat
+ // 960 x 400 auf 390 px verkleinert da: Beschriftung 5,7 bis 6,5 px hoch, unlesbar (gemessen
+ // 06.10.2026). Schmal: 600 px breit, kleinste Schrift 19, am Handy 19 * 390 / 600 = 12,4 px.
+ var BREIT = {W:960, H:400, X0:90, Y0:310, BR:620, HO:230, achse:16, klein:14, marke:15, zahl:15,
+              text:16, idxMin:0, iy:6, uy:18, mx:"links", ux:90, uy2:60,
+              unten:["Der Strom ist bei der Resonanzfrequenz am größten; dort ist Z = R."]};
+ var SCHMAL = {W:600, H:470, X0:84, Y0:350, BR:470, HO:290, achse:22, klein:19, marke:22, zahl:21,
+               text:22, idxMin:19, iy:24, uy:27, mx:"rechts", ux:24, uy2:72,
+               unten:["Der Strom ist bei der Resonanzfrequenz", "am größten; dort ist Z = R."]};
+ var G = BREIT;
+ function anordnen(){
+  var neu = (cv.parentNode.clientWidth || window.innerWidth) < 640 ? SCHMAL : BREIT;
+  if(neu !== G || cv.width !== neu.W){ G = neu; cv.width = G.W; cv.height = G.H; }
+ }
+ anordnen();
+ /* Formelzeichen mit tiefgestelltem Index; das Canvas kennt kein <sub>. */
+ function mitIndex(haupt, index, rest, x, y, groesse, fett){
+  var f=(fett?"bold ":"")+groesse+"px 'Noto Sans',sans-serif";
+  var fi=(fett?"bold ":"")+Math.max(G.idxMin, Math.round(0.72*groesse))+"px 'Noto Sans',sans-serif";
+  ctx.font=f; ctx.fillText(haupt,x,y); x+=ctx.measureText(haupt).width+1;
+  ctx.font=fi; ctx.fillText(index,x,y+0.3*groesse); x+=ctx.measureText(index).width+1;
+  ctx.font=f; ctx.fillText(rest,x,y);
+ }
+ function zeichne(){
+  var R=+wid.value, L=+ind.value/1000, C=+kap.value*1e-6;
+  var fR=1/(2*Math.PI*Math.sqrt(L*C));
+  var Q=2*Math.PI*fR*L/R, b=fR/Q, Imax=U/R;
+  ctx.clearRect(0,0,cv.width,cv.height);
+  var X0=G.X0,Y0=G.Y0,BR=G.BR,HO=G.HO;
+  /* Achsen */
+  ctx.strokeStyle=INK;ctx.lineWidth=1.6;
+  ctx.beginPath();ctx.moveTo(X0,Y0);ctx.lineTo(X0+BR+20,Y0);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(X0,Y0);ctx.lineTo(X0,Y0-HO-20);ctx.stroke();
+  ctx.fillStyle=INK;ctx.font=G.achse+"px 'Noto Sans',sans-serif";
+  ctx.fillText("I",X0-26,Y0-HO-G.iy);
+  ctx.fillText("f",X0+BR+26,Y0+5);
+  /* die Kurve: Frequenzachse von 0 bis 3 mal f_r */
+  var fmax=3*fR;
+  ctx.strokeStyle=ROT;ctx.lineWidth=3.2;ctx.beginPath();
+  for(var px=0; px<=BR; px++){
+   var f=fmax*px/BR;
+   var I;
+   if(f<=0){ I=0; }
+   else {
+    var XL=2*Math.PI*f*L, XC=1/(2*Math.PI*f*C);
+    I=U/Math.hypot(R,XL-XC);
+   }
+   var y=Y0-I/Imax*HO;
+   if(px===0) ctx.moveTo(X0+px,y); else ctx.lineTo(X0+px,y);
+  }
+  ctx.stroke();
+  /* Hoechstwert und 70,7 Prozent */
+  var xr=X0+BR/3;
+  ctx.strokeStyle=GRAU;ctx.lineWidth=1.3;ctx.setLineDash([5,4]);
+  ctx.beginPath();ctx.moveTo(X0,Y0-HO);ctx.lineTo(X0+BR,Y0-HO);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(X0,Y0-0.707*HO);ctx.lineTo(X0+BR,Y0-0.707*HO);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(xr,Y0);ctx.lineTo(xr,Y0-HO);ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle="#5A666F";ctx.font=G.klein+"px 'Noto Sans',sans-serif";
+  ctx.fillText("100 %",X0-64,Y0-HO+5);
+  ctx.fillText("70,7 %",X0-64,Y0-0.707*HO+5);
+  /* Bandbreite einzeichnen. Die Grenzfrequenzen liegen nicht symmetrisch um f_r, sondern
+     so, dass f_ct * f_ch = f_r^2 und f_ch - f_ct = b ist (dort ist |X_L - X_C| = R, der
+     Strom also 70,7 % des Hoechstwertes). Mit f_r -/+ b/2 lag die Linie bei kleiner Guete
+     neben den Schnittpunkten der Kurve (R = 60 Ohm: 7 Hz daneben, korrigiert 06.10.2026). */
+  var fct=Math.sqrt(fR*fR+b*b/4)-b/2, fch=fct+b;
+  var x1=X0+fct/fmax*BR, x2=Math.min(X0+BR, X0+fch/fmax*BR);
+  ctx.strokeStyle=KUP;ctx.lineWidth=2.6;
+  ctx.beginPath();ctx.moveTo(x1,Y0-0.707*HO);ctx.lineTo(x2,Y0-0.707*HO);ctx.stroke();
+  ctx.fillStyle=KUP;ctx.font="bold "+G.marke+"px 'Noto Sans',sans-serif";
+  var tb="b = "+komma(b,1)+" Hz", wb=ctx.measureText(tb).width;
+  if(x2+10+wb <= cv.width-4){ ctx.fillText(tb,x2+10,Y0-0.707*HO+5); }
+  else { ctx.textAlign='right'; ctx.fillText(tb,x2-8,Y0-0.707*HO+6+1.1*G.marke); ctx.textAlign='left'; }
+  /* Beschriftung der Resonanzstelle */
+  ctx.fillStyle=ROT;
+  mitIndex("f","r"," = "+komma(fR,1)+" Hz",xr-40,Y0+G.uy+4,G.marke,true);
+  ctx.fillStyle=INK;ctx.font=G.zahl+"px 'Noto Sans',sans-serif";
+  ctx.fillText("0",X0-16,Y0+G.uy);
+  if(G.mx==="links"){ ctx.fillText(komma(fmax,0)+" Hz",X0+BR-24,Y0+G.uy); }
+  else { ctx.textAlign='right'; ctx.fillText(komma(fmax,0)+" Hz",X0+BR+20,Y0+G.uy); ctx.textAlign='left'; }
+  ctx.fillStyle="#5A666F";ctx.font=G.text+"px 'Noto Sans',sans-serif";
+  for(var k=0;k<G.unten.length;k++){ ctx.fillText(G.unten[k],G.ux,Y0+G.uy2+k*1.3*G.text); }
+  /* Anzeigen */
+  document.getElementById('widw').textContent=R+" Ω";
+  document.getElementById('indw').textContent=(+ind.value)+" mH";
+  document.getElementById('kapw').textContent=(+kap.value)+" µF";
+  document.getElementById('aF').textContent=komma(fR,1)+" Hz";
+  document.getElementById('aI').textContent=komma(Imax,2)+" A";
+  document.getElementById('aQ').textContent=komma(Q,2);
+  document.getElementById('aU').textContent=komma(Q*U,0)+" V";
+  document.getElementById('vgl').innerHTML =
+    "Aus <b>"+U+" V</b> werden an der Spule <b>"+komma(Q*U,0)+" V</b>, also das "
+    +komma(Q,1)+"-Fache. Die Bandbreite beträgt <b>"+komma(b,1)+" Hz</b>. "
+    +"Beides hängt an der Güte, und die Güte hängt am Wirkwiderstand.";
+ }
+ [wid,ind,kap].forEach(function(e){e.addEventListener('input',zeichne);});
+ document.getElementById('reset').addEventListener('click',function(){
+  wid.value=8; ind.value=120; kap.value=20; zeichne();
+ });
+ window.addEventListener('resize', function(){ anordnen(); zeichne(); });
+ zeichne();
+})();
+</script>
+</body></html>
