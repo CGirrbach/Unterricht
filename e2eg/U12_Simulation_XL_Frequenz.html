@@ -1,0 +1,251 @@
+<!-- sim_bearbeitung: pflicht -->
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>U12 Simulation: der Blindwiderstand über der Frequenz</title>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--linie:#C7D2DA;
+      --gruen:#2F7D62;--rot:#B23A33;--grau:#5A666F}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Noto Sans',system-ui,sans-serif;color:var(--ink);background:#fff}
+header{border-top:6px solid var(--kupfer);padding:14px 18px 10px}
+h1{margin:0;font-size:clamp(18px,4vw,26px)}
+.ziel{background:var(--kupferhell);border-left:5px solid var(--kupfer);
+      padding:12px 16px;margin:12px 18px;font-size:clamp(14px,3vw,17px)}
+.ziel > b:first-child{display:block;font-size:.82em;letter-spacing:.08em;text-transform:uppercase;
+        color:var(--kupfer);margin-bottom:4px}
+canvas{display:block;width:100%;max-width:960px;margin:0 auto;height:auto}
+.regler{max-width:960px;margin:0 auto;padding:8px 18px 4px}
+.zeile{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:14px 0}
+.zeile label{flex:0 0 210px;font-weight:700;font-size:clamp(14px,3vw,17px)}
+/* Der Regler trug die Vorgabefarbe des Browsers (Blau), die einzige Farbe im Bild, die
+   nicht aus dem Haus stammt, und ausgerechnet am Bedienelement (Befund Linse BLATT,
+   U03/B2 und U04/B5, 01.09.2026). Er trägt jetzt Kupfer wie alles Bedienbare. */
+input[type=range]{flex:1 1 220px;min-width:180px;height:44px;accent-color:var(--kupfer);
+  -webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-moz-range-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;
+  height:26px;margin-top:-9px;border-radius:50%;background:var(--kupfer);border:2px solid #fff;
+  box-shadow:0 0 0 1.4px var(--kupfer)}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;
+  background:var(--kupfer);border:2px solid #fff}
+input[type=range]:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
+.wert{flex:0 0 128px;text-align:right;font-variant-numeric:tabular-nums;
+      font-size:clamp(15px,3.2vw,19px);font-weight:700;color:var(--kupfer)}
+.anzeigen{display:flex;gap:12px;flex-wrap:wrap;max-width:960px;margin:6px auto 0;padding:0 18px}
+.kachel{flex:1 1 150px;border:1.4px solid var(--linie);padding:10px 12px}
+.kachel span{display:block;font-size:.78em;letter-spacing:.06em;color:var(--grau);
+             font-weight:700}
+.kachel b{font-size:clamp(17px,3.6vw,22px)}
+button{font:inherit;font-weight:700;padding:12px 20px;min-height:48px;border:1.6px solid var(--ink);
+       background:#fff;color:var(--ink);cursor:pointer}
+button:hover{background:var(--kupferhell)}
+.fuss{max-width:960px;margin:14px auto 26px;padding:0 18px;font-size:.86em;color:var(--grau)}
+@media (prefers-reduced-motion: reduce){canvas{outline:none}}
+</style></head><body>
+
+<header>
+<h1>X<sub>L</sub> über der Frequenz</h1>
+</header>
+
+<div class="ziel">
+<b>Was Sie herausfinden sollen</b>
+Eine Spule liegt an einer Wechselspannung von 10 V. Verändern Sie die <b>Frequenz</b> und
+beobachten Sie <b>zwei</b> Größen zugleich: den Blindwiderstand X<sub>L</sub> und den Strom
+I<sub>bL</sub>. Finden Sie heraus, <b>welche Kurve</b> im Bild X<sub>L</sub> über f entsteht, wenn die
+Frequenz wächst, was mit dem Strom geschieht, und was sich ändert, wenn Sie zusätzlich die
+<b>Induktivität</b> verstellen.
+</div>
+
+<script type="application/json" id="sim-meta">
+{
+  "erkenntnis": "dass der induktive Blindwiderstand mit der Frequenz LINEAR wächst (eine Gerade durch den Ursprung) und der Strom dabei umgekehrt proportional fällt; die Steigung der Geraden hängt an der Induktivität",
+  "startwerte":     {"frequenz": 120, "induktivitaet": 150},
+  "loesungswerte":  {"frequenz": 50, "induktivitaet": 100},
+  "quelle": "Europa Fachkunde S. 135, Bild 2 (Blindwiderstand X_L in Abhaengigkeit von der Frequenz f) und Europa-Rechenbuch S. 99, 7.5.2"
+}
+</script>
+
+<canvas id="buehne" width="960" height="330"
+        data-quelle="Europa Fachkunde S. 135, Bild 2: bei konstanter Induktivitaet ist X_L proportional zur Frequenz; Europa-Rechenbuch S. 99, Formelkasten X_L = 2 · pi · f · L"></canvas>
+
+<div class="regler">
+<div class="zeile">
+  <label for="fr">Frequenz f</label>
+  <input type="range" id="fr" min="10" max="500" step="10" value="120">
+  <span class="wert" id="frw">120 Hz</span>
+</div>
+<div class="zeile">
+  <label for="ind">Induktivität L</label>
+  <input type="range" id="ind" min="20" max="400" step="10" value="150">
+  <span class="wert" id="indw">150 mH</span>
+</div>
+<div class="zeile">
+  <button id="reset" type="button">Zurücksetzen</button>
+</div>
+</div>
+
+<div class="anzeigen">
+  <div class="kachel"><span>Blindwiderstand X<sub>L</sub></span><b id="xl">113,1 &#8486;</b></div>
+  <div class="kachel"><span>Blindstrom I<sub>bL</sub></span><b id="ib">88,4 mA</b></div>
+  <div class="kachel"><span>Spannung U<sub>bL</sub></span><b id="ub">10,0 V</b></div>
+  <div class="kachel"><span>Kreisfrequenz &omega;</span><b id="om">754 1/s</b></div>
+</div>
+
+<div class="fuss">
+Die Spannung bleibt bei allen Einstellungen 10 V. Gerechnet wird mit
+X<sub>L</sub> = 2 &middot; &pi; &middot; f &middot; L und I<sub>bL</sub> = U<sub>bL</sub> / X<sub>L</sub>;
+die Formeln für X<sub>L</sub> finden Sie im Tabellenbuch, Seite 40 (Formel 1 und 2). Die Spule ist
+als <b>ideal</b> angenommen, ihr Drahtwiderstand also null. Alle Anzeigen sind gerundet, gerechnet
+wird mit den ungerundeten Werten; wer den Strom aus der gerundeten Anzeige X<sub>L</sub>
+nachrechnet, kann in der letzten Stelle abweichen.
+</div>
+
+<script>
+(function(){
+ var U=10;                                   /* Spannung, fest */
+ var cv=document.getElementById('buehne'), ctx=cv.getContext('2d');
+ var fr=document.getElementById('fr'), ind=document.getElementById('ind');
+ var INK="#1A2530",KUP="#A34E0E",GRUEN="#2F7D62",GRAU="#C7D2DA",HELL="#F5EBDF";
+ function xl(f,L){return 2*Math.PI*f*L/1000;}          /* L in mH */
+ function komma(x,n){return x.toFixed(n).replace(".",",");}
+ /* Der Strom wird mit drei wesentlichen Stellen angezeigt, wie im Arbeitsblatt gerechnet.
+    Vorher stand er in ganzen Milliampere: bei 200 Hz und 100 mH zeigte die Anzeige 80 mA,
+    das Arbeitsblatt rechnet 79,6 mA, und bei 500 Hz und 160 mH zeigte sie 20 mA fuer
+    19,9 mA, sodass die Vertiefungsaufgabe "unter 20 mA" nicht zu entscheiden war
+    (Nacharbeit 26.09.2026 nach dem Befund der Linse FACH zu U12, B1). */
+ function strom(I){
+  var mA=I*1000;
+  if(I>=1) return komma(I,2)+" A";
+  if(mA>=100) return komma(mA,0)+" mA";
+  if(mA>=10) return komma(mA,1)+" mA";
+  return komma(mA,2)+" mA";
+ }
+ function tief(c,h,i,x,y,farbe,g){
+  c.fillStyle=farbe;c.font="bold "+g+"px 'Noto Sans',sans-serif";c.fillText(h,x,y);
+  var b=c.measureText(h).width;
+  c.font="bold "+Math.round(g*0.66)+"px 'Noto Sans',sans-serif";
+  c.fillText(i,x+b+1,y+Math.round(g*0.22));
+ }
+ /* Zwei Anordnungen derselben Zeichnung (06.10.2026). Am Handy (schmaler als 640 px) standen
+    beide Teilbilder nebeneinander im Querformat (960 auf 330 Bildpunkte), auf zwei Fünftel
+    verkleinert: Beschriftung 5 bis 8 px hoch, die tiefgestellten bL rund 5 px, unlesbar.
+    Schmal: die Kennlinie oben, Spannung und Strom darunter (600 auf 775 Bildpunkte), größere
+    Schrift (auch die Indizes mindestens 20 Bildpunkte), dickere Linien. */
+ var BREIT  = {W:960, H:330, GX0:70, GY0:280, GXE:470, GYE:40,
+               LX0:560, LXE:930, LY:170, AU:64, AI:96,  lw:1,   pr:7},
+     SCHMAL = {W:600, H:775, GX0:90, GY0:330, GXE:550, GYE:50,
+               LX0:60,  LXE:560, LY:560, AU:80, AI:120, lw:4/3, pr:9};
+ var G = BREIT;
+ function anordnen(){
+  var neu = (cv.parentNode.clientWidth || window.innerWidth) < 640 ? SCHMAL : BREIT;
+  if (neu !== G || cv.width !== neu.W) { G = neu; cv.width = G.W; cv.height = G.H; }
+ }
+ anordnen();
+ function zeichne(){
+  var f=+fr.value, L=+ind.value, X=xl(f,L), I=U/X;
+  ctx.clearRect(0,0,cv.width,cv.height);
+  /* ---- links: die Kennlinie X_L über f (am Handy oben) ------------------- */
+  var GX0=G.GX0,GY0=G.GY0,GXE=G.GXE,GYE=G.GYE, FMAX=500, XMAX=xl(FMAX,400);
+  ctx.strokeStyle=GRAU;ctx.lineWidth=1.6*G.lw;
+  ctx.beginPath();ctx.moveTo(GX0,GY0);ctx.lineTo(GXE+10,GY0);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(GX0,GY0);ctx.lineTo(GX0,GYE-6);ctx.stroke();
+  ctx.strokeStyle="#E4EAEF";ctx.lineWidth=G.lw;
+  for(var g=100;g<=500;g+=100){
+   var gx=GX0+(GXE-GX0)*g/FMAX;
+   ctx.beginPath();ctx.moveTo(gx,GY0);ctx.lineTo(gx,GYE);ctx.stroke();
+  }
+  /* die Gerade fuer das eingestellte L */
+  ctx.strokeStyle=KUP;ctx.lineWidth=3.4*G.lw;
+  ctx.beginPath();
+  ctx.moveTo(GX0,GY0);
+  ctx.lineTo(GX0+(GXE-GX0),GY0-(GY0-GYE)*xl(FMAX,L)/XMAX);
+  ctx.stroke();
+  /* der eingestellte Punkt */
+  var px=GX0+(GXE-GX0)*f/FMAX, py=GY0-(GY0-GYE)*X/XMAX;
+  ctx.strokeStyle=GRUEN;ctx.lineWidth=1.6*G.lw;ctx.setLineDash([5,4]);
+  ctx.beginPath();ctx.moveTo(px,GY0);ctx.lineTo(px,py);ctx.lineTo(GX0,py);ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle=GRUEN;ctx.beginPath();ctx.arc(px,py,G.pr,0,2*Math.PI);ctx.fill();
+  if (G === SCHMAL) {
+   ctx.font="26px 'Noto Sans',sans-serif";ctx.fillStyle="#5A666F";
+   ctx.fillText("0",GX0-24,GY0+30);
+   ctx.fillText("500 Hz",GXE-84,GY0+32);
+   tief(ctx,"X","L",GX0-80,GYE+20,INK,30);
+   ctx.fillStyle="#5A666F";ctx.font="italic 26px 'Noto Sans',sans-serif";
+   ctx.fillText("f",GXE+16,GY0+8);
+   ctx.fillStyle=KUP;ctx.font="bold 26px 'Noto Sans',sans-serif";
+   ctx.fillText("L = "+L+" mH",GX0+20,GYE+26);
+  } else {
+  ctx.font="17px 'Noto Sans',sans-serif";ctx.fillStyle="#5A666F";
+  ctx.fillText("0",GX0-16,GY0+20);
+  ctx.fillText("500 Hz",GXE-52,GY0+22);
+  tief(ctx,"X","L",GX0-46,GYE+14,INK,19);
+  ctx.fillStyle="#5A666F";ctx.font="italic 17px 'Noto Sans',sans-serif";
+  ctx.fillText("f",GXE+14,GY0+6);
+  ctx.fillStyle=KUP;ctx.font="bold 17px 'Noto Sans',sans-serif";
+  ctx.fillText("L = "+L+" mH",GX0+18,GYE+18);
+  }
+  /* ---- rechts: Spannung und Strom im Liniendiagramm (am Handy unten) ---- */
+  var LX0=G.LX0,LXE=G.LXE,LY=G.LY,AU=G.AU;
+  var AI=Math.min(G.AI, G.AI*I/0.5);             /* Stromamplitude, gedeckelt */
+  ctx.strokeStyle=GRAU;ctx.lineWidth=1.4*G.lw;
+  ctx.beginPath();ctx.moveTo(LX0-12,LY);ctx.lineTo(LXE+12,LY);ctx.stroke();
+  function kurve(amp,ver,farbe,br){
+   ctx.strokeStyle=farbe;ctx.lineWidth=br*G.lw;ctx.beginPath();
+   for(var w=0;w<=4*Math.PI;w+=0.02){
+    var x=LX0+(LXE-LX0)*w/(4*Math.PI), y=LY-amp*Math.sin(w-ver);
+    if(w===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+   }
+   ctx.stroke();
+  }
+  kurve(AU,0,INK,2.8);
+  kurve(AI,Math.PI/2,KUP,3.2);
+  if (G === SCHMAL) {
+   tief(ctx,"u","bL",LX0+2,LY-AU-14,INK,30);
+   tief(ctx,"i","bL",LX0+90,LY+Math.max(AI,25)+36,KUP,30);
+   ctx.fillStyle="#5A666F";ctx.font="24px 'Noto Sans',sans-serif";
+   ctx.fillText("Spannung (fest 10 V) und Strom der Spule",20,LY+195);
+   if(2*I>1){
+    ctx.fillStyle=KUP;ctx.font="bold 22px 'Noto Sans',sans-serif";
+    ctx.fillText("Über 0,5 A: Kurve gekappt,",20,400);
+    ctx.fillText("Wert in der Anzeige",20,428);
+   }
+  } else {
+  tief(ctx,"u","bL",LX0+2,LY-AU-12,INK,18);
+  tief(ctx,"i","bL",LX0+70,LY+Math.max(AI,20)+26,KUP,18);
+  ctx.fillStyle="#5A666F";ctx.font="16px 'Noto Sans',sans-serif";
+  /* Neutral beschriftet: vorher stand hier fest "der Strom wird kleiner". Das war die
+     Erkenntnis, die die Klasse selbst finden soll, und beim Senken der Frequenz sogar
+     falsch (Nacharbeit 26.09.2026 nach dem Befund der Linse DIDAKTIK zu U12). */
+  /* Tiefer gesetzt: bei grossem Strom (10 Hz, 20 mH) lag die Marke i_bL auf dem Satz. */
+  ctx.fillText("Spannung (fest 10 V) und Strom der Spule",LX0,LY+152);
+  /* Ab einem halben Ampere wird die Stromkurve nicht höher gezeichnet (Deckel in AI oben).
+     Das stand nirgends, und wer unter 32 Hz "halbe Frequenz, doppelter Strom" ausprobierte,
+     sah eine Kurve, die sich nicht ändert (zweite Runde, 26.09.2026, Linse BLATT B11). */
+  if(2*I>1){
+   ctx.fillStyle=KUP;ctx.font="bold 15px 'Noto Sans',sans-serif";
+   ctx.fillText("Über 0,5 A: Kurve gekappt, Wert in der Anzeige",LX0-10,28);
+  }
+  }
+  /* Anzeigen */
+  document.getElementById('frw').textContent=f+" Hz";
+  document.getElementById('indw').textContent=L+" mH";
+  /* Unter 10 Ω zwei Nachkommastellen, damit X_L wie der Strom mindestens drei wesentliche
+     Stellen traegt (zweite Runde, 26.09.2026, Befund der Linse FACH B4: 10 Hz und 20 mH
+     zeigte 1,3 Ω neben 7,96 A). */
+  document.getElementById('xl').textContent=komma(X,X<10?2:1)+" Ω";
+  document.getElementById('ib').textContent=strom(I);
+  document.getElementById('ub').textContent="10,0 V";
+  document.getElementById('om').textContent=komma(2*Math.PI*f,0)+" 1/s";
+ }
+ window.addEventListener('resize',function(){ anordnen(); zeichne(); });
+ fr.addEventListener('input',zeichne);
+ ind.addEventListener('input',zeichne);
+ document.getElementById('reset').addEventListener('click',function(){
+  fr.value=120; ind.value=150; zeichne();
+ });
+ zeichne();
+})();
+</script>
+</body></html>
