@@ -1,0 +1,262 @@
+<!-- sim_bearbeitung: pflicht -->
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>U32 Simulation: Das Drehfeld</title>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--linie:#C7D2DA;
+      --gruen:#2F7D62;--rot:#B23A33;--grau:#5A666F}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Noto Sans',system-ui,sans-serif;color:var(--ink);background:#fff}
+header{border-top:6px solid var(--kupfer);padding:14px 18px 10px}
+h1{margin:0;font-size:clamp(18px,4vw,26px)}
+.ziel{background:var(--kupferhell);border-left:5px solid var(--kupfer);
+      padding:12px 16px;margin:12px 18px;font-size:clamp(14px,3vw,17px)}
+.ziel > b:first-child{display:block;font-size:.82em;letter-spacing:.08em;text-transform:uppercase;
+        color:var(--kupfer);margin-bottom:4px}
+canvas{display:block;width:100%;max-width:960px;margin:0 auto;height:auto}
+.regler{max-width:960px;margin:0 auto;padding:8px 18px 4px}
+.zeile{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:14px 0}
+.zeile label{flex:0 0 210px;font-weight:700;font-size:clamp(14px,3vw,17px)}
+/* Der Regler trug die Vorgabefarbe des Browsers (Blau), die einzige Farbe im Bild, die
+   nicht aus dem Haus stammt, und ausgerechnet am Bedienelement (Befund Linse BLATT,
+   U03/B2 und U04/B5, 01.09.2026). Er trägt jetzt Kupfer wie alles Bedienbare. */
+input[type=range]{flex:1 1 220px;min-width:180px;height:44px;accent-color:var(--kupfer);
+  -webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-moz-range-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;
+  height:26px;margin-top:-9px;border-radius:50%;background:var(--kupfer);border:2px solid #fff;
+  box-shadow:0 0 0 1.4px var(--kupfer)}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;
+  background:var(--kupfer);border:2px solid #fff}
+input[type=range]:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
+.wert{flex:0 0 128px;text-align:right;font-variant-numeric:tabular-nums;
+      font-size:clamp(15px,3.2vw,19px);font-weight:700;color:var(--kupfer)}
+.anzeigen{display:flex;gap:12px;flex-wrap:wrap;max-width:960px;margin:6px auto 0;padding:0 18px}
+.kachel{flex:1 1 150px;border:1.4px solid var(--linie);padding:10px 12px}
+.kachel span{display:block;font-size:.78em;letter-spacing:.06em;color:var(--grau);
+             font-weight:700}
+.kachel b{font-size:clamp(17px,3.6vw,22px)}
+button{font:inherit;font-weight:700;padding:12px 20px;min-height:48px;border:1.6px solid var(--ink);
+       background:#fff;color:var(--ink);cursor:pointer}
+button:hover{background:var(--kupferhell)}
+.fuss{max-width:960px;margin:14px auto 26px;padding:0 18px;font-size:.86em;color:var(--grau)}
+@media (prefers-reduced-motion: reduce){canvas{outline:none}}
+</style><style>
+.vergleich{max-width:960px;margin:10px auto 0;padding:10px 18px;border-left:5px solid var(--gruen);
+  background:#EEF5F2;font-size:clamp(14px,3vw,17px)}
+</style>
+</head><body>
+
+<header>
+<h1>Das Drehfeld</h1>
+</header>
+
+<div class="ziel">
+<b>Was Sie herausfinden sollen</b>
+Drei feste Spulen, drei Str&ouml;me, und trotzdem dreht sich etwas. Verstellen Sie die
+<b>Polpaarzahl</b> und achten Sie darauf, wie viele Pole im Bild erscheinen und wie schnell
+sich das Feld dreht. Und dann die <b>Frequenz</b>: Welche der beiden Gr&ouml;&szlig;en steckt
+fest in der Maschine, welche l&auml;sst sich von au&szlig;en &auml;ndern?
+</div>
+
+<script type="application/json" id="sim-meta">
+{
+  "erkenntnis": "dass das Drehfeld aus drei festen Spulen entsteht und sich genau mit n_s = f/p dreht; verdoppelt man die Polpaarzahl, halbiert sich die Drehzahl, waehrend die Frequenz sie proportional aendert; die Polpaarzahl liegt in der Maschine fest, die Frequenz nicht",
+  "startwerte":    {"netzfrequenz": 50, "polpaarzahl": 2},
+  "loesungswerte": {"polpaarzahl": [12, 6, 3, 4], "netzfrequenz": [60]},
+  "quelle": "Europa Fachkunde S. 493 (13.2.2.1), Europa-Rechenbuch S. 244 (12.3.1), Tabellenbuch S. 532 Formel 5 und 7"
+}
+</script>
+
+<canvas id="buehne" width="960" height="430"
+        data-quelle="Europa Fachkunde S. 493, Bild 1 und Bild 2: aus drei um 120 Grad versetzten Spulen entsteht ein umlaufendes Magnetfeld; seine Drehzahl ist n_s = f/p"></canvas>
+
+<div class="regler">
+<div class="zeile">
+  <label for="frq">Netzfrequenz f</label>
+  <input type="range" id="frq" min="5" max="60" step="1" value="50">
+  <div class="wert" id="frqw">50 Hz</div>
+</div>
+<div class="zeile">
+  <label for="pol">Polpaarzahl p</label>
+  <input type="range" id="pol" min="1" max="6" step="1" value="2">
+  <div class="wert" id="polw">2</div>
+</div>
+<button id="reset" type="button">Zur&uuml;cksetzen</button>
+</div>
+
+<div class="anzeigen">
+  <div class="kachel"><span>Polzahl z = 2 &middot; p</span><b id="aZ">4</b></div>
+  <div class="kachel"><span>Drehfelddrehzahl n<sub>s</sub></span><b id="aS">25 1/s</b></div>
+  <div class="kachel"><span>dasselbe in 1/min</span><b id="aM">1500 1/min</b></div>
+  <div class="kachel"><span>Zeit f&uuml;r eine Umdrehung</span><b id="aT">40 ms</b></div>
+</div>
+
+<div class="vergleich" id="vgl">&nbsp;</div>
+
+<div class="fuss">
+Gerechnet wird mit n<sub>s</sub> = f / p und z = 2 &middot; p (Tabellenbuch Seite 532,
+Formel 5 und Formel 7). Das Bild l&auml;uft <b>verlangsamt</b>: eine Umdrehung des Feldes
+dauert hier zwei Sekunden, unabh&auml;ngig von der eingestellten Drehzahl, sonst w&auml;re
+bei 3000 1/min nichts zu erkennen. Die <b>Zahlen</b> in den Kacheln sind die wirklichen.
+Der St&auml;nder ist als Schnitt gezeichnet, die Nuten sind vereinfacht dargestellt.
+</div>
+
+<script>
+"use strict";
+var C = document.getElementById("buehne"), g = C.getContext("2d");
+var frq = document.getElementById("frq"), pol = document.getElementById("pol");
+var INK = "#1A2530", KUPFER = "#A34E0E", LINIE = "#C7D2DA", GRAU = "#5A666F";
+var GRUEN = "#2F7D62", ROT = "#B23A33", BLAU = "#2C5F8A";
+var FARBE = [KUPFER, GRUEN, BLAU];
+var raf = null, t0 = 0;
+
+/* Zwei Anordnungen derselben Zeichnung. Am Handy (schmaler als 640 px) stand das Querformat
+   960 x 430 auf 390 px verkleinert da: die kleinste Beschriftung (14 px) war dort 5,7 px hoch,
+   unlesbar (06.10.2026). Hochformat 600 x 900: der Staender oben, 1,35fach vergroessert
+   (Verschiebung ax, ay), die drei Stroeme und die Rechnung darunter ueber die volle Breite.
+   Kleinste Schrift 20 px, bei 390 px Breite 13 px. */
+var BREIT  = {W: 960, H: 430, k: 1,    ax: 0,     ay: 0,     fA: 14, X0: 470, XB: 920, Y0: 150,
+              HK: 78, fB: 14, f1: 26, f2: 32, f3: 15, r0: 34, r1: 90, r2: 134, r3: 168};
+var SCHMAL = {W: 600, H: 900, k: 1.35, ax: -10.5, ay: -57.5, fA: 15, X0: 30,  XB: 580, Y0: 612,
+              HK: 90, fB: 20, f1: 30, f2: 38, f3: 20, r0: 36, r1: 98, r2: 146, r3: 182};
+var G = BREIT;
+function anordnen() {
+  var neu = (C.parentNode.clientWidth || window.innerWidth) < 640 ? SCHMAL : BREIT;
+  if (neu !== G || C.width !== neu.W) { G = neu; C.width = G.W; C.height = G.H; }
+}
+anordnen();
+
+function zahl(v, n) {
+  return (Math.abs(v) < 5e-4 ? 0 : v).toFixed(n === undefined ? 2 : n).replace(".", ",");
+}
+
+function bild(winkel) {
+  var f = +frq.value, pp = +pol.value;
+  var ns = f / pp;
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  g.clearRect(0, 0, C.width, C.height);
+  g.setTransform(G.k, 0, 0, G.k, G.ax, G.ay);
+
+  /* ---------- links: der Ständer im Schnitt ---------- */
+  var MX = 230, MY = 200, RA = 150, RI = 92;
+  g.fillStyle = "#DCEBF5";
+  g.beginPath(); g.arc(MX, MY, RA, 0, 2 * Math.PI);
+  g.arc(MX, MY, RI, 0, 2 * Math.PI, true); g.fill();
+  g.strokeStyle = INK; g.lineWidth = 2;
+  g.beginPath(); g.arc(MX, MY, RA, 0, 2 * Math.PI); g.stroke();
+  g.beginPath(); g.arc(MX, MY, RI, 0, 2 * Math.PI); g.stroke();
+  /* die Nuten: je Polpaar sechs Spulenseiten */
+  var nuten = 6 * pp;
+  for (var k = 0; k < nuten; k++) {
+    var w = k * 2 * Math.PI / nuten;
+    var rx = MX + (RA + RI) / 2 * Math.cos(w), ry = MY + (RA + RI) / 2 * Math.sin(w);
+    g.fillStyle = FARBE[k % 3];
+    g.beginPath(); g.arc(rx, ry, 9, 0, 2 * Math.PI); g.fill();
+    g.strokeStyle = "#fff"; g.lineWidth = 1.4; g.stroke();
+  }
+  /* Das Drehfeld: 2p Pole, abwechselnd Nord und Sued, als Boegen auf der Bohrung.
+     Zuvor waren es Linien durch die Mitte; bei p = 4 kreuzten sie sich dort zu einem
+     Knoten, und die Buchstaben lagen uebereinander (gesehen am Bild, nicht am Quelltext).
+     Pole sitzen ohnehin am Umfang, nicht in der Mitte. */
+  for (var q = 0; q < 2 * pp; q++) {
+    var wf = winkel + q * Math.PI / pp;
+    var nord = (q % 2) === 0;
+    var halb = Math.PI / (2 * pp) * 0.78;
+    g.strokeStyle = nord ? ROT : BLAU; g.lineWidth = 13;
+    g.beginPath(); g.arc(MX, MY, RI - 8, wf - halb, wf + halb); g.stroke();
+    g.fillStyle = nord ? ROT : BLAU;
+    g.font = "bold 19px system-ui,sans-serif";
+    g.textAlign = "center"; g.textBaseline = "middle";
+    g.fillText(nord ? "N" : "S",
+               MX + (RI - 34) * Math.cos(wf), MY + (RI - 34) * Math.sin(wf));
+  }
+  /* der Feldzeiger vom Suedpol zum Nordpol des ersten Polpaares */
+  g.strokeStyle = INK; g.lineWidth = 2.4; g.setLineDash([6, 4]);
+  g.beginPath();
+  g.moveTo(MX + (RI - 46) * Math.cos(winkel + Math.PI / pp),
+           MY + (RI - 46) * Math.sin(winkel + Math.PI / pp));
+  g.lineTo(MX + (RI - 46) * Math.cos(winkel), MY + (RI - 46) * Math.sin(winkel));
+  g.stroke(); g.setLineDash([]);
+  g.textBaseline = "alphabetic";
+  g.fillStyle = GRAU; g.font = G.fA + "px system-ui,sans-serif"; g.textAlign = "center";
+  g.fillText("Ständer im Schnitt, " + (2 * pp) + " Pole", MX, 396);
+  g.setTransform(1, 0, 0, 1, 0, 0);
+
+  /* ---------- rechts: die drei Ströme ---------- */
+  var X0 = G.X0, XB = G.XB, Y0 = G.Y0, HK = G.HK;
+  g.strokeStyle = LINIE; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(X0, Y0); g.lineTo(XB, Y0); g.stroke();
+  g.beginPath(); g.moveTo(X0, Y0 - HK - 12); g.lineTo(X0, Y0 + HK + 12); g.stroke();
+  for (var s = 0; s < 3; s++) {
+    g.strokeStyle = FARBE[s]; g.lineWidth = 2.6; g.beginPath();
+    for (var t = 0; t <= 360; t += 2) {
+      var y = Math.sin((t - 120 * s) * Math.PI / 180);
+      var X = X0 + (XB - X0) * t / 360;
+      if (t === 0) { g.moveTo(X, Y0 - HK * y); } else { g.lineTo(X, Y0 - HK * y); }
+    }
+    g.stroke();
+  }
+  /* die Marke läuft mit dem Feld: ein Polpaar-Umlauf ist eine volle Stromperiode */
+  var grad = ((winkel * pp) * 180 / Math.PI) % 360;
+  if (grad < 0) { grad += 360; }
+  var xm = X0 + (XB - X0) * grad / 360;
+  g.strokeStyle = INK; g.lineWidth = 1.4; g.setLineDash([5, 4]);
+  g.beginPath(); g.moveTo(xm, Y0 - HK - 12); g.lineTo(xm, Y0 + HK + 12); g.stroke();
+  g.setLineDash([]);
+  for (var s2 = 0; s2 < 3; s2++) {
+    g.fillStyle = FARBE[s2];
+    g.beginPath();
+    g.arc(xm, Y0 - HK * Math.sin((grad - 120 * s2) * Math.PI / 180), 5, 0, 2 * Math.PI);
+    g.fill();
+  }
+  g.fillStyle = GRAU; g.font = G.fB + "px system-ui,sans-serif"; g.textAlign = "center";
+  g.fillText("die drei Strangströme über einer Periode", (X0 + XB) / 2, Y0 + HK + G.r0);
+
+  /* ---------- rechts unten: die Rechnung ---------- */
+  g.fillStyle = INK; g.font = "bold " + G.f1 + "px system-ui,sans-serif"; g.textAlign = "left";
+  g.fillText("n" + "ₛ" + " = " + f + " Hz / " + pp + " = " + zahl(ns, 2) + " 1/s",
+             X0, Y0 + HK + G.r1);
+  g.fillStyle = KUPFER; g.font = "bold " + G.f2 + "px system-ui,sans-serif";
+  g.fillText(zahl(ns * 60, 0) + " 1/min", X0, Y0 + HK + G.r2);
+  g.fillStyle = GRAU; g.font = G.f3 + "px system-ui,sans-serif";
+  g.fillText("Ein Umlauf des Feldes entspricht " + pp + " Stromperiode"
+             + (pp === 1 ? "" : "n") + ".", X0, Y0 + HK + G.r3);
+
+  document.getElementById("frqw").textContent = f + " Hz";
+  document.getElementById("polw").textContent = pp;
+  document.getElementById("aZ").textContent = 2 * pp;
+  document.getElementById("aS").textContent = zahl(ns, 2) + " 1/s";
+  document.getElementById("aM").textContent = zahl(ns * 60, 0) + " 1/min";
+  document.getElementById("aT").textContent = zahl(1000 / ns, 1) + " ms";
+
+  var satz;
+  if (pp === 1) {
+    satz = "Bei p = 1 macht das Feld je Stromperiode eine ganze Umdrehung: " +
+           zahl(ns * 60, 0) + " 1/min. Schneller geht es an diesem Netz nicht.";
+  } else {
+    satz = "Bei p = " + pp + " braucht das Feld " + pp + " Stromperioden für eine Umdrehung, " +
+           "deshalb nur " + zahl(ns * 60, 0) + " 1/min. Die Polpaarzahl liegt in der " +
+           "Maschine fest; die Frequenz lässt sich mit einem Umrichter ändern.";
+  }
+  document.getElementById("vgl").textContent = satz;
+}
+
+function loop(ts) {
+  if (!t0) { t0 = ts; }
+  bild(((ts - t0) / 2000) * 2 * Math.PI);      /* eine Umdrehung in zwei Sekunden */
+  raf = requestAnimationFrame(loop);
+}
+
+[frq, pol].forEach(function (e) { e.addEventListener("input", function () { bild(0); }); });
+document.getElementById("reset").addEventListener("click", function () {
+  frq.value = 50; pol.value = 2; bild(0);
+});
+window.addEventListener("resize", function () { anordnen(); if (!raf) { bild(0); } });
+bild(0);
+if (!window.matchMedia || !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  raf = requestAnimationFrame(loop);
+}
+</script>
+</body></html>
