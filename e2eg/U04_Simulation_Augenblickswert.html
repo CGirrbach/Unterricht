@@ -1,0 +1,267 @@
+<!-- sim_bearbeitung: pflicht -->
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>U04 Simulation: der Augenblickswert am Zeigerbild und am Liniendiagramm</title>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--linie:#C7D2DA;
+      --gruen:#2F7D62;--rot:#B23A33;--grau:#5A666F}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Noto Sans',system-ui,sans-serif;color:var(--ink);background:#fff}
+header{border-top:6px solid var(--kupfer);padding:14px 18px 10px}
+h1{margin:0;font-size:clamp(18px,4vw,26px)}
+.ziel{background:var(--kupferhell);border-left:5px solid var(--kupfer);
+      padding:12px 16px;margin:12px 18px;font-size:clamp(14px,3vw,17px)}
+.ziel > b:first-child{display:block;font-size:.82em;letter-spacing:.08em;text-transform:uppercase;
+        color:var(--kupfer);margin-bottom:4px}
+canvas{display:block;width:100%;max-width:960px;margin:0 auto;height:auto}
+.regler{max-width:960px;margin:0 auto;padding:8px 18px 4px}
+.zeile{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:14px 0}
+.zeile label{flex:0 0 210px;font-weight:700;font-size:clamp(14px,3vw,17px)}
+/* Der Regler trug die Vorgabefarbe des Browsers (Blau), die einzige Farbe im Bild, die
+   nicht aus dem Haus stammt, und ausgerechnet am Bedienelement (Befund Linse BLATT,
+   U03/B2 und U04/B5, 01.09.2026). Er trägt jetzt Kupfer wie alles Bedienbare. */
+input[type=range]{flex:1 1 220px;min-width:180px;height:44px;accent-color:var(--kupfer);
+  -webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-moz-range-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;
+  height:26px;margin-top:-9px;border-radius:50%;background:var(--kupfer);border:2px solid #fff;
+  box-shadow:0 0 0 1.4px var(--kupfer)}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;
+  background:var(--kupfer);border:2px solid #fff}
+input[type=range]:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
+.wert{flex:0 0 128px;text-align:right;font-variant-numeric:tabular-nums;
+      font-size:clamp(15px,3.2vw,19px);font-weight:700;color:var(--kupfer)}
+.anzeigen{display:flex;gap:12px;flex-wrap:wrap;max-width:960px;margin:6px auto 0;padding:0 18px}
+.kachel{flex:1 1 150px;border:1.4px solid var(--linie);padding:10px 12px}
+.kachel span{display:block;font-size:.78em;letter-spacing:.06em;color:var(--grau);
+             font-weight:700}
+.kachel b{font-size:clamp(17px,3.6vw,22px)}
+button{font:inherit;font-weight:700;padding:12px 20px;min-height:48px;border:1.6px solid var(--ink);
+       background:#fff;color:var(--ink);cursor:pointer}
+button:hover{background:var(--kupferhell)}
+.fuss{max-width:960px;margin:14px auto 26px;padding:0 18px;font-size:.86em;color:var(--grau)}
+@media (prefers-reduced-motion: reduce){canvas{outline:none}}
+</style></head><body>
+
+<header>
+<h1>Der Augenblickswert am Zeigerbild und am Liniendiagramm</h1>
+</header>
+
+<div class="ziel">
+<b>Was Sie herausfinden sollen</b>
+Stellen Sie den Winkel ein und beobachten Sie <b>drei</b> Dinge zugleich: die Lage des Zeigers,
+die kupferne Strecke daneben, und denselben Wert auf der Kurve. Finden Sie heraus, <b>wovon der
+Augenblickswert abhängt</b>, bei welchen Winkeln er <b>null</b> wird, wo er <b>negativ</b> ist,
+und warum er niemals größer werden kann als der Scheitelwert.
+</div>
+
+<script type="application/json" id="sim-meta">
+{
+  "erkenntnis": "dass der Augenblickswert die senkrechte Projektion des Zeigers ist, dass er bei 0°, 180° und 360° null wird, zwischen 180° und 360° negativ ist und den Scheitelwert nie übersteigt",
+  "startwerte":     {"winkel": 45, "scheitelwert": 20},
+  "loesungswerte":  {"winkel": 90, "scheitelwert": 12},
+  "quelle": "Europa-Rechenbuch S. 94 (Der Augenblickswert ergibt sich aus dem Zeigerbild und dem Liniendiagramm) und Europa Fachkunde S. 129 (Zeigerdarstellung)"
+}
+</script>
+
+<canvas id="buehne" width="960" height="420"
+        data-quelle="Europa-Rechenbuch S. 94 (Zeigerbild und Liniendiagramm) und Europa Fachkunde S. 129, Bild 2"></canvas>
+
+<div class="regler">
+<div class="zeile">
+  <label for="a">Winkel &alpha;</label>
+  <input type="range" id="a" min="0" max="360" step="1" value="45">
+  <span class="wert" id="aw">45&deg;</span>
+</div>
+<div class="zeile">
+  <label for="u">Scheitelwert û</label>
+  <input type="range" id="u" min="1" max="50" step="1" value="20">
+  <span class="wert" id="uw">20 V</span>
+</div>
+<div class="zeile">
+  <button id="reset" type="button">Zurücksetzen</button>
+  <button id="dreh" type="button">Langsam drehen</button>
+</div>
+</div>
+
+<div class="anzeigen">
+  <div class="kachel"><span>sin &alpha;</span><b id="sw">0,707</b></div>
+  <div class="kachel"><span>Augenblickswert u</span><b id="vw">14,1 V</b></div>
+  <div class="kachel"><span>Lage</span><b id="hw">erste Halbschwingung</b></div>
+</div>
+
+<div class="fuss">
+Der Augenblickswert (Momentanwert) u ergibt sich aus dem Zeigerbild und dem Liniendiagramm.
+Die Zeigerlänge entspricht dem Scheitelwert û. Gerechnet wird u = û · sin &alpha;; im
+Tabellenbuch steht dieselbe Formel mit &alpha; = 360° · f · t auf Seite 35 (Formel 13).
+</div>
+
+<script>
+(function(){
+ "use strict";
+ var cv=document.getElementById('buehne'), ctx=cv.getContext('2d');
+ var meta=JSON.parse(document.getElementById('sim-meta').textContent);
+ var grad=meta.startwerte.winkel, ud=meta.startwerte.scheitelwert;
+ var laeuft=false, raf=null;
+ var ruhig = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ /* Zwei Anordnungen derselben Zeichnung (06.10.2026). Am Handy (schmaler als 640 px) standen
+    Zeigerbild und Liniendiagramm nebeneinander im Querformat (960 auf 420 Bildpunkte), auf
+    zwei Fünftel verkleinert: Schrift rund 7 px hoch, unlesbar. Schmal: Zeigerbild oben,
+    Liniendiagramm darunter (600 auf 815 Bildpunkte), beide mit gleichem Maßstab, damit die
+    kupferne Strecke in beiden Bildern gleich lang ist; die waagerechte Verbindungslinie
+    entfällt dort, weil die beiden Bilder nicht mehr auf einer Höhe liegen. */
+ var BREIT  = {W:960, H:420, CX:175, CY:210, R:135, X0:370, XE:930, BY:210, AMP:135, lw:1,   dot:6, bg:42},
+     SCHMAL = {W:600, H:815, CX:300, CY:215, R:130, X0:60,  XE:560, BY:605, AMP:130, lw:4/3, dot:8, bg:52};
+ var G = BREIT, CX, CY, R;                /* Zeigerbild */
+ var X0, XE, BY, AMP;                     /* Liniendiagramm, eine volle Periode */
+ function anordnen(){
+  var neu = (cv.parentNode.clientWidth || window.innerWidth) < 640 ? SCHMAL : BREIT;
+  if (neu !== G || cv.width !== neu.W) { G = neu; cv.width = G.W; cv.height = G.H; }
+  CX=G.CX; CY=G.CY; R=G.R; X0=G.X0; XE=G.XE; BY=G.BY; AMP=G.AMP;
+ }
+ anordnen();
+
+ function kurvenX(g){ return X0 + (XE-X0)*g/360; }
+
+ // Ein negativer Wert bekommt ein echtes Minuszeichen (U+2212), keinen Bindestrich.
+ function zahl(x, stellen){
+  return x.toFixed(stellen).replace('.', ',').replace('-', '\u2212');
+ }
+
+ function zeige(){
+  var s = Math.sin(grad*Math.PI/180);
+  document.getElementById('aw').textContent = grad + '°';
+  document.getElementById('uw').textContent = ud + ' V';
+  document.getElementById('sw').textContent = zahl(s, 3);
+  document.getElementById('vw').textContent = zahl(ud*s, 1) + ' V';
+  var h;
+  if (grad === 0 || grad === 180 || grad === 360) h = 'Nulldurchgang';
+  else if (grad < 180) h = 'erste Halbschwingung';
+  else h = 'zweite Halbschwingung';
+  document.getElementById('hw').textContent = h;
+ }
+
+ function zeichne(){
+  var rad = grad*Math.PI/180, s = Math.sin(rad);
+  ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.font = (G === SCHMAL ? 26 : 17) + "px 'Noto Sans',sans-serif";
+  ctx.lineCap = 'round';
+  /* Achsen */
+  ctx.strokeStyle="#C7D2DA"; ctx.lineWidth=1.4*G.lw;
+  ctx.beginPath(); ctx.moveTo(CX-R-30,CY); ctx.lineTo(CX+R+28,CY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(CX,CY-R-28); ctx.lineTo(CX,CY+R+28); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(X0-18,BY); ctx.lineTo(XE+14,BY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(X0,BY-AMP-26); ctx.lineTo(X0,BY+AMP+26); ctx.stroke();
+  /* volle Sinuslinie, blass: sie steht schon da, der Punkt wandert darauf */
+  ctx.strokeStyle="#C7D2DA"; ctx.lineWidth=2*G.lw;
+  ctx.beginPath();
+  for(var g=0; g<=360; g+=2){
+    var px=kurvenX(g), py=BY-AMP*Math.sin(g*Math.PI/180);
+    if(g===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+  }
+  ctx.stroke();
+  /* bereits durchlaufener Teil, kräftig */
+  ctx.strokeStyle="#1A2530"; ctx.lineWidth=2.6*G.lw;
+  ctx.beginPath();
+  for(var g2=0; g2<=grad; g2+=1){
+    var qx=kurvenX(g2), qy=BY-AMP*Math.sin(g2*Math.PI/180);
+    if(g2===0) ctx.moveTo(qx,qy); else ctx.lineTo(qx,qy);
+  }
+  ctx.stroke();
+  /* Kreis */
+  ctx.strokeStyle="#1A2530"; ctx.lineWidth=1.8*G.lw;
+  ctx.beginPath(); ctx.arc(CX,CY,R,0,2*Math.PI); ctx.stroke();
+  /* Zeiger */
+  var tx=CX+R*Math.cos(rad), ty=CY-R*Math.sin(rad);
+  ctx.strokeStyle="#1A2530"; ctx.lineWidth=4*G.lw;
+  ctx.beginPath(); ctx.moveTo(CX,CY); ctx.lineTo(tx,ty); ctx.stroke();
+  /* Winkelbogen */
+  ctx.strokeStyle="#2F7D62"; ctx.lineWidth=5*G.lw;
+  ctx.beginPath(); ctx.arc(CX,CY,G.bg,0,-rad,true); ctx.stroke();
+  /* die senkrechte Projektion, links und rechts dieselbe Strecke */
+  var kx=kurvenX(grad), ky=BY-AMP*s;
+  ctx.strokeStyle="#A34E0E"; ctx.lineWidth=6*G.lw;
+  ctx.beginPath(); ctx.moveTo(tx,CY); ctx.lineTo(tx,ty); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(kx,BY); ctx.lineTo(kx,ky); ctx.stroke();
+  /* Verbindung */
+  if (G === BREIT) {
+  ctx.strokeStyle="#8A959D"; ctx.lineWidth=1.5; ctx.setLineDash([6,5]);
+  ctx.beginPath(); ctx.moveTo(tx,ty); ctx.lineTo(kx,ky); ctx.stroke(); ctx.setLineDash([]);
+  }
+  /* Punkte */
+  ctx.fillStyle="#1A2530"; ctx.beginPath(); ctx.arc(tx,ty,G.dot,0,2*Math.PI); ctx.fill();
+  ctx.fillStyle="#A34E0E"; ctx.beginPath(); ctx.arc(kx,ky,G.dot,0,2*Math.PI); ctx.fill();
+  /* Beschriftung */
+  ctx.fillStyle="#5A666F";
+  if (G === SCHMAL) {
+   ctx.fillText('Zeigerbild', CX-62, CY+R+50);
+   ctx.fillText('Liniendiagramm', X0+6, BY+AMP+62);
+   ctx.fillText('0°', X0-6, BY+30);
+   /* 180° links unter der Achse, 360° rechts über ihr: dort verläuft die Kurve nicht
+      (unter 180° ist sie positiv, vor 360° negativ); mittig gesetzt lief sie durch die Zahl. */
+   ctx.textAlign='right';
+   ctx.fillText('180°', kurvenX(180)-8, BY+30);
+   ctx.fillText('360°', kurvenX(360)-4, BY-12);
+   ctx.textAlign='left';
+   ctx.fillText('+û = '+ud+' V', X0+8, BY-AMP-14);
+   ctx.fillText('\u2212û = \u2212'+ud+' V', X0+8, BY+AMP+30);
+   ctx.fillStyle="#1A2530";
+   ctx.fillText('û = '+ud+' V', CX+R-80, CY-R-8);
+   ctx.font = "bold 32px 'Noto Sans',sans-serif";
+   ctx.fillStyle="#A34E0E";
+   ctx.fillText('u = '+zahl(ud*s, 1)+' V', 20, 40);
+   return;
+  }
+  ctx.fillText('Zeigerbild', CX-34, CY+R+54);
+  ctx.fillText('Liniendiagramm', X0+6, BY+AMP+54);
+  ctx.fillText('0°', X0-4, BY+20);
+  ctx.fillText('180°', kurvenX(180)-16, BY+20);
+  ctx.fillText('360°', kurvenX(360)-22, BY+20);
+  // Die Kurve ist auf feste Höhe gezeichnet: sie zeigt die FORM, nicht den Betrag. Ohne
+  // Beschriftung könnten Schüler meinen, ein größerer Scheitelwert ergebe dieselbe Höhe.
+  // Deshalb tragen Scheitel und Talsohle den Wert û ausdrücklich.
+  ctx.fillText('+û = '+ud+' V', X0+8, BY-AMP-8);
+  ctx.fillText('\u2212û = \u2212'+ud+' V', X0+8, BY+AMP+20);
+  ctx.fillStyle="#1A2530";
+  ctx.fillText('û = '+ud+' V', CX+R-58, CY-R-8);
+  ctx.font = "bold 22px 'Noto Sans',sans-serif";
+  ctx.fillStyle="#A34E0E";
+  ctx.fillText('u = '+zahl(ud*s, 1)+' V', X0+10, 34);
+ }
+
+ function alles(){ zeige(); zeichne(); }
+
+ function schritt(){
+  grad = (grad + 1) % 361;
+  document.getElementById('a').value = grad;
+  alles();
+  raf = requestAnimationFrame(schritt);
+ }
+
+ document.getElementById('a').addEventListener('input', function(e){
+   grad = parseInt(e.target.value,10); alles();
+ });
+ document.getElementById('u').addEventListener('input', function(e){
+   ud = parseInt(e.target.value,10); alles();
+ });
+ document.getElementById('reset').addEventListener('click', function(){
+   if(raf){cancelAnimationFrame(raf); raf=null;}
+   laeuft=false; document.getElementById('dreh').textContent='Langsam drehen';
+   grad=meta.startwerte.winkel; ud=meta.startwerte.scheitelwert;
+   document.getElementById('a').value=grad; document.getElementById('u').value=ud;
+   alles();
+ });
+ document.getElementById('dreh').addEventListener('click', function(){
+   laeuft = !laeuft;
+   this.textContent = laeuft ? 'Anhalten' : 'Langsam drehen';
+   if(laeuft && !ruhig){ raf = requestAnimationFrame(schritt); }
+   else { if(raf){cancelAnimationFrame(raf); raf=null;} laeuft=false;
+          this.textContent='Langsam drehen'; }
+ });
+
+ window.addEventListener('resize', function(){ anordnen(); zeichne(); });
+ alles();
+})();
+</script>
+</body></html>
