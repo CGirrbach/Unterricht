@@ -5,7 +5,10 @@
  Word und PowerPoint: keine Stufeneinteilung mehr (Carlo, 12.10.2026), Themengebiete = die drei Stationen der Lerntheke
  (Station 1 Block 02 bis 09, Station 2 Block 10 bis 14, Station 3 Block 15 bis 18), Elementarladung mit dem Wert des
  Tabellenbuchs (0,16022 mal 10 hoch minus 18 As, wie Block 05), Einheiten als echte Brüche, zwei Aufgabenarten der
- Klassenarbeit ergänzt (Leitwert aus Spannung und Strom, Widerstand aus Leistung und Spannung). Die alte Fassung
+ Klassenarbeit ergänzt (Leitwert aus Spannung und Strom, Widerstand aus Leistung und Spannung). Nach der Prüfung
+ (12.10.2026): keine Amperestunden mehr (in Block 02 bis 18 nicht eingeführt), Etikett „Block 15“ für Ws und Wh, und
+ keine Zahlenkombination der Klassenarbeit (Block 20: 0,045 A, 1800 Ws, 3,12 mal 10 hoch 19 Elektronen, 0,3 Ohm bei
+ 2,5 mm², 3 kW mit 0,82); window.kaprobe(n) prüft das. Die alte Fassung
  08_klassenarbeitstrainer_1.html bleibt unverändert online.
  Vorgänger: Neubau 26.09.2026 (der alte Trainer mit Leitprojekt liegt in .vor_neubau2609).
  Stellt Zufallsaufgaben zu allen Themen der Klassenarbeit 1 (Block 02 bis 18) in der Schreibweise der Blöcke,
@@ -153,13 +156,18 @@ G.push({stufe: 1, block: "Block 03", f: function(){
   {von: "Wh", nach: "kWh", fak: 1/1000, x: zuf(15, 980)*10, gr: "<i>W</i>", name: "Arbeit", regel: "1000 Wh = 1 kWh"},
   {von: "kV", nach: "V", fak: 1000, x: zuf(4, 400)/10, gr: "<i>U</i>", name: "Spannung", regel: "1 kV = 1000 V"},
   {von: "µF", nach: "nF", fak: 1000, x: zuf(12, 99)/100, gr: "<i>C</i>", name: "Kapazität", regel: "1 µF = 1000 nF"}];
- var a = wahl(arten), w = a.x*a.fak;
- return {art: "vorsatz", p: {x: a.x, fak: a.fak}, wert: w, einh: a.nach,
+ var a = wahl(arten);
+ /* Klassenarbeit (Block 20) Aufgabe 1 b: 0,045 A in mA, 1800 Ws in Wh: diese Werte nicht stellen */
+ while((a.von === "A" && Math.abs(a.x - 0.045) < 1e-9) || (a.von === "Ws" && a.x === 1800)){ a.x = a.von === "A" ? zuf(12, 950)/1000 : zuf(2, 40)*900; }
+ var w = a.x*a.fak;
+ return {art: "vorsatz", p: {x: a.x, fak: a.fak}, wert: w, einh: a.nach, blockText: (a.von === "Ws" || a.von === "Wh") ? "Block 15" : "",
   frage: "Rechnen Sie " + (a.name === "Widerstand" ? "den " : "die ") + a.name + " " + a.gr + " = " + zahl(a.x, 4) + " " + a.von + " in " + a.nach + " um.",
   weg: [["Umrechnung", a.regel], ["Ergebnis", a.gr + " = " + zahl(a.x, 4) + " " + a.von + " " + erg(w, a.nach, 4)]]};
 }});
 G.push({stufe: 2, block: "Block 05", f: function(){
- var m = zuf(110, 990)/100, ex = zuf(17, 20), n = m*Math.pow(10, ex), e = E_TB, q = n*e;
+ var m = zuf(110, 990)/100, ex = zuf(17, 20);
+ while(m === 3.12 && ex === 19){ m = zuf(110, 990)/100; }       /* Klassenarbeit Aufgabe 3 */
+ var n = m*Math.pow(10, ex), e = E_TB, q = n*e;
  return {art: "ladung", p: {n: n}, wert: q, einh: "As", betrag: true,
   frage: "Durch einen Leiter bewegen sich <i>n</i> = " + zahl(m, 2) + MAL + "10<sup>" + ex + "</sup> Elektronen. Berechnen Sie den Betrag der Ladung <i>Q</i>.",
   weg: [["Formel", "<i>Q</i> = <i>n</i>" + MAL + "<i>e</i>"],
@@ -168,7 +176,9 @@ G.push({stufe: 2, block: "Block 05", f: function(){
   merke: "Elementarladung <i>e</i>: Tabellenbuch S. 30. Die Exponenten werden addiert: " + ex + " + (−18) = " + zahl(ex - 18, 0) + ". Elektronen tragen negative Ladung; gefragt ist hier nur der Betrag. 1 As = 1 C."};
 }});
 G.push({stufe: 3, block: "Block 05 und 07", f: function(){
- var m = zuf(110, 990)/100, ex = zuf(18, 19), n = m*Math.pow(10, ex), e = E_TB, t = zuf(2, 20), q = n*e, i = q/t;
+ var m = zuf(110, 990)/100, ex = zuf(18, 19);
+ while(m === 3.12 && ex === 19){ m = zuf(110, 990)/100; }       /* Klassenarbeit Aufgabe 3 */
+ var n = m*Math.pow(10, ex), e = E_TB, t = zuf(2, 20), q = n*e, i = q/t;
  return {art: "strom_n", p: {n: n, t: t}, wert: i, einh: "A",
   frage: "In <i>t</i> = " + t + " s bewegen sich <i>n</i> = " + zahl(m, 2) + MAL + "10<sup>" + ex + "</sup> Elektronen durch den Querschnitt eines Leiters. Berechnen Sie die Stromstärke <i>I</i>.",
   weg: [["Formel", "<i>Q</i> = <i>n</i>" + MAL + "<i>e</i>;  <i>I</i> = " + br("<i>Q</i>", "<i>t</i>")],
@@ -186,15 +196,17 @@ G.push({stufe: 2, block: "Block 07", f: function(){
    merke: "1 C = 1 As, also ergibt C durch s die Einheit A."};
  }
  if(v === 2){
-  var i2 = zuf(2, 40)/10, h = zuf(2, 24), q2 = i2*h;
-  return {art: "ladung_it", p: {i: i2, h: h}, wert: q2, einh: "Ah",
-   frage: "Eine Leuchte nimmt <i>I</i> = " + zahl(i2, 1) + " A auf und ist <i>t</i> = " + h + " h eingeschaltet. Welche Ladung <i>Q</i> fließt in dieser Zeit? Geben Sie <i>Q</i> in Ah an.",
-   weg: [["Formel", "<i>Q</i> = <i>I</i>" + MAL + "<i>t</i>"], ["Einsetzen", "<i>Q</i> = " + zahl(i2, 1) + " A" + MAL + h + " h"], ["Ergebnis", "<i>Q</i> " + erg(q2, "Ah")]]};
+  var i2 = zuf(2, 40)/10, h = wahl([5, 10, 20, 30, 60, 90, 120]), q2 = i2*h;
+  return {art: "ladung_it", p: {i: i2, h: h}, wert: q2, einh: "As",
+   frage: "Durch eine Leuchte fließt <i>I</i> = " + zahl(i2, 1) + " A. Welche Ladung <i>Q</i> fließt in <i>t</i> = " + h + " s?",
+   weg: [["Formel", "<i>Q</i> = <i>I</i>" + MAL + "<i>t</i>"], ["Einsetzen", "<i>Q</i> = " + zahl(i2, 1) + " A" + MAL + h + " s"], ["Ergebnis", "<i>Q</i> " + erg(q2, "As")]],
+   merke: "Umgestellt aus <i>I</i> = " + br("<i>Q</i>", "<i>t</i>") + " mit dem Formel-Dreieck (Block 07)."};
  }
  var q3 = zuf(2, 36)*10, i3 = wahl([0.5, 1, 2, 2.5, 4, 5]), t3 = q3/i3;
- return {art: "zeit_qi", p: {q: q3, i: i3}, wert: t3, einh: "h",
-  frage: "Eine Batterie liefert die Ladung <i>Q</i> = " + q3 + " Ah. Ein Verbraucher nimmt <i>I</i> = " + zahl(i3, 1) + " A auf. Wie lange kann er betrieben werden? Geben Sie <i>t</i> in h an.",
-  weg: [["Formel", "<i>t</i> = " + br("<i>Q</i>", "<i>I</i>")], ["Einsetzen", "<i>t</i> = " + br(q3 + " Ah", zahl(i3, 1) + " A")], ["Ergebnis", "<i>t</i> " + erg(t3, "h")]]};
+ return {art: "zeit_qi", p: {q: q3, i: i3}, wert: t3, einh: "s",
+  frage: "Durch einen Leiter fließt <i>I</i> = " + zahl(i3, 1) + " A. Wie lange dauert es, bis die Ladung <i>Q</i> = " + q3 + " As geflossen ist?",
+  weg: [["Formel", "<i>t</i> = " + br("<i>Q</i>", "<i>I</i>")], ["Einsetzen", "<i>t</i> = " + br(q3 + " As", zahl(i3, 1) + " A")], ["Ergebnis", "<i>t</i> " + erg(t3, "s")]],
+  merke: "As geteilt durch A ergibt s."};
 }});
 G.push({stufe: 2, block: "Block 06", f: function(){
  var q = zuf(2, 40), u = wahl([1.5, 4.5, 6, 9, 12, 24, 48]), w = u*q;
@@ -204,7 +216,7 @@ G.push({stufe: 2, block: "Block 06", f: function(){
    weg: [["Formel", "<i>U</i> = " + br("<i>W</i>", "<i>Q</i>")], ["Einsetzen", "<i>U</i> = " + br(zahl(w, 1) + " Ws", q + " As")], ["Ergebnis", "<i>U</i> " + erg(u, "V")]],
    merke: "1 C = 1 As; Ws durch As ergibt W durch A, also V."};
  }
- return {art: "arbeit_uq", p: {u: u, q: q}, wert: w, einh: "Ws",
+ return {art: "arbeit_uq", p: {u: u, q: q}, wert: w, einh: "Ws", blockText: "Block 06 und 07",       /* umgestellt: Block 07 */
   frage: "Zwischen zwei Punkten liegt die Spannung <i>U</i> = " + zahl(u, 1) + " V. Welche Arbeit <i>W</i> wird aufgewendet, um die Ladung <i>Q</i> = " + q + " C zu verschieben?",
   weg: [["Formel", "<i>W</i> = <i>U</i>" + MAL + "<i>Q</i>"], ["Einsetzen", "<i>W</i> = " + zahl(u, 1) + " V" + MAL + q + " As"], ["Ergebnis", "<i>W</i> " + erg(w, "Ws")]]};
 }});
@@ -310,7 +322,9 @@ W.push({stufe: 2, block: "Block 13", f: function(){
   weg: [["Formel", "<i>R</i> = " + br("<i>ϱ</i>" + MAL + "<i>l</i>", "<i>A</i>")], ["Einsetzen", "<i>R</i> = " + br(zahl(s.rho, 4) + " " + br("Ω" + MAL + "mm²", "m") + MAL + l + " m", zahl(a, 2) + " mm²")], ["Ergebnis", "<i>R</i> " + erg(r2, "Ω")]]};
 }});
 W.push({stufe: 3, block: "Block 13", f: function(){
- var s = LEITER[0], a = wahl([1.5, 2.5, 4]), r = zuf(8, 60)/100, lges = r*s.gam*a, l = lges/2;
+ var s = LEITER[0], a = wahl([1.5, 2.5, 4]), r = zuf(8, 60)/100;
+ while(r === 0.3 && a === 2.5){ r = zuf(8, 60)/100; }            /* Klassenarbeit Aufgabe 5 */
+ var lges = r*s.gam*a, l = lges/2;
  return {art: "leitungslaenge", p: {r: r, a: a, gam: s.gam}, wert: l, einh: "m",
   frage: "Eine zweiadrige Kupferleitung mit <i>A</i> = " + zahl(a, 1) + " mm² ist am Ende kurzgeschlossen. Am Anfang misst man den Widerstand von Hin- und Rückleiter zusammen: <i>R</i> = " + zahl(r, 2) + " Ω (<i>γ</i> = 56 " + gamE() + "). Wie lang ist die Leitung?",
   weg: [["Formel", "<i>l</i> = <i>R</i>" + MAL + "<i>γ</i>" + MAL + "<i>A</i> (Hin- und Rückleiter zusammen)"],
@@ -403,7 +417,9 @@ E.push({stufe: 2, block: "Block 17", f: function(){
    weg: [["Formel", "<i>η</i> = " + br("<i>P</i><sub>ab</sub>", "<i>P</i><sub>zu</sub>")], ["Einsetzen", "<i>η</i> = " + br(zahl(pab, 1) + " W", zahl(pzu) + " W")], ["Ergebnis", "<i>η</i> " + erg(e2, "", 3) + " (" + zahl(e2*100, 1) + " %)"]],
    merke: "W durch W kürzt sich: der Wirkungsgrad hat keine Einheit und ist immer kleiner als 1."};
  }
- var pab2 = wahl([0.75, 1.1, 1.5, 2.2, 3, 4, 5.5]), eta2 = zuf(70, 92)/100, pzu2 = pab2/eta2, pv = pzu2 - pab2;
+ var pab2 = wahl([0.75, 1.1, 1.5, 2.2, 3, 4, 5.5]), eta2 = zuf(70, 92)/100;
+ while(pab2 === 3 && eta2 === 0.82){ eta2 = zuf(70, 92)/100; }   /* Klassenarbeit Aufgabe 9 */
+ var pzu2 = pab2/eta2, pv = pzu2 - pab2;
  return {art: "zugefuehrt", p: {pab: pab2, eta: eta2}, wert: pzu2, einh: "kW",
   frage: "Ein Motor gibt <i>P</i><sub>ab</sub> = " + zahl(pab2, 2) + " kW ab, sein Wirkungsgrad ist <i>η</i> = " + zahl(eta2, 2) + ". Welche Leistung <i>P</i><sub>zu</sub> nimmt er auf?",
   weg: [["Formel", "<i>P</i><sub>zu</sub> = " + br("<i>P</i><sub>ab</sub>", "<i>η</i>")], ["Einsetzen", "<i>P</i><sub>zu</sub> = " + br(zahl(pab2, 2) + " kW", zahl(eta2, 2))], ["Ergebnis", "<i>P</i><sub>zu</sub> " + erg(pzu2, "kW")]],
@@ -556,6 +572,19 @@ function zehnerpotenz(v, d){
  var q = Math.log10(Math.abs(v/d));
  return Math.abs(q - Math.round(q)) < 1e-9;
 }
+/* 12.10.2026: Stichprobe, ob eine Zahlenkombination der Klassenarbeit (Block 20) oder eine Amperestunde gezogen wird */
+window.kaprobe = function(n){
+ var alle = window.probe(n), treffer = [];
+ alle.forEach(function(a){
+  var p = a.p || {};
+  if(a.art === "vorsatz" && ((Math.abs(p.x - 0.045) < 1e-9 && p.fak === 1000) || (p.x === 1800 && Math.abs(p.fak - 1/3600) < 1e-12))) treffer.push(a.art);
+  if((a.art === "ladung" || a.art === "strom_n") && Math.abs(p.n - 3.12e19) < 1e9) treffer.push(a.art);
+  if(a.art === "leitungslaenge" && p.r === 0.3 && p.a === 2.5) treffer.push(a.art);
+  if(a.art === "zugefuehrt" && p.pab === 3 && p.eta === 0.82) treffer.push(a.art);
+  if(/\bAh\b/.test(a.frage)) treffer.push(a.art + " Ah");
+ });
+ return {geprueft: alle.length, treffer: treffer};
+};
 var ABGELEITET = ["dt", "fak"];   /* dt aus den beiden Temperaturen, fak ist der Umrechnungsfaktor: beide rechnet der Schüler selbst */
 window.anzeigeprobe = function(n){
  var fehl = [], gezaehlt = 0;
