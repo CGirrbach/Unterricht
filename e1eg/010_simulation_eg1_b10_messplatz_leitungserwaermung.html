@@ -1,0 +1,268 @@
+<!doctype html>
+<!-- Block EG1-B10 · Messplatz Leitungserwärmung (Neubau 12.10.2026, Aufgabe IN der Stunde) -->
+<!-- Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht):
+     (1) Jede Leitung verträgt nur einen bestimmten Strom: Darüber wird der Leiter im Dauerbetrieb wärmer als 70 °C,
+         die Isolation zu heiß. Dieser größte Strom ist die Strombelastbarkeit I_r (Tabellenbuch S. 198).
+     (2) Je größer der Querschnitt, desto größer der Strom, den die Leitung verträgt; die Stromdichte, die sie
+         verträgt, wird dabei kleiner (die Schüler rechnen J = I/A selbst; die Seite zeigt J NICHT).
+     (3) Auf der Wand (Verlegeart C) verträgt dieselbe Leitung mehr Strom als im Rohr (Verlegeart B2).
+     Rechenmodell (Leitertemperatur im Dauerbetrieb): theta = 30 °C + 40 K · (I / I_r)^2.
+       Die Erwärmung wächst mit dem Quadrat der Stromstärke (Wärme im Leiter ~ I²). Geeicht so, dass der Leiter bei
+       I = I_r genau 70 °C erreicht: Tabellenbuch S. 198 „Strombelastbarkeiten für festverlegte Kabel, Leitungen bei
+       theta_U = 30 °C", „Strombelastbarkeit I_r in A von Kupferleitern mit Betriebstemperatur theta_B <= 70 °C",
+       Spalten B2 und C, 2 Strom führende Leiter (am Seitenbild abgelesen, deckungsgleich mit Fachkunde S. 35):
+         mm²   B2/2   C/2
+         1,5   16,5   19,5
+         2,5   23     27
+         4     30     36
+         6     38     46
+         10    52     63
+     Verlegearten nach Tabellenbuch S. 196: B2 = Mantelleitung im Elektroinstallationsrohr auf Putz,
+       C = Mantelleitung direkt auf einer Wand.
+     Nachgerechnet (Anzeige eine Nachkommastelle, Strom in 0,5-A-Schritten):
+       1,5 B2: 16,5 A -> 70,0 °C; 17 A -> 72,5 °C      2,5 B2: 23 A -> 70,0 °C; 23,5 A -> 71,8 °C
+       4 B2:   30 A -> 70,0 °C; 30,5 A -> 71,3 °C      2,5 C:  27 A -> 70,0 °C; 27,5 A -> 71,5 °C
+       10 C:   63 A -> 70,0 °C; 63,5 A -> 70,6 °C      (kleinster Sprung über die Grenze im ganzen Bereich)
+       18 A: 1,5 B2 -> 77,6 °C; 1,5 C -> 64,1 °C; 2,5 B2 -> 54,5 °C (Arbeitsblatt Aufgabe 5)
+     Grenzfall im Einstellbereich: 1,5 mm² B2 mit 70 A -> weit über 150 °C (Anzeige „über 150 °C").
+     Startstellung neutral: kein Querschnitt, keine Verlegeart, I = 0 A, Leiter auf Umgebungstemperatur 30 °C. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Leitungserwärmung (Block 10)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"querschnitt":null,"verlegeart":null,"I":0},"loesungswerte":{"1,5 mm² B2":"16,5 A","2,5 mm² B2":"23 A","4 mm² B2":"30 A","2,5 mm² C":"27 A","18 A, 1,5 mm² B2":"77,6 °C","18 A, 1,5 mm² C":"64,1 °C","18 A, 2,5 mm² B2":"54,5 °C"}}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62;--rot:#B23A33}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:980px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px}
+ @media(min-width:760px){.buehne{grid-template-columns:1.25fr 1fr}}
+ canvas{width:100%;height:auto;display:block;border:1px solid var(--linie);background:#fff;touch-action:manipulation}
+ .anzeigen{display:grid;grid-template-columns:1fr;gap:8px;align-content:start}
+ .anz{border:1.4px solid var(--ink);padding:8px 12px;background:var(--hell)}
+ .anz .name{font-size:14px;font-weight:700;color:var(--grau)}
+ .anz .wert{font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink)}
+ .anz.temp .wert{color:var(--kupfer)}
+ .anz.zustand .wert{font-size:22px}
+ .anz.zustand.heiss{border-color:var(--rot);background:#FBEDEC}
+ .anz.zustand.heiss .wert{color:var(--rot)}
+ .anz.zustand.gut .wert{color:var(--gruen)}
+ .fest{font-size:13.5px;color:var(--grau);margin-top:2px}
+ .wahl{margin:12px 0 4px}
+ .wahl .titel{font-size:14px;font-weight:700;margin:10px 0 4px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+ button{font:inherit;font-size:15px;min-height:46px;padding:8px 14px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer}
+ button.an{background:var(--kupfer);color:#fff}
+ button:disabled{opacity:.45;cursor:not-allowed}
+ button.notieren{border-color:var(--gruen);color:#fff;background:var(--gruen);font-weight:700}
+ button.notieren:disabled{background:#fff;color:var(--gruen)}
+ .strom input[type=range]{display:block;width:100%;height:46px;margin:0 0 6px;accent-color:var(--kupfer)}
+ .strom input:disabled{opacity:.45}
+ table{width:100%;border-collapse:collapse;margin-top:12px;font-size:15px}
+ th,td{border:1px solid var(--linie);padding:6px 8px;text-align:left}
+ th{background:var(--hell);font-size:14px}
+ .tabelle{overflow-x:auto}
+ td.z{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+ td.heiss{color:var(--rot);font-weight:700}
+ .leer{color:var(--grau);font-style:italic}
+ @media(max-width:420px){.anz .wert{font-size:26px} th,td{padding:4px 3px;font-size:12.5px} button{padding:8px 11px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E1EG · Lernfeld 1 · Block 10</div><h1>Messplatz Leitungserwärmung</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Querschnitt wählen, Verlegeart wählen, dann den Strom einstellen. Der Messplatz zeigt die Temperatur des Leiters im Dauerbetrieb. Die Isolation verträgt höchstens <b>70 °C</b>. Mit <b>Messwert notieren</b> landet die Einstellung im Messprotokoll.</div>
+
+ <div class="buehne">
+  <canvas id="c" width="560" height="330" data-quelle="Verlegearten nach Tabellenbuch S. 196 (B2: Mantelleitung im Elektroinstallationsrohr auf Putz; C: Mantelleitung auf einer Wand); Umgebung 30 °C und Grenze 70 °C nach Tabellenbuch S. 198"
+   aria-label="Querschnitt einer Mantelleitung mit zwei Strom führenden Leitern an einer Wand, je nach Verlegeart im Installationsrohr oder direkt auf der Wand. Daneben ein Thermometer für die Leitertemperatur mit der Grenze 70 Grad Celsius."></canvas>
+  <div class="anzeigen">
+   <div class="anz"><div class="name">Strommesser</div><div class="wert" id="aI">0 A</div></div>
+   <div class="anz temp"><div class="name">Leitertemperatur im Dauerbetrieb</div><div class="wert" id="aT">30,0 °C</div></div>
+   <div class="anz zustand" id="kZ"><div class="name">Isolation</div><div class="wert" id="aZ">noch nicht eingestellt</div></div>
+   <div class="fest">Fest eingestellt: Mantelleitung mit 2 Strom führenden Leitern aus Kupfer, Umgebungstemperatur 30 °C.</div>
+  </div>
+ </div>
+
+ <div class="wahl">
+  <div class="titel">1. Querschnitt</div>
+  <div class="knoepfe" id="querschnitte"></div>
+  <div class="titel">2. Verlegeart</div>
+  <div class="knoepfe" id="arten"></div>
+  <div class="titel">3. Strom</div>
+  <div class="strom">
+   <input id="rI" type="range" min="0" max="140" step="1" value="0" disabled aria-label="Strom in Schritten von 0,5 Ampere">
+   <div class="knoepfe"><button id="bM1" disabled>− 1 A</button><button id="bM05" disabled>− 0,5 A</button><button id="bP05" disabled>+ 0,5 A</button><button id="bP1" disabled>+ 1 A</button></div>
+  </div>
+  <div class="titel">4. Notieren</div>
+  <div class="knoepfe"><button class="notieren" id="bNotiz" disabled>Messwert notieren</button><button id="bReset">Zurücksetzen</button></div>
+ </div>
+
+ <div class="tabelle"><table id="protokoll">
+  <tr><th>Nr.</th><th>Quer&shy;schnitt</th><th>Verlege&shy;art</th><th>Strom</th><th>Tempe&shy;ratur</th><th>Isola&shy;tion</th></tr>
+  <tr class="leer"><td colspan="6">Noch kein Messwert notiert.</td></tr>
+ </table></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+// Tabellenbuch S. 198, Strombelastbarkeit I_r in A, 2 Strom führende Leiter
+var QUER=[{A:1.5,t:"1,5 mm²",B2:16.5,C:19.5},{A:2.5,t:"2,5 mm²",B2:23,C:27},{A:4,t:"4 mm²",B2:30,C:36},
+          {A:6,t:"6 mm²",B2:38,C:46},{A:10,t:"10 mm²",B2:52,C:63}];
+var ARTEN=[{k:"B2",t:"B2: im Rohr auf der Wand",kurz:"B2"},{k:"C",t:"C: direkt auf der Wand",kurz:"C"}];
+var UMGEBUNG=30, GRENZE=70, ANZEIGE_MAX=150;
+var z={q:null,a:null,s:0,nr:0,anzeigeT:UMGEBUNG,phase:0};   // s: Strom in halben Ampere
+var $=function(id){return document.getElementById(id);};
+var ruhig=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function komma(s){return String(s).replace(".",",");}
+function stromText(s){return s%2===0 ? komma(String(s/2))+" A" : komma((s/2).toFixed(1))+" A";}
+function bereit(){return z.q!==null&&z.a!==null;}
+function temperatur(){                       // Leitertemperatur im Dauerbetrieb, Modell siehe Kopf
+  if(!bereit()) return UMGEBUNG;
+  var Ir=QUER[z.q][ARTEN[z.a].k], I=z.s/2;
+  return UMGEBUNG+(GRENZE-UMGEBUNG)*(I/Ir)*(I/Ir);
+}
+function tempText(T){
+  if(T>ANZEIGE_MAX) return "über "+ANZEIGE_MAX+" °C";
+  return komma((Math.round(T*10)/10).toFixed(1))+" °C";
+}
+function zuHeiss(T){return T>GRENZE+1e-9;}
+
+function knoepfe(){
+  QUER.forEach(function(q,i){var b=document.createElement("button");b.textContent=q.t;b.onclick=function(){z.q=i;auffrischen();};$("querschnitte").appendChild(b);});
+  ARTEN.forEach(function(a,i){var b=document.createElement("button");b.textContent=a.t;b.onclick=function(){z.a=i;auffrischen();};$("arten").appendChild(b);});
+}
+function setzeStrom(s){z.s=Math.max(0,Math.min(140,s));auffrischen();}
+function auffrischen(){
+  Array.prototype.forEach.call($("querschnitte").children,function(b,i){b.classList.toggle("an",z.q===i);});
+  Array.prototype.forEach.call($("arten").children,function(b,i){b.classList.toggle("an",z.a===i);});
+  var ok=bereit();
+  ["bM1","bM05","bP05","bP1","rI","bNotiz"].forEach(function(id){$(id).disabled=!ok;});
+  $("rI").value=z.s;
+  $("aI").textContent=stromText(z.s);
+  var T=temperatur();
+  $("aT").textContent=tempText(T);
+  var k=$("kZ");
+  k.classList.remove("heiss","gut");
+  if(!ok){$("aZ").textContent="noch nicht eingestellt";}
+  else if(z.s===0){$("aZ").textContent="kein Strom";}
+  else if(zuHeiss(T)){$("aZ").textContent="zu heiß (über 70 °C)";k.classList.add("heiss");}
+  else {$("aZ").textContent="in Ordnung";k.classList.add("gut");}
+  if(ruhig) z.anzeigeT=T;
+}
+function notieren(){
+  if(!bereit()) return;
+  var tb=$("protokoll"),leer=tb.querySelector("tr.leer"); if(leer) leer.remove();
+  var T=temperatur(); z.nr++;
+  var tr=document.createElement("tr");
+  tr.innerHTML="<td>"+z.nr+"</td><td>"+QUER[z.q].t+"</td><td>"+ARTEN[z.a].kurz+"</td><td class='z'>"+stromText(z.s)+"</td><td class='z'>"+tempText(T)+"</td>"
+    +(zuHeiss(T)?"<td class='heiss'>zu heiß</td>":"<td>in Ordnung</td>");
+  tb.appendChild(tr);
+}
+function zuruecksetzen(){
+  z={q:null,a:null,s:0,nr:0,anzeigeT:UMGEBUNG,phase:0};
+  var tb=$("protokoll"); while(tb.rows.length>1) tb.deleteRow(1);
+  var tr=tb.insertRow(); tr.className="leer"; tr.innerHTML="<td colspan='6'>Noch kein Messwert notiert.</td>";
+  auffrischen();
+}
+
+// ---------- Zeichnung ----------
+var c=$("c"), g=c.getContext("2d");
+function mischen(a,b,t){t=Math.max(0,Math.min(1,t));return "rgb("+[0,1,2].map(function(i){return Math.round(a[i]+(b[i]-a[i])*t);}).join(",")+")";}
+function leiterfarbe(T){                       // Kupfer bei 30 °C, glühend rot ab etwa 150 °C
+  var kupfer=[200,117,51], heiss=[226,40,20];
+  return mischen(kupfer,heiss,(T-UMGEBUNG)/(ANZEIGE_MAX-UMGEBUNG));
+}
+function zeichne(){
+  var W=c.width,H=c.height; g.clearRect(0,0,W,H);
+  // Wand
+  g.fillStyle="#DDE2E6"; g.fillRect(0,0,60,H);
+  g.strokeStyle="#9AA5AE"; g.lineWidth=2;
+  for(var y=-60;y<H;y+=22){g.beginPath();g.moveTo(0,y+60);g.lineTo(60,y);g.stroke();}
+  g.strokeStyle="#1A2530"; g.lineWidth=3; g.beginPath(); g.moveTo(60,0); g.lineTo(60,H); g.stroke();
+  g.fillStyle="#1A2530"; g.font="22px 'Noto Sans',sans-serif"; g.textAlign="center";
+  g.save(); g.translate(30,H-60); g.rotate(-Math.PI/2); g.fillText("Wand",0,8); g.restore();
+
+  var T=z.anzeigeT;
+  if(z.q===null||z.a===null){
+    g.fillStyle="#5A666F"; g.font="22px 'Noto Sans',sans-serif"; g.textAlign="center";
+    g.fillText("Querschnitt und",215,150); g.fillText("Verlegeart wählen",215,180);
+  } else {
+    var A=QUER[z.q].A, rc=11+17*Math.sqrt(A/10), luft=5;     // Aderradius schematisch, Fläche wächst mit A
+    var iso=6, breite=2*(2*(rc+iso))+3*luft, hoch=2*(rc+iso)+2*luft+6;
+    var rohr=(ARTEN[z.a].k==="B2"), mx, my=165;
+    if(rohr){
+      var R=breite/2+18; mx=60+R+4;
+      g.fillStyle="#F4F6F8"; g.beginPath(); g.arc(mx,my,R,0,6.2832); g.fill();
+      g.strokeStyle="#5A666F"; g.lineWidth=5; g.stroke();
+      g.fillStyle="#5A666F"; g.font="19px 'Noto Sans',sans-serif"; g.textAlign="left";
+      g.fillText("Elektroinstallationsrohr",72,my-R-14);
+      my=my+R-hoch/2-6;                                         // Leitung liegt unten im Rohr
+    } else {
+      mx=60+breite/2+3;
+      g.fillStyle="#5A666F"; g.font="19px 'Noto Sans',sans-serif"; g.textAlign="left";
+      g.fillText("direkt auf der Wand",72,52);
+    }
+    // Mantel
+    g.fillStyle="#E9ECEF"; g.strokeStyle="#1A2530"; g.lineWidth=2.5;
+    var x0=mx-breite/2, y0=my-hoch/2, r=hoch/2;
+    g.beginPath(); g.moveTo(x0+r,y0); g.lineTo(x0+breite-r,y0); g.arc(x0+breite-r,my,r,-1.5708,1.5708);
+    g.lineTo(x0+r,y0+hoch); g.arc(x0+r,my,r,1.5708,4.7124); g.closePath(); g.fill(); g.stroke();
+    // zwei Adern: Aderisolation braun und blau, Leiter in Temperaturfarbe
+    [["#8B5A2B",mx-(rc+iso)-luft/2],["#2E6DB4",mx+(rc+iso)+luft/2]].forEach(function(a){
+      g.fillStyle=a[0]; g.beginPath(); g.arc(a[1],my,rc+iso,0,6.2832); g.fill();
+      g.fillStyle=leiterfarbe(T); g.beginPath(); g.arc(a[1],my,rc,0,6.2832); g.fill();
+    });
+    // Wärme: aufsteigende Wellen, Zahl wächst mit der Übertemperatur
+    var n=Math.min(6,Math.floor((T-UMGEBUNG)/12));
+    if(n>0){
+      g.strokeStyle=zuHeiss(T)?"#B23A33":"#E08A3C"; g.lineWidth=2.5;
+      for(var i=0;i<n;i++){
+        var wx=mx-breite/2+10+i*(breite-20)/Math.max(1,n-1), off=ruhig?0:(z.phase*18+i*7)%18;
+        g.beginPath();
+        for(var k=0;k<=24;k++){var yy=y0-10-k*1.6-off; var xx=wx+5*Math.sin((k+off)/3.5); if(k===0)g.moveTo(xx,yy); else g.lineTo(xx,yy);}
+        g.stroke();
+      }
+    }
+    g.fillStyle="#1A2530"; g.font="19px 'Noto Sans',sans-serif"; g.textAlign="center";
+    g.fillText("Leiter "+QUER[z.q].t,mx+(rohr?20:30),Math.min(H-12,y0+hoch+(rohr?62:36)));
+  }
+  // Thermometer
+  var tx=470, top=40, bot=280, tmin=20, tmax=ANZEIGE_MAX;
+  function ty(t){return bot-(t-tmin)/(tmax-tmin)*(bot-top);}
+  g.fillStyle="#fff"; g.strokeStyle="#1A2530"; g.lineWidth=2.5;
+  g.beginPath(); g.rect(tx-12,top-6,24,bot-top+6); g.fill(); g.stroke();
+  g.beginPath(); g.arc(tx,bot+18,20,0,6.2832); g.fill(); g.stroke();
+  var Tz=Math.min(T,tmax+4);
+  g.fillStyle=zuHeiss(T)?"#B23A33":"#A34E0E";
+  g.beginPath(); g.arc(tx,bot+18,15,0,6.2832); g.fill();
+  g.fillRect(tx-7,ty(Tz),14,bot+10-ty(Tz));
+  g.font="17px 'Noto Sans',sans-serif"; g.textAlign="right"; g.fillStyle="#5A666F"; g.lineWidth=1.5; g.strokeStyle="#5A666F";
+  [30,50,100,150].forEach(function(t){g.beginPath();g.moveTo(tx-12,ty(t));g.lineTo(tx-20,ty(t));g.stroke();g.fillText(t+" °C",tx-24,ty(t)+6);});
+  g.strokeStyle="#B23A33"; g.lineWidth=3; g.beginPath(); g.moveTo(tx-16,ty(GRENZE)); g.lineTo(tx+30,ty(GRENZE)); g.stroke();
+  g.fillStyle="#B23A33"; g.textAlign="left"; g.font="bold 18px 'Noto Sans',sans-serif"; g.fillText("70 °C",tx+20,ty(GRENZE)-8);
+  g.font="16px 'Noto Sans',sans-serif"; g.fillText("Grenze",tx+20,ty(GRENZE)+20);
+}
+var vorher=0;
+function schleife(t){
+  var dt=Math.min(0.1,(t-vorher)/1000); vorher=t;
+  var ziel=temperatur();
+  if(ruhig) z.anzeigeT=ziel; else z.anzeigeT+=(ziel-z.anzeigeT)*Math.min(1,dt*4);
+  if(Math.abs(ziel-z.anzeigeT)<0.05) z.anzeigeT=ziel;
+  z.phase=(z.phase+dt)%1000;
+  zeichne(); requestAnimationFrame(schleife);
+}
+$("rI").addEventListener("input",function(){setzeStrom(+this.value);});
+$("bM1").onclick=function(){setzeStrom(z.s-2);}; $("bM05").onclick=function(){setzeStrom(z.s-1);};
+$("bP05").onclick=function(){setzeStrom(z.s+1);}; $("bP1").onclick=function(){setzeStrom(z.s+2);};
+$("bNotiz").onclick=notieren; $("bReset").onclick=zuruecksetzen;
+knoepfe(); auffrischen(); requestAnimationFrame(schleife);
+})();
+</script>
+</body></html>
