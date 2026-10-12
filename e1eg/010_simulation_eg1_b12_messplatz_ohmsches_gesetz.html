@@ -53,6 +53,7 @@
  .tabelle{overflow-x:auto}
  td.z{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
  .leer{color:var(--grau);font-style:italic}
+ .fz{font-family:Cambria, Caladea, 'Noto Serif', Georgia, serif;font-style:italic}  /* Formelzeichen mit Serifen: I und l unterscheidbar */
  .hinweis{font-size:14px;color:var(--kupfer);min-height:1.4em;margin-top:4px}
  @media(max-width:420px){.anz .wert{font-size:26px} th,td{padding:5px 5px;font-size:14px} button{padding:8px 11px}}
  @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
@@ -67,14 +68,14 @@
   <div class="anzeigen">
    <div class="anz"><div class="name">Spannungsmesser</div><div class="wert" id="aU">0 V</div></div>
    <div class="anz strom"><div class="name">Strommesser</div><div class="wert" id="aI">0 A</div></div>
-   <div class="anz"><div class="name">Widerstand R</div><div class="wert" id="aR">nicht gewählt</div></div>
+   <div class="anz"><div class="name">Widerstand <i class="fz">R</i></div><div class="wert" id="aR">nicht gewählt</div></div>
   </div>
  </div>
 
  <div class="wahl">
-  <div class="titel">1. Widerstand R</div>
+  <div class="titel">1. Widerstand <i class="fz">R</i></div>
   <div class="knoepfe" id="widerstaende" role="group" aria-label="Widerstand wählen"></div>
-  <div class="titel">2. Spannung U am Netzgerät</div>
+  <div class="titel">2. Spannung <i class="fz">U</i> am Netzgerät</div>
   <div class="regler">
    <button class="schritt" id="bMinus" aria-label="Spannung um 1 V verringern">−</button>
    <input id="rU" type="range" min="0" max="12" step="1" value="0" aria-label="Spannung U in Volt">
@@ -87,7 +88,7 @@
  </div>
 
  <div class="tabelle"><table id="protokoll">
-  <tr><th>Nr.</th><th>Widerstand R</th><th>Spannung U</th><th>Stromstärke I</th></tr>
+  <tr><th>Nr.</th><th>Widerstand <i class="fz">R</i></th><th>Spannung <i class="fz">U</i></th><th>Stromstärke <i class="fz">I</i></th></tr>
   <tr class="leer"><td colspan="4">Noch keine Messung.</td></tr>
  </table></div>
 </div>
@@ -196,19 +197,19 @@ function zeichne(jetzt){
   g.fillStyle="#fff"; g.strokeStyle="#1A2530"; g.lineWidth=3;
   g.beginPath(); g.arc(180,YO,24,0,6.283); g.fill(); g.stroke();
   g.fillStyle="#1A2530"; g.font="bold 24px 'Noto Sans',sans-serif"; g.fillText("A",180,YO+8);
-  pfeil(222,34,262,34,"#C2186B"); g.fillStyle="#C2186B"; g.font="italic 22px 'Noto Sans',sans-serif"; g.fillText("I",242,24);
+  pfeil(222,34,262,34,"#C2186B"); g.fillStyle="#C2186B"; g.font="italic 25px Cambria, Caladea, 'Noto Serif', Georgia, serif"; g.fillText("I",242,24);
   g.fillStyle="#A34E0E"; g.font="bold 21px 'Noto Sans',sans-serif"; g.fillText(zeigeI(I),180,YO+52);
   // Spannungsmesser parallel
   g.fillStyle="#fff"; g.strokeStyle="#1A2530"; g.lineWidth=3;
   g.beginPath(); g.arc(XV,150,24,0,6.283); g.fill(); g.stroke();
   g.fillStyle="#1A2530"; g.font="bold 24px 'Noto Sans',sans-serif"; g.fillText("V",XV,158);
-  pfeil(365,72,365,228,"#2557A3"); g.fillStyle="#2557A3"; g.font="italic 22px 'Noto Sans',sans-serif"; g.textAlign="left"; g.fillText("U",376,190);
+  pfeil(365,72,365,228,"#2557A3"); g.fillStyle="#2557A3"; g.font="italic 25px Cambria, Caladea, 'Noto Serif', Georgia, serif"; g.textAlign="left"; g.fillText("U",376,190);
   g.fillStyle="#1A2530"; g.font="bold 21px 'Noto Sans',sans-serif"; g.textAlign="right"; g.fillText(z.U+" V",XV-32,157);
   // einstellbarer Widerstand
   g.fillStyle="#fff"; g.strokeStyle="#1A2530"; g.lineWidth=3;
   g.fillRect(XR-12,110,24,80); g.strokeRect(XR-12,110,24,80);
   pfeil(XR-34,206,XR+32,96,"#1A2530");
-  g.fillStyle="#1A2530"; g.font="italic 22px 'Noto Sans',sans-serif"; g.textAlign="right"; g.fillText("R",XR-22,128);
+  g.fillStyle="#1A2530"; g.font="italic 25px Cambria, Caladea, 'Noto Serif', Georgia, serif"; g.textAlign="right"; g.fillText("R",XR-22,128);
   g.font="bold 21px 'Noto Sans',sans-serif"; g.fillText(z.R===null?"?":z.R+" Ω",XR-22,160);
 }
 function schleife(t){
