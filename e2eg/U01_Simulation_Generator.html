@@ -1,0 +1,214 @@
+<!doctype html>
+<!-- E2EG U01 · Messplatz Generator (Neubau 12.10.2026, Aufgabe IN der Stunde, Muster E1EG B07/B16) -->
+<!-- Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht):
+     (1) Steht die Leiterschleife still, zeigt der Spannungsmesser 0 V; Spannung entsteht nur durch Bewegung.
+     (2) Dreht sich die Schleife gleichmäßig, ist die Spannung bei 0°, 180° und 360° null (Leiter bewegen sich
+         parallel zu den Feldlinien) und bei 90° und 270° betragsmäßig am größten (Leiter bewegen sich senkrecht).
+     (3) Nach einer halben Umdrehung kehrt sich die Richtung der Spannung um; die Messpunkte über dem Drehwinkel
+         ergeben eine Sinuskurve (die Schüler zeichnen sie selbst, die Seite zeichnet keine Kurve).
+     Rechenmodell: u = 10 V · sin α (Modellgenerator, größter Wert 10 V). Anordnung nach Europa Fachkunde S. 130,
+     Bild 2 (Prinzip der Spannungserzeugung: N oben, S unten, homogenes Feld, bei α = 0° ist der Fluss durch die
+     Schleife am größten und u = 0) und S. 93/94 (Leiter im Magnetfeld, Bewegungsrichtung). Die Darstellung ist der
+     Querschnitt in Richtung der Drehachse.
+     Anzeige mit einer Nachkommastelle: bei allen 30°-Stellungen exakt gerundet (5,0 · 8,7 · 10,0 V), kein „−0,0“.
+     „Standbild“ hält den Augenblick einer gleichmäßig weiterlaufenden Drehung fest (keine stehende Schleife mit
+     Spannung: im Zustand „steht“ ist u = 0). Startstellung neutral: Generator steht, α = 0°, u = 0 V.
+     Keine Formel, kein Scheitelwert û (kommt in U02), keine Fehlvorstellung. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Generator (U01)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"zustand":"steht","alpha_grad":0,"u_V":0},"loesungswerte":{"0°":"0,0 V","30°":"5,0 V","60°":"8,7 V","90°":"10,0 V","120°":"8,7 V","150°":"5,0 V","180°":"0,0 V","210°":"−5,0 V","240°":"−8,7 V","270°":"−10,0 V","300°":"−8,7 V","330°":"−5,0 V","360°":"0,0 V"}}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:980px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px}
+ @media(min-width:760px){.buehne{grid-template-columns:1.2fr 1fr}}
+ canvas{width:100%;height:auto;display:block;border:1px solid var(--linie);background:#fff;touch-action:manipulation}
+ .legende{font-size:13.5px;color:var(--grau);margin-top:4px}
+ .anzeigen{display:grid;grid-template-columns:1fr;gap:8px;align-content:start}
+ .anz{border:1.4px solid var(--ink);padding:8px 12px;background:var(--hell)}
+ .anz .name{font-size:14px;font-weight:700;color:var(--grau)}
+ .anz .wert{font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink)}
+ .anz.spannung .wert{color:var(--kupfer)}
+ .status{min-height:3em;font-size:15px;color:var(--grau)}
+ .status b{color:var(--ink)}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+ button{font:inherit;font-size:16px;min-height:48px;padding:8px 14px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer}
+ button.haupt{background:var(--kupfer);color:#fff;font-weight:700;min-width:190px}
+ button:disabled{opacity:.4;cursor:not-allowed}
+ button.schritt{min-width:96px;font-weight:700}
+ .formelzeichen{font-family:Cambria,Caladea,Georgia,serif;font-style:italic}
+ @media(max-width:420px){.anz .wert{font-size:26px} button{font-size:15px;padding:8px 10px} button.haupt{min-width:0;flex:1 1 100%}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E2EG · LF 5 · U01</div><h1>Messplatz Generator: Leiterschleife im Magnetfeld</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Drehung starten. Mit <b>Standbild</b> anhalten, dann mit <b>30° ▶</b> und <b>◀ 30°</b> die Drehwinkel einstellen. Die Spannung <span class="formelzeichen">u</span> am Spannungsmesser ablesen und eintragen.</div>
+
+ <div class="buehne">
+  <div>
+   <canvas id="c" width="560" height="470" data-quelle="Anordnung nach Europa Fachkunde S. 130, Bild 2 (Prinzip der Spannungserzeugung) und S. 93/94 (Leiter im Magnetfeld); Querschnitt in Richtung der Drehachse"
+    aria-label="Querschnitt eines Generators: oben der Nordpol, unten der Südpol, dazwischen senkrechte Feldlinien. Eine Leiterschleife dreht sich um die Mitte; an ihren beiden Leitern zeigen Pfeile die Bewegungsrichtung."></canvas>
+   <div class="legende">Blick in Richtung der Drehachse. Grüne Linien: Feldlinien von N nach S. Pfeile an den Leitern 1 und 2: Bewegungsrichtung.</div>
+  </div>
+  <div class="anzeigen">
+   <canvas id="m" width="400" height="230" aria-label="Spannungsmesser mit Nullpunkt in der Skalenmitte, Skala von minus 10 V bis plus 10 V"></canvas>
+   <div class="anz"><div class="name">Drehwinkel <span class="formelzeichen">α</span></div><div class="wert" id="aA">0°</div></div>
+   <div class="anz spannung"><div class="name">Spannungsmesser <span class="formelzeichen">u</span></div><div class="wert" id="aU">0,0 V</div></div>
+   <div class="status" id="aS" aria-live="polite"></div>
+  </div>
+ </div>
+
+ <div class="knoepfe">
+  <button class="haupt" id="bLauf" type="button">▶ Drehung starten</button>
+  <button class="schritt" id="bZur" type="button" aria-label="Standbild 30 Grad zurück">◀ 30°</button>
+  <button class="schritt" id="bVor" type="button" aria-label="Standbild 30 Grad weiter">30° ▶</button>
+  <button id="bReset" type="button">Zurücksetzen</button>
+ </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var UMAX=10;                 // größter Wert des Modellgenerators in V
+var UMLAUF=12;               // Sekunden für eine Umdrehung (langsam, damit der Zeiger sichtbar pendelt)
+var START={zustand:"steht",alpha:0};
+var z={zustand:START.zustand,alpha:START.alpha};   // zustand: steht | dreht | standbild
+var $=function(id){return document.getElementById(id);};
+var ruhig=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function komma(s){return s.replace(".",",");}
+function spannung(){                                   // Spannung in V im aktuellen Zustand
+  if(z.zustand==="steht") return 0;
+  return UMAX*Math.sin(z.alpha*Math.PI/180);
+}
+function textU(u){
+  var r=Math.round(u*10)/10;
+  if(Math.abs(r)<0.05) return "0,0 V";
+  return (r<0?"−":"")+komma(Math.abs(r).toFixed(1))+" V";
+}
+function textA(a){ return Math.round(a)+"°"; }
+
+// ---------- Generator ----------
+var c=$("c"), g=c.getContext("2d");
+var MX=280, MY=238, R=118;
+function pfeil(x1,y1,x2,y2,farbe,breite,spitze){
+  g.strokeStyle=farbe; g.fillStyle=farbe; g.lineWidth=breite;
+  g.beginPath(); g.moveTo(x1,y1); g.lineTo(x2,y2); g.stroke();
+  var w=Math.atan2(y2-y1,x2-x1);
+  g.beginPath(); g.moveTo(x2,y2);
+  g.lineTo(x2-spitze*Math.cos(w-0.4),y2-spitze*Math.sin(w-0.4));
+  g.lineTo(x2-spitze*Math.cos(w+0.4),y2-spitze*Math.sin(w+0.4)); g.closePath(); g.fill();
+}
+function zeichneGenerator(){
+  var W=c.width,H=c.height; g.clearRect(0,0,W,H);
+  // Pole
+  g.fillStyle="#EE6A4F"; g.fillRect(70,14,420,62); g.strokeStyle="#1A2530"; g.lineWidth=2; g.strokeRect(70,14,420,62);
+  g.fillStyle="#5FB46C"; g.fillRect(70,H-76,420,62); g.strokeRect(70,H-76,420,62);
+  g.fillStyle="#fff"; g.font="bold 34px 'Noto Sans',sans-serif"; g.textAlign="center"; g.textBaseline="middle";
+  g.fillText("N",MX,46); g.fillText("S",MX,H-45);
+  // Feldlinien (homogenes Feld, von N nach S)
+  for(var x=100;x<=460;x+=60){ pfeil(x,80,x,H-82,"#2E9E4F",1.6,11); }
+  // Drehkreis und Bezugslinie für α
+  g.setLineDash([6,6]); g.strokeStyle="#9AA5AE"; g.lineWidth=1.5;
+  g.beginPath(); g.arc(MX,MY,R,0,2*Math.PI); g.stroke();
+  g.beginPath(); g.moveTo(MX-R-30,MY); g.lineTo(MX+R+30,MY); g.stroke(); g.setLineDash([]);
+  // Drehrichtung (gegen den Uhrzeigersinn)
+  g.strokeStyle="#5A666F"; g.lineWidth=2.5;
+  g.beginPath(); g.arc(MX,MY,R+28,-0.95,-0.45); g.stroke();
+  var wa=-0.95, xa=MX+(R+28)*Math.cos(wa), ya=MY+(R+28)*Math.sin(wa);
+  pfeil(MX+(R+28)*Math.cos(wa+0.05),MY+(R+28)*Math.sin(wa+0.05),xa,ya,"#5A666F",2.5,12);
+  // Leiterschleife: Winkel α gegen die Waagerechte, gegen den Uhrzeigersinn (y nach oben)
+  var a=z.alpha*Math.PI/180;
+  var x1=MX+R*Math.cos(a), y1=MY-R*Math.sin(a), x2=MX-R*Math.cos(a), y2=MY+R*Math.sin(a);
+  // Winkelbogen α
+  if(z.alpha%360>0.5){
+    g.strokeStyle="#A34E0E"; g.lineWidth=2.5; g.beginPath(); g.arc(MX,MY,38,0,-a,true); g.stroke();
+    var wm=-a/2; g.fillStyle="#A34E0E"; g.font="italic bold 24px Cambria,Caladea,Georgia,serif";
+    g.fillText("α",MX+60*Math.cos(wm),MY+60*Math.sin(wm));
+  }
+  g.strokeStyle="#7A3A0B"; g.lineWidth=7; g.lineCap="round";
+  g.beginPath(); g.moveTo(x1,y1); g.lineTo(x2,y2); g.stroke(); g.lineCap="butt";
+  // Achse
+  g.fillStyle="#1A2530"; g.beginPath(); g.arc(MX,MY,6,0,2*Math.PI); g.fill();
+  // Leiter 1 und 2
+  [[x1,y1,"1",a],[x2,y2,"2",a+Math.PI]].forEach(function(l){
+    g.fillStyle="#E9A46B"; g.strokeStyle="#1A2530"; g.lineWidth=2.5;
+    g.beginPath(); g.arc(l[0],l[1],17,0,2*Math.PI); g.fill(); g.stroke();
+    g.fillStyle="#1A2530"; g.font="bold 19px 'Noto Sans',sans-serif"; g.fillText(l[2],l[0],l[1]+1);
+    if(z.zustand!=="steht"){                       // Bewegungsrichtung: tangential, gegen den Uhrzeigersinn
+      var vx=-Math.sin(l[3]), vy=-Math.cos(l[3]);   // Bildschirmkoordinaten (y nach unten)
+      pfeil(l[0]+vx*22,l[1]+vy*22,l[0]+vx*74,l[1]+vy*74,"#D6007E",4,16);
+    }
+  });
+  g.textBaseline="alphabetic";
+}
+
+// ---------- Spannungsmesser (Nullpunkt in Skalenmitte) ----------
+var m=$("m"), h=m.getContext("2d");
+function zeichneMesser(u){
+  var W=m.width,H=m.height, cx=W/2, cy=H-28, r=150, wmax=55*Math.PI/180;
+  h.clearRect(0,0,W,H);
+  h.fillStyle="#F4F6F8"; h.fillRect(1,1,W-2,H-2); h.strokeStyle="#1A2530"; h.lineWidth=2; h.strokeRect(1,1,W-2,H-2);
+  h.strokeStyle="#1A2530"; h.lineWidth=2; h.beginPath(); h.arc(cx,cy,r,-Math.PI/2-wmax,-Math.PI/2+wmax); h.stroke();
+  h.textAlign="center"; h.textBaseline="middle"; h.fillStyle="#1A2530";
+  for(var k=-10;k<=10;k++){
+    var w=-Math.PI/2+k/10*wmax, l=(k%5===0)?16:8;
+    h.lineWidth=(k%5===0)?2.5:1.5;
+    h.beginPath(); h.moveTo(cx+r*Math.cos(w),cy+r*Math.sin(w)); h.lineTo(cx+(r-l)*Math.cos(w),cy+(r-l)*Math.sin(w)); h.stroke();
+    if(k%5===0){ h.font="bold 20px 'Noto Sans',sans-serif"; h.fillText((k<0?"−":"")+Math.abs(k),cx+(r+18)*Math.cos(w),cy+(r+18)*Math.sin(w)); }
+  }
+  h.font="bold 22px 'Noto Sans',sans-serif"; h.fillText("V",cx+110,cy-8);
+  var wz=-Math.PI/2+Math.max(-1.08,Math.min(1.08,u/UMAX))*wmax;
+  h.strokeStyle="#A34E0E"; h.lineWidth=4; h.beginPath(); h.moveTo(cx,cy); h.lineTo(cx+(r-6)*Math.cos(wz),cy+(r-6)*Math.sin(wz)); h.stroke();
+  h.fillStyle="#1A2530"; h.beginPath(); h.arc(cx,cy,8,0,2*Math.PI); h.fill();
+}
+
+// ---------- Zustand ----------
+function auffrischen(){
+  var u=spannung();
+  $("aA").textContent=textA(z.alpha); $("aU").textContent=textU(u);
+  var s=$("aS");
+  if(z.zustand==="steht"){ s.innerHTML="<b>Der Generator steht still.</b> Starten Sie die Drehung."; }
+  else if(z.zustand==="dreht"){ s.innerHTML="<b>Die Leiterschleife dreht sich gleichmäßig</b> (eine Umdrehung in "+UMLAUF+" s)."; }
+  else { s.innerHTML="<b>Standbild bei α = "+textA(z.alpha)+":</b> Die Leiterschleife dreht sich gleichmäßig weiter; das Bild hält diesen Augenblick fest."; }
+  $("bLauf").textContent=z.zustand==="dreht"?"❚❚ Standbild":(z.zustand==="steht"?"▶ Drehung starten":"▶ Weiterdrehen");
+  $("bVor").disabled=$("bZur").disabled=(z.zustand!=="standbild");
+  zeichneGenerator(); zeichneMesser(u);
+}
+var letzte=null, takt=null;
+function schritt(t){
+  if(z.zustand!=="dreht"){ letzte=null; return; }
+  if(letzte!==null){ z.alpha=(z.alpha+360*(t-letzte)/1000/UMLAUF)%360; }
+  letzte=t; auffrischen(); requestAnimationFrame(schritt);
+}
+function starten(){
+  z.zustand="dreht";
+  if(z.alpha>=360) z.alpha=0;
+  if(ruhig){                                   // reduzierte Bewegung: in 30°-Sprüngen, keine fließende Bewegung
+    z.alpha=Math.round(z.alpha/30)*30%360; auffrischen();
+    takt=setInterval(function(){ z.alpha=(z.alpha+30)%360; auffrischen(); }, UMLAUF*1000/12);
+  } else { letzte=null; auffrischen(); requestAnimationFrame(schritt); }
+}
+function anhalten(){ z.zustand="standbild"; if(takt){clearInterval(takt);takt=null;} auffrischen(); }
+$("bLauf").onclick=function(){ if(z.zustand==="dreht") anhalten(); else starten(); };
+$("bVor").onclick=function(){
+  if(z.alpha>=360-1e-9) z.alpha=30; else z.alpha=Math.min(360,Math.floor(z.alpha/30+1e-9)*30+30);
+  auffrischen();
+};
+$("bZur").onclick=function(){
+  if(z.alpha<=1e-9) z.alpha=330; else z.alpha=Math.max(0,Math.ceil(z.alpha/30-1e-9)*30-30);
+  auffrischen();
+};
+$("bReset").onclick=function(){ if(takt){clearInterval(takt);takt=null;} z={zustand:START.zustand,alpha:START.alpha}; auffrischen(); };
+auffrischen();
+})();
+</script>
+</body></html>
