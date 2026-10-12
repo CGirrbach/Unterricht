@@ -1,0 +1,203 @@
+<!doctype html>
+<!-- Block EG1-B07 · Messplatz Stromstärke (Neubau 12.10.2026, Aufgabe IN der Stunde) -->
+<!-- Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht):
+     (1) Bei einem Gerät wächst die gezählte Ladung Q im selben Verhältnis wie die Zeit t:
+         doppelte Messzeit, doppelte Ladung.
+     (2) Q geteilt durch t ergibt genau die Anzeige des Strommessers: I = Q/t.
+     (3) Mit I = Q/t lässt sich vorhersagen, welche Ladung in einer Zeit fließt (Q = I · t)
+         und wie lange es bis zu einer Ladung dauert (t = Q/I).
+     Grenzfälle im Einstellbereich: 100 µA (Taschenrechner) bis 4,35 A (Bügeleisen), Schalter offen: I = 0.
+     Werte der Geräte: Europa Fachkunde S. 31, Tabelle „Beispiele elektrischer Stromstärken“
+     (Taschenrechner 100 µA, 10-W-LED-Lampe E 27 43 mA, Bügeleisen 4,35 A).
+     Elektronenzahl: Tabellenbuch S. 30, 1 As = 6,24151 · 10^18 e.
+     Startstellung neutral: kein Gerät, keine Messzeit, Schalter offen, Zähler 0. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Stromstärke (Block 07)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"geraet":null,"messzeit":null,"Q":0},"loesungswerte":{"LED-Lampe 10 s":"0,43 As","LED-Lampe 20 s":"0,86 As","Bügeleisen 10 s":"43,5 As","Taschenrechner 20 s":"2 mAs","Bügeleisen 20 s":"87 As"}}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62;--blau:#2557A3}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:980px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px}
+ @media(min-width:760px){.buehne{grid-template-columns:1.25fr 1fr}}
+ canvas{width:100%;height:auto;display:block;border:1px solid var(--linie);background:#fff;touch-action:manipulation}
+ .anzeigen{display:grid;grid-template-columns:1fr;gap:8px}
+ .anz{border:1.4px solid var(--ink);padding:8px 12px;background:var(--hell)}
+ .anz .name{font-size:14px;font-weight:700;color:var(--grau)}
+ .anz .wert{font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink)}
+ .anz.strom .wert{color:var(--kupfer)}
+ .anz .klein{font-size:13px;color:var(--grau)}
+ .wahl{margin:12px 0 4px}
+ .wahl .titel{font-size:14px;font-weight:700;margin:8px 0 4px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px}
+ button{font:inherit;font-size:15px;min-height:46px;padding:8px 14px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer}
+ button.an{background:var(--kupfer);color:#fff}
+ button:disabled{opacity:.45;cursor:not-allowed}
+ button.start{border-color:var(--gruen);color:#fff;background:var(--gruen);font-weight:700}
+ button.start:disabled{background:#fff;color:var(--gruen)}
+ table{width:100%;border-collapse:collapse;margin-top:12px;font-size:15px}
+ th,td{border:1px solid var(--linie);padding:6px 8px;text-align:left}
+ th{background:var(--hell);font-size:14px}
+ .tabelle{overflow-x:auto}
+ td.z{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+ .leer{color:var(--grau);font-style:italic}
+ @media(max-width:420px){.anz .wert{font-size:26px} th,td{padding:5px 5px;font-size:14px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E1EG · Lernfeld 1 · Block 07</div><h1>Messplatz Stromstärke</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Gerät wählen, Messzeit wählen, <b>Messung starten</b>. Während der Messung ist der Schalter geschlossen. Jede Messung landet unten im Messprotokoll.</div>
+
+ <div class="buehne">
+  <canvas id="c" width="560" height="330" data-quelle="Schaltung nach Europa Fachkunde S. 31, Bild 1 (Elektronenbewegung im Stromkreis) und Bild 2 (Leiterquerschnitt); Strommesser in Reihe"
+   aria-label="Stromkreis aus Spannungsquelle, Schalter, Strommesser und Gerät. Am Leiterquerschnitt wird die durchfließende Ladung gezählt. Bei geschlossenem Schalter bewegen sich Elektronen vom Minuspol durch das Gerät zum Pluspol."></canvas>
+  <div class="anzeigen">
+   <div class="anz strom"><div class="name">Strommesser</div><div class="wert" id="aI">0 A</div></div>
+   <div class="anz"><div class="name">Zeit t (Stoppuhr)</div><div class="wert" id="aT">0,0 s</div></div>
+   <div class="anz"><div class="name">Ladung Q durch den Leiterquerschnitt</div><div class="wert" id="aQ">0 As</div>
+    <div class="klein" id="aN">&nbsp;</div></div>
+  </div>
+ </div>
+
+ <div class="wahl">
+  <div class="titel">1. Gerät</div>
+  <div class="knoepfe" id="geraete"></div>
+  <div class="titel">2. Messzeit</div>
+  <div class="knoepfe" id="zeiten"></div>
+  <div class="titel">3. Messen</div>
+  <div class="knoepfe"><button class="start" id="bStart" disabled>Messung starten</button><button id="bReset">Zurücksetzen</button></div>
+ </div>
+
+ <div class="tabelle"><table id="protokoll">
+  <tr><th>Nr.</th><th>Gerät</th><th>Messzeit t</th><th>Strommesser I</th><th>Ladung Q</th></tr>
+  <tr class="leer"><td colspan="5">Noch keine Messung.</td></tr>
+ </table></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var GERAETE=[{n:"Taschenrechner",I:100e-6},{n:"LED-Lampe 10 W",I:0.043},{n:"Bügeleisen",I:4.35}];
+var ZEITEN=[5,10,20,30];
+var PRO_AS=6.24151e18;                       // Tabellenbuch S. 30: 1 As = 6,24151 · 10^18 e
+var zustand={g:null,tz:null,laeuft:false,t:0,Q:0,start:0,nr:0};
+var $=function(id){return document.getElementById(id);};
+var ruhig=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function komma(s){return s.replace(".",",");}
+function sig(x,n){                             // n gültige Ziffern, ohne überflüssige Nullen hinter dem Komma
+  if(x===0) return "0";
+  var s=Number(x.toPrecision(n)).toString();
+  if(s.indexOf("e")>=0) s=Number(x.toPrecision(n)).toFixed(6);
+  return komma(s);
+}
+function strom(I){
+  if(I===0) return "0 A";
+  if(I<1e-3) return sig(I*1e6,3)+" µA";
+  if(I<1) return sig(I*1e3,3)+" mA";
+  return sig(I,3)+" A";
+}
+function ladung(Q){
+  if(Q===0) return "0 As";
+  if(Q<0.1) return sig(Q*1e3,3)+" mAs";
+  return sig(Q,3)+" As";
+}
+function hoch(x){var e=Math.floor(Math.log10(x)),m=x/Math.pow(10,e);return komma(m.toFixed(2))+" · 10<sup>"+e+"</sup>";}
+
+function knoepfe(){
+  var gd=$("geraete"),zd=$("zeiten");
+  GERAETE.forEach(function(g,i){var b=document.createElement("button");b.textContent=g.n;b.onclick=function(){if(zustand.laeuft)return;zustand.g=i;auffrischen();};gd.appendChild(b);});
+  ZEITEN.forEach(function(z,i){var b=document.createElement("button");b.textContent=z+" s";b.onclick=function(){if(zustand.laeuft)return;zustand.tz=i;auffrischen();};zd.appendChild(b);});
+}
+function auffrischen(){
+  Array.prototype.forEach.call($("geraete").children,function(b,i){b.classList.toggle("an",zustand.g===i);b.disabled=zustand.laeuft;});
+  Array.prototype.forEach.call($("zeiten").children,function(b,i){b.classList.toggle("an",zustand.tz===i);b.disabled=zustand.laeuft;});
+  $("bStart").disabled=zustand.laeuft||zustand.g===null||zustand.tz===null;
+  var I=zustand.laeuft?GERAETE[zustand.g].I:0;
+  $("aI").textContent=strom(I);
+  $("aT").textContent=komma(zustand.t.toFixed(1))+" s";
+  $("aQ").textContent=ladung(zustand.Q);
+  $("aN").innerHTML=zustand.Q>0?"das sind n ≈ "+hoch(zustand.Q*PRO_AS)+" Elektronen":"&nbsp;";
+}
+function protokoll(){
+  var tb=$("protokoll"),leer=tb.querySelector("tr.leer"); if(leer) leer.remove();
+  var g=GERAETE[zustand.g],tr=document.createElement("tr");
+  tr.innerHTML="<td>"+zustand.nr+"</td><td>"+g.n+"</td><td class='z'>"+ZEITEN[zustand.tz]+" s</td><td class='z'>"+strom(g.I)+"</td><td class='z'>"+ladung(zustand.Q)+"</td>";
+  tb.appendChild(tr);
+}
+function starten(){
+  zustand.laeuft=true; zustand.t=0; zustand.Q=0; zustand.start=performance.now(); auffrischen(); requestAnimationFrame(schritt);
+}
+function schritt(jetzt){
+  if(!zustand.laeuft) return;
+  var T=ZEITEN[zustand.tz], g=GERAETE[zustand.g];
+  zustand.t=Math.min(T,(jetzt-zustand.start)/1000);
+  zustand.Q=g.I*zustand.t;
+  if(zustand.t>=T){ zustand.t=T; zustand.Q=g.I*T; zustand.laeuft=false; zustand.nr++; protokoll(); }
+  auffrischen(); zeichne(jetzt);
+  if(zustand.laeuft) requestAnimationFrame(schritt); else zeichne(jetzt);
+}
+function zuruecksetzen(){
+  zustand={g:null,tz:null,laeuft:false,t:0,Q:0,start:0,nr:0};
+  var tb=$("protokoll"); while(tb.rows.length>1) tb.deleteRow(1);
+  var tr=tb.insertRow(); tr.className="leer"; tr.innerHTML="<td colspan='5'>Noch keine Messung.</td>";
+  auffrischen(); zeichne(0);
+}
+
+// ---------- Schaltung ----------
+var c=$("c"), g2=c.getContext("2d");
+// Elektronenweg: vom Minuspol (unten) nach rechts, durch das Gerät nach oben, oben nach links zum Pluspol
+var WEG=[[150,270],[460,270],[460,215],[460,135],[460,70],[150,70]];
+function laenge(){var s=0;for(var i=1;i<WEG.length;i++)s+=Math.hypot(WEG[i][0]-WEG[i-1][0],WEG[i][1]-WEG[i-1][1]);return s;}
+var L=laenge();
+function punkt(s){for(var i=1;i<WEG.length;i++){var a=WEG[i-1],b=WEG[i],d=Math.hypot(b[0]-a[0],b[1]-a[1]);if(s<=d)return[a[0]+(b[0]-a[0])*s/d,a[1]+(b[1]-a[1])*s/d];s-=d;}return WEG[WEG.length-1];}
+function zeichne(jetzt){
+  var W=c.width,H=c.height; g2.clearRect(0,0,W,H);
+  g2.lineWidth=3; g2.strokeStyle="#1A2530"; g2.fillStyle="#1A2530";
+  // Spannungsquelle
+  g2.fillStyle="#F4F6F8"; g2.fillRect(40,50,110,240); g2.strokeRect(40,50,110,240);
+  g2.fillStyle="#1A2530"; g2.font="bold 26px 'Noto Sans',sans-serif"; g2.textAlign="center";
+  g2.fillText("+",130,92); g2.fillText("−",130,282);
+  g2.font="25px 'Noto Sans',sans-serif"; g2.save(); g2.translate(84,170); g2.rotate(-Math.PI/2); g2.fillText("Spannungsquelle",0,0); g2.restore();
+  // Leitungen
+  g2.beginPath(); g2.moveTo(150,70); g2.lineTo(230,70); g2.moveTo(285,70); g2.lineTo(330,70); g2.moveTo(380,70); g2.lineTo(460,70); g2.lineTo(460,135);
+  g2.moveTo(460,215); g2.lineTo(460,270); g2.lineTo(150,270); g2.stroke();
+  // Schalter
+  var zu=zustand.laeuft;
+  g2.beginPath(); g2.arc(230,70,4,0,6.283); g2.arc(285,70,4,0,6.283); g2.fill();
+  g2.beginPath(); g2.moveTo(230,70); if(zu) g2.lineTo(285,70); else g2.lineTo(279,40); g2.stroke();
+  g2.font="24px 'Noto Sans',sans-serif"; g2.fillText(zu?"Schalter zu":"Schalter offen",258,30);
+  // Leiterquerschnitt
+  g2.setLineDash([6,5]); g2.strokeStyle="#A34E0E"; g2.lineWidth=2;
+  g2.beginPath(); g2.ellipse(300,270,9,22,0,0,6.283); g2.stroke(); g2.setLineDash([]);
+  g2.fillStyle="#A34E0E"; g2.textAlign="center"; g2.font="24px 'Noto Sans',sans-serif"; g2.fillText("Leiterquerschnitt",300,318);
+  // Elektronen
+  var I=zu?GERAETE[zustand.g].I:0;
+  var v = I>0 ? 18+22*(Math.log10(I)+4) : 0;   // px je s; 100 µA langsam, 4,35 A schnell
+  var phase = ruhig ? 0 : (jetzt/1000*v)%34;
+  g2.fillStyle="#2557A3";
+  for(var s=phase;s<L;s+=34){ var p=punkt(s); if(p[0]>=150&&p[0]<=460){ g2.beginPath(); g2.arc(p[0],p[1],5,0,6.283); g2.fill(); } }
+  g2.textAlign="left"; g2.font="23px 'Noto Sans',sans-serif"; g2.fillStyle="#2557A3";
+  g2.fillText("Elektronen", 166, 252);
+  g2.lineWidth=3; g2.strokeStyle="#1A2530";
+  // Strommesser
+  g2.fillStyle="#fff"; g2.beginPath(); g2.arc(355,70,25,0,6.283); g2.fill(); g2.stroke();
+  g2.fillStyle="#A34E0E"; g2.font="bold 24px 'Noto Sans',sans-serif"; g2.fillText("A",355,79);
+  // Gerät
+  g2.fillStyle="#fff"; g2.fillRect(430,135,60,80); g2.strokeRect(430,135,60,80);
+  g2.fillStyle="#1A2530"; g2.font="24px 'Noto Sans',sans-serif"; g2.textAlign="right";
+  g2.fillText(zustand.g===null?"Gerät":GERAETE[zustand.g].n.split(" ")[0],420,182);
+}
+function schleife(t){ if(!zustand.laeuft) zeichne(t); requestAnimationFrame(schleife); }
+$("bStart").onclick=starten; $("bReset").onclick=zuruecksetzen;
+knoepfe(); auffrischen(); requestAnimationFrame(schleife);
+})();
+</script>
+</body></html>
