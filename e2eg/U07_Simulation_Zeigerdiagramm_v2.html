@@ -33,9 +33,9 @@ button{font:inherit;font-weight:700;font-size:clamp(15px,3.6vw,17px);padding:10p
       border:1.6px solid var(--ink);background:#fff;color:var(--ink);cursor:pointer;flex:1 1 140px}
 button.haupt{background:var(--kupfer);border-color:var(--kupfer);color:#fff}
 button:focus-visible{outline:3px solid var(--kupfer);outline-offset:2px}
-.anzeigen{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;max-width:960px;
+.anzeigen{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;max-width:960px;
       margin:8px auto 0;padding:0 18px}
-.kachel{border:1.4px solid var(--linie);padding:8px 12px}
+.kachel{border:1.4px solid var(--linie);padding:8px 10px;min-width:0}
 .kachel span{display:block;font-size:clamp(13px,3.2vw,14px);color:var(--grau);font-weight:700}
 .kachel b{font-size:clamp(22px,5.2vw,26px);font-variant-numeric:tabular-nums}
 .fuss{max-width:960px;margin:12px auto 24px;padding:0 18px;font-size:clamp(14px,3.4vw,15px);color:var(--grau);
@@ -47,8 +47,8 @@ button:focus-visible{outline:3px solid var(--kupfer);outline-offset:2px}
 <header><h1>Messplatz: Zwei Zeiger anhalten</h1></header>
 
 <div class="ziel"><b>So arbeiten Sie</b>
-Zwei Zeiger drehen sich in Zeitlupe. Daneben steht ihr Liniendiagramm. Stellen Sie ein, starten Sie, halten Sie an
-und lesen Sie unten ab.</div>
+Zwei Zeiger drehen sich in Zeitlupe, dazu ihr Liniendiagramm. Stellen Sie ein, starten Sie, halten Sie an und
+lesen Sie die Anzeigen ab.</div>
 
 <script type="application/json" id="sim-meta">
 {
@@ -61,6 +61,20 @@ und lesen Sie unten ab.</div>
 
 <canvas id="buehne" width="960" height="400" aria-label="Zeigerbild mit zwei Zeigern und Liniendiagramm"></canvas>
 
+<div class="anzeigen">
+  <div class="kachel"><span>Lage von û₁</span><b id="a1">0°</b></div>
+  <div class="kachel"><span>Lage von û₂</span><b id="a2">0°</b></div>
+  <div class="kachel"><span>Winkel von û₁ bis û₂</span><b id="dw">0°</b></div>
+</div>
+
+<div class="regler">
+  <div class="knoepfe">
+    <button type="button" id="lauf" class="haupt">Start</button>
+    <button type="button" id="start">Zurück auf Start</button>
+    <button type="button" id="reset">Zurücksetzen</button>
+  </div>
+</div>
+
 <div class="regler">
   <div class="zeile">
     <label for="lage2">Startlage von û₂</label>
@@ -72,17 +86,6 @@ und lesen Sie unten ab.</div>
     <input type="range" id="f2" min="30" max="70" step="5" value="50">
     <span class="wert" id="f2w">50 Hz</span>
   </div>
-  <div class="knoepfe">
-    <button type="button" id="lauf" class="haupt">Start</button>
-    <button type="button" id="start">Zurück auf Start</button>
-    <button type="button" id="reset">Zurücksetzen</button>
-  </div>
-</div>
-
-<div class="anzeigen">
-  <div class="kachel"><span>Lage von û₁</span><b id="a1">0°</b></div>
-  <div class="kachel"><span>Lage von û₂</span><b id="a2">0°</b></div>
-  <div class="kachel"><span>Winkel von û₁ bis û₂</span><b id="dw">0°</b></div>
 </div>
 
 <div class="fuss">
@@ -106,7 +109,7 @@ Waagerechten nach rechts. Im Liniendiagramm ist α die Lage von û₁.
   /* Zwei Anordnungen: breit (Tafel) Zeiger links, Liniendiagramm rechts, gleicher Maßstab, damit die waagerechten
      Hilfslinien von der Zeigerspitze zum Kurvenpunkt laufen; schmal (Handy) beides untereinander, größere Schrift. */
   var BREIT  = {W: 960, H: 400, cx: 190, cy: 200, s: 36, x0: 430, x1: 915, ly: 200, f: 20, lw: 1, proj: true},
-      SCHMAL = {W: 600, H: 980, cx: 300, cy: 240, s: 48, x0: 90, x1: 560, ly: 720, f: 30, lw: 1.5, proj: false};
+      SCHMAL = {W: 600, H: 830, cx: 300, cy: 200, s: 40, x0: 90, x1: 560, ly: 610, f: 30, lw: 1.5, proj: false};
   var G = BREIT;
   function anordnen() {
     var neu = (cv.parentNode.clientWidth || window.innerWidth) < 640 ? SCHMAL : BREIT;
