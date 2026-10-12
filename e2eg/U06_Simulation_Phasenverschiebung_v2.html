@@ -1,321 +1,229 @@
-<!-- sim_bearbeitung: pflicht -->
-<!-- Fassung 2 (12.10.2026, Neubau U06 als Word und PowerPoint). Gegenüber
-     U06_Simulation_Phasenverschiebung.html (Adresse bleibt unverändert online):
-     1. Der Fußtext nennt die Formel φ = 360° · Δt / T nicht mehr; die Schüler finden den
-        Zusammenhang am Messplatz selbst (Aufgabe 2 des Arbeitsblatts).
-     2. Die Kachel „Lage“ lief bei „phasenverschoben“ in 1000 px Breite über den Rand
-        (Bild sim_nach_js.png, 270° bei 50 Hz); jetzt mit weichem Trennstrich.
-     3. Formelzeichen (u, f, T, φ, t) kursiv, auch im Bild.
-     Rechenlogik (bewerte, marken) unverändert. -->
-<!doctype html><html lang="de"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>U06 Simulation: zwei Sinuskurven mit verstellbarer Phasenlage</title>
+<!doctype html>
+<!-- E2EG U06 · Messplatz Zweikanal-Oszilloskop: Phasenverschiebung (neu 12.10.2026, Aufgabe IN der Stunde nach dem
+     Muster E1EG Block 07 und E2EG U02).
+     Ersetzt die eigene Zwischenfassung dieser Adresse vom selben Tag (Kurvenbild mit fertigen Kacheln für φ, Δt,
+     „Es eilt vor“; Carlo 12.10.2026: Simulationen auf Eignung prüfen, Messplatz statt Vorführung). Die alte Adresse
+     U06_Simulation_Phasenverschiebung.html bleibt unverändert online.
+     Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht und rechnet nichts vor):
+       (1) Die Zeitdifferenz Δt ist derselbe Teil der Periodendauer T wie der Winkel vom Vollwinkel 360°.
+       (2) Voreilend ist die Spannung, die den Nulldurchgang gleicher Richtung früher erreicht (weiter links);
+           Phasenlage 270° am Generator heißt im Bild: u₁ eilt um 90° vor; bei 180° eilt keine vor (gegenphasig),
+           bei 0° und 360° fallen Nulldurchgänge und Scheitelwerte zusammen (phasengleich).
+     Rechenmodell: u₁ = 3 div · sin(360° · f · t), u₂ = 2 div · sin(360° · f · t + Phasenlage); Amplitude 2 V je div
+     (û₁ = 6 V, û₂ = 4 V); getriggert auf den steigenden Nulldurchgang von u₁ am linken Rand. Bildschirm 10 div × 8 div.
+     Vorbild: Fachkunde S. 134 Versuch 1 (Zweikanal-Oszilloskop, Linienbild), S. 185 Praxistipp „Bestimmen der
+     Phasenverschiebung φ“ (Abstand Δx, Länge x_T), S. 215 („Phasenlage … gegenphasig, 180°“); Tabellenbuch S. 35
+     (Phasenverschiebung, Δt zwischen Nulldurchgängen gleicher Richtung); Rechenbuch S. 143 (Zweikanal-Oszilloskop).
+     Exaktheit: Bei den Aufgabeneinstellungen (25 Hz und 50 Hz, 5 ms je div, Phasenlage Vielfache von 45°) liegen alle
+     Nulldurchgänge und Scheitel auf Rasterlinien: 25 Hz ergibt T = 40 ms = 8 div, 45° = 1 div; 50 Hz ergibt T = 4 div,
+     90° = 1 div. Prüfmodus ?pruefen: Nulldurchgänge aus genau den gezeichneten Punkten, als JSON in #pruefbericht.
+     Startstellung neutral: 10 Hz, 0°, 10 ms je div (keine Aufgabeneinstellung). -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Zweikanal-Oszilloskop (U06)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"frequenz_Hz":10,"phasenlage_grad":0,"zeitbasis_ms_je_div":10},"loesungswerte":{"25 Hz, 5 ms je div":"Periode 8 div = 40 ms","45°":"Δx = 1 div, u₂ eilt vor","90°":"Δx = 2 div, u₂ eilt vor","180°":"Δx = 4 div, gegenphasig","270°":"Δx = 2 div, u₁ eilt vor","50 Hz, 90°":"Periode 4 div = 20 ms, Δx = 1 div","360°":"phasengleich"},"quelle":"Europa Fachkunde S. 134, S. 185, S. 215; Tabellenbuch Elektrotechnik S. 35; Europa-Rechenbuch S. 143"}</script>
 <style>
-:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--linie:#C7D2DA;
-      --gruen:#2F7D62;--rot:#B23A33;--grau:#5A666F}
-*{box-sizing:border-box}
-body{margin:0;font-family:'Noto Sans',system-ui,sans-serif;color:var(--ink);background:#fff}
-header{border-top:6px solid var(--kupfer);padding:14px 18px 10px}
-h1{margin:0;font-size:clamp(18px,4vw,26px)}
-.ziel{background:var(--kupferhell);border-left:5px solid var(--kupfer);
-      padding:12px 16px;margin:12px 18px;font-size:clamp(14px,3vw,17px)}
-.ziel > b:first-child{display:block;font-size:.82em;letter-spacing:.08em;text-transform:uppercase;
-        color:var(--kupfer);margin-bottom:4px}
-canvas{display:block;width:100%;max-width:960px;margin:0 auto;height:auto}
-.regler{max-width:960px;margin:0 auto;padding:8px 18px 4px}
-.zeile{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:14px 0}
-.zeile label{flex:0 0 230px;font-weight:700;font-size:clamp(14px,3vw,17px)}
-/* Der Regler trug die Vorgabefarbe des Browsers (Blau), die einzige Farbe im Bild, die
-   nicht aus dem Haus stammt, und ausgerechnet am Bedienelement (Befund Linse BLATT,
-   U03/B2 und U04/B5, 01.09.2026). Er trägt jetzt Kupfer wie alles Bedienbare. */
-input[type=range]{flex:1 1 220px;min-width:180px;height:44px;accent-color:var(--kupfer);
-  -webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
-input[type=range]::-webkit-slider-runnable-track{height:8px;background:var(--linie);border-radius:4px}
-input[type=range]::-moz-range-track{height:8px;background:var(--linie);border-radius:4px}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;
-  height:26px;margin-top:-9px;border-radius:50%;background:var(--kupfer);border:2px solid #fff;
-  box-shadow:0 0 0 1.4px var(--kupfer)}
-input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;
-  background:var(--kupfer);border:2px solid #fff}
-input[type=range]:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
-.wert{flex:0 0 128px;text-align:right;font-variant-numeric:tabular-nums;
-      font-size:clamp(15px,3.2vw,19px);font-weight:700;color:var(--kupfer)}
-.anzeigen{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;
-          max-width:960px;margin:6px auto 0;padding:0 18px}
-.kachel{border:1.4px solid var(--linie);padding:10px 12px}
-.kachel span{display:block;font-size:.78em;letter-spacing:.06em;color:var(--grau);
-             font-weight:700}
-.kachel b{font-size:clamp(17px,3.6vw,22px);display:block;overflow-wrap:anywhere;hyphens:manual}
-i{font-family:'Noto Serif',Cambria,Georgia,serif}
-.kachel.verdeckt b{color:var(--grau)}
-button{font:inherit;font-weight:700;padding:12px 20px;min-height:48px;border:1.6px solid var(--ink);
-       background:#fff;color:var(--ink);cursor:pointer}
-button:hover{background:var(--kupferhell)}
-.fuss{max-width:960px;margin:14px auto 26px;padding:0 18px;font-size:.86em;color:var(--grau)}
-.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
-      line-height:1.15;margin:0 .15em}
-.frac .z{border-bottom:1.2px solid currentColor;padding:0 .25em}
-#pruefbericht{display:none}
-@media (prefers-reduced-motion: reduce){canvas{outline:none}}
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--blau:#1F5FA8}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:980px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px;align-items:start}
+ @media(min-width:760px){.buehne{grid-template-columns:1.6fr 1fr}}
+ .schirm{border:3px solid var(--ink);background:#30363c;padding:8px;border-radius:6px}
+ canvas{width:100%;height:auto;display:block;background:#DDE8DC;touch-action:manipulation}
+ .einstellung{display:flex;flex-wrap:wrap;gap:4px 18px;align-items:center;color:#fff;font-size:15px;padding:8px 2px 2px}
+ .einstellung b{color:#FFE66B}
+ .kanal{display:inline-flex;align-items:center;gap:6px}
+ .strich{display:inline-block;width:26px;height:4px;border-radius:2px}
+ .generator{border:3px solid var(--ink);background:var(--hell);padding:10px 12px;border-radius:6px}
+ .generator .name{font-size:14px;font-weight:700;color:var(--grau)}
+ .lcd{background:#20313a;color:#9BF0B4;font-variant-numeric:tabular-nums;font-size:30px;font-weight:700;padding:6px 12px;margin:6px 0;border-radius:4px;text-align:right}
+ .lcd small{font-size:15px;color:#cfe;font-weight:400;float:left;margin-top:10px}
+ .generator .form{font-size:14px;color:var(--grau)}
+ .wahl{margin:14px 0 4px}
+ .wahl .titel{font-size:15px;font-weight:700;margin:10px 0 5px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+ button{font:inherit;font-size:16px;min-height:48px;min-width:58px;padding:6px 12px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+ button.an{background:var(--kupfer);color:#fff}
+ button.zurueck{border-color:var(--ink);color:var(--ink)}
+ .bruch{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;font-size:.78em;line-height:1.05}
+ .bruch>span:first-child{border-bottom:1.3px solid currentColor;padding:0 2px}
+ .bruch>span:last-child{padding:0 2px}
+ .fz{font-family:Cambria,Caladea,'Noto Serif',Georgia,serif;font-style:italic}
+ .hinweis{font-size:14px;color:var(--grau);margin-top:10px}
+ #pruefbericht{display:none}
+ @media(max-width:420px){.lcd{font-size:26px} button{min-width:52px;padding:6px 9px;font-size:15px} .einstellung{font-size:14px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E2EG · LF 5 · U06</div><h1>Messplatz Zweikanal-Oszilloskop</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Am Generator Frequenz und Phasenlage von Kanal 2 wählen, am Oszilloskop
+  die Zeitbasis. Dann Kästchen (div) zählen: die Länge einer Periode und den Abstand Δ<span class="fz">x</span> zweier
+  Nulldurchgänge <b>gleicher Richtung</b> (beide von Minus nach Plus oder beide von Plus nach Minus), die höchstens eine
+  halbe Periode auseinanderliegen.</div>
 
-<header>
-<h1>Zwei Sinuskurven mit verstellbarer Phasenlage</h1>
-</header>
+ <div class="buehne">
+  <div class="schirm">
+   <canvas id="c" width="600" height="480" aria-label="Bildschirm des Zweikanal-Oszilloskops mit Raster aus 10 mal 8 Kästchen und den Kurven der Spannungen u1 und u2."></canvas>
+   <div class="einstellung" aria-live="polite">
+    <span class="kanal"><span class="strich" style="background:#5B9BE6"></span><span>Kanal 1: <span class="fz">u</span>₁</span></span>
+    <span class="kanal"><span class="strich" style="background:#E8894A"></span><span>Kanal 2: <span class="fz">u</span>₂</span></span>
+    <span>Amplitude: <b>2 <span class="bruch"><span>V</span><span>div</span></span></b></span>
+    <span>Zeitbasis: <b id="aZ"></b></span>
+   </div>
+  </div>
+  <div class="generator">
+   <div class="name">Zweikanal-Funktionsgenerator</div>
+   <div class="lcd" id="aF"><small>Frequenz</small>10 Hz</div>
+   <div class="lcd" id="aP"><small>Phasenlage Kanal 2</small>0°</div>
+   <div class="form">Signalform: Sinus, Kanal 1 und Kanal 2</div>
+  </div>
+ </div>
 
-<div class="ziel">
-<b>Was Sie herausfinden sollen</b>
-Beide Kurven haben <b>dieselbe Frequenz</b> und <b>dieselbe Höhe</b>. Mit dem oberen Schieber
-verschieben Sie <i>u</i>₂ nach links, also zu früheren Zeiten. Beobachten Sie den
-Phasenverschiebungswinkel <i>φ</i>, die Zeitdifferenz Δ<i>t</i> und die markierten Nulldurchgänge.
-Entscheiden Sie <b>selbst im Bild</b>, welche Kurve voreilt, und prüfen Sie erst danach mit
-„Antwort zeigen“. Was geschieht, wenn Sie über 180° hinaus schieben, und was bei 360°?
+ <div class="wahl">
+  <div class="titel">1. Frequenz am Generator</div>
+  <div class="knoepfe" id="frequenzen"></div>
+  <div class="titel">2. Phasenlage von Kanal 2 am Generator</div>
+  <div class="knoepfe" id="phasen"></div>
+  <div class="titel">3. Zeitbasis am Oszilloskop</div>
+  <div class="knoepfe" id="zeitbasen"></div>
+  <div class="titel">4. Neu beginnen</div>
+  <div class="knoepfe"><button class="zurueck" id="bReset" type="button">Zurücksetzen</button></div>
+ </div>
+ <div class="hinweis">Der Bildschirm ist 10 div breit und 8 div hoch; die Mittellinien tragen Teilstriche im Abstand von
+  0,2 div. Das Oszilloskop ist auf <span class="fz">u</span>₁ getriggert: <span class="fz">u</span>₁ beginnt am linken
+  Rand mit dem Nulldurchgang von Minus nach Plus.</div>
+ <pre id="pruefbericht"></pre>
 </div>
-
-<script type="application/json" id="sim-meta">
-{
-  "erkenntnis": "dass eine Phasenverschiebung sowohl als Zeit als auch als Winkel angegeben werden kann, dass man Nulldurchgänge gleicher Richtung vergleicht, die höchstens eine halbe Periode auseinanderliegen, dass die voreilende Kurve diesen Nulldurchgang früher erreicht und im Bild weiter links steht, dass eine Verschiebung um mehr als 180° von der anderen Seite gelesen wird (dann eilt u₁ um 360° minus die Verschiebung vor), dass bei 180° keine Kurve voreilt (gegenphasig) und dass 360° dieselbe Lage ergibt wie 0°",
-  "startwerte":     {"verschiebung": 40, "frequenz": 60},
-  "loesungswerte":  {"verschiebung": 270, "frequenz": 50},
-  "quelle": "Europa Fachkunde S. 134 (Definition, Bild 1b) und S. 135 (nacheilen: Scheitelwert später erreicht); Tabellenbuch Elektrotechnik S. 35 (Phasenverschiebung: Liniendiagramm mit Δt zwischen gleichsinnigen Nulldurchgängen, φ° = Δt · 360°/T); Europa Fachkunde S. 215 und 219 (gegenphasig, 180°); Technische Mathematik, Lösungen S. 38 (Winkel bis 180° mit voreilend/nacheilend)"
-}
-</script>
-
-<canvas id="buehne" width="960" height="330"
-        data-quelle="Liniendiagramm zweier Sinusspannungen gleicher Frequenz und Höhe; Grundlage Europa Fachkunde S. 134, Bild 1b, und Tabellenbuch Elektrotechnik S. 35 (Phasenverschiebung)"></canvas>
-
-<div class="regler">
-<div class="zeile">
-  <label for="ph">Verschiebung von <i>u</i>₂ nach links</label>
-  <input type="range" id="ph" min="0" max="360" step="1" value="40">
-  <span class="wert" id="phw">40&deg;</span>
-</div>
-<div class="zeile">
-  <label for="fr">Frequenz <i>f</i></label>
-  <input type="range" id="fr" min="10" max="100" step="1" value="60">
-  <span class="wert" id="frw">60 Hz</span>
-</div>
-<div class="zeile">
-  <button id="antwort" type="button">Antwort zeigen</button>
-  <button id="reset" type="button">Zurücksetzen</button>
-  <button id="halt" type="button">Anhalten</button>
-</div>
-</div>
-
-<div class="anzeigen">
-  <div class="kachel"><span>Periodendauer <i>T</i></span><b id="tw">16,7 ms</b></div>
-  <div class="kachel"><span>Phasen&shy;verschiebungs&shy;winkel <i>φ</i></span><b id="pw">40°</b></div>
-  <div class="kachel"><span>Zeitdifferenz &Delta;<i>t</i></span><b id="dw">1,85 ms</b></div>
-  <div class="kachel verdeckt" id="kv"><span>Es eilt vor</span><b id="vw">?</b></div>
-  <div class="kachel verdeckt" id="kl"><span>Lage</span><b id="lw">?</b></div>
-</div>
-
-<div class="fuss">
-Die senkrechten Markierungen zeigen zwei Nulldurchgänge <b>gleicher Richtung</b> (von Minus nach
-Plus), die höchstens eine halbe Periode auseinanderliegen; ihr Abstand ist die Zeitdifferenz
-Δ<i>t</i>. Mit „Anhalten“ bleibt das Bild stehen.
-</div>
-
-<pre id="pruefbericht"></pre>
 
 <script>
 (function(){
- "use strict";
- var cv=document.getElementById('buehne'), ctx=cv.getContext('2d');
- var meta=JSON.parse(document.getElementById('sim-meta').textContent);
- var s=meta.startwerte.verschiebung, f=meta.startwerte.frequenz;
- var laeuft=true, raf=null, t0=0, offen=false;
- var ruhig = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
- /* Zwei Anordnungen derselben Zeichnung (06.10.2026). Am Handy (schmaler als 640 px) stand das
-    Querformat (960 auf 330 Bildpunkte) auf zwei Fünftel verkleinert da: Beschriftung 7 bis 8 px
-    hoch, unlesbar (am Standbild in 390 px Breite gesehen). Schmal: dieselben zwei Perioden auf
-    600 auf 430 Bildpunkten, größere Schrift, dickere Linien, lange Beschriftungen zweizeilig. */
- var BREIT  = {W:960, H:330, X0:90, XE:930, CY:150, A:95,  su:20, sd:18, uy:24, dx2:52,
-               ty:50, zeile:0,  lw:1,   r:5},
-     SCHMAL = {W:600, H:430, X0:50, XE:578, CY:190, A:120, su:28, sd:24, uy:30, dx2:72,
-               ty:60, zeile:30, lw:7/5, r:7};
- var G = BREIT, X0, XE, CY, A, ZWEI_PI=2*Math.PI;
- function anordnen(){
-  var neu = (cv.parentNode.clientWidth || window.innerWidth) < 640 ? SCHMAL : BREIT;
-  if (neu !== G || cv.width !== neu.W) { G = neu; cv.width = G.W; cv.height = G.H; }
-  X0=G.X0; XE=G.XE; CY=G.CY; A=G.A;
- }
- anordnen();
+"use strict";
+var FREQUENZEN=[10,25,50,100];                       // Hz
+var PHASEN=[0,45,90,135,180,225,270,315,360];        // Grad, Phasenlage von Kanal 2
+var ZEITBASEN=[1,2,5,10];                            // ms je div
+var START={f:10,p:0,z:10};
+var A1=3, A2=2;                                      // Scheitelwerte in div (6 V und 4 V bei 2 V je div)
+var zustand={f:START.f,p:START.p,z:START.z};
+var $=function(id){return document.getElementById(id);};
+var bewegung=!(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 
- function zahl(x, st){ return x.toFixed(st).replace('.', ','); }
- function T_ms(){ return 1000/f; }
- function px(a){ return X0 + (XE-X0)*a/(4*Math.PI); }   /* zwei volle Perioden */
+function komma(x){return String(x).replace(".",",");}
+function bruch(z,n){return "<span class='bruch'><span>"+z+"</span><span>"+n+"</span></span>";}
+function zeitbasisHtml(z){return komma(z)+" "+bruch("ms","div");}
 
- /* Was das BILD zeigt, bei einer Verschiebung von u₂ um sGrad nach links.
-    Verglichen werden Nulldurchgänge gleicher Richtung, die höchstens eine halbe Periode
-    auseinanderliegen (Tabellenbuch S. 35: Δt zwischen zwei fallenden Nulldurchgängen;
-    Technische Mathematik, Lösungen S. 38: Winkel bis 180° mit „voreilend/nacheilend“).
-    Bis zum 26.09.2026 meldete die Kachel für JEDEN Winkel von 1° bis 359° „u₂ eilt vor“;
-    bei 180° gibt das Bild keine voreilende Kurve her, darüber eilt u₁ vor (Befund der
-    Linsen FACH B3, DIDAKTIK B1, BLATT B13). */
- function bewerte(sGrad){
-  var sr = ((sGrad % 360) + 360) % 360;
-  if (sr === 0)   return {phi: 0,        vor: 'keine', lage: 'phasengleich'};
-  if (sr < 180)   return {phi: sr,       vor: 'u₂',    lage: 'phasenverschoben'};
-  if (sr === 180) return {phi: 180,      vor: 'keine', lage: 'gegenphasig'};
-  return                 {phi: 360 - sr, vor: 'u₁',    lage: 'phasenverschoben'};
- }
-
- /* Welche Nulldurchgänge werden markiert? u₁ = sin(a + lauf) steigt bei a₁ = −lauf (mod 2π)
-    durch null, u₂ = sin(a + lauf + s) bei a₁ − s (mod 2π). Markiert wird das NÄCHSTE Paar;
-    liegt eine Marke links vom Bild, rücken beide um eine Periode nach rechts. */
- function marken(lauf, sGrad){
-  var b = bewerte(sGrad), a1 = ((-lauf) % ZWEI_PI + ZWEI_PI) % ZWEI_PI, d = b.phi*Math.PI/180;
-  if (b.lage === 'phasengleich') return {m: [[1, a1], [2, a1]], balken: []};
-  if (b.lage === 'gegenphasig') {
-   if (a1 < Math.PI) a1 += ZWEI_PI;
-   return {m: [[1, a1], [2, a1 - Math.PI], [2, a1 + Math.PI]],
-           balken: [[a1 - Math.PI, a1], [a1, a1 + Math.PI]]};
-  }
-  if (b.vor === 'u₂') {
-   var a2 = a1 - d;
-   if (a2 < -1e-9) { a1 += ZWEI_PI; a2 += ZWEI_PI; }
-   return {m: [[1, a1], [2, a2]], balken: [[a2, a1]]};
-  }
-  return {m: [[1, a1], [2, a1 + d]], balken: [[a1, a1 + d]]};
- }
-
- function kurve(ph, farbe, breite){
-  ctx.strokeStyle=farbe; ctx.lineWidth=breite*G.lw; ctx.beginPath();
-  for(var a=0;a<=4*Math.PI;a+=0.01){
-   var x=px(a), y=CY-A*Math.sin(a+ph);
-   if(a===0)ctx.moveTo(x,y); else ctx.lineTo(x,y);
-  }
-  ctx.stroke();
- }
-
- function marke(a, farbe){
-  var x = px(a);
-  ctx.strokeStyle=farbe; ctx.lineWidth=2*G.lw; ctx.setLineDash([5,4]);
-  ctx.beginPath(); ctx.moveTo(x, CY-A-6); ctx.lineTo(x, CY+A+16); ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.fillStyle=farbe; ctx.beginPath(); ctx.arc(x, CY, G.r, 0, 2*Math.PI); ctx.fill();
- }
-
- function zeichne(lauf){
-  ctx.clearRect(0,0,cv.width,cv.height);
-  ctx.font="17px 'Noto Sans',sans-serif"; ctx.lineCap="round";
-  ctx.strokeStyle="#C7D2DA"; ctx.lineWidth=1.4;
-  ctx.beginPath(); ctx.moveTo(X0-40,CY); ctx.lineTo(XE+14,CY); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(X0,CY-A-12); ctx.lineTo(X0,CY+A+30); ctx.stroke();
-  var ph2 = s*Math.PI/180;
-  kurve(lauf,       "#1A2530", 2.6);           /* u₁ */
-  kurve(lauf+ph2,   "#A34E0E", 2.6);           /* u₂, um s nach links verschoben */
-  var mk = marken(lauf, s), b = bewerte(s);
-  mk.m.forEach(function(p){ marke(p[1], p[0] === 1 ? "#1A2530" : "#A34E0E"); });
-  ctx.strokeStyle="#2F7D62"; ctx.lineWidth=G.lw*13/5;
-  mk.balken.forEach(function(z){
-   ctx.beginPath(); ctx.moveTo(px(z[0]), CY+A+26); ctx.lineTo(px(z[1]), CY+A+26); ctx.stroke();
+function knopfreihe(id, werte, text, aria, setze){
+  werte.forEach(function(w){
+    var b=document.createElement("button"); b.type="button"; b.innerHTML=text(w); b.dataset.wert=w;
+    b.setAttribute("aria-label",aria(w));
+    b.onclick=function(){setze(w);auffrischen(true);}; $(id).appendChild(b);
   });
-  ctx.fillStyle="#2F7D62";
-  var dt = zahl(T_ms()*b.phi/360, 2) + " ms", zeilen, tx;
-  var DT = [["Δ", 0], ["t", 1]];                 /* Δ aufrecht, t kursiv (Formelzeichen) */
-  if (mk.balken.length === 1) {
-   zeilen = [DT.concat([[" = " + dt, 0]])]; tx = px(Math.min(mk.balken[0][0], mk.balken[0][1])) + 6;
-  } else if (mk.balken.length === 2) {
-   zeilen = G.zeile ? [[["nach links wie nach rechts", 0]], DT.concat([[" = " + dt, 0]])]
-                    : [[["nach links wie nach rechts ", 0]].concat(DT, [[" = " + dt, 0]])];
-   tx = px(mk.balken[0][0]) + 6;
-  } else {
-   zeilen = G.zeile ? [DT.concat([[" = 0 ms:", 0]]), [["die Kurven decken sich", 0]]]
-                    : [DT.concat([[" = 0 ms: die Kurven decken sich", 0]])];
-   tx = X0 + 8;
+}
+function markiere(id,wert){
+  Array.prototype.forEach.call($(id).children,function(b){b.classList.toggle("an",parseFloat(b.dataset.wert)===wert);});
+}
+function auffrischen(animiert){
+  markiere("frequenzen",zustand.f); markiere("phasen",zustand.p); markiere("zeitbasen",zustand.z);
+  $("aF").innerHTML="<small>Frequenz</small>"+komma(zustand.f)+" Hz";
+  $("aP").innerHTML="<small>Phasenlage Kanal 2</small>"+zustand.p+"°";
+  $("aZ").innerHTML=zeitbasisHtml(zustand.z);
+  zeichne(animiert&&bewegung);
+}
+
+// ---------- Bildschirm ----------
+var c=$("c"), g=c.getContext("2d");
+var DPR=Math.max(1,Math.min(3,window.devicePixelRatio||1));
+var BW=600, BH=480, DIV=60;                          // logische Größe: 10 × 8 div zu je 60 Bildpunkten
+c.width=BW*DPR; c.height=BH*DPR; g.scale(DPR,DPR);
+var lauf=null;
+
+function raster(){
+  g.fillStyle="#DDE8DC"; g.fillRect(0,0,BW,BH);
+  g.strokeStyle="rgba(26,37,48,0.45)"; g.lineWidth=1;
+  for(var i=0;i<=10;i++){ var x=Math.round(i*DIV)+0.5; if(i===10) x-=1; g.beginPath(); g.moveTo(x,0); g.lineTo(x,BH); g.stroke(); }
+  for(var j=0;j<=8;j++){ var y=Math.round(j*DIV)+0.5; if(j===8) y-=1; g.beginPath(); g.moveTo(0,y); g.lineTo(BW,y); g.stroke(); }
+  g.strokeStyle="#1A2530"; g.lineWidth=2;
+  g.beginPath(); g.moveTo(0,BH/2); g.lineTo(BW,BH/2); g.moveTo(BW/2,0); g.lineTo(BW/2,BH); g.stroke();
+  g.lineWidth=1.5;
+  for(var k=0;k<=50;k++){ var xt=k*DIV/5; g.beginPath(); g.moveTo(xt,BH/2-5); g.lineTo(xt,BH/2+5); g.stroke(); }
+  for(var m=0;m<=40;m++){ var yt=m*DIV/5; g.beginPath(); g.moveTo(BW/2-5,yt); g.lineTo(BW/2+5,yt); g.stroke(); }
+}
+// Punkte einer Kurve: t von 0 bis 10 div · Zeitbasis; u = A · sin(360° · f · t + Phasenlage), in div
+function punkte(a, phase){
+  var tGes=10*zustand.z/1000, perioden=zustand.f*tGes;
+  var n=Math.max(BW*2, Math.ceil(perioden*48));
+  var p=[];
+  for(var i=0;i<=n;i++){
+    var t=tGes*i/n, u=a*Math.sin(2*Math.PI*zustand.f*t + phase*Math.PI/180);
+    p.push([BW*i/n, BH/2-u*DIV]);
   }
-  /* Nie über den rechten Rand hinaus: die längste Zeile endet spätestens 6 px davor. */
-  var lang = 0;
-  zeilen.forEach(function(z){ lang = Math.max(lang, laenge(z, G.sd)); });
-  tx = Math.min(tx, cv.width - 6 - lang);
-  zeilen.forEach(function(z, k){ schreib(z, tx, CY+A+G.ty + k*G.zeile, G.sd); });
-  /* Die Beschriftung steht ÜBER dem oberen Ende der Marken (CY−A−6); bis zum 26.09.2026
-     liefen die Marken durch die Schrift (Befund Linse BLATT B12 an der Animation). */
-  ctx.fillStyle="#1A2530"; schreib([["u", 1], ["₁", 0]], X0+8, CY-A-G.uy, G.su);
-  ctx.fillStyle="#A34E0E"; schreib([["u", 1], ["₂", 0]], X0+8+G.dx2, CY-A-G.uy, G.su);
- }
-
- /* Text aus Teilen [text, kursiv]; Formelzeichen kursiv mit Serifen, der Rest Noto Sans fett. */
- function schrift(k, gr){ return k ? "italic bold "+gr+"px 'Noto Serif',Cambria,Georgia,serif"
-                                   : "bold "+gr+"px 'Noto Sans',sans-serif"; }
- function laenge(teile, gr){
-  var w = 0;
-  teile.forEach(function(t){ ctx.font = schrift(t[1], gr); w += ctx.measureText(t[0]).width; });
-  return w;
- }
- function schreib(teile, x, y, gr){
-  teile.forEach(function(t){ ctx.font = schrift(t[1], gr); ctx.fillText(t[0], x, y);
-                             x += ctx.measureText(t[0]).width; });
- }
-
- function zeige(){
-  var b = bewerte(s);
-  document.getElementById('phw').textContent = s + '°';
-  document.getElementById('frw').textContent = f + ' Hz';
-  document.getElementById('tw').textContent = zahl(T_ms(),1) + ' ms';
-  document.getElementById('pw').textContent = b.phi + '°';
-  document.getElementById('dw').textContent = zahl(T_ms()*b.phi/360,2) + ' ms';
-  var v = document.getElementById('vw'), l = document.getElementById('lw');
-  document.getElementById('kv').className = offen ? 'kachel' : 'kachel verdeckt';
-  document.getElementById('kl').className = offen ? 'kachel' : 'kachel verdeckt';
-  if (!offen) { v.textContent = '?'; l.textContent = '?'; l.style.color = ''; return; }
-  /* u kursiv (Formelzeichen); „phasenverschoben“ mit weichem Trennstrich (Kachel lief über) */
-  if (b.vor === 'keine') v.textContent = 'keine';
-  else v.innerHTML = '<i>u</i>' + b.vor.charAt(1);
-  l.textContent = b.lage === 'phasenverschoben' ? 'phasen­verschoben' : b.lage;
-  l.style.color = b.lage === 'phasengleich' ? 'var(--gruen)' : 'var(--ink)';
- }
-
- function verbergen(){
-  offen = false; document.getElementById('antwort').textContent = 'Antwort zeigen';
- }
- function alles(l){ zeige(); zeichne(l||0); }
- function loop(ts){ if(!t0)t0=ts; alles(((ts-t0)/1000)*1.2); raf=requestAnimationFrame(loop); }
-
- /* Prüfmodus für nachrechnung.py: dieselben Funktionen, die zeichnen und anzeigen,
-    für jede Stellung des Schiebers und 36 Laufstellungen; das Ergebnis steht als JSON im
-    unsichtbaren Element #pruefbericht. Die Seite zeichnet dann nichts. */
- if (/[?&]pruefen\b/.test(location.search)) {
-  zeige();                                   /* Ausgangslage: Antwort verdeckt */
-  var bericht = {start: {vor: document.getElementById('vw').textContent,
-                         lage: document.getElementById('lw').textContent}, stellungen: []};
-  f = 50;
-  for (var sg = 0; sg <= 360; sg++) {
-   s = sg;
-   offen = true; zeige();
-   var z = {s: sg, phi: bewerte(sg).phi,
-            vor: document.getElementById('vw').textContent,
-            lage: document.getElementById('lw').textContent,
-            dt: document.getElementById('dw').textContent, laeufe: []};
-   for (var k = 0; k < 36; k++) {
-    var lauf = ZWEI_PI*k/36, mk = marken(lauf, sg);
-    z.laeufe.push({lauf: lauf, m: mk.m, balken: mk.balken});
-   }
-   bericht.stellungen.push(z);
+  return p;
+}
+function kurve(p,bis,farbe){
+  g.strokeStyle=farbe; g.lineWidth=3; g.lineJoin="round";
+  g.beginPath(); g.moveTo(p[0][0],p[0][1]);
+  for(var i=1;i<=bis;i++) g.lineTo(p[i][0],p[i][1]);
+  g.stroke();
+}
+function zeichne(animiert){
+  if(lauf){ cancelAnimationFrame(lauf); lauf=null; }
+  var p1=punkte(A1,0), p2=punkte(A2,zustand.p);
+  function bild(anteil){
+    raster();
+    kurve(p1,Math.max(1,Math.round(anteil*(p1.length-1))),"#1F5FA8");
+    kurve(p2,Math.max(1,Math.round(anteil*(p2.length-1))),"#A34E0E");
   }
-  document.getElementById('pruefbericht').textContent = JSON.stringify(bericht);
-  return;
- }
+  if(!animiert){ bild(1); return; }
+  var start=null, dauer=350;
+  function schritt(ts){
+    if(start===null) start=ts;
+    var a=Math.min(1,(ts-start)/dauer);
+    bild(a);
+    if(a<1) lauf=requestAnimationFrame(schritt); else lauf=null;
+  }
+  lauf=requestAnimationFrame(schritt);
+}
+function zuruecksetzen(){ zustand={f:START.f,p:START.p,z:START.z}; auffrischen(false); }
 
- document.getElementById('ph').addEventListener('input', function(e){
-   s = parseInt(e.target.value,10); verbergen(); if(!raf) alles(0); });
- document.getElementById('fr').addEventListener('input', function(e){
-   f = parseInt(e.target.value,10); if(!raf) alles(0); });
- document.getElementById('antwort').addEventListener('click', function(){
-   offen = !offen; this.textContent = offen ? 'Antwort verbergen' : 'Antwort zeigen';
-   zeige(); });
- document.getElementById('reset').addEventListener('click', function(){
-   s = meta.startwerte.verschiebung; f = meta.startwerte.frequenz; verbergen();
-   document.getElementById('ph').value = s; document.getElementById('fr').value = f;
-   if(!raf) alles(0); else zeige(); });
- document.getElementById('halt').addEventListener('click', function(){
-   if(raf){ cancelAnimationFrame(raf); raf=null; this.textContent='Weiterlaufen'; }
-   else { t0=0; raf=requestAnimationFrame(loop); this.textContent='Anhalten'; } });
+// ---------- Prüfmodus: Nulldurchgänge aus genau den gezeichneten Punkten ----------
+function nulldurchgaenge(p){
+  var erg=[];
+  for(var i=1;i<p.length;i++){
+    var y0=BH/2-p[i-1][1], y1=BH/2-p[i][1];                  // positiv oben
+    if(y0===0 && i===1){ erg.push({div:0, richtung: y1>0?"steigend":"fallend"}); continue; }
+    if((y0<0&&y1>=0)||(y0>0&&y1<=0)){
+      if(y1===0 && i<p.length-1){ continue; }                // genau auf null: im nächsten Schritt gezählt
+      var x=p[i-1][0]+(p[i][0]-p[i-1][0])*(0-y0)/(y1-y0);
+      erg.push({div:Math.round(x/DIV*1000)/1000, richtung: y1>y0?"steigend":"fallend"});
+    }
+  }
+  return erg;
+}
+if (/[?&]pruefen\b/.test(location.search)) {
+  var bericht=[];
+  [[25,5],[50,5]].forEach(function(fz){
+    PHASEN.forEach(function(ph){
+      zustand={f:fz[0],p:ph,z:fz[1]};
+      bericht.push({f:fz[0], z:fz[1], phase:ph, u1:nulldurchgaenge(punkte(A1,0)), u2:nulldurchgaenge(punkte(A2,ph))});
+    });
+  });
+  $("pruefbericht").textContent=JSON.stringify(bericht);
+}
 
- window.addEventListener('resize', function(){ anordnen(); if(!raf) alles(0); });
- if(ruhig){ alles(0); } else { raf=requestAnimationFrame(loop); }
+knopfreihe("frequenzen",FREQUENZEN,function(f){return komma(f)+" Hz";},function(f){return "Frequenz "+f+" Hertz";},
+           function(f){zustand.f=f;});
+knopfreihe("phasen",PHASEN,function(p){return p+"°";},function(p){return "Phasenlage "+p+" Grad";},
+           function(p){zustand.p=p;});
+knopfreihe("zeitbasen",ZEITBASEN,zeitbasisHtml,function(z){return "Zeitbasis "+z+" Millisekunden je div";},
+           function(z){zustand.z=z;});
+$("bReset").onclick=zuruecksetzen;
+zustand={f:START.f,p:START.p,z:START.z};
+auffrischen(false);
 })();
 </script>
 </body></html>
