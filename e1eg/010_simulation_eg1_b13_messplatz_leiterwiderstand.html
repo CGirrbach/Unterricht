@@ -1,0 +1,191 @@
+<!doctype html>
+<!-- Block EG1-B13 · Messplatz Leiterwiderstand (Neubau 12.10.2026, Aufgabe IN der Stunde) -->
+<!-- Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht):
+     (1) Bei l = 1 m und A = 1 mm² zeigt der Widerstandsmesser genau den Zahlenwert des spezifischen
+         Widerstands ϱ aus dem Tabellenbuch S. 559 (Definition von ϱ, Fachkunde S. 38).
+     (2) Doppelte Länge, doppelter Widerstand; doppelter Querschnitt, halber Widerstand.
+     (3) Daraus R = ϱ · l / A (Tabellenbuch S. 30, Formel 12); Probe an einer neuen Einstellung.
+     Rechenmodell R = ϱ · l / A; Stoffwerte ϱ20 Tabellenbuch S. 559: Silber 0,0167, Kupfer 0,0178, Gold 0,022,
+     Aluminium 0,0278, Konstantan 0,49 Ω·mm²/m.
+     Anzeige: vier geltende Ziffern ohne Nullen am Ende. Alle Werte der Aufgaben gehen auf (0,0178 · 0,534 · 0,267 ·
+     0,178 · 0,2224 Ω), keiner ist gerundet. Grenzfälle: Silber 1 m / 6 mm² 0,002783 Ω; Konstantan 100 m / 0,5 mm² 98 Ω.
+     Startstellung neutral: kein Werkstoff, keine Länge, kein Querschnitt, Anzeige leer. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Leiterwiderstand (Block 13)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"werkstoff":null,"l":null,"A":null,"R":null},"loesungswerte":{"Silber 1 m 1 mm²":"0,0167 Ω","Kupfer 1 m 1 mm²":"0,0178 Ω","Aluminium 1 m 1 mm²":"0,0278 Ω","Konstantan 1 m 1 mm²":"0,49 Ω","Kupfer 10 m 1 mm²":"0,178 Ω","Kupfer 20 m 1 mm²":"0,356 Ω","Kupfer 30 m 1 mm²":"0,534 Ω","Kupfer 30 m 2 mm²":"0,267 Ω","Kupfer 30 m 3 mm²":"0,178 Ω","Aluminium 20 m 2,5 mm²":"0,2224 Ω"}}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:980px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px}
+ @media(min-width:760px){.buehne{grid-template-columns:1.35fr 1fr}}
+ canvas{width:100%;height:auto;display:block;border:1px solid var(--linie);background:#fff;touch-action:manipulation}
+ .unter{font-size:13px;color:var(--grau);margin:4px 0 0}
+ .anz{border:1.4px solid var(--ink);padding:10px 12px;background:var(--hell)}
+ .anz .name{font-size:14px;font-weight:700;color:var(--grau)}
+ .anz .wert{font-size:32px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--kupfer);min-height:1.4em}
+ .anz .klein{font-size:14px;color:var(--grau);margin-top:4px}
+ .wahl{margin:12px 0 4px}
+ .wahl .titel{font-size:14px;font-weight:700;margin:10px 0 4px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px}
+ button{font:inherit;font-size:15px;min-height:46px;min-width:56px;padding:8px 12px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer}
+ button.an{background:var(--kupfer);color:#fff}
+ button:disabled{opacity:.45;cursor:not-allowed}
+ button.start{border-color:var(--gruen);color:#fff;background:var(--gruen);font-weight:700}
+ button.start:disabled{background:#fff;color:var(--gruen)}
+ table{width:100%;border-collapse:collapse;margin-top:12px;font-size:15px}
+ th,td{border:1px solid var(--linie);padding:6px 8px;text-align:left}
+ th{background:var(--hell);font-size:14px}
+ .tabelle{overflow-x:auto}
+ td.z{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+ .leer{color:var(--grau);font-style:italic}
+ i{font-family:'Times New Roman',Times,'Noto Serif',serif;font-style:italic;font-size:1.12em}
+ @media(max-width:420px){.anz .wert{font-size:28px} th,td{padding:5px 4px;font-size:14px} button{padding:8px 9px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E1EG · Lernfeld 1 · Block 13</div><h1>Messplatz Leiterwiderstand</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Werkstoff, Länge und Querschnitt des Drahtes wählen, dann <b>Messen</b>. Der Widerstandsmesser zeigt den Widerstand des Drahtes. Jede Messung landet unten im Messprotokoll.</div>
+
+ <div class="buehne">
+  <div>
+   <canvas id="c" width="560" height="300" data-quelle="Draht zwischen zwei Klemmen am Widerstandsmesser, nach Europa Fachkunde S. 38, Tabelle 2 (Werkstoff, Leiterlänge, Leiterquerschnitt) und Rechenbuch S. 44, Bild 1"
+    aria-label="Ein Draht ist zwischen zwei Klemmen eingespannt und an einen Widerstandsmesser angeschlossen. Die gezeichnete Länge wächst mit der gewählten Länge, die Dicke mit dem Querschnitt."></canvas>
+   <p class="unter">Schematisch, nicht maßstäblich: länger heißt länger gezeichnet, größerer Querschnitt heißt dicker gezeichnet.</p>
+  </div>
+  <div class="anz">
+   <div class="name">Widerstandsmesser</div>
+   <div class="wert" id="aR">– – –</div>
+   <div class="klein" id="aDraht">Noch kein Draht eingespannt.</div>
+  </div>
+ </div>
+
+ <div class="wahl">
+  <div class="titel">1. Werkstoff</div>
+  <div class="knoepfe" id="stoffe"></div>
+  <div class="titel">2. Länge <i>l</i></div>
+  <div class="knoepfe" id="laengen"></div>
+  <div class="titel">3. Querschnitt <i>A</i></div>
+  <div class="knoepfe" id="querschnitte"></div>
+  <div class="titel">4. Messen</div>
+  <div class="knoepfe"><button class="start" id="bMessen" disabled>Messen</button><button id="bReset">Zurücksetzen</button></div>
+ </div>
+
+ <div class="tabelle"><table id="protokoll">
+  <tr><th>Nr.</th><th>Werkstoff</th><th>Länge <i>l</i></th><th>Quer&shy;schnitt <i>A</i></th><th><i>R</i></th></tr>
+  <tr class="leer"><td colspan="5">Noch keine Messung.</td></tr>
+ </table></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+// Stoffwerte Tabellenbuch S. 559, Spalte rho20 in Ohm·mm²/m (nur intern, die Seite zeigt sie nicht)
+var STOFFE=[{n:"Silber",r:0.0167,f:"#C4CACF"},{n:"Kupfer",r:0.0178,f:"#C9722B"},{n:"Gold",r:0.022,f:"#D6B34A"},
+            {n:"Aluminium",r:0.0278,f:"#A9B3BA"},{n:"Konstantan",r:0.49,f:"#8E7C63"}];
+var LAENGEN=[1,10,20,30,50,100];
+var QUER=[0.5,1,1.5,2,2.5,3,4,6];
+var z={s:null,l:null,a:null,R:null,misst:false,nr:0};
+var $=function(id){return document.getElementById(id);};
+var ruhig=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function komma(s){return String(s).replace(".",",");}
+function ohm(R){                  // vier geltende Ziffern, ohne Nullen am Ende; Hälften kaufmännisch (Faktor gegen Binärfehler)
+  var s=(R*(1+1e-12)).toPrecision(4);
+  if(s.indexOf("e")>=0) s=Number(s).toFixed(8);
+  if(s.indexOf(".")>=0) s=s.replace(/0+$/,"").replace(/\.$/,"");
+  return komma(s)+" Ω";
+}
+function zahl(x){return komma(String(x));}
+
+function knoepfe(liste,ziel,text,feld){
+  liste.forEach(function(w,i){var b=document.createElement("button");b.type="button";b.innerHTML=text(w);
+    b.onclick=function(){if(z.misst)return;z[feld]=i;z.R=null;auffrischen();};$(ziel).appendChild(b);});
+}
+function auffrischen(){
+  [["stoffe","s"],["laengen","l"],["querschnitte","a"]].forEach(function(p){
+    Array.prototype.forEach.call($(p[0]).children,function(b,i){b.classList.toggle("an",z[p[1]]===i);b.disabled=z.misst;});});
+  var bereit=z.s!==null&&z.l!==null&&z.a!==null;
+  $("bMessen").disabled=z.misst||!bereit;
+  $("aR").textContent=z.misst?"misst …":(z.R===null?"– – –":ohm(z.R));
+  $("aDraht").innerHTML=bereit?(STOFFE[z.s].n+", <i>l</i> = "+zahl(LAENGEN[z.l])+" m, <i>A</i> = "+zahl(QUER[z.a])+" mm²")
+    :"Noch kein Draht eingespannt.";
+  zeichne();
+}
+function messen(){
+  var s=STOFFE[z.s],l=LAENGEN[z.l],a=QUER[z.a];
+  var R=s.r*l/a;
+  var fertig=function(){z.misst=false;z.R=R;z.nr++;protokoll(s,l,a,R);auffrischen();};
+  if(ruhig){fertig();return;}
+  z.misst=true;auffrischen();setTimeout(fertig,700);
+}
+function protokoll(s,l,a,R){
+  var tb=$("protokoll"),leer=tb.querySelector("tr.leer"); if(leer) leer.remove();
+  var tr=document.createElement("tr");
+  tr.innerHTML="<td>"+z.nr+"</td><td>"+s.n+"</td><td class='z'>"+zahl(l)+" m</td><td class='z'>"+zahl(a)+" mm²</td><td class='z'>"+ohm(R)+"</td>";
+  tb.appendChild(tr);
+}
+function zuruecksetzen(){
+  z={s:null,l:null,a:null,R:null,misst:false,nr:0};
+  var tb=$("protokoll"); while(tb.rows.length>1) tb.deleteRow(1);
+  var tr=tb.insertRow(); tr.className="leer"; tr.innerHTML="<td colspan='5'>Noch keine Messung.</td>";
+  auffrischen();
+}
+
+// ---------- Zeichnung ----------
+var c=$("c"), g=c.getContext("2d");
+function zeichne(){
+  var W=c.width,H=c.height; g.clearRect(0,0,W,H);
+  var ink="#1A2530";
+  // Widerstandsmesser oben in der Mitte
+  g.lineWidth=3; g.strokeStyle=ink; g.fillStyle="#fff";
+  g.beginPath(); g.arc(280,52,30,0,6.283); g.fill(); g.stroke();
+  g.fillStyle="#A34E0E"; g.font="bold 30px 'Noto Sans',sans-serif"; g.textAlign="center"; g.textBaseline="middle";
+  g.fillText("Ω",280,54); g.textBaseline="alphabetic";
+  // Draht: Länge wächst mit der Wurzel der Länge (schematisch), Dicke mit dem Querschnitt
+  var hat=z.l!==null, l=hat?LAENGEN[z.l]:30, a=z.a!==null?QUER[z.a]:1;
+  var lp=70+390*Math.sqrt(l/100), x1=280-lp/2, x2=280+lp/2, y=168;
+  var d=5+4*a;
+  // Messleitungen
+  g.lineWidth=2.5; g.beginPath();
+  g.moveTo(250,52); g.lineTo(x1,52); g.lineTo(x1,y-d/2-14);
+  g.moveTo(310,52); g.lineTo(x2,52); g.lineTo(x2,y-d/2-14); g.stroke();
+  if(z.s!==null&&hat&&z.a!==null){
+    g.fillStyle=STOFFE[z.s].f; g.fillRect(x1,y-d/2,lp,d);
+    g.lineWidth=1.5; g.strokeStyle=ink; g.strokeRect(x1,y-d/2,lp,d);
+  }else{
+    g.setLineDash([7,6]); g.lineWidth=1.5; g.strokeStyle="#9AA5AE"; g.strokeRect(x1,y-d/2,lp,d); g.setLineDash([]);
+  }
+  // Klemmen
+  g.fillStyle=ink; g.fillRect(x1-6,y-d/2-14,12,d+28); g.fillRect(x2-6,y-d/2-14,12,d+28);
+  // Beschriftung
+  g.textAlign="center"; g.font="23px 'Noto Sans',sans-serif"; g.fillStyle="#5A666F";
+  var t1=z.s===null?"Werkstoff?":STOFFE[z.s].n;
+  g.fillText(t1,280,y+d/2+44);
+  g.font="italic 27px 'Times New Roman',Times,serif"; var wl=g.measureText("l").width, wa=g.measureText("A").width;
+  var tl=" = "+(hat?zahl(l)+" m":"?"), ta=" = "+(z.a!==null?zahl(a)+" mm²":"?");
+  g.font="23px 'Noto Sans',sans-serif"; var bl=g.measureText(tl).width, ba=g.measureText(ta).width;
+  var gesamt=wl+bl+40+wa+ba, x=280-gesamt/2, yy=y+d/2+80;
+  g.textAlign="left";
+  g.font="italic 27px 'Times New Roman',Times,serif"; g.fillText("l",x,yy);
+  g.font="23px 'Noto Sans',sans-serif"; g.fillText(tl,x+wl,yy);
+  x+=wl+bl+40;
+  g.font="italic 27px 'Times New Roman',Times,serif"; g.fillText("A",x,yy);
+  g.font="23px 'Noto Sans',sans-serif"; g.fillText(ta,x+wa,yy);
+}
+
+knoepfe(STOFFE,"stoffe",function(s){return s.n;},"s");
+knoepfe(LAENGEN,"laengen",function(l){return zahl(l)+" m";},"l");
+knoepfe(QUER,"querschnitte",function(a){return zahl(a)+" mm²";},"a");
+$("bMessen").onclick=messen; $("bReset").onclick=zuruecksetzen;
+auffrischen();
+})();
+</script>
+</body></html>
