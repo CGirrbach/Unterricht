@@ -1,0 +1,163 @@
+<!doctype html>
+<!-- Block EG1-B11 · Messplatz Widerstand und Leitwert (Neubau 12.10.2026, Aufgabe IN der Stunde) -->
+<!-- Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht):
+     (1) Verdoppelt sich der Widerstand (1, 2, 4, 8 Ohm), halbiert sich der Leitwert.
+     (2) Das Produkt aus Widerstand und Leitwert ist bei jedem Widerstand 1: G = 1/R, R = 1/G.
+     (3) Mit der Formel lässt sich vorhersagen, was der Messplatz zeigt (0,5 und 50 Ohm, 0,2 S).
+     Grenzfälle im Einstellbereich: 0,5 Ohm (Leitwert größer als 1 S) und 1 kOhm (0,001 S: klein, aber nicht null).
+     Größen nach Europa Fachkunde S. 36 (Widerstand R in Ohm, Leitwert G in Siemens), Widerstandswerte nach dem
+     Beispiel derselben Seite; Kehrwert nach Tabellenbuch S. 30, Formel 9.
+     Anzeige: Widerstand in Ohm (1 kOhm mit Vorsatz), Leitwert immer in S mit allen Ziffern (0,125 S, 0,02 S, 0,001 S);
+     alle Werte sind exakt, R · G ergibt bei jeder Einstellung genau 1.
+     Startstellung neutral: kein Widerstand, keine Messart, Anzeige leer, Protokoll leer. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Widerstand und Leitwert (Block 11)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"widerstand":null,"messart":null,"anzeige":null},"loesungswerte":{"1 Ω":"1 S","2 Ω":"0,5 S","4 Ω":"0,25 S","8 Ω":"0,125 S","10 Ω":"0,1 S","0,5 Ω":"2 S","50 Ω":"0,02 S","5 Ω":"0,2 S"}}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62;--blau:#2557A3}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:980px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px}
+ @media(min-width:760px){.buehne{grid-template-columns:1.25fr 1fr}}
+ canvas{width:100%;height:auto;display:block;border:1px solid var(--linie);background:#fff}
+ .anz{border:1.4px solid var(--ink);padding:10px 12px;background:var(--hell)}
+ .anz .name{font-size:14px;font-weight:700;color:var(--grau)}
+ .anz .wert{font-size:38px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--kupfer);min-height:56px}
+ .anz .klein{font-size:14px;color:var(--grau)}
+ .wahl{margin:12px 0 4px}
+ .wahl .titel{font-size:14px;font-weight:700;margin:10px 0 4px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px}
+ button{font:inherit;font-size:15px;min-height:46px;min-width:58px;padding:8px 14px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer}
+ button.an{background:var(--kupfer);color:#fff}
+ button:disabled{opacity:.45;cursor:not-allowed}
+ button.start{border-color:var(--gruen);color:#fff;background:var(--gruen);font-weight:700}
+ button.start:disabled{background:#fff;color:var(--gruen)}
+ table{width:100%;border-collapse:collapse;margin-top:12px;font-size:15px}
+ th,td{border:1px solid var(--linie);padding:6px 8px;text-align:left}
+ th{background:var(--hell);font-size:14px}
+ td.z{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+ .leer{color:var(--grau);font-style:italic}
+ @media(max-width:420px){.anz .wert{font-size:32px} th,td{padding:5px 5px;font-size:14px} button{padding:8px 10px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E1EG · Lernfeld 1 · Block 11</div><h1>Messplatz Widerstand und Leitwert</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Widerstand wählen, Messart wählen, <b>Messen</b>. Jede Messung landet unten im Messprotokoll.</div>
+
+ <div class="buehne">
+  <canvas id="c" width="560" height="300" data-quelle="Schaltzeichen Widerstand (Rechteck) und Messgerät (Kreis mit Einheitenzeichen) nach DIN EN 60617 wie Tabellenbuch S. 30, Bild Strom, Spannung, Widerstand; direkte Messung mit dem Messgerät am Widerstand nach Europa Fachkunde S. 178"
+   aria-label="Ein Widerstand ist über zwei Messleitungen an ein Messgerät angeschlossen. Im Kreis des Messgeräts steht die gewählte Messart: Ohm für den Widerstand, S für den Leitwert."></canvas>
+  <div class="anz">
+   <div class="name">Anzeige des Messgeräts</div>
+   <div class="wert" id="aW">–</div>
+   <div class="klein" id="aM">Messart: noch nicht gewählt</div>
+  </div>
+ </div>
+
+ <div class="wahl">
+  <div class="titel">1. Widerstand</div>
+  <div class="knoepfe" id="widerstaende"></div>
+  <div class="titel">2. Messart</div>
+  <div class="knoepfe" id="messarten"></div>
+  <div class="titel">3. Messen</div>
+  <div class="knoepfe"><button class="start" id="bMessen" disabled>Messen</button><button id="bReset">Zurücksetzen</button></div>
+ </div>
+
+ <div class="tabelle"><table id="protokoll">
+  <tr><th>Nr.</th><th>Widerstand</th><th>Messart</th><th>Anzeige</th></tr>
+  <tr class="leer"><td colspan="4">Noch keine Messung.</td></tr>
+ </table></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+// Widerstandswerte in Ohm: Beispiel Fachkunde S. 36 (1, 2, 4, 8, 10), dazu 0,5 und 50 (Arbeitsauftrag), 5, 1000
+var WIDERSTAENDE=[0.5,1,2,4,5,8,10,50,1000];
+var MESSARTEN=[{k:"R",n:"Widerstand (Ω)",zeichen:"Ω",name:"Widerstand"},{k:"G",n:"Leitwert (S)",zeichen:"S",name:"Leitwert"}];
+var zustand={r:null,m:null,wert:null,laeuft:false,nr:0};
+var $=function(id){return document.getElementById(id);};
+var ruhig=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+var uhr=null;
+
+function zahl(x){                              // exakt, Dezimalkomma, ohne Nullen am Ende
+  return String(parseFloat(x.toPrecision(10))).replace(".",",");
+}
+function rText(R){ return R>=1000 ? zahl(R/1000)+" kΩ" : zahl(R)+" Ω"; }
+function gText(G){ return zahl(G)+" S"; }      // immer in Siemens, alle Ziffern
+function messwert(){
+  var R=WIDERSTAENDE[zustand.r];
+  return MESSARTEN[zustand.m].k==="R" ? rText(R) : gText(1/R);
+}
+
+function knoepfe(){
+  WIDERSTAENDE.forEach(function(R,i){var b=document.createElement("button");b.textContent=rText(R);
+    b.onclick=function(){if(zustand.laeuft)return;zustand.r=i;zustand.wert=null;auffrischen();};$("widerstaende").appendChild(b);});
+  MESSARTEN.forEach(function(m,i){var b=document.createElement("button");b.textContent=m.n;
+    b.onclick=function(){if(zustand.laeuft)return;zustand.m=i;zustand.wert=null;auffrischen();};$("messarten").appendChild(b);});
+}
+function auffrischen(){
+  Array.prototype.forEach.call($("widerstaende").children,function(b,i){b.classList.toggle("an",zustand.r===i);b.disabled=zustand.laeuft;});
+  Array.prototype.forEach.call($("messarten").children,function(b,i){b.classList.toggle("an",zustand.m===i);b.disabled=zustand.laeuft;});
+  $("bMessen").disabled=zustand.laeuft||zustand.r===null||zustand.m===null;
+  $("aW").textContent=zustand.laeuft?"· · ·":(zustand.wert===null?"–":zustand.wert);
+  $("aM").textContent=zustand.m===null?"Messart: noch nicht gewählt":"Messart: "+MESSARTEN[zustand.m].name;
+  zeichne();
+}
+function protokoll(){
+  var tb=$("protokoll"),leer=tb.querySelector("tr.leer"); if(leer) leer.remove();
+  var tr=document.createElement("tr");
+  tr.innerHTML="<td>"+zustand.nr+"</td><td class='z'>"+rText(WIDERSTAENDE[zustand.r])+"</td><td>"+MESSARTEN[zustand.m].name+"</td><td class='z'>"+zustand.wert+"</td>";
+  tb.appendChild(tr);
+}
+function fertig(){
+  zustand.laeuft=false; zustand.wert=messwert(); zustand.nr++; protokoll(); auffrischen();
+}
+function messen(){
+  if(zustand.r===null||zustand.m===null) return;
+  zustand.laeuft=true; zustand.wert=null; auffrischen();
+  if(ruhig) fertig(); else uhr=setTimeout(fertig,700);
+}
+function zuruecksetzen(){
+  if(uhr){clearTimeout(uhr);uhr=null;}
+  zustand={r:null,m:null,wert:null,laeuft:false,nr:0};
+  var tb=$("protokoll"); while(tb.rows.length>1) tb.deleteRow(1);
+  var tr=tb.insertRow(); tr.className="leer"; tr.innerHTML="<td colspan='4'>Noch keine Messung.</td>";
+  auffrischen();
+}
+
+// ---------- Schaltung: Widerstand links, Messgerät rechts, zwei Messleitungen ----------
+var c=$("c"), g=c.getContext("2d");
+function zeichne(){
+  var W=c.width,H=c.height; g.clearRect(0,0,W,H);
+  g.lineWidth=3; g.strokeStyle="#1A2530"; g.fillStyle="#1A2530"; g.textAlign="center"; g.textBaseline="middle";
+  // Messleitungen
+  g.beginPath(); g.moveTo(130,60); g.lineTo(130,100); g.moveTo(130,200); g.lineTo(130,240);
+  g.moveTo(130,60); g.lineTo(400,60); g.lineTo(400,105); g.moveTo(130,240); g.lineTo(400,240); g.lineTo(400,195); g.stroke();
+  // Widerstand (Schaltzeichen: Rechteck)
+  g.fillStyle="#fff"; g.fillRect(110,100,40,100); g.strokeRect(110,100,40,100);
+  g.fillStyle="#1A2530"; g.font="bold 26px 'Noto Sans',sans-serif"; g.textAlign="right";
+  g.font=(zustand.r===null?"italic ":"")+"bold 26px 'Noto Sans',sans-serif";
+  g.fillText(zustand.r===null?"R":rText(WIDERSTAENDE[zustand.r]),98,150);
+  g.font="22px 'Noto Sans',sans-serif"; g.fillStyle="#5A666F"; g.textAlign="center"; g.fillText("Widerstand",130,280);
+  // Messgerät (Kreis mit Einheitenzeichen der Messart)
+  g.fillStyle="#fff"; g.beginPath(); g.arc(400,150,45,0,6.2832); g.fill(); g.strokeStyle="#1A2530"; g.stroke();
+  g.fillStyle="#A34E0E"; g.font="bold 38px 'Noto Sans',sans-serif";
+  g.fillText(zustand.m===null?"?":MESSARTEN[zustand.m].zeichen,400,152);
+  g.font="22px 'Noto Sans',sans-serif"; g.fillStyle="#5A666F"; g.fillText("Messgerät",400,280);
+  // Punkte an den Anschlüssen
+  g.fillStyle="#1A2530";
+  [[130,60],[130,240],[400,60],[400,240]].forEach(function(p){g.beginPath();g.arc(p[0],p[1],4,0,6.2832);g.fill();});
+}
+$("bMessen").onclick=messen; $("bReset").onclick=zuruecksetzen;
+knoepfe(); auffrischen();
+})();
+</script>
+</body></html>
