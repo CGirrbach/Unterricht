@@ -46,7 +46,11 @@ canvas{display:block;width:100%;max-width:980px;margin:6px auto 24px;height:auto
 .kachel.u{border-color:var(--kupfer)}
 .kachel.u span,.kachel.u b{color:var(--kupfer)}
 .status{max-width:980px;margin:8px auto 4px;padding:0 16px;font-size:clamp(15px,3.6vw,17px);color:var(--grau);min-height:1.5em}
-@media (max-width:640px){.anzeigen{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* Handy: Einstellen, Ablesen und Zeigerbild ohne langes Scrollen (Eignung, E2EG-Anleitung Abschnitt 6) */
+@media (max-width:640px){.anzeigen{display:flex;flex-wrap:wrap;gap:6px}.kachel{flex:1 1 0}
+  .kachel.u{flex:1 1 100%;display:flex;align-items:baseline;justify-content:space-between}
+  .kachel{padding:6px 7px}.kachel b{font-size:clamp(17px,4.9vw,22px)}
+  .zeile{margin:5px 0;gap:6px}.kurz p{margin:2px 0}input[type=range]{height:34px}}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
 </style>
 </head>
@@ -142,7 +146,7 @@ waagerechten Achse. Rechts steht derselbe Wert im Liniendiagramm.</p>
 
   var cv = document.getElementById("buehne"), ctx = cv.getContext("2d");
   var BREIT = {W: 980, H: 420, CX: 200, CY: 210, R: 140, X0: 430, BW: 480, Y0: 210, A: 140, sz: 18, lw: 1},
-      SCHMAL = {W: 600, H: 800, CX: 300, CY: 215, R: 150, X0: 70, BW: 440, Y0: 600, A: 135, sz: 26, lw: 1.5};
+      SCHMAL = {W: 600, H: 740, CX: 300, CY: 205, R: 140, X0: 70, BW: 440, Y0: 565, A: 120, sz: 26, lw: 1.5};
   var G = BREIT;
 
   function anordnen() {
