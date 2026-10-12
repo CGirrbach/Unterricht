@@ -104,10 +104,10 @@ function strom(I){
   if(I<1) return sig(I*1e3,3)+" mA";
   return sig(I,3)+" A";
 }
-function ladung(Q){
+function ladung(Q){                           // vier Ziffern: 21,75 As und 130,5 As (Bügeleisen) bleiben exakt
   if(Q===0) return "0 As";
-  if(Q<0.1) return sig(Q*1e3,3)+" mAs";
-  return sig(Q,3)+" As";
+  if(Q<0.1) return sig(Q*1e3,4)+" mAs";
+  return sig(Q,4)+" As";
 }
 function hoch(x){var e=Math.floor(Math.log10(x)),m=x/Math.pow(10,e);return komma(m.toFixed(2))+" · 10<sup>"+e+"</sup>";}
 
@@ -183,7 +183,7 @@ function zeichne(jetzt){
   var v = I>0 ? 18+22*(Math.log10(I)+4) : 0;   // px je s; 100 µA langsam, 4,35 A schnell
   var phase = ruhig ? 0 : (jetzt/1000*v)%34;
   g2.fillStyle="#2557A3";
-  for(var s=phase;s<L;s+=34){ var p=punkt(s); if(p[0]>=150&&p[0]<=460){ g2.beginPath(); g2.arc(p[0],p[1],5,0,6.283); g2.fill(); } }
+  for(var s=phase;s<L;s+=34){ var p=punkt(s); if(p[0]>=150&&p[0]<=460&&(zu||p[1]!==70||p[0]<226||p[0]>289)){ g2.beginPath(); g2.arc(p[0],p[1],5,0,6.283); g2.fill(); } }
   g2.textAlign="left"; g2.font="23px 'Noto Sans',sans-serif"; g2.fillStyle="#2557A3";
   g2.fillText("Elektronen", 166, 252);
   g2.lineWidth=3; g2.strokeStyle="#1A2530";
