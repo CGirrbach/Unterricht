@@ -1,0 +1,343 @@
+<!doctype html>
+<!-- Block EG1-B06 · Messplatz Spannung (Neubau 12.10.2026, Aufgabe IN der Stunde, ersetzt die alte
+     Simulation „Potenzial und Spannung“, die die Formeln nannte und W = U · Q rechnete) -->
+<!-- Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt keine Formel):
+     Messplatz 1 (Arbeit und Ladung)
+       (1) Bei einer Spannungsquelle wächst die im Verbraucher umgesetzte Arbeit W im selben
+           Verhältnis wie die Ladung Q: doppelte Ladung, doppelte Arbeit.
+       (2) W geteilt durch Q ergibt genau die Anzeige des Spannungsmessers: U = W/Q.
+     Messplatz 2 (Potenziale)
+       (3) Mit der schwarzen Messleitung an der Masse misst man das Potenzial eines Anschlusses.
+       (4) Die Spannung zwischen zwei Anschlüssen ist die Differenz ihrer Potenziale: U43 = φ4 − φ3.
+       (5) Wird die Masse verschoben, ändern sich alle Potenziale, die Spannung zwischen zwei
+           Anschlüssen bleibt gleich.
+     Grenzfälle im Einstellbereich: beide Messleitungen am selben Anschluss (0 V); rote Messleitung am
+     niedrigeren Potenzial (negative Anzeige, Fachkunde S. 30); Masse an Anschluss 5 (alle Potenziale ≤ 0).
+     Werte und Belege:
+       Fachkunde S. 28: Monozelle 1,5 V, Autobatterie 12 V (Tabelle Spannungsbeispiele); Bild 2: Netzteil
+         mit fünf Anschlüssen 0/3/6/9/12 V gegen Anschluss 1; U43 = 9 V − 6 V = 3 V.
+       Blockbatterie 9 V: genormte 9-V-Batterie (Größe 6LR61), Wert für die Rechenaufgabe „erst rechnen,
+         dann prüfen“ (36 Ws bei 4 As).
+       Fachkunde S. 30: Spannungsmesser parallel zum Verbraucher (Bild 3); Anzeige positiv, wenn vom höheren
+         zum niedrigeren Potenzial gemessen wird.
+       Tabellenbuch S. 87: Schaltzeichen Körper, Masse (Strich mit Querbalken).
+     Handrechnung = Modell:
+       W = U · Q:  Monozelle 1,5 V: 1 As → 1,5 Ws; 2 As → 3 Ws; 4 As → 6 Ws
+                   Blockbatterie 9 V: 1 As → 9 Ws; 2 As → 18 Ws; 4 As → 36 Ws
+                   Autobatterie 12 V: 1 As → 12 Ws; 2 As → 24 Ws; 4 As → 48 Ws
+       Anzeige Messplatz 2 = (rot − schwarz) · 3 V, unabhängig von der Masse.
+         Masse 1: φ1..φ5 = 0/3/6/9/12 V;  Masse 2: −3/0/3/6/9 V;  U43 = 3 V in beiden Fällen.
+     Startstellung neutral: keine Spannungsquelle, keine Ladung, Schalter offen, Zähler 0;
+     keine Masse, Messleitungen nicht angelegt. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Spannung (Block 06)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"messplatz":1,"quelle":null,"ladung":null,"Q":0,"W":0,"masse":null,"rot":null,"schwarz":null},"loesungswerte":{"Monozelle 2 As":"3 Ws","Monozelle 4 As":"6 Ws","Autobatterie 2 As":"24 Ws","Blockbatterie 4 As":"36 Ws","Masse 1: phi1 bis phi5":"0/3/6/9/12 V","Masse 2: phi1 bis phi5":"-3/0/3/6/9 V","U43":"3 V"}}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62;--blau:#2557A3;--rot:#C62828}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:980px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .reiter{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+ .reiter button{flex:1 1 220px;font-weight:700}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px}
+ @media(min-width:760px){.buehne{grid-template-columns:1.25fr 1fr}}
+ canvas{width:100%;height:auto;display:block;border:1px solid var(--linie);background:#fff;touch-action:manipulation}
+ .anzeigen{display:grid;grid-template-columns:1fr;gap:8px;align-content:start}
+ .anz{border:1.4px solid var(--ink);padding:8px 12px;background:var(--hell)}
+ .anz .name{font-size:14px;font-weight:700;color:var(--grau)}
+ .anz .wert{font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink)}
+ .anz.haupt .wert{color:var(--kupfer)}
+ .anz .klein{font-size:13px;color:var(--grau)}
+ .wahl{margin:12px 0 4px}
+ .wahl .titel{font-size:14px;font-weight:700;margin:8px 0 4px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px}
+ button{font:inherit;font-size:15px;min-height:46px;min-width:52px;padding:8px 14px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer}
+ button.an{background:var(--kupfer);color:#fff}
+ button:disabled{opacity:.45;cursor:not-allowed}
+ button.start{border-color:var(--gruen);color:#fff;background:var(--gruen);font-weight:700}
+ button.start:disabled{background:#fff;color:var(--gruen)}
+ .knoepfe.rot button.an{background:var(--rot);border-color:var(--rot)}
+ .knoepfe.rot button{border-color:var(--rot);color:var(--rot)}
+ .knoepfe.rot button.an{color:#fff}
+ .knoepfe.schwarz button{border-color:var(--ink);color:var(--ink)}
+ .knoepfe.schwarz button.an{background:var(--ink);color:#fff}
+ table{width:100%;border-collapse:collapse;margin-top:12px;font-size:15px}
+ th,td{border:1px solid var(--linie);padding:6px 8px;text-align:left}
+ th{background:var(--hell);font-size:14px}
+ .tabelle{overflow-x:auto}
+ td.z{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+ .leer{color:var(--grau);font-style:italic}
+ th{hyphens:manual}
+ [hidden]{display:none!important}
+ @media(max-width:420px){.anz .wert{font-size:26px} th,td{padding:5px 5px;font-size:14px} button{padding:8px 10px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E1EG · Lernfeld 1 · Block 06</div><h1>Messplatz Spannung</h1></div>
+ <div class="reiter" role="tablist">
+  <button id="tab1" class="an" role="tab" aria-selected="true">Messplatz 1: Arbeit und Ladung</button>
+  <button id="tab2" role="tab" aria-selected="false">Messplatz 2: Potenziale</button>
+ </div>
+
+ <!-- ===================== Messplatz 1 ===================== -->
+ <section id="mp1">
+  <div class="anleitung"><b>So messen Sie:</b> Spannungsquelle wählen, Ladung wählen, <b>Messung starten</b>. Während der Messung ist der Schalter geschlossen. Die Messung endet, wenn die gewählte Ladung durch den Leiterquerschnitt geflossen ist. Jede Messung landet unten im Messprotokoll.</div>
+  <div class="buehne">
+   <canvas id="c1" width="560" height="330" data-quelle="Stromkreis nach Europa Fachkunde S. 30, Bild 3 (Spannungsmessung an einem Verbraucher, Spannungsmesser parallel) und S. 31, Bild 2 (Leiterquerschnitt); Schaltzeichen Leuchte nach Tabellenbuch S. 86"
+    aria-label="Stromkreis aus Spannungsquelle, Schalter und Leuchte. Der Spannungsmesser liegt parallel zur Leuchte. Am Leiterquerschnitt wird die durchfließende Ladung gezählt. Bei geschlossenem Schalter bewegen sich Elektronen vom Minuspol durch die Leuchte zum Pluspol."></canvas>
+   <div class="anzeigen">
+    <div class="anz haupt"><div class="name">Spannungsmesser</div><div class="wert" id="aU">0 V</div></div>
+    <div class="anz"><div class="name">Ladung Q durch den Leiterquerschnitt</div><div class="wert" id="aQ">0 As</div></div>
+    <div class="anz"><div class="name">Arbeit W, in der Leuchte umgesetzt</div><div class="wert" id="aW">0 Ws</div></div>
+   </div>
+  </div>
+  <div class="wahl">
+   <div class="titel">1. Spannungsquelle</div>
+   <div class="knoepfe" id="quellen"></div>
+   <div class="titel">2. Ladung</div>
+   <div class="knoepfe" id="ladungen"></div>
+   <div class="titel">3. Messen</div>
+   <div class="knoepfe"><button class="start" id="bStart" disabled>Messung starten</button><button id="bReset1">Zurücksetzen</button></div>
+  </div>
+  <div class="tabelle"><table id="prot1">
+   <tr><th>Nr.</th><th>Spannungs&shy;quelle</th><th>Ladung Q</th><th>Arbeit W</th><th>Spannungs&shy;messer</th></tr>
+   <tr class="leer"><td colspan="5">Noch keine Messung.</td></tr>
+  </table></div>
+ </section>
+
+ <!-- ===================== Messplatz 2 ===================== -->
+ <section id="mp2" hidden>
+  <div class="anleitung"><b>So messen Sie:</b> Masse festlegen. Rote und schwarze Messleitung an je einen Anschluss legen; der Spannungsmesser zeigt sofort an. Mit <b>Messwert notieren</b> landet die Messung unten im Messprotokoll.</div>
+  <div class="buehne">
+   <canvas id="c2" width="560" height="330" data-quelle="Netzteil mit fünf Anschlüssen nach Europa Fachkunde S. 28, Bild 2 (Potenziale); Spannungsmesser mit zwei Messleitungen nach Fachkunde S. 30, Bild 2; Schaltzeichen Körper, Masse nach Tabellenbuch S. 87"
+    aria-label="Netzteil mit fünf Anschlüssen, von unten nach oben 1 bis 5. Ein Anschluss kann als Masse festgelegt werden und trägt dann das Massezeichen. Ein Spannungsmesser hat eine rote und eine schwarze Messleitung, die an je einen Anschluss gelegt werden."></canvas>
+   <div class="anzeigen">
+    <div class="anz haupt"><div class="name">Spannungsmesser</div><div class="wert" id="aV">0 V</div>
+     <div class="klein" id="aLage">Messleitungen anlegen.</div></div>
+   </div>
+  </div>
+  <div class="wahl">
+   <div class="titel">1. Masse an Anschluss</div>
+   <div class="knoepfe" id="massen"></div>
+   <div class="titel">2. Rote Messleitung an Anschluss</div>
+   <div class="knoepfe rot" id="rote"></div>
+   <div class="titel">3. Schwarze Messleitung an Anschluss</div>
+   <div class="knoepfe schwarz" id="schwarze"></div>
+   <div class="titel">4. Notieren</div>
+   <div class="knoepfe"><button class="start" id="bNotiz" disabled>Messwert notieren</button><button id="bReset2">Zurücksetzen</button></div>
+  </div>
+  <div class="tabelle"><table id="prot2">
+   <tr><th>Nr.</th><th>Masse an</th><th>rot an</th><th>schwarz an</th><th>Anzeige</th></tr>
+   <tr class="leer"><td colspan="5">Noch keine Messung.</td></tr>
+  </table></div>
+ </section>
+</div>
+
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id);};
+var ruhig=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+var QUELLEN=[{n:"Monozelle",U:1.5},{n:"Blockbatterie",U:9},{n:"Autobatterie",U:12}];
+var LADUNGEN=[1,2,4];                 // As
+var DAUER=3;                          // s je Messung (die Zeit spielt hier keine Rolle)
+var STUFE=3;                          // V zwischen benachbarten Anschlüssen (Fachkunde S. 28, Bild 2)
+var NAMEN={1:"Anschluss 1",2:"Anschluss 2",3:"Anschluss 3",4:"Anschluss 4",5:"Anschluss 5"};
+
+function komma(s){return s.replace(".",",");}
+function sig(x,n){                     // n gültige Ziffern, ohne überflüssige Nullen hinter dem Komma
+  if(x===0) return "0";
+  var s=Number(x.toPrecision(n)).toString();
+  if(s.indexOf("e")>=0) s=Number(x.toPrecision(n)).toFixed(6);
+  return komma(s);
+}
+function volt(u){ if(u===0) return "0 V"; return (u<0?"−":"")+sig(Math.abs(u),4)+" V"; }
+function ladung(q){ return q===0?"0 As":sig(q,3)+" As"; }
+function arbeit(w){ return w===0?"0 Ws":sig(w,4)+" Ws"; }
+
+// ===================== Reiter =====================
+function zeige(nr){
+  $("mp1").hidden=(nr!==1); $("mp2").hidden=(nr!==2);
+  $("tab1").classList.toggle("an",nr===1); $("tab2").classList.toggle("an",nr===2);
+  $("tab1").setAttribute("aria-selected",nr===1?"true":"false"); $("tab2").setAttribute("aria-selected",nr===2?"true":"false");
+  if(nr===1) zeichne1(performance.now()); else zeichne2();
+}
+$("tab1").onclick=function(){zeige(1);}; $("tab2").onclick=function(){zeige(2);};
+
+// ===================== Messplatz 1 =====================
+var m1={q:null,l:null,laeuft:false,Q:0,W:0,start:0,nr:0};
+function knoepfe1(){
+  QUELLEN.forEach(function(g,i){var b=document.createElement("button");b.textContent=g.n;b.onclick=function(){if(m1.laeuft)return;m1.q=i;auffrischen1();};$("quellen").appendChild(b);});
+  LADUNGEN.forEach(function(z,i){var b=document.createElement("button");b.textContent=z+" As";b.onclick=function(){if(m1.laeuft)return;m1.l=i;auffrischen1();};$("ladungen").appendChild(b);});
+}
+function auffrischen1(){
+  Array.prototype.forEach.call($("quellen").children,function(b,i){b.classList.toggle("an",m1.q===i);b.disabled=m1.laeuft;});
+  Array.prototype.forEach.call($("ladungen").children,function(b,i){b.classList.toggle("an",m1.l===i);b.disabled=m1.laeuft;});
+  $("bStart").disabled=m1.laeuft||m1.q===null||m1.l===null;
+  $("aU").textContent=volt(m1.laeuft?QUELLEN[m1.q].U:0);
+  $("aQ").textContent=ladung(m1.Q);
+  $("aW").textContent=arbeit(m1.W);
+}
+function protokoll1(){
+  var tb=$("prot1"),leer=tb.querySelector("tr.leer"); if(leer) leer.remove();
+  var g=QUELLEN[m1.q],tr=document.createElement("tr");
+  tr.innerHTML="<td>"+m1.nr+"</td><td>"+g.n+"</td><td class='z'>"+ladung(m1.Q)+"</td><td class='z'>"+arbeit(m1.W)+"</td><td class='z'>"+volt(g.U)+"</td>";
+  tb.appendChild(tr);
+}
+function starten(){ m1.laeuft=true; m1.Q=0; m1.W=0; m1.start=performance.now(); auffrischen1(); requestAnimationFrame(schritt1); }
+function schritt1(jetzt){
+  if(!m1.laeuft) return;
+  var Qz=LADUNGEN[m1.l], U=QUELLEN[m1.q].U;
+  var anteil=Math.min(1,(jetzt-m1.start)/1000/DAUER);
+  m1.Q=Qz*anteil; m1.W=U*m1.Q;
+  if(anteil>=1){ m1.Q=Qz; m1.W=U*Qz; m1.nr++; protokoll1(); m1.laeuft=false; }
+  auffrischen1(); zeichne1(jetzt);
+  if(m1.laeuft) requestAnimationFrame(schritt1);
+}
+function zuruecksetzen1(){
+  m1={q:null,l:null,laeuft:false,Q:0,W:0,start:0,nr:0};
+  var tb=$("prot1"); while(tb.rows.length>1) tb.deleteRow(1);
+  var tr=tb.insertRow(); tr.className="leer"; tr.innerHTML="<td colspan='5'>Noch keine Messung.</td>";
+  auffrischen1(); zeichne1(0);
+}
+
+var c1=$("c1"), g1=c1.getContext("2d");
+// Elektronenweg: vom Minuspol (unten) nach rechts, durch die Leuchte nach oben, oben nach links zum Pluspol
+var WEG=[[150,270],[420,270],[420,70],[150,70]];
+function laenge(){var s=0;for(var i=1;i<WEG.length;i++)s+=Math.hypot(WEG[i][0]-WEG[i-1][0],WEG[i][1]-WEG[i-1][1]);return s;}
+var L=laenge();
+function punkt(s){for(var i=1;i<WEG.length;i++){var a=WEG[i-1],b=WEG[i],d=Math.hypot(b[0]-a[0],b[1]-a[1]);if(s<=d)return[a[0]+(b[0]-a[0])*s/d,a[1]+(b[1]-a[1])*s/d];s-=d;}return WEG[WEG.length-1];}
+function zeichne1(jetzt){
+  var W=c1.width,H=c1.height,g=g1; g.clearRect(0,0,W,H);
+  var zu=m1.laeuft;
+  g.lineWidth=3; g.strokeStyle="#1A2530";
+  // Spannungsquelle
+  g.fillStyle="#F4F6F8"; g.fillRect(40,50,110,240); g.strokeRect(40,50,110,240);
+  g.fillStyle="#1A2530"; g.font="bold 26px 'Noto Sans',sans-serif"; g.textAlign="center";
+  g.fillText("+",130,92); g.fillText("−",130,282);
+  g.font="22px 'Noto Sans',sans-serif"; g.save(); g.translate(86,170); g.rotate(-Math.PI/2);
+  g.fillText(m1.q===null?"Spannungsquelle":QUELLEN[m1.q].n,0,0); g.restore();
+  // Leitungen
+  g.beginPath(); g.moveTo(150,70); g.lineTo(230,70); g.moveTo(285,70); g.lineTo(420,70); g.lineTo(420,144);
+  g.moveTo(420,206); g.lineTo(420,270); g.lineTo(150,270); g.stroke();
+  // Schalter
+  g.fillStyle="#1A2530";
+  g.beginPath(); g.arc(230,70,4,0,6.283); g.arc(285,70,4,0,6.283); g.fill();
+  g.beginPath(); g.moveTo(230,70); if(zu) g.lineTo(285,70); else g.lineTo(279,40); g.stroke();
+  g.font="22px 'Noto Sans',sans-serif"; g.textAlign="center"; g.fillText(zu?"Schalter zu":"Schalter offen",258,30);
+  // Leiterquerschnitt
+  g.setLineDash([6,5]); g.strokeStyle="#A34E0E"; g.lineWidth=2;
+  g.beginPath(); g.ellipse(300,270,9,22,0,0,6.283); g.stroke(); g.setLineDash([]);
+  g.fillStyle="#A34E0E"; g.font="22px 'Noto Sans',sans-serif"; g.fillText("Leiterquerschnitt",300,318);
+  // Elektronen
+  var v=zu?60:0, phase=(ruhig||!zu)?0:(jetzt/1000*v)%34;
+  g.fillStyle="#2557A3";
+  for(var s=phase;s<L;s+=34){ var p=punkt(s); if(zu||p[1]!==70||p[0]<226||p[0]>289){ g.beginPath(); g.arc(p[0],p[1],5,0,6.283); g.fill(); } }
+  g.textAlign="left"; g.font="21px 'Noto Sans',sans-serif"; g.fillText("Elektronen",166,252);
+  // Leuchte (Kreis mit Kreuz)
+  g.lineWidth=3; g.strokeStyle="#1A2530";
+  g.fillStyle=zu?"#FFE27A":"#fff"; g.beginPath(); g.arc(420,175,31,0,6.283); g.fill(); g.stroke();
+  var d=31*Math.SQRT1_2;
+  g.beginPath(); g.moveTo(420-d,175-d); g.lineTo(420+d,175+d); g.moveTo(420+d,175-d); g.lineTo(420-d,175+d); g.stroke();
+  g.fillStyle="#1A2530"; g.font="21px 'Noto Sans',sans-serif"; g.textAlign="right"; g.fillText("Leuchte",380,182);
+  // Spannungsmesser parallel zur Leuchte
+  g.lineWidth=2.5; g.beginPath(); g.moveTo(420,110); g.lineTo(510,110); g.lineTo(510,151); g.moveTo(510,199); g.lineTo(510,240); g.lineTo(420,240); g.stroke();
+  g.fillStyle="#1A2530"; g.beginPath(); g.arc(420,110,4,0,6.283); g.arc(420,240,4,0,6.283); g.fill();
+  g.fillStyle="#fff"; g.beginPath(); g.arc(510,175,24,0,6.283); g.fill(); g.stroke();
+  g.fillStyle="#A34E0E"; g.font="bold 24px 'Noto Sans',sans-serif"; g.textAlign="center"; g.fillText("V",510,184);
+}
+function schleife(t){ if(!m1.laeuft&&!$("mp1").hidden) zeichne1(t); requestAnimationFrame(schleife); }
+
+// ===================== Messplatz 2 =====================
+var m2={masse:null,rot:null,schwarz:null,nr:0};
+function knoepfe2(){
+  [["massen","masse"],["rote","rot"],["schwarze","schwarz"]].forEach(function(paar){
+    for(var k=1;k<=5;k++){ (function(k){ var b=document.createElement("button"); b.textContent=String(k);
+      b.setAttribute("aria-label",NAMEN[k]); b.onclick=function(){m2[paar[1]]=k;auffrischen2();}; $(paar[0]).appendChild(b); })(k); }
+  });
+}
+function anzeige2(){ if(m2.rot===null||m2.schwarz===null) return 0; return (m2.rot-m2.schwarz)*STUFE; }
+function auffrischen2(){
+  [["massen","masse"],["rote","rot"],["schwarze","schwarz"]].forEach(function(paar){
+    Array.prototype.forEach.call($(paar[0]).children,function(b,i){b.classList.toggle("an",m2[paar[1]]===i+1);});
+  });
+  $("aV").textContent=volt(anzeige2());
+  var t;
+  if(m2.rot===null&&m2.schwarz===null) t="Messleitungen anlegen.";
+  else t="rot an "+(m2.rot===null?"keinem Anschluss":NAMEN[m2.rot])+", schwarz an "+(m2.schwarz===null?"keinem Anschluss":NAMEN[m2.schwarz]);
+  $("aLage").textContent=t;
+  $("bNotiz").disabled=(m2.rot===null||m2.schwarz===null);
+  zeichne2();
+}
+function notieren(){
+  if(m2.rot===null||m2.schwarz===null) return;
+  var tb=$("prot2"),leer=tb.querySelector("tr.leer"); if(leer) leer.remove();
+  m2.nr++;
+  var tr=document.createElement("tr");
+  tr.innerHTML="<td>"+m2.nr+"</td><td>"+(m2.masse===null?"keine":m2.masse)+"</td><td>"+m2.rot+"</td><td>"+m2.schwarz+"</td><td class='z'>"+volt(anzeige2())+"</td>";
+  tb.appendChild(tr);
+}
+function zuruecksetzen2(){
+  m2={masse:null,rot:null,schwarz:null,nr:0};
+  var tb=$("prot2"); while(tb.rows.length>1) tb.deleteRow(1);
+  var tr=tb.insertRow(); tr.className="leer"; tr.innerHTML="<td colspan='5'>Noch keine Messung.</td>";
+  auffrischen2();
+}
+
+var c2=$("c2"), g2=c2.getContext("2d");
+var XK=210;                                        // x der Anschlussklemmen
+function yk(k){ return 275-(k-1)*55; }             // 1 unten, 5 oben (wie Fachkunde S. 28, Bild 2)
+var VX=470, VY=150, VR=34;                         // Spannungsmesser
+function leitung(g,farbe,x0,y0,x1,y1){
+  g.strokeStyle=farbe; g.lineWidth=4; g.lineCap="round";
+  g.beginPath(); g.moveTo(x0,y0); g.bezierCurveTo(x0-70,y0,x1+80,y1,x1+10,y1); g.stroke();
+  g.lineWidth=7; g.beginPath(); g.moveTo(x1+30,y1); g.lineTo(x1+10,y1); g.stroke();   // Prüfspitze
+  g.lineCap="butt";
+}
+function zeichne2(){
+  var W=c2.width,H=c2.height,g=g2; g.clearRect(0,0,W,H);
+  // Netzteil
+  g.lineWidth=3; g.strokeStyle="#1A2530"; g.fillStyle="#F4F6F8";
+  g.beginPath(); if(g.roundRect) g.roundRect(40,16,190,302,18); else g.rect(40,16,190,302); g.fill(); g.stroke();
+  g.fillStyle="#1A2530"; g.font="bold 22px 'Noto Sans',sans-serif"; g.textAlign="left"; g.fillText("Netzteil",56,52);
+  // Klemmen
+  for(var k=1;k<=5;k++){
+    var y=yk(k);
+    g.font="22px 'Noto Sans',sans-serif"; g.textAlign="right"; g.fillStyle="#1A2530"; g.fillText(String(k),XK-16,y+8);
+    g.fillStyle="#fff"; g.lineWidth=4; g.beginPath(); g.arc(XK,y,8,0,6.283); g.fill(); g.stroke();
+  }
+  // Masse (Tabellenbuch S. 87: Strich mit Querbalken)
+  if(m2.masse!==null){
+    var ym=yk(m2.masse);
+    g.strokeStyle="#1A2530"; g.lineWidth=3;
+    g.beginPath(); g.moveTo(XK,ym+8); g.lineTo(XK,ym+24); g.stroke();
+    g.lineWidth=5; g.beginPath(); g.moveTo(XK-13,ym+24); g.lineTo(XK+13,ym+24); g.stroke();
+    g.fillStyle="#1A2530"; g.font="bold 20px 'Noto Sans',sans-serif"; g.textAlign="right"; g.fillText("Masse",XK-22,ym+31);
+  }
+  // Spannungsmesser
+  g.strokeStyle="#1A2530"; g.lineWidth=3; g.fillStyle="#fff";
+  g.beginPath(); g.arc(VX,VY,VR,0,6.283); g.fill(); g.stroke();
+  g.fillStyle="#A34E0E"; g.font="bold 30px 'Noto Sans',sans-serif"; g.textAlign="center"; g.fillText("V",VX,VY+11);
+  // Anzeige am Gerät
+  g.fillStyle="#1A2530"; g.fillRect(VX-62,VY+48,124,40);
+  g.fillStyle="#9BE8B5"; g.font="bold 24px 'Noto Sans',sans-serif"; g.fillText(volt(anzeige2()),VX,VY+77);
+  // Messleitungen: rot oben, schwarz unten vom Gerät
+  var ruheR=[300,300], ruheS=[340,318];
+  var rx0=VX-VR+2, ry0=VY-14, sx0=VX-VR+2, sy0=VY+14;
+  var zr=m2.rot===null?ruheR:[XK,yk(m2.rot)], zs=m2.schwarz===null?ruheS:[XK,yk(m2.schwarz)];
+  leitung(g,"#1A2530",sx0,sy0,zs[0],zs[1]);
+  leitung(g,"#C62828",rx0,ry0,zr[0],zr[1]);
+}
+
+$("bStart").onclick=starten; $("bReset1").onclick=zuruecksetzen1;
+$("bNotiz").onclick=notieren; $("bReset2").onclick=zuruecksetzen2;
+knoepfe1(); knoepfe2(); auffrischen1(); auffrischen2(); zeige(1); requestAnimationFrame(schleife);
+})();
+</script>
+</body></html>
