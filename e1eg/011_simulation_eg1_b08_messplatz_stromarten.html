@@ -1,0 +1,281 @@
+<!doctype html>
+<!-- Block EG1-B08 · Messplatz Stromarten (Neubau 12.10.2026, Aufgabe IN der Stunde) -->
+<!-- Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht):
+     (1) Batterie: Der Strommesser zeigt immer denselben Wert; die Elektronen bewegen sich gleichmäßig in eine Richtung.
+     (2) Batterie umgepolt: derselbe Betrag mit Minuszeichen; die Elektronen bewegen sich andersherum. Das Vorzeichen
+         sagt, ob der Strom mit oder gegen den Bezugspfeil I fließt (Tabellenbuch S. 43, Strombezugspfeile).
+     (3) Generator: Der Zeiger schlägt abwechselnd nach links und nach rechts aus, der Wert wechselt zwischen + und −;
+         die Elektronen bewegen sich hin und her. Richtung und Stärke wechseln ständig.
+     (4) Generator und Batterie in Reihe: Der Zeiger schlägt nur nach einer Seite aus und pendelt um den Wert der
+         Batterie; der Strom pendelt um 0,10 A (Batterie allein) und schwankt um 0,05 A (Generator allein).
+     Versuche nach Europa Fachkunde S. 34 (Versuch 1 bis 3): Lampe 6 V/0,1 A, Strommesser mit Zeiger in der Skalenmitte,
+     Funktionsgenerator 1 Hz, Batterie in Reihe. Bezugspfeil und Polung des Strommessers nach Fachkunde S. 32, Bild 1.
+     Werte: Batterie 0,10 A; Generator Scheitelwert 0,05 A, 1 Hz; Messschreiber 8 s = 8 volle Schwingungen, deshalb
+     sind kleinster und größter Wert exakt: Batterie +0,10/+0,10; umgepolt −0,10/−0,10; Generator −0,05/+0,05;
+     Generator und Batterie +0,05/+0,15 (A). Grenzfall im Einstellbereich: keine Quelle, I = 0.
+     Startstellung neutral: keine Quelle, Strommesser 0, kein Schaubild, leeres Protokoll. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Stromarten (Block 08)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"quelle":null,"I":"0,00 A","schaubild":null},"loesungswerte":{"Batterie":"+0,10 A bis +0,10 A","Batterie umgepolt":"−0,10 A bis −0,10 A","Generator":"−0,05 A bis +0,05 A","Generator und Batterie":"+0,05 A bis +0,15 A"}}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62;--blau:#2557A3}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:980px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px}
+ @media(min-width:760px){.buehne{grid-template-columns:1.35fr 1fr}}
+ canvas{width:100%;height:auto;display:block;border:1px solid var(--linie);background:#fff;touch-action:manipulation}
+ .anz{border:1.4px solid var(--ink);padding:8px 12px;background:var(--hell)}
+ .anz .name{font-size:14px;font-weight:700;color:var(--grau)}
+ .anz .wert{font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--kupfer);text-align:center}
+ .legende{font-size:13px;color:var(--grau);margin-top:6px}
+ .legende b{color:var(--ink)}
+ .wahl{margin:12px 0 4px}
+ .wahl .titel{font-size:14px;font-weight:700;margin:8px 0 4px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px}
+ button{font:inherit;font-size:15px;min-height:46px;padding:8px 14px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer}
+ button.an{background:var(--kupfer);color:#fff}
+ button:disabled{opacity:.45;cursor:not-allowed}
+ button.start{border-color:var(--gruen);color:#fff;background:var(--gruen);font-weight:700}
+ button.start:disabled{background:#fff;color:var(--gruen)}
+ .schreiber{margin-top:12px}
+ .schreiber .name{font-size:14px;font-weight:700;color:var(--grau);margin-bottom:4px}
+ table{width:100%;border-collapse:collapse;margin-top:12px;font-size:15px}
+ th,td{border:1px solid var(--linie);padding:6px 8px;text-align:left}
+ th{background:var(--hell);font-size:14px}
+ .tabelle{overflow-x:auto}
+ td.z{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+ .leer{color:var(--grau);font-style:italic}
+ @media(max-width:420px){.anz .wert{font-size:26px} th,td{padding:5px 5px;font-size:14px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E1EG · Lernfeld 1 · Block 08</div><h1>Messplatz Stromarten</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Quelle wählen und beobachten. Dann <b>Messschreiber starten</b>: Er zeichnet 8 s lang die Anzeige des Strommessers auf. Jede Messung landet unten im Messprotokoll.</div>
+
+ <div class="buehne">
+  <div>
+   <canvas id="c" width="560" height="330" data-quelle="Versuche nach Europa Fachkunde S. 34 (Versuch 1 bis 3: Lampe, Strommesser, Batterie, Funktionsgenerator, beides in Reihe); Strommesser mit Polung und Bezugspfeil I nach Fachkunde S. 32, Bild 1; Schaltzeichen nach DIN EN 60617 (Tabellenbuch S. 86)"
+    aria-label="Stromkreis aus Quelle, Strommesser und Lampe. Über der oberen Leitung steht der Pfeil I. Blaue Punkte zeigen die freien Elektronen in den Leitungen."></canvas>
+   <div class="legende"><b>Blaue Punkte:</b> freie Elektronen. <b>Pfeil <i>I</i>:</b> Bezugspfeil.</div>
+  </div>
+  <div class="anz">
+   <div class="name">Strommesser (Zeiger in der Skalenmitte)</div>
+   <canvas id="m" width="300" height="170" data-quelle="Strommesser mit Zeiger in der Skalenmitte nach Europa Fachkunde S. 34, Versuch 2"
+    aria-label="Zeigerinstrument mit Nullpunkt in der Mitte, Skala von minus 0,2 A bis plus 0,2 A."></canvas>
+   <div class="wert" id="aI">0,00 A</div>
+  </div>
+ </div>
+
+ <div class="wahl">
+  <div class="titel">1. Quelle</div>
+  <div class="knoepfe" id="quellen"></div>
+  <div class="titel">2. Messen</div>
+  <div class="knoepfe"><button class="start" id="bStart" disabled>Messschreiber starten (8 s)</button><button id="bReset">Zurücksetzen</button></div>
+ </div>
+
+ <div class="schreiber">
+  <div class="name" id="sTitel">Messschreiber: Anzeige des Strommessers über der Zeit</div>
+  <canvas id="s" width="900" height="330" data-quelle="Stromstärke-Zeit-Schaubild wie Europa Fachkunde S. 34, Tabelle Stromarten; Achsen nach DIN 461"
+   aria-label="Schaubild: waagerecht die Zeit t in s von 0 bis 8, senkrecht die Stromstärke I in A von minus 0,2 bis plus 0,2."></canvas>
+ </div>
+
+ <div class="tabelle"><table id="protokoll">
+  <tr><th>Nr.</th><th>Quelle</th><th>kleinster Wert</th><th>größter Wert</th></tr>
+  <tr class="leer"><td colspan="4">Noch keine Messung.</td></tr>
+ </table></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+// Quellen: Gleichanteil (A) und Scheitelwert des Generators (A); Generator 1 Hz wie Fachkunde S. 34, Versuch 2
+var QUELLEN=[{n:"Batterie",dc:0.10,ac:0},{n:"Batterie umgepolt",dc:-0.10,ac:0},{n:"Generator",dc:0,ac:0.05},
+             {n:"Generator und Batterie",dc:0.10,ac:0.05}];
+var F=1, DAUER=8, K=1200;                     // Hz; Messschreiber 8 s = 8 volle Schwingungen; px je (A·s)
+var $=function(id){return document.getElementById(id);};
+var ruhig=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+var z={q:null,t0:0,lauf:false,ls:0,spur:[],spurQ:null,nr:0,s:0,letzt:0,anzeige:0};
+
+function komma(s){return s.replace(".",",");}
+function wert(I){                              // zwei Nachkommastellen mit Vorzeichen; 0 ohne Vorzeichen
+  var r=Math.round(I*100)/100;
+  if(r===0) return "0,00 A";
+  return (r>0?"+":"−")+komma(Math.abs(r).toFixed(2))+" A";
+}
+function strom(jetzt){
+  if(z.q===null) return 0;
+  var q=QUELLEN[z.q], t=(jetzt-z.t0)/1000;
+  return q.dc+q.ac*Math.sin(2*Math.PI*F*t);
+}
+
+function knoepfe(){
+  QUELLEN.forEach(function(q,i){var b=document.createElement("button");b.textContent=q.n;
+    b.onclick=function(){if(z.lauf)return; z.q=i; z.t0=performance.now(); auffrischen();}; $("quellen").appendChild(b);});
+}
+function auffrischen(){
+  Array.prototype.forEach.call($("quellen").children,function(b,i){b.classList.toggle("an",z.q===i);b.disabled=z.lauf;});
+  $("bStart").disabled=z.lauf||z.q===null;
+}
+function protokoll(q){
+  var tb=$("protokoll"),leer=tb.querySelector("tr.leer"); if(leer) leer.remove();
+  var tr=document.createElement("tr");
+  // 8 volle Schwingungen: kleinster und größter Wert sind exakt Gleichanteil − und + Scheitelwert
+  tr.innerHTML="<td>"+z.nr+"</td><td>"+q.n+"</td><td class='z'>"+wert(q.dc-q.ac)+"</td><td class='z'>"+wert(q.dc+q.ac)+"</td>";
+  tb.appendChild(tr);
+}
+function starten(){
+  z.lauf=true; z.ls=performance.now(); z.spur=[]; z.spurQ=z.q; auffrischen();
+  $("sTitel").textContent="Messschreiber: "+QUELLEN[z.q].n;
+}
+function zuruecksetzen(){
+  z={q:null,t0:0,lauf:false,ls:0,spur:[],spurQ:null,nr:0,s:0,letzt:0,anzeige:0};
+  var tb=$("protokoll"); while(tb.rows.length>1) tb.deleteRow(1);
+  var tr=tb.insertRow(); tr.className="leer"; tr.innerHTML="<td colspan='4'>Noch keine Messung.</td>";
+  $("sTitel").textContent="Messschreiber: Anzeige des Strommessers über der Zeit";
+  $("aI").textContent="0,00 A"; auffrischen();
+}
+
+// ---------- Schaltung ----------
+var c=$("c"), g=c.getContext("2d");
+var XL=95, XR=470, YO=70, YU=270;             // Leiterschleife; Weg im Uhrzeigersinn ab links oben
+var WEG=[[XL,YO],[XR,YO],[XR,YU],[XL,YU],[XL,YO]];
+var LEN=2*(XR-XL)+2*(YU-YO);
+function punkt(s){s=((s%LEN)+LEN)%LEN;for(var i=1;i<WEG.length;i++){var a=WEG[i-1],b=WEG[i],d=Math.hypot(b[0]-a[0],b[1]-a[1]);if(s<=d)return[a[0]+(b[0]-a[0])*s/d,a[1]+(b[1]-a[1])*s/d];s-=d;}return WEG[0];}
+var AM=[250,YO], LA=[XR,170];
+function batterie(y,plusOben){                 // galvanisches Element: langer dünner Strich Pluspol, kurzer dicker Minuspol
+  var yp=plusOben?y-8:y+8, ym=plusOben?y+8:y-8;
+  g.fillStyle="#fff"; g.fillRect(XL-26,y-14,52,28);
+  g.strokeStyle="#1A2530"; g.lineWidth=2.5; g.beginPath(); g.moveTo(XL-22,yp); g.lineTo(XL+22,yp); g.stroke();
+  g.lineWidth=7; g.beginPath(); g.moveTo(XL-11,ym); g.lineTo(XL+11,ym); g.stroke();
+  g.fillStyle="#1A2530"; g.font="bold 22px 'Noto Sans',sans-serif"; g.textAlign="center";
+  g.fillText("+",XL+38,yp+(plusOben?-2:14)); g.fillText("−",XL+38,ym+(plusOben?14:-2));
+}
+function generator(y){
+  g.fillStyle="#fff"; g.beginPath(); g.arc(XL,y,26,0,6.283); g.fill();
+  g.strokeStyle="#1A2530"; g.lineWidth=2.5; g.stroke();
+  g.fillStyle="#1A2530"; g.font="bold 20px 'Noto Sans',sans-serif"; g.textAlign="center"; g.fillText("G",XL,y+2);
+  g.lineWidth=2; g.beginPath();
+  for(var i=0;i<=20;i++){var x=XL-10+i, yy=y+13-4*Math.sin(i/20*2*Math.PI); if(i===0)g.moveTo(x,yy); else g.lineTo(x,yy);} g.stroke();
+}
+function zeichneKreis(I,jetzt){
+  g.clearRect(0,0,c.width,c.height);
+  g.strokeStyle="#1A2530"; g.lineWidth=3;
+  g.beginPath(); g.moveTo(XL,YO); g.lineTo(XR,YO); g.lineTo(XR,YU); g.lineTo(XL,YU); g.stroke();
+  // linke Seite: Quelle
+  if(z.q===null){
+    g.beginPath(); g.moveTo(XL,YO); g.lineTo(XL,130); g.moveTo(XL,210); g.lineTo(XL,YU); g.stroke();
+    g.setLineDash([5,5]); g.strokeStyle="#9AA5AE"; g.strokeRect(XL-30,135,60,70); g.setLineDash([]);
+    g.fillStyle="#5A666F"; g.font="20px 'Noto Sans',sans-serif"; g.textAlign="left"; g.fillText("Quelle?",XL+40,177);
+  } else {
+    g.beginPath(); g.moveTo(XL,YO); g.lineTo(XL,YU); g.stroke();
+    var n=QUELLEN[z.q].n;
+    if(n==="Batterie") batterie(170,true);
+    else if(n==="Batterie umgepolt") batterie(170,false);
+    else if(n==="Generator") generator(170);
+    else { generator(128); batterie(218,true); }
+  }
+  // Elektronen: Weg im Uhrzeigersinn = technische Richtung bei positivem I; die Elektronen laufen entgegen
+  g.fillStyle="#2557A3";
+  var ab=LEN/34, off=((z.s%ab)+ab)%ab;          // 34 Elektronen, gleichmäßig auf der ganzen Schleife
+  for(var i=0;i<34;i++){
+    var p=punkt(off+i*ab);
+    if(Math.hypot(p[0]-AM[0],p[1]-AM[1])<30||Math.hypot(p[0]-LA[0],p[1]-LA[1])<28) continue;
+    if(p[0]===XL&&p[1]>100&&p[1]<245) continue;
+    g.beginPath(); g.arc(p[0],p[1],5.5,0,6.283); g.fill();
+  }
+  // Strommesser mit Polung (Fachkunde S. 32, Bild 1: + links, − rechts)
+  g.fillStyle="#fff"; g.beginPath(); g.arc(AM[0],AM[1],25,0,6.283); g.fill(); g.strokeStyle="#1A2530"; g.lineWidth=3; g.stroke();
+  g.fillStyle="#1A2530"; g.font="bold 24px 'Noto Sans',sans-serif"; g.textAlign="center"; g.fillText("A",AM[0],AM[1]+9);
+  g.font="bold 20px 'Noto Sans',sans-serif"; g.fillText("+",AM[0]-36,YO-12); g.fillText("−",AM[0]+36,YO-12);
+  // Bezugspfeil I über der oberen Leitung
+  g.strokeStyle="#A34E0E"; g.fillStyle="#A34E0E"; g.lineWidth=3;
+  g.beginPath(); g.moveTo(320,YO-26); g.lineTo(405,YO-26); g.stroke();
+  g.beginPath(); g.moveTo(415,YO-26); g.lineTo(401,YO-33); g.lineTo(401,YO-19); g.closePath(); g.fill();
+  g.font="italic bold 24px 'Noto Sans',sans-serif"; g.fillText("I",362,YO-36);
+  // Lampe
+  g.fillStyle="#fff"; g.beginPath(); g.arc(LA[0],LA[1],22,0,6.283); g.fill(); g.strokeStyle="#1A2530"; g.lineWidth=3; g.stroke();
+  var d=15.5; g.beginPath(); g.moveTo(LA[0]-d,LA[1]-d); g.lineTo(LA[0]+d,LA[1]+d); g.moveTo(LA[0]+d,LA[1]-d); g.lineTo(LA[0]-d,LA[1]+d); g.stroke();
+  g.fillStyle="#1A2530"; g.font="22px 'Noto Sans',sans-serif"; g.textAlign="right"; g.fillText("Lampe",XR-32,LA[1]+8);
+}
+
+// ---------- Zeigerinstrument ----------
+var m=$("m"), h=m.getContext("2d");
+function zeichneMesser(I){
+  var W=m.width, H=m.height, cx=W/2, cy=H-22, R=118, max=0.2, wmax=55*Math.PI/180;
+  h.clearRect(0,0,W,H);
+  h.strokeStyle="#1A2530"; h.lineWidth=2; h.beginPath(); h.arc(cx,cy,R,-Math.PI/2-wmax,-Math.PI/2+wmax); h.stroke();
+  h.fillStyle="#1A2530"; h.font="16px 'Noto Sans',sans-serif"; h.textAlign="center";
+  for(var k=-4;k<=4;k++){
+    var w=k/4*wmax, lang=(k%2===0)?14:8, sx=Math.sin(w), cyw=-Math.cos(w);
+    h.beginPath(); h.moveTo(cx+R*sx,cy+R*cyw); h.lineTo(cx+(R-lang)*sx,cy+(R-lang)*cyw); h.stroke();
+    if(k%2===0){ var txt=(k===0)?"0":(k<0?"−":"")+komma((Math.abs(k)/4*max).toFixed(1)); h.fillText(txt,cx+(R+16)*sx,cy+(R+16)*cyw+5); }
+  }
+  h.font="bold 20px 'Noto Sans',sans-serif"; h.fillText("A",cx+92,cy+4);       // Einheit unten rechts, nicht unter dem Zeiger
+  var a=Math.max(-1.08,Math.min(1.08,I/max))*wmax;
+  h.strokeStyle="#A34E0E"; h.lineWidth=3; h.beginPath(); h.moveTo(cx,cy); h.lineTo(cx+(R-6)*Math.sin(a),cy-(R-6)*Math.cos(a)); h.stroke();
+  h.fillStyle="#1A2530"; h.beginPath(); h.arc(cx,cy,6,0,6.283); h.fill();
+}
+
+// ---------- Messschreiber ----------
+var sc=$("s"), sg=sc.getContext("2d");
+var P={l:96,r:820,o:26,u:270,imax:0.2};
+function lageSchreiber(){                       // am Handy schmalere Zeichnung, damit die Beschriftung lesbar bleibt
+  var w=(window.innerWidth<600)?560:900;
+  if(sc.width!==w){ sc.width=w; sc.height=330; }
+  FS=(w<900)?1.3:1; P.r=w-(w<900?100:80);
+}
+var FS=1;                                      // Schriftfaktor der Beschriftung im Messschreiber
+function schrift(px,kursiv){ sg.font=(kursiv?"italic ":"")+Math.round(px*FS)+"px 'Noto Sans',sans-serif"; }
+lageSchreiber(); window.addEventListener("resize",lageSchreiber);
+function px(t){return P.l+(P.r-P.l)*t/DAUER;}
+function py(I){return (P.o+P.u)/2-I/P.imax*(P.u-P.o)/2;}
+function zeichneSchreiber(){
+  var W=sc.width,H=sc.height; sg.clearRect(0,0,W,H);
+  sg.strokeStyle="#E3E8EC"; sg.lineWidth=1;
+  for(var t=1;t<=DAUER;t++){sg.beginPath(); sg.moveTo(px(t),P.o); sg.lineTo(px(t),P.u); sg.stroke();}
+  for(var i=-4;i<=4;i++){var y=py(i*0.05); sg.beginPath(); sg.moveTo(P.l,y); sg.lineTo(P.r,y); sg.stroke();}
+  sg.strokeStyle="#1A2530"; sg.lineWidth=2;
+  sg.beginPath(); sg.moveTo(P.l,P.u+8); sg.lineTo(P.l,P.o-14); sg.stroke();                 // senkrechte Achse mit Pfeil
+  sg.beginPath(); sg.moveTo(P.l,P.o-20); sg.lineTo(P.l-6,P.o-8); sg.lineTo(P.l+6,P.o-8); sg.closePath(); sg.fillStyle="#1A2530"; sg.fill();
+  var y0=py(0); sg.beginPath(); sg.moveTo(P.l,y0); sg.lineTo(P.r+14,y0); sg.stroke();          // Zeitachse bei I = 0 mit Pfeil
+  sg.beginPath(); sg.moveTo(P.r+22,y0); sg.lineTo(P.r+10,y0-6); sg.lineTo(P.r+10,y0+6); sg.closePath(); sg.fill();
+  schrift(18); sg.textAlign="right";
+  for(var j=-2;j<=2;j++){ var txt=(j===0)?"0":(j<0?"−":"")+komma((Math.abs(j)*0.1).toFixed(1)); sg.fillText(txt,P.l-10,py(j*0.1)+6); }
+  sg.textAlign="center"; for(var t2=1;t2<=DAUER;t2++) sg.fillText(String(t2),px(t2),P.u+26);
+  schrift(20,true); sg.textAlign="left"; sg.fillText("I",P.l+12,P.o-4);
+  schrift(20); sg.fillText(" in A",P.l+12+7*FS,P.o-4);
+  sg.textAlign="left"; schrift(20,true); sg.fillText("t",P.r+24,y0+30);   // rechts neben dem Raster
+  schrift(20); sg.fillText(" in s",P.r+24+7*FS,y0+30);
+  if(z.spur.length>1){
+    sg.strokeStyle="#A34E0E"; sg.lineWidth=3; sg.beginPath();
+    z.spur.forEach(function(p,i){ if(i===0) sg.moveTo(px(p[0]),py(p[1])); else sg.lineTo(px(p[0]),py(p[1])); }); sg.stroke();
+  }
+}
+
+// ---------- Ablauf ----------
+function schleife(jetzt){
+  var dt=z.letzt?Math.min(0.05,(jetzt-z.letzt)/1000):0; z.letzt=jetzt;
+  var I=strom(jetzt);
+  if(!ruhig) z.s-=K*I*dt;                      // Elektronen gegen die technische Richtung (Weg im Uhrzeigersinn)
+  if(z.lauf){
+    var t=(jetzt-z.ls)/1000;
+    if(t>=DAUER){
+      t=DAUER; z.spur.push([t,strom(z.ls+DAUER*1000)]); z.lauf=false; z.nr++; protokoll(QUELLEN[z.spurQ]); auffrischen();
+    } else z.spur.push([t,I]);
+  }
+  if(jetzt-z.anzeige>100||z.q===null){ $("aI").textContent=wert(I); z.anzeige=jetzt; }
+  zeichneKreis(I,jetzt); zeichneMesser(I); zeichneSchreiber();
+  requestAnimationFrame(schleife);
+}
+$("bStart").onclick=starten; $("bReset").onclick=zuruecksetzen;
+knoepfe(); auffrischen(); requestAnimationFrame(schleife);
+})();
+</script>
+</body></html>
