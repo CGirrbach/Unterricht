@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>U04 Messplatz: Zeiger und Augenblickswert</title>
+<!--
+  E2EG U04 „Der Augenblickswert einer Sinusspannung“, Neubau 12.10.2026 (ersetzt für den neuen Block
+  U04_Simulation_Augenblickswert.html, deren Adresse auf alten Blättern steht und unverändert bleibt).
+  Grund für die neue Datei: Die alte Seite nannte im Fußtext die Formel u = û · sin α und zeigte sin α als eigene
+  Anzeige; die Schüler sollen den Zusammenhang am Messplatz selbst finden (Messplatz-Prinzip wie E1EG Block 07).
+  Die Seite nennt weder eine Formel noch den Sinus. Sie zeigt Scheitelwert, Winkel (oder Zeit) und Augenblickswert.
+  Exaktheit: û ganzzahlig 1 bis 50 V; Winkel ganzzahlig 0° bis 360°; Zeit in Schritten von 0,1 ms bei f = 50 Hz
+  (Winkel 1,8° je Schritt); Augenblickswert auf zwei Nachkommastellen. Geprüfte Einstellungen stehen im Verlaufsplan.
+  Modell: Rechenbuch Elektrotechnik S. 94 (Zeigerbild und Liniendiagramm), Tabellenbuch S. 35 (Formel 9 und 13).
+-->
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--linie:#C7D2DA;--blau:#2557A3;--grau:#5A666F;--hell:#F4F6F8}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:#fff;line-height:1.4}
+header{border-top:6px solid var(--kupfer);padding:12px 16px 4px;max-width:980px;margin:0 auto}
+h1{margin:0;font-size:clamp(20px,4.6vw,28px)}
+.kurz{max-width:980px;margin:6px auto 0;padding:0 16px;font-size:clamp(15px,3.6vw,17px)}
+.kurz p{margin:4px 0}
+.kupfer{color:var(--kupfer);font-weight:700}
+.wahl{max-width:980px;margin:6px auto 0;padding:0 16px}
+.zeile{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:10px 0}
+.zeile .name{flex:0 0 100%;font-weight:700;font-size:clamp(15px,3.6vw,17px)}
+.stell{display:flex;align-items:center;gap:6px;flex:1 1 100%;max-width:560px}
+.stell .wert{flex:1 1 auto;text-align:center;font-weight:700;font-size:clamp(20px,5.4vw,26px);
+  font-variant-numeric:tabular-nums;color:var(--kupfer);min-width:96px;white-space:nowrap}
+button{font:inherit;font-weight:700;font-size:clamp(15px,3.9vw,18px);min-height:48px;min-width:58px;padding:8px 10px;
+       border:2px solid var(--ink);background:#fff;color:var(--ink);cursor:pointer;border-radius:6px;touch-action:manipulation}
+button[aria-pressed="true"]{background:var(--kupfer);border-color:var(--kupfer);color:#fff}
+button:disabled{opacity:.4;cursor:default}
+button.gross{flex:1 1 150px}
+button:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
+input[type=range]{flex:1 1 100%;width:100%;max-width:560px;height:40px;accent-color:var(--kupfer);margin:0}
+.versteckt{display:none!important}
+canvas{display:block;width:100%;max-width:980px;margin:6px auto 24px;height:auto}
+.anzeigen{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;max-width:980px;margin:8px auto 0;padding:0 16px}
+.kachel{border:1.5px solid var(--linie);border-radius:6px;padding:8px 10px;min-width:0}
+.kachel span{display:block;font-size:clamp(13px,3.3vw,15px);color:var(--grau);font-weight:700}
+.kachel b{display:block;font-size:clamp(20px,5.4vw,26px);font-variant-numeric:tabular-nums;white-space:nowrap}
+.kachel.u{border-color:var(--kupfer)}
+.kachel.u span,.kachel.u b{color:var(--kupfer)}
+.status{max-width:980px;margin:8px auto 4px;padding:0 16px;font-size:clamp(15px,3.6vw,17px);color:var(--grau);min-height:1.5em}
+@media (max-width:640px){.anzeigen{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><h1>Messplatz: Zeiger und Augenblickswert</h1></header>
+
+<div class="kurz">
+<p>Der Zeiger dreht sich links herum. Seine Länge ist der Scheitelwert <i>û</i>.</p>
+<p><span class="kupfer">Kupfern: der Augenblickswert <i>u</i></span>, der senkrechte Abstand der Zeigerspitze von der
+waagerechten Achse. Rechts steht derselbe Wert im Liniendiagramm.</p>
+</div>
+
+<script type="application/json" id="sim-meta">
+{
+  "erkenntnis": "Der Augenblickswert ist der senkrechte Abstand der Zeigerspitze von der Achse; der Augenblickswert geteilt durch den Scheitelwert hängt nur vom Winkel ab (er ist der Sinus des Winkels) und ist zwischen 180° und 360° negativ.",
+  "startwerte": {"modus": "winkel", "scheitelwert_v": 10, "winkel_grad": 0, "zeit_ms": 0},
+  "loesungswerte": {"modus": "winkel", "scheitelwert_v": 40, "winkel_grad": 240, "zeit_ms": 4},
+  "quelle": "Rechenbuch Elektrotechnik S. 94 (Zeigerbild und Liniendiagramm); Tabellenbuch S. 35 (Formel 9 und 13)"
+}
+</script>
+
+<div class="wahl">
+  <div class="zeile" role="group" aria-label="Scheitelwert">
+    <span class="name">Scheitelwert <i>û</i></span>
+    <div class="stell">
+      <button type="button" data-u="-10">−10</button>
+      <button type="button" data-u="-1">−1</button>
+      <span class="wert" id="wU">10 V</span>
+      <button type="button" data-u="1">+1</button>
+      <button type="button" data-u="10">+10</button>
+    </div>
+    <input type="range" id="rU" min="1" max="50" step="1" value="10" aria-label="Scheitelwert in Volt">
+  </div>
+
+  <div class="zeile" role="group" aria-label="Einstellen über">
+    <span class="name">Einstellen über</span>
+    <button type="button" class="gross" data-modus="winkel">Winkel <i>α</i></button>
+    <button type="button" class="gross" data-modus="zeit">Zeit <i>t</i> bei 50 Hz</button>
+  </div>
+
+  <div class="zeile" id="zeileWinkel" role="group" aria-label="Winkel">
+    <span class="name">Winkel <i>α</i></span>
+    <div class="stell">
+      <button type="button" data-a="-15">−15°</button>
+      <button type="button" data-a="-1">−1°</button>
+      <span class="wert" id="wA">0°</span>
+      <button type="button" data-a="1">+1°</button>
+      <button type="button" data-a="15">+15°</button>
+    </div>
+    <input type="range" id="rA" min="0" max="360" step="1" value="0" aria-label="Winkel in Grad">
+  </div>
+
+  <div class="zeile versteckt" id="zeileZeit" role="group" aria-label="Zeit">
+    <span class="name">Zeit <i>t</i> in ms ab dem Nulldurchgang, Frequenz <i>f</i>&nbsp;=&nbsp;50&nbsp;Hz</span>
+    <div class="stell">
+      <button type="button" data-t="-10">−1</button>
+      <button type="button" data-t="-1">−0,1</button>
+      <span class="wert" id="wT">0 ms</span>
+      <button type="button" data-t="1">+0,1</button>
+      <button type="button" data-t="10">+1</button>
+    </div>
+    <input type="range" id="rT" min="0" max="200" step="1" value="0" aria-label="Zeit in Zehntel-Millisekunden">
+  </div>
+
+  <div class="zeile">
+    <button type="button" class="gross" id="dreh">Eine Umdrehung zeigen</button>
+    <button type="button" class="gross" id="reset">Zurücksetzen</button>
+  </div>
+</div>
+
+
+
+<div class="anzeigen" aria-live="polite">
+  <div class="kachel"><span>Scheitelwert <i>û</i></span><b id="aU">10 V</b></div>
+  <div class="kachel"><span>Winkel <i>α</i></span><b id="aA">0°</b></div>
+  <div class="kachel" id="kT"><span>Zeit <i>t</i></span><b id="aT">0 ms</b></div>
+  <div class="kachel u"><span>Augenblickswert <i>u</i></span><b id="aW">0,00 V</b></div>
+</div>
+<div class="status" id="status">Stellen Sie Scheitelwert und Winkel ein und lesen Sie den Augenblickswert ab.</div>
+
+<canvas id="buehne" width="980" height="420" aria-label="Zeigerbild und Liniendiagramm"
+        data-quelle="Rechenbuch Elektrotechnik S. 94, Bild: Sinusförmige Wechselspannung (Zeigerbild und Liniendiagramm)"></canvas>
+
+<script>
+(function () {
+  "use strict";
+  var meta = JSON.parse(document.getElementById("sim-meta").textContent);
+  var START = meta.startwerte;
+  var F = 50;                                   /* Frequenz im Modus Zeit */
+  var modus, uDach, grad, zehntel;              /* zehntel: Zeit in 0,1 ms (ganzzahlig, keine Rundungsfehler) */
+  var raf = null;
+  var ruhig = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var cv = document.getElementById("buehne"), ctx = cv.getContext("2d");
+  var BREIT = {W: 980, H: 420, CX: 200, CY: 210, R: 140, X0: 430, BW: 480, Y0: 210, A: 140, sz: 18, lw: 1},
+      SCHMAL = {W: 600, H: 800, CX: 300, CY: 215, R: 150, X0: 70, BW: 440, Y0: 600, A: 135, sz: 26, lw: 1.5};
+  var G = BREIT;
+
+  function anordnen() {
+    var neu = (cv.parentNode.clientWidth || window.innerWidth) < 640 ? SCHMAL : BREIT;
+    if (neu !== G || cv.width !== neu.W) { G = neu; cv.width = G.W; cv.height = G.H; }
+  }
+
+  /* Zahl mit Dezimalkomma und echtem Minuszeichen; was auf null gerundet wird, trägt kein Vorzeichen */
+  function zahl(x, stellen) {
+    var s = x.toFixed(stellen);
+    if (/^-0(\.0*)?$/.test(s)) s = s.slice(1);
+    return s.replace(".", ",").replace("-", "−");
+  }
+  function knapp(x) {                            /* 72 · 5,4 · 126 (höchstens eine Nachkommastelle) */
+    var s = (Math.round(x * 10) / 10).toFixed(1);
+    if (s.slice(-2) === ".0") s = s.slice(0, -2);
+    return s.replace(".", ",");
+  }
+
+  /* aktueller Winkel in Grad und im Bogenmaß */
+  function winkel() {
+    if (modus === "zeit") return {grad: 360 * F * zehntel / 10000, rad: 2 * Math.PI * F * zehntel / 10000};
+    return {grad: grad, rad: grad * Math.PI / 180};
+  }
+  function augenblick() {
+    var w = winkel();
+    if (modus === "winkel" && grad % 180 === 0) return 0;          /* 0°, 180°, 360°: exakt null */
+    if (modus === "zeit" && zehntel % 100 === 0) return 0;         /* 0, 10, 20 ms bei 50 Hz */
+    return uDach * Math.sin(w.rad);
+  }
+
+  function zeige() {
+    var w = winkel();
+    document.getElementById("wU").textContent = uDach + " V";
+    document.getElementById("rU").value = uDach;
+    document.getElementById("wA").textContent = grad + "°";
+    document.getElementById("rA").value = grad;
+    document.getElementById("wT").textContent = zahl(zehntel / 10, 1) + " ms";
+    document.getElementById("rT").value = zehntel;
+    document.getElementById("aU").textContent = uDach + " V";
+    document.getElementById("aA").textContent = knapp(w.grad) + "°";
+    document.getElementById("aT").textContent = zahl(zehntel / 10, 1) + " ms";
+    document.getElementById("aW").textContent = zahl(augenblick(), 2) + " V";
+    document.getElementById("kT").classList.toggle("versteckt", modus !== "zeit");
+    document.getElementById("zeileWinkel").classList.toggle("versteckt", modus !== "winkel");
+    document.getElementById("zeileZeit").classList.toggle("versteckt", modus !== "zeit");
+    document.querySelectorAll("[data-modus]").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(b.dataset.modus === modus));
+    });
+  }
+
+  function pfeil(x1, y1, x2, y2, gr) {
+    var a = Math.atan2(y2 - y1, x2 - x1);
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2 - 0.6 * gr * Math.cos(a), y2 - 0.6 * gr * Math.sin(a)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - gr * Math.cos(a - 0.4), y2 - gr * Math.sin(a - 0.4));
+    ctx.lineTo(x2 - gr * Math.cos(a + 0.4), y2 - gr * Math.sin(a + 0.4));
+    ctx.closePath(); ctx.fill();
+  }
+  function marke(text, x, y, farbe) {
+    ctx.strokeStyle = "#FFFFFF"; ctx.lineWidth = 6 * G.lw; ctx.lineJoin = "round"; ctx.strokeText(text, x, y);
+    ctx.fillStyle = farbe || "#5A666F"; ctx.fillText(text, x, y);
+  }
+
+  function zeichne() {
+    var CX = G.CX, CY = G.CY, R = G.R, lw = G.lw;
+    var w = winkel(), rad = w.rad, s = Math.sin(rad), c = Math.cos(rad);
+    if (modus === "winkel" && grad % 180 === 0) s = 0;
+    if (modus === "zeit" && zehntel % 100 === 0) s = 0;
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.font = G.sz + "px system-ui, sans-serif";
+    ctx.textBaseline = "middle";
+
+    /* Zeigerbild: Achsenkreuz, Kreis mit dem Radius û */
+    ctx.strokeStyle = "#C7D2DA"; ctx.lineWidth = 1.5 * lw;
+    ctx.beginPath(); ctx.moveTo(CX - R - 24, CY); ctx.lineTo(CX + R + 24, CY);
+    ctx.moveTo(CX, CY - R - 24); ctx.lineTo(CX, CY + R + 24); ctx.stroke();
+    ctx.strokeStyle = "#1A2530"; ctx.lineWidth = 2 * lw;
+    ctx.beginPath(); ctx.arc(CX, CY, R, 0, 2 * Math.PI); ctx.stroke();
+    ctx.textAlign = "center";
+    marke("0°", CX + R + 30 * lw, CY - 16 * lw);
+    marke("90°", CX + 30 * lw, CY - R - 22 * lw);
+    marke("180°", CX - R - 34 * lw, CY - 16 * lw);
+    marke("270°", CX + 34 * lw, CY + R + 22 * lw);
+
+    /* Winkelbogen (blau) */
+    var wr = (w.grad % 360 === 0 && w.grad > 0) ? 2 * Math.PI : rad % (2 * Math.PI);
+    if (wr > 1e-9) {
+      ctx.strokeStyle = "#2557A3"; ctx.lineWidth = 4 * lw;
+      ctx.beginPath(); ctx.arc(CX, CY, 38 * lw, 0, -wr, true); ctx.stroke();
+    }
+    ctx.font = "italic " + G.sz + "px system-ui, sans-serif";
+    ctx.textAlign = "center";
+    if (wr > 0.6) marke("α", CX + 22 * lw * Math.cos(wr / 2), CY - 22 * lw * Math.sin(wr / 2), "#2557A3");
+    else marke("α", CX + 60 * lw, CY + 18 * lw, "#2557A3");     /* kleiner Winkel: unter der Achse */
+
+    /* Zeiger */
+    var tx = CX + R * c, ty = CY - R * s;
+    ctx.strokeStyle = "#1A2530"; ctx.fillStyle = "#1A2530"; ctx.lineWidth = 4 * lw;
+    pfeil(CX, CY, tx, ty, 18 * lw);
+    /* Augenblickswert: senkrechter Abstand der Zeigerspitze von der Achse */
+    ctx.strokeStyle = "#A34E0E"; ctx.lineWidth = 6 * lw;
+    if (Math.abs(s) > 1e-9) { ctx.beginPath(); ctx.moveTo(tx, CY); ctx.lineTo(tx, ty); ctx.stroke(); }
+    ctx.textAlign = "left";
+    marke("û = " + uDach + " V", CX - R, CY - R - 22 * lw, "#1A2530");
+    ctx.font = G.sz + "px system-ui, sans-serif";
+
+    /* Liniendiagramm: eine Periode */
+    var X0 = G.X0, BW = G.BW, Y0 = G.Y0, A = G.A;
+    ctx.strokeStyle = "#1A2530"; ctx.fillStyle = "#1A2530"; ctx.lineWidth = 1.5 * lw;
+    pfeil(X0, Y0, X0 + BW + 34 * lw, Y0, 12 * lw);
+    pfeil(X0, Y0 + A + 14 * lw, X0, Y0 - A - 26 * lw, 12 * lw);
+    for (var k = 1; k <= 4; k++) {
+      var xs = X0 + BW * k / 4;
+      ctx.beginPath(); ctx.moveTo(xs, Y0 - 5 * lw); ctx.lineTo(xs, Y0 + 5 * lw); ctx.stroke();
+    }
+    ctx.strokeStyle = "#C7D2DA"; ctx.lineWidth = 1.2 * lw; ctx.setLineDash([5 * lw, 5 * lw]);
+    ctx.beginPath(); ctx.moveTo(X0, Y0 - A); ctx.lineTo(X0 + BW, Y0 - A); ctx.moveTo(X0, Y0 + A); ctx.lineTo(X0 + BW, Y0 + A);
+    ctx.stroke(); ctx.setLineDash([]);
+    /* ganze Periode mittelgrau, der durchlaufene Teil dunkel */
+    ctx.strokeStyle = "#8A959D"; ctx.lineWidth = 2.5 * lw; ctx.beginPath();
+    for (var i = 0; i <= 360; i += 2) {
+      var x = X0 + BW * i / 360, y = Y0 - A * Math.sin(i * Math.PI / 180);
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    var bis = Math.min(360, w.grad);
+    if (bis > 0) {
+      ctx.strokeStyle = "#1A2530"; ctx.lineWidth = 3.5 * lw; ctx.beginPath();
+      var n = Math.max(2, Math.ceil(bis));
+      for (var j = 0; j <= n; j++) {
+        var g = bis * j / n, xx = X0 + BW * g / 360, yy = Y0 - A * Math.sin(g * Math.PI / 180);
+        if (j === 0) ctx.moveTo(xx, yy); else ctx.lineTo(xx, yy);
+      }
+      ctx.stroke();
+    }
+    var xe = X0 + BW * Math.min(360, w.grad) / 360, ye = Y0 - A * s;
+    ctx.strokeStyle = "#A34E0E"; ctx.lineWidth = 6 * lw;
+    if (Math.abs(s) > 1e-9) { ctx.beginPath(); ctx.moveTo(xe, Y0); ctx.lineTo(xe, ye); ctx.stroke(); }
+    ctx.fillStyle = "#A34E0E"; ctx.beginPath(); ctx.arc(xe, ye, 6 * lw, 0, 2 * Math.PI); ctx.fill();
+    if (G === BREIT) {
+      ctx.strokeStyle = "#9AA5AE"; ctx.lineWidth = 1.2; ctx.setLineDash([5, 5]);
+      ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(xe, ye); ctx.stroke(); ctx.setLineDash([]);
+    }
+    /* Beschriftung */
+    ctx.textAlign = "left";
+    ctx.font = "italic " + G.sz + "px system-ui, sans-serif";
+    marke("u", X0 + 14 * lw, Y0 - A - 24 * lw, "#1A2530");
+    ctx.font = G.sz + "px system-ui, sans-serif";
+    ctx.textAlign = "right";
+    marke("+û", X0 - 8 * lw, Y0 - A);
+    marke("−û", X0 - 8 * lw, Y0 + A);
+    ctx.textAlign = "center";
+    for (var m = 1; m <= 4; m++) {
+      var text = modus === "zeit" ? String(5 * m) : (90 * m) + "°";
+      marke(text, X0 + BW * m / 4 + (m === 2 ? -18 : 14) * lw, Y0 + 22 * lw);
+    }
+    ctx.textAlign = "right";
+    var xr = X0 + BW + 32 * lw;
+    if (modus === "zeit") {
+      marke("in ms", xr, Y0 + 52 * lw);
+      ctx.font = "italic " + G.sz + "px system-ui, sans-serif";
+      marke("t ", xr - ctx.measureText("in ms").width - 4 * lw, Y0 + 52 * lw);
+      ctx.font = G.sz + "px system-ui, sans-serif";
+    } else {
+      ctx.font = "italic " + G.sz + "px system-ui, sans-serif";
+      marke("α", xr, Y0 + 52 * lw);
+      ctx.font = G.sz + "px system-ui, sans-serif";
+    }
+    ctx.textAlign = "left";
+  }
+
+  function alles() { zeige(); zeichne(); }
+  function anhalten() {
+    if (raf) cancelAnimationFrame(raf);
+    raf = null;
+    document.getElementById("dreh").disabled = false;
+  }
+  function status(t) { document.getElementById("status").textContent = t; }
+
+  function begrenzen(x, lo, hi) { return Math.max(lo, Math.min(hi, x)); }
+
+  document.querySelectorAll("[data-u]").forEach(function (b) {
+    b.addEventListener("click", function () { anhalten(); uDach = begrenzen(uDach + (+b.dataset.u), 1, 50); alles(); });
+  });
+  document.querySelectorAll("[data-a]").forEach(function (b) {
+    b.addEventListener("click", function () { anhalten(); grad = begrenzen(grad + (+b.dataset.a), 0, 360); alles(); });
+  });
+  document.querySelectorAll("[data-t]").forEach(function (b) {
+    b.addEventListener("click", function () { anhalten(); zehntel = begrenzen(zehntel + (+b.dataset.t), 0, 200); alles(); });
+  });
+  document.getElementById("rU").addEventListener("input", function (e) { anhalten(); uDach = +e.target.value; alles(); });
+  document.getElementById("rA").addEventListener("input", function (e) { anhalten(); grad = +e.target.value; alles(); });
+  document.getElementById("rT").addEventListener("input", function (e) { anhalten(); zehntel = +e.target.value; alles(); });
+  document.querySelectorAll("[data-modus]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      anhalten(); modus = b.dataset.modus; alles();
+      status(modus === "zeit" ? "Stellen Sie die Zeit ab dem Nulldurchgang ein. Die Frequenz ist 50 Hz."
+                              : "Stellen Sie Scheitelwert und Winkel ein und lesen Sie den Augenblickswert ab.");
+    });
+  });
+
+  /* Eine Umdrehung in Zeitlupe (8 s); bei reduzierter Bewegung keine Animation */
+  document.getElementById("dreh").addEventListener("click", function () {
+    if (ruhig) { status("Die Bewegung ist am Gerät abgeschaltet. Stellen Sie den Winkel mit den Knöpfen ein."); return; }
+    anhalten();
+    this.disabled = true;
+    var t0 = null, DAUER = 8000;
+    function takt(jetzt) {
+      if (t0 === null) t0 = jetzt;
+      var anteil = Math.min(1, (jetzt - t0) / DAUER);
+      if (modus === "zeit") zehntel = Math.round(200 * anteil); else grad = Math.round(360 * anteil);
+      alles();
+      if (anteil < 1) raf = requestAnimationFrame(takt); else anhalten();
+    }
+    raf = requestAnimationFrame(takt);
+  });
+
+  function zuruecksetzen() {
+    anhalten();
+    modus = START.modus; uDach = START.scheitelwert_v; grad = START.winkel_grad; zehntel = Math.round(START.zeit_ms * 10);
+    alles();
+    status("Stellen Sie Scheitelwert und Winkel ein und lesen Sie den Augenblickswert ab.");
+  }
+  document.getElementById("reset").addEventListener("click", zuruecksetzen);
+  window.addEventListener("resize", function () { anordnen(); zeichne(); });
+
+  /* Prüfhilfe (ohne Anzeige): eine Einstellung setzen und die Anzeigen zurückgeben, für sim_pruefen.py */
+  window.__stelle = function (m, u, wert) {
+    anhalten(); modus = m; uDach = u;
+    if (m === "zeit") zehntel = Math.round(wert * 10); else grad = wert;
+    alles();
+    return [document.getElementById("aU").textContent, document.getElementById("aA").textContent,
+            document.getElementById("aT").textContent, document.getElementById("aW").textContent];
+  };
+
+  anordnen(); zuruecksetzen();
+})();
+</script>
+</body>
+</html>
