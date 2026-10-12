@@ -1,0 +1,182 @@
+<!doctype html>
+<!-- Block EG1-B17 · Messplatz Wirkungsgrad (Neubau 12.10.2026, Aufgabe IN der Stunde; Nachfolger von
+     010_simulation_eg1_b17_wirkungsgrad_messplatz.html, dessen Adresse unverändert bleibt) -->
+<!-- Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht):
+     (1) Der Motor nimmt mehr Leistung auf, als er an der Welle abgibt; die Differenz wird zu Wärme (Verlustleistung).
+     (2) Der Anteil, der ankommt (Wirkungsgrad), hängt von der Belastung ab: im Leerlauf null, bei der
+         Bemessungsleistung 100 W am größten, bei Überlast wieder kleiner.
+     (3) Netzteil und Motor hintereinander: Der Anteil vom Netz bis zur Welle ist das Produkt der beiden Anteile.
+     Modell (ausgedacht, Zahlen zum Rechnen gewählt):
+       Motor:    P_v = 25 W + P_ab² / 400 W  (fester Anteil Reibung, Lüftung, Eisen; wachsender Anteil Wicklung).
+                 Größter Wirkungsgrad dort, wo beide Anteile gleich sind: P_ab = 100 W (Bemessungsleistung), η = 2/3.
+       Netzteil: fester Wirkungsgrad 0,75, P_Netz = P_zu / 0,75.
+     Werte in 20-W-Schritten (alle P_zu ganzzahlig): 0 W → 25 W, 20 → 46, 40 → 69, 60 → 94, 80 → 121, 100 → 150,
+       120 → 181, 140 → 214, 160 → 249. Mit Netzteil bei 100 W: P_Netz = 200 W (Aufgabe 4: 0,75 · 2/3 = 0,5).
+     Formeln: Tabellenbuch S. 26, Formel 8, 9, 10; Leistungsschaubild nach Europa Fachkunde S. 46, Bild 2.
+     Startstellung neutral: keine Belastung gewählt, Motor steht, alle Leistungsmesser 0 W. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Wirkungsgrad (Block 17)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"belastung":null,"netzteil":false,"P_zu":0},"loesungswerte":{"Leerlauf 0 W":"P_zu 25 W","40 W":"P_zu 69 W","100 W":"P_zu 150 W","160 W":"P_zu 249 W","Netzteil davor, 100 W":"P_Netz 200 W, P_zu 150 W"}}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62;--rot:#B23A33}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:980px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ i.fz{font-family:Cambria,Caladea,Georgia,'Times New Roman',serif;font-style:italic}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px}
+ @media(min-width:760px){.buehne{grid-template-columns:1.3fr 1fr}}
+ canvas{width:100%;height:auto;display:block;border:1px solid var(--linie);background:#fff;touch-action:manipulation}
+ .anzeigen{display:grid;grid-template-columns:1fr;gap:8px}
+ .anz{border:1.4px solid var(--ink);padding:8px 12px;background:var(--hell)}
+ .anz .name{font-size:14px;font-weight:700;color:var(--grau)}
+ .anz .wert{font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink)}
+ .anz.mess .wert{color:var(--kupfer)}
+ .anz.aus{opacity:.45}
+ .schild{border:1.4px dashed var(--linie);padding:6px 12px;font-size:14px;color:var(--grau)}
+ .warn{font-size:14px;color:var(--rot);font-weight:700;min-height:1.4em}
+ .wahl{margin:12px 0 4px}
+ .wahl .titel{font-size:14px;font-weight:700;margin:8px 0 4px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px}
+ button{font:inherit;font-size:15px;min-height:46px;min-width:62px;padding:8px 12px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer}
+ button.an{background:var(--kupfer);color:#fff}
+ button.zurueck{border-color:var(--ink);color:var(--ink)}
+ @media(max-width:759px){.anzeigen{grid-template-columns:1fr 1fr}.schild,.warn{grid-column:1/-1}}
+ @media(max-width:420px){.anz{padding:6px 8px}.anz .name{font-size:13px}.anz .wert{font-size:22px} button{min-width:56px;padding:8px 9px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E1EG · Lernfeld 1 · Block 17</div><h1>Messplatz Wirkungsgrad</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Belastung wählen. Die Bremse nimmt dem Motor an der Welle diese Leistung ab.
+  Leistungsmesser ablesen. Mit <b>Netzteil davor</b> liegt ein Netzteil zwischen Netz und Motor.</div>
+
+ <div class="buehne">
+  <canvas id="c" width="560" height="330" data-quelle="Leistungsschaubild nach Europa Fachkunde S. 46, Bild 2 (Band, Verluste nach unten); Kette Netzteil und Motor nach Rechenbuch S. 61, Bild 3"
+   aria-label="Netz, wahlweise ein Netzteil, Leistungsmesser, Motor und Bremse. Ein Band zeigt die Leistung; was nach unten abzweigt, wird zu Wärme."></canvas>
+  <div class="anzeigen">
+   <div class="anz mess aus" id="kNetz"><div class="name">Leistungsmesser am Netz <i class="fz">P</i><sub>Netz</sub></div><div class="wert" id="aNetz">kein Netzteil</div></div>
+   <div class="anz mess"><div class="name">Leistungsmesser am Motor <i class="fz">P</i><sub>zu</sub></div><div class="wert" id="aZu">0 W</div></div>
+   <div class="anz"><div class="name">Bremse an der Welle <i class="fz">P</i><sub>ab</sub></div><div class="wert" id="aAb">0 W</div></div>
+   <div class="schild">Leistungsschild des Motors: Bemessungsleistung 100 W</div>
+   <div class="warn" id="warn">&nbsp;</div>
+  </div>
+ </div>
+
+ <div class="wahl">
+  <div class="titel">1. Belastung (Leistung an der Welle)</div>
+  <div class="knoepfe" id="lasten"></div>
+  <div class="titel">2. Netzteil</div>
+  <div class="knoepfe"><button id="bOhne" class="an">ohne Netzteil</button><button id="bMit">Netzteil davor</button></div>
+  <div class="titel">3. Neu beginnen</div>
+  <div class="knoepfe"><button class="zurueck" id="bReset">Zurücksetzen</button></div>
+ </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var LASTEN=[0,20,40,60,80,100,120,140,160];   // W, 20-W-Schritte: alle P_zu ganzzahlig
+var P0=25, K=400, ETA_N=0.75, P_N=100;
+var zustand={last:null,netz:false};
+var $=function(id){return document.getElementById(id);};
+var ruhig=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function komma(s){return String(s).replace(".",",");}
+function watt(x){                               // ganze Zahl ohne Komma, sonst eine Stelle nach dem Komma
+  var r=Math.round(x*10)/10;
+  return (Math.abs(r-Math.round(r))<1e-9 ? String(Math.round(r)) : komma(r.toFixed(1)))+" W";
+}
+function werte(){
+  if(zustand.last===null) return {lauf:false,ab:0,zu:0,netz:0};
+  var ab=zustand.last, zu=ab+P0+ab*ab/K;
+  return {lauf:true,ab:ab,zu:zu,netz:zu/ETA_N};
+}
+function knoepfe(){
+  var d=$("lasten");
+  LASTEN.forEach(function(p,i){
+    var b=document.createElement("button"); b.textContent=p===0?"Leerlauf 0 W":p+" W";
+    b.onclick=function(){zustand.last=p; auffrischen();}; d.appendChild(b);
+  });
+}
+function auffrischen(){
+  Array.prototype.forEach.call($("lasten").children,function(b,i){b.classList.toggle("an",zustand.last===LASTEN[i]);});
+  $("bOhne").classList.toggle("an",!zustand.netz); $("bMit").classList.toggle("an",zustand.netz);
+  var w=werte();
+  $("aZu").textContent=watt(w.zu);
+  $("aAb").textContent=watt(w.ab);
+  $("kNetz").classList.toggle("aus",!zustand.netz);
+  $("aNetz").textContent=zustand.netz?watt(w.netz):"kein Netzteil";
+  $("warn").innerHTML=(w.lauf&&w.ab>P_N)?"Überlast: mehr als die Bemessungsleistung":"&nbsp;";
+  zeichne(performance.now());
+}
+function zuruecksetzen(){ zustand={last:null,netz:false}; auffrischen(); }
+
+// ---------- Schaltung und Leistungsband ----------
+var c=$("c"), g=c.getContext("2d");
+var Y=120, TOP=Y-15, SK=0.30;                    // Leitung, Oberkante des Bandes, Bandbreite je Watt (332 W: 100 px)
+function band(x1,x2,p,farbe){ var h=Math.max(p>0?3:0,p*SK); g.fillStyle=farbe; g.fillRect(x1,TOP,x2-x1,h); }
+function abzweig(x,pVor,pNach,farbe){           // wie im Leistungsschaubild: der Verlust biegt unten nach unten ab
+  var b=(pVor-pNach)*SK; if(b<=0) return; b=Math.max(3,b);
+  var yo=TOP+pNach*SK;
+  g.fillStyle=farbe; g.fillRect(x,yo,b,268-yo);
+  g.beginPath(); g.moveTo(x-6,268); g.lineTo(x+b+6,268); g.lineTo(x+b/2,282); g.closePath(); g.fill();
+}
+function messer(x){
+  g.fillStyle="#fff"; g.beginPath(); g.arc(x,Y,19,0,6.283); g.fill(); g.lineWidth=3; g.strokeStyle="#1A2530"; g.stroke();
+  g.fillStyle="#A34E0E"; g.font="bold 22px 'Noto Sans',sans-serif"; g.textAlign="center"; g.fillText("W",x,Y+8);
+}
+function zeichne(jetzt){
+  var W=c.width,H=c.height, w=werte(); g.clearRect(0,0,W,H);
+  var BAND="#F0C7A0", WAERME="#E8A0A0";
+  var xMot=380, xNt=200;
+  // Leistungsband: links P_Netz (mit Netzteil) bzw. P_zu, nach dem Motor P_ab
+  if(w.lauf){
+    var xa=xNt+20, xb=xMot+14, bN=(w.netz-w.zu)*SK, bM=(w.zu-w.ab)*SK;
+    if(zustand.netz){ band(60,xa+bN,w.netz,BAND); band(xa,xb+bM,w.zu,BAND); }
+    else band(60,xb+bM,w.zu,BAND);
+    band(xb,500,w.ab,BAND);
+    if(zustand.netz) abzweig(xa,w.netz,w.zu,WAERME);
+    abzweig(xb,w.zu,w.ab,WAERME);
+    g.fillStyle="#B23A33"; g.font="22px 'Noto Sans',sans-serif"; g.textAlign="center";
+    if(zustand.netz) g.fillText("Wärme",xNt+30,310);
+    g.fillText("Wärme",xMot+30,310);
+  }
+  // Leitung
+  g.strokeStyle="#1A2530"; g.lineWidth=3; g.beginPath(); g.moveTo(40,Y); g.lineTo(500,Y); g.stroke();
+  // Netz
+  g.fillStyle="#F4F6F8"; g.fillRect(10,Y-50,46,100); g.strokeRect(10,Y-50,46,100);
+  g.save(); g.translate(40,Y); g.rotate(-Math.PI/2); g.fillStyle="#1A2530"; g.font="22px 'Noto Sans',sans-serif"; g.textAlign="center"; g.fillText("Netz",0,0); g.restore();
+  // Netzteil
+  if(zustand.netz){
+    g.fillStyle="#fff"; g.fillRect(xNt-36,Y-40,72,80); g.strokeRect(xNt-36,Y-40,72,80);
+    g.fillStyle="#1A2530"; g.font="20px 'Noto Sans',sans-serif"; g.textAlign="center"; g.fillText("Netzteil",xNt,Y-52);
+    g.beginPath(); g.moveTo(xNt-24,Y+28); g.lineTo(xNt+24,Y-28); g.lineWidth=2; g.stroke(); g.lineWidth=3;
+    messer(110);
+  }
+  messer(zustand.netz?290:200);
+  // Motor
+  g.fillStyle="#fff"; g.beginPath(); g.arc(xMot,Y,38,0,6.283); g.fill(); g.stroke();
+  g.fillStyle="#1A2530"; g.font="bold 30px 'Noto Sans',sans-serif"; g.textAlign="center"; g.fillText("M",xMot,Y+11);
+  g.font="20px 'Noto Sans',sans-serif"; g.fillText("Motor",xMot,Y-50);
+  // Welle und Bremse
+  g.fillStyle="#1A2530"; g.fillRect(xMot+38,Y-5,62,10);
+  g.fillStyle="#F4F6F8"; g.fillRect(470,Y-44,70,88); g.strokeRect(470,Y-44,70,88);
+  var phi = (w.lauf&&!ruhig) ? (jetzt/1000*6)%6.283 : 0;   // drehende Bremsscheibe
+  g.beginPath(); g.arc(505,Y,26,0,6.283); g.stroke();
+  g.beginPath(); g.moveTo(505,Y); g.lineTo(505+26*Math.cos(phi),Y+26*Math.sin(phi)); g.stroke();
+  g.fillStyle="#1A2530"; g.font="20px 'Noto Sans',sans-serif"; g.fillText("Bremse",505,Y-52);
+  if(!w.lauf){ g.fillStyle="#5A666F"; g.font="22px 'Noto Sans',sans-serif"; g.fillText("Motor steht: Belastung wählen",280,260); }
+}
+function schleife(t){ zeichne(t); if(!ruhig) requestAnimationFrame(schleife); }
+$("bOhne").onclick=function(){zustand.netz=false; auffrischen();};
+$("bMit").onclick=function(){zustand.netz=true; auffrischen();};
+$("bReset").onclick=zuruecksetzen;
+knoepfe(); auffrischen(); requestAnimationFrame(schleife);
+})();
+</script>
+</body></html>
