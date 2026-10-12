@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>U05 Messplatz: Zwei gleiche Lampen</title>
+<!--
+  E2EG U05 „Effektivwert“, Neubau 12.10.2026. Ersetzt für den neuen Block U05_Simulation_Effektivwert.html; deren
+  Adresse steht auf alten Blättern und bleibt unverändert.
+  Warum neu: Die alte Seite zeigte bei û = 10 V für 7,0 V und für 7,1 V „gleich hell: ja“ und die Leistungen auf eine
+  Nachkommastelle („0,5 W“ beide Male); die Kachel „Gleichspannung ÷ û“ rechnete das gesuchte Verhältnis vor (0,700
+  oder 0,710, nie 0,707) und schrieb ÷; der Fußtext nannte die Deutung („gleiche mittlere Leistung“).
+  Messplatz-Prinzip wie E1EG Block 07: Die Schüler stellen die Gleichspannung auf gleiche Helligkeit, lesen ab und
+  werten auf dem Arbeitsblatt selbst aus. Die Seite nennt weder eine Formel noch das Wort für den gesuchten Wert.
+  Exaktheit: Gleichspannung in Schritten von 0,01 V; „gleich hell“ steht nur beim Schritt, der û durch Wurzel 2 am
+  nächsten liegt (ganzzahlig in Hundertstel Volt gerechnet): 7,07 V, 14,14 V, 24,04 V. Höchstwert und Mittelwert der
+  Leistung links sind exakt (û²/R und û²/2R mit R = 100 Ω): 1 und 0,5 W, 4 und 2 W, 11,56 und 5,78 W.
+  Modell: Europa Fachkunde S. 131 (Versuch mit zwei gleichen Lampen an Sinus- und Gleichspannung; Bild 1 Sinusleistung).
+-->
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--linie:#C7D2DA;--gruen:#2F7D62;--grau:#5A666F;--hell:#F4F6F8}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:#fff;line-height:1.4}
+header{border-top:6px solid var(--kupfer);padding:12px 16px 4px;max-width:980px;margin:0 auto}
+h1{margin:0;font-size:clamp(20px,4.6vw,28px)}
+.kurz{max-width:980px;margin:6px auto 0;padding:0 16px;font-size:clamp(15px,3.6vw,17px)}
+.kurz p{margin:4px 0}
+.wahl{max-width:980px;margin:6px auto 0;padding:0 16px}
+.zeile{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:10px 0}
+.zeile .name{flex:0 0 100%;font-weight:700;font-size:clamp(15px,3.6vw,17px)}
+button{font:inherit;font-weight:700;font-size:clamp(16px,4vw,18px);min-height:48px;min-width:72px;padding:10px 12px;
+       border:2px solid var(--ink);background:#fff;color:var(--ink);cursor:pointer;border-radius:6px;touch-action:manipulation}
+button[aria-pressed="true"]{background:var(--kupfer);border-color:var(--kupfer);color:#fff}
+button:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
+.fein{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;width:100%}
+.fein button{min-width:0;padding:10px 4px;font-size:clamp(15px,3.8vw,18px)}
+.uwert{font-size:clamp(26px,7vw,34px);font-weight:700;color:var(--gruen);font-variant-numeric:tabular-nums;min-width:140px}
+input[type=range]{flex:1 1 240px;min-width:200px;height:44px;-webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-moz-range-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:28px;height:28px;margin-top:-10px;
+  border-radius:50%;background:var(--gruen);border:2px solid #fff;box-shadow:0 0 0 1.5px var(--gruen)}
+input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:var(--gruen);border:2px solid #fff}
+input[type=range]:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
+canvas{display:block;width:100%;max-width:980px;margin:6px auto 0;height:auto}
+.anzeigen{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;max-width:980px;margin:8px auto 0;padding:0 16px}
+.kachel{border:1.5px solid var(--linie);border-radius:6px;padding:8px 10px;min-width:0}
+.kachel span{display:block;font-size:clamp(13px,3.3vw,15px);color:var(--grau);font-weight:700}
+.kachel b{display:block;font-size:clamp(20px,5.4vw,26px);font-variant-numeric:tabular-nums;white-space:nowrap}
+.kachel.links span{color:var(--kupfer)}
+.kachel.rechts span{color:var(--gruen)}
+.status{max-width:980px;margin:10px auto 0;padding:10px 16px;font-size:clamp(18px,4.6vw,22px);font-weight:700;text-align:center}
+.status.gleich{background:#EAF3EC;color:var(--gruen)}
+.status.ungleich{background:var(--hell);color:var(--grau)}
+.fuss{max-width:980px;margin:10px auto 26px;padding:0 16px;font-size:clamp(14px,3.4vw,16px);color:var(--grau)}
+@media (max-width:640px){.anzeigen{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .fein{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><h1>Messplatz: Zwei gleiche Lampen</h1></header>
+
+<div class="kurz">
+<p>Beide Lampen haben den Widerstand <i>R</i>&nbsp;=&nbsp;100&nbsp;Ω.
+Die linke Lampe liegt an einer sinusförmigen <b>Wechselspannung</b> mit dem Scheitelwert <i>û</i>,
+die rechte an einer einstellbaren <b>Gleichspannung</b> <i>U</i>.</p>
+</div>
+
+<script type="application/json" id="sim-meta">
+{
+  "erkenntnis": "Die Gleichspannung, bei der beide Lampen gleich hell leuchten, ist bei jedem Scheitelwert 0,707-mal so groß wie der Scheitelwert; die mittlere Leistung der Lampe an Wechselspannung ist halb so groß wie ihr Höchstwert.",
+  "startwerte": {"scheitelwert_v": 10, "gleichspannung_v": 0},
+  "loesungswerte": {"scheitelwert_v": 10, "gleichspannung_v": 7.07},
+  "quelle": "Europa Fachkunde S. 131, Versuch mit zwei gleichen Lampen und Bild 1 (Sinusleistung)"
+}
+</script>
+
+<div class="wahl">
+  <div class="zeile" role="group" aria-label="Scheitelwert der Wechselspannung">
+    <span class="name">Linke Lampe: Scheitelwert <i>û</i> der Wechselspannung</span>
+    <button type="button" data-u="10">10 V</button>
+    <button type="button" data-u="20">20 V</button>
+    <button type="button" data-u="34">34 V</button>
+  </div>
+  <div class="zeile">
+    <span class="name">Rechte Lampe: Gleichspannung <i>U</i></span>
+    <span class="uwert" id="uAnz">0,00 V</span>
+    <input type="range" id="regler" min="0" max="4000" step="1" value="0" aria-label="Gleichspannung grob einstellen">
+    <div class="fein" role="group" aria-label="Gleichspannung fein einstellen">
+      <button type="button" data-d="-100">−1 V</button>
+      <button type="button" data-d="-10">−0,1 V</button>
+      <button type="button" data-d="-1">−0,01 V</button>
+      <button type="button" data-d="1">+0,01 V</button>
+      <button type="button" data-d="10">+0,1 V</button>
+      <button type="button" data-d="100">+1 V</button>
+    </div>
+  </div>
+</div>
+
+<div class="status ungleich" id="status" aria-live="polite">Rechte Lampe dunkler</div>
+
+<canvas id="buehne" width="980" height="330" aria-label="Zwei Lampen und der zeitliche Verlauf der Leistung"
+        data-quelle="Europa Fachkunde S. 131: Versuch mit zwei gleichen Lampen; Bild 1 Sinusleistung"></canvas>
+
+<div class="anzeigen" aria-live="polite">
+  <div class="kachel links"><span>Scheitelwert <i>û</i> links</span><b id="aU">10 V</b></div>
+  <div class="kachel links"><span>Höchstwert der Leistung <i>p̂</i> links</span><b id="aPh">1 W</b></div>
+  <div class="kachel links"><span>Mittelwert der Leistung <i>P</i> links</span><b id="aPm">0,5 W</b></div>
+  <div class="kachel rechts"><span>Gleichspannung <i>U</i> rechts</span><b id="aG">0,00 V</b></div>
+</div>
+
+<div class="zeile wahl"><button type="button" id="reset">Zurücksetzen</button></div>
+
+<div class="fuss">Kupfer: Leistung <i>p</i> der linken Lampe im zeitlichen Verlauf, gestrichelt ihr Mittelwert.
+Grün: Leistung der rechten Lampe. Die Gleichspannung lässt sich in Schritten von 0,01&nbsp;V einstellen.</div>
+
+<script>
+(function () {
+  "use strict";
+  var meta = JSON.parse(document.getElementById("sim-meta").textContent);
+  var START = meta.startwerte;
+  var R = 100;
+  var uh = START.scheitelwert_v;                    /* Scheitelwert links in V (ganzzahlig) */
+  var uc = Math.round(START.gleichspannung_v * 100); /* Gleichspannung rechts in Hundertstel Volt (ganzzahlig) */
+  var UCMAX = 4000;
+  var PMAX = (UCMAX / 100) * (UCMAX / 100) / R;     /* größte Leistung rechts: 16 W */
+  var ruhig = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var raf = null, t0 = null, phase = 0;
+
+  var cv = document.getElementById("buehne"), ctx = cv.getContext("2d");
+  var BREIT = {W: 980, H: 330, lx1: 120, lx2: 330, ly: 130, lr: 52, X0: 500, XE: 950, YB: 270, AH: 210, sz: 18},
+      SCHMAL = {W: 600, H: 700, lx1: 160, lx2: 440, ly: 130, lr: 70, X0: 70, XE: 575, YB: 640, AH: 330, sz: 26};
+  var G = BREIT;
+
+  function anordnen() {
+    var neu = (cv.parentNode.clientWidth || window.innerWidth) < 640 ? SCHMAL : BREIT;
+    if (neu !== G || cv.width !== neu.W) { G = neu; cv.width = G.W; cv.height = G.H; }
+  }
+
+  /* exakte Anzeige ohne überflüssige Nullen: 0,5 · 11,56 · 4 */
+  function knapp(x) {
+    var s = x.toFixed(4).replace(/0+$/, "").replace(/\.$/, "");
+    return s.replace(".", ",");
+  }
+  function volt(c) { return (c / 100).toFixed(2).replace(".", ",") + " V"; }
+
+  function pHoch() { return uh * uh / R; }            /* Höchstwert der Leistung links */
+  function pMittel() { return uh * uh / (2 * R); }    /* Mittelwert der Leistung links */
+  function pRechts() { return (uc / 100) * (uc / 100) / R; }
+  /* Schritt der Gleichspannung (in 0,01 V), der gleich hell leuchtet: der nächste an û durch Wurzel 2.
+     Wurzel 2 ist irrational; der Abstand zum Schritt ist nie genau 0,005 V, die Wahl ist eindeutig. */
+  function zielSchritt() { return Math.round(uh * 100 / Math.SQRT2); }
+
+  function helligkeit(p) { return Math.pow(Math.max(p, 0) / PMAX, 0.35); }
+
+  function lampe(x, y, r, anteil, text) {
+    var a = Math.max(0, Math.min(1, anteil));
+    var rr = Math.round(232 + (255 - 232) * a), gg = Math.round(232 + (206 - 232) * a),
+        bb = Math.round(228 + (110 - 228) * a);
+    var schein = r * (1.15 + 1.85 * a);
+    var g = ctx.createRadialGradient(x, y, r * 0.6, x, y, schein);
+    g.addColorStop(0, "rgba(255,196,92," + (0.72 * a) + ")");
+    g.addColorStop(1, "rgba(255,196,92,0)");
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, schein, 0, 2 * Math.PI); ctx.fill();
+    ctx.fillStyle = "rgb(" + rr + "," + gg + "," + bb + ")";
+    ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.fill();
+    ctx.strokeStyle = "#1A2530"; ctx.lineWidth = 2.2;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.stroke();
+    ctx.fillStyle = "#8A959D"; ctx.fillRect(x - 0.3 * r, y + r - 2, 0.6 * r, 0.36 * r);
+    ctx.fillStyle = "#1A2530"; ctx.font = G.sz + "px system-ui, sans-serif"; ctx.textAlign = "center";
+    ctx.textBaseline = "alphabetic";
+    ctx.fillText(text, x, y + r + 0.36 * r + 1.3 * G.sz);
+  }
+
+  function zeichne() {
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    var ph = pHoch(), pm = pMittel(), pr = pRechts();
+    lampe(G.lx1, G.ly, G.lr, helligkeit(pm), "Wechselspannung");
+    lampe(G.lx2, G.ly, G.lr, helligkeit(pr), "Gleichspannung");
+
+    /* Leistung über der Zeit, Maßstab nach der größeren der beiden Leistungen */
+    var X0 = G.X0, XE = G.XE, YB = G.YB, AH = G.AH;
+    var bezug = Math.max(ph, pr, 0.01), s = AH / (bezug * 1.1);
+    ctx.strokeStyle = "#1A2530"; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(X0, YB); ctx.lineTo(XE, YB); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(X0, YB + 8); ctx.lineTo(X0, YB - AH - 4); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(X0, YB - AH - 14); ctx.lineTo(X0 - 6, YB - AH - 2); ctx.lineTo(X0 + 6, YB - AH - 2);
+    ctx.closePath(); ctx.fillStyle = "#1A2530"; ctx.fill();
+    ctx.beginPath(); ctx.moveTo(XE + 12, YB); ctx.lineTo(XE, YB - 6); ctx.lineTo(XE, YB + 6); ctx.closePath(); ctx.fill();
+    ctx.font = "italic " + G.sz + "px Georgia, 'Times New Roman', serif"; ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    ctx.fillText("p", X0 + 10, YB - AH - 6);
+    ctx.fillText("t", XE - 4, YB + G.sz);
+
+    /* Fläche unter p und Kurve (zwei Perioden der Spannung, vier Leistungsberge) */
+    ctx.fillStyle = "rgba(163,78,14,0.12)"; ctx.beginPath(); ctx.moveTo(X0, YB);
+    var n = 360, a, x, y, sn;
+    for (var k = 0; k <= n; k++) {
+      a = 4 * Math.PI * k / n; sn = Math.sin(a + phase);
+      x = X0 + (XE - X0) * k / n; y = YB - ph * sn * sn * s; ctx.lineTo(x, y);
+    }
+    ctx.lineTo(XE, YB); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = "#A34E0E"; ctx.lineWidth = 3; ctx.beginPath();
+    for (k = 0; k <= n; k++) {
+      a = 4 * Math.PI * k / n; sn = Math.sin(a + phase);
+      x = X0 + (XE - X0) * k / n; y = YB - ph * sn * sn * s;
+      if (k === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    /* Mittelwert links gestrichelt, Leistung rechts grün */
+    ctx.setLineDash([10, 7]); ctx.lineWidth = 2.5; ctx.strokeStyle = "#A34E0E";
+    ctx.beginPath(); ctx.moveTo(X0, YB - pm * s); ctx.lineTo(XE, YB - pm * s); ctx.stroke();
+    ctx.setLineDash([]); ctx.strokeStyle = "#2F7D62"; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(X0, YB - pr * s); ctx.lineTo(XE, YB - pr * s); ctx.stroke();
+    /* Höchstwert markieren */
+    ctx.strokeStyle = "#5A666F"; ctx.lineWidth = 1; ctx.setLineDash([3, 4]);
+    ctx.beginPath(); ctx.moveTo(X0, YB - ph * s); ctx.lineTo(XE, YB - ph * s); ctx.stroke(); ctx.setLineDash([]);
+    ctx.textAlign = "right"; ctx.fillStyle = "#A34E0E";
+    ctx.font = "italic " + G.sz + "px Georgia, 'Times New Roman', serif";
+    ctx.fillText("p̂", X0 - 8, YB - ph * s);
+    ctx.fillText("P", X0 - 8, YB - pm * s);
+    ctx.fillStyle = "#5A666F"; ctx.font = G.sz + "px system-ui, sans-serif"; ctx.fillText("0", X0 - 8, YB);
+  }
+
+  function zeige() {
+    document.getElementById("aU").textContent = uh + " V";
+    document.getElementById("aPh").textContent = knapp(pHoch()) + " W";
+    document.getElementById("aPm").textContent = knapp(pMittel()) + " W";
+    document.getElementById("aG").textContent = volt(uc);
+    document.getElementById("uAnz").textContent = volt(uc);
+    document.getElementById("regler").value = uc;
+    var z = zielSchritt(), st = document.getElementById("status");
+    if (uc === z) { st.textContent = "Gleich hell"; st.className = "status gleich"; }
+    else if (uc < z) { st.textContent = "Rechte Lampe dunkler"; st.className = "status ungleich"; }
+    else { st.textContent = "Rechte Lampe heller"; st.className = "status ungleich"; }
+    document.querySelectorAll("[data-u]").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(+b.dataset.u === uh));
+    });
+  }
+
+  function alles() { zeige(); zeichne(); }
+
+  function takt(jetzt) {
+    if (t0 === null) t0 = jetzt;
+    phase = ((jetzt - t0) / 1000) * 1.2;
+    zeichne();
+    raf = requestAnimationFrame(takt);
+  }
+
+  document.querySelectorAll("[data-u]").forEach(function (b) {
+    b.addEventListener("click", function () { uh = +b.dataset.u; alles(); });
+  });
+  document.querySelectorAll("[data-d]").forEach(function (b) {
+    b.addEventListener("click", function () { uc = Math.max(0, Math.min(UCMAX, uc + (+b.dataset.d))); alles(); });
+  });
+  document.getElementById("regler").addEventListener("input", function (e) {
+    uc = Math.max(0, Math.min(UCMAX, parseInt(e.target.value, 10) || 0)); alles();
+  });
+  document.getElementById("reset").addEventListener("click", function () {
+    uh = START.scheitelwert_v; uc = Math.round(START.gleichspannung_v * 100); alles();
+  });
+  window.addEventListener("resize", function () { anordnen(); zeichne(); });
+
+  /* Prüfhilfe (ohne Anzeige): Anzeigen zu einer Einstellung, für sim_pruefen.py */
+  window.__messung = function (scheitel, hundertstel) {
+    uh = scheitel; uc = hundertstel; alles();
+    return [document.getElementById("aU").textContent, document.getElementById("aPh").textContent,
+            document.getElementById("aPm").textContent, document.getElementById("aG").textContent,
+            document.getElementById("status").textContent];
+  };
+
+  anordnen(); alles();
+  if (!ruhig) raf = requestAnimationFrame(takt);
+})();
+</script>
+</body>
+</html>
