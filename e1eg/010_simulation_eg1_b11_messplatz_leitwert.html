@@ -144,7 +144,7 @@ function zeichne(){
   // Widerstand (Schaltzeichen: Rechteck)
   g.fillStyle="#fff"; g.fillRect(110,100,40,100); g.strokeRect(110,100,40,100);
   g.fillStyle="#1A2530"; g.font="bold 26px 'Noto Sans',sans-serif"; g.textAlign="right";
-  g.font=(zustand.r===null?"italic ":"")+"bold 26px 'Noto Sans',sans-serif";
+  g.font=zustand.r===null?"italic bold 30px Cambria,Caladea,'Times New Roman',serif":"bold 26px 'Noto Sans',sans-serif";
   g.fillText(zustand.r===null?"R":rText(WIDERSTAENDE[zustand.r]),98,150);
   g.font="22px 'Noto Sans',sans-serif"; g.fillStyle="#5A666F"; g.textAlign="center"; g.fillText("Widerstand",130,280);
   // Messgerät (Kreis mit Einheitenzeichen der Messart)
