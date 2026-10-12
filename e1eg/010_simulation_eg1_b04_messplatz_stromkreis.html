@@ -1,0 +1,175 @@
+<!doctype html>
+<!-- Block EG1-B04 · Messplatz Stromkreis (Neubau 12.10.2026, Aufgabe IN der Stunde, nach dem Muster von B07) -->
+<!-- Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht):
+     (1) Die Lampe leuchtet nur, wenn der Stromkreis geschlossen ist: Schalter zu UND Draht an beiden Polen
+         angeschlossen (Europa Fachkunde S. 24, Versuch 1; S. 25, Versuch 4).
+     (2) Nicht jeder Stoff in der Prüfstelle lässt die Lampe leuchten: Metalle hell, Kohle und Salzlösung
+         schwächer, Glas, Porzellan, Kunststoff und destilliertes Wasser gar nicht (Fachkunde S. 24, Versuch 2
+         und 3: „Nur bei den Metallstäben und beim Kohlestab leuchtet die Lampe (allerdings mit unterschiedlicher
+         Helligkeit)“, „Metalle leiten den elektrischen Strom gut, Kohle weniger gut; Glas, Porzellan und
+         Kunststoffe leiten den Strom gar nicht“, „Bei destilliertem Wasser bleibt die Lampe dunkel. Nach
+         Auflösen des Salzes leuchtet die Lampe“).
+     (3) Grenzfall Silicium (rein): Die Lampe bleibt dunkel, obwohl Silicium kein Nichtleiter ist. Reines
+         Silicium hat nur eine geringe Leitfähigkeit (Eigenleitung, Fachkunde S. 196); für die Lampe reicht das
+         nicht. Das klärt Aufgabe 5 b) des Arbeitsblatts, die Seite sagt es nicht.
+     Fachliche Entscheidung: Die Salzlösung zeigt „leuchtet schwach“ wie die Kohle. Das Buch sagt nur „leuchtet“;
+     an einer 1,5-V-Batterie mit Kupferdrähten als Elektroden leuchtet die Lampe schwächer als mit einem
+     Metallstab. Beides ist Leiter (Verlaufsplan, Hinweise).
+     Die Seite nennt keine Werkstoffgruppe (Leiter, Nichtleiter, Halbleiter): die Einteilung ist Aufgabe 5.
+     Startstellung neutral: Prüfstelle leer, Schalter offen, unterer Draht angeschlossen. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Stromkreis (Block 04)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"pruefstelle":null,"schalter":"offen","unterer_draht":"angeschlossen"},"loesungswerte":{"Kupfer, Schalter offen":"bleibt dunkel","Kupfer, Schalter geschlossen":"leuchtet hell","Kupfer, Schalter geschlossen, Draht gelöst":"bleibt dunkel","Kupfer":"leuchtet hell","Aluminium":"leuchtet hell","Stahl":"leuchtet hell","Kohle":"leuchtet schwach","Glas":"bleibt dunkel","Porzellan":"bleibt dunkel","Kunststoff":"bleibt dunkel","destilliertes Wasser":"bleibt dunkel","Salzlösung":"leuchtet schwach","Silicium":"bleibt dunkel"}}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:980px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px;align-items:start}
+ @media(min-width:760px){.buehne{grid-template-columns:1.6fr 1fr}}
+ canvas{width:100%;height:auto;display:block;border:1px solid var(--linie);background:#fff;touch-action:manipulation}
+ .anz{border:1.4px solid var(--ink);padding:10px 12px;background:var(--hell)}
+ .anz .name{font-size:14px;font-weight:700;color:var(--grau)}
+ .anz .wert{font-size:28px;font-weight:700;color:var(--kupfer)}
+ .anz .klein{font-size:14px;color:var(--grau);margin-top:4px}
+ .wahl{margin:12px 0 4px}
+ .wahl .titel{font-size:14px;font-weight:700;margin:10px 0 4px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px}
+ button{font:inherit;font-size:15px;min-height:46px;padding:8px 14px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer}
+ button.an{background:var(--kupfer);color:#fff}
+ button.zurueck{border-color:var(--grau);color:var(--grau)}
+ @media(max-width:420px){button{padding:8px 10px;font-size:14px}.anz .wert{font-size:24px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E1EG · Lernfeld 1 · Block 04</div><h1>Messplatz Stromkreis</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Stoff in die Prüfstelle setzen, Schalter und unteren Draht einstellen, Lampe beobachten.</div>
+
+ <div class="buehne">
+  <canvas id="c" width="600" height="360" data-quelle="Nach Europa Fachkunde S. 24, Bild 3 (Leiter und Isolierstoffe im Stromkreis), Bild 4 (Salzlösung als Leiter), Bild 5 (Unterbrechen des Stromkreises); Versuche 1 bis 4, S. 24 und 25"
+   aria-label="Stromkreis aus Batterie, Schalter, Prüfstelle und Lampe. In die Prüfstelle wird ein Stoff gesetzt. Der untere Draht kann von der Batterie gelöst werden."></canvas>
+  <div>
+   <div class="anz"><div class="name">Lampe</div><div class="wert" id="aL" aria-live="polite">bleibt dunkel</div>
+    <div class="klein" id="aS">Prüfstelle: leer</div></div>
+  </div>
+ </div>
+
+ <div class="wahl">
+  <div class="titel">1. Stoff in der Prüfstelle</div>
+  <div class="knoepfe" id="stoffe"></div>
+  <div class="titel">2. Schalter</div>
+  <div class="knoepfe"><button id="sOffen" class="an">offen</button><button id="sZu">geschlossen</button></div>
+  <div class="titel">3. Unterer Draht an der Batterie</div>
+  <div class="knoepfe"><button id="dAn" class="an">angeschlossen</button><button id="dLos">gelöst</button></div>
+  <div class="knoepfe" style="margin-top:14px"><button class="zurueck" id="bReset">Zurücksetzen</button></div>
+ </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+// Helligkeit nach Europa Fachkunde S. 24, Versuch 2 und 3: 2 = hell, 1 = schwach, 0 = dunkel.
+// Keine Werkstoffgruppe auf der Seite: die Einteilung leisten die Schüler (Aufgabe 5).
+var STOFFE=[
+ {n:"Kupfer",h:2,f:"#C46A2F"},{n:"Aluminium",h:2,f:"#C9CDD2"},{n:"Stahl",h:2,f:"#8C949B"},
+ {n:"Kohle",h:1,f:"#3A3A3A"},{n:"Glas",h:0,f:"#D8EEF2"},{n:"Porzellan",h:0,f:"#F4F1EA"},
+ {n:"Kunststoff",h:0,f:"#E3B53B"},{n:"destilliertes Wasser",h:0,f:"#CFE8F7",fl:true},
+ {n:"Salzlösung",h:1,f:"#A9D6F2",fl:true},{n:"Silicium",h:0,f:"#6E7A8A"}];
+var z={stoff:null,zu:false,an:true};
+var $=function(id){return document.getElementById(id);};
+
+function helligkeit(){
+  if(!z.zu||!z.an||z.stoff===null) return 0;
+  return STOFFE[z.stoff].h;
+}
+function auffrischen(){
+  Array.prototype.forEach.call($("stoffe").children,function(b,i){b.classList.toggle("an",z.stoff===i);});
+  $("sOffen").classList.toggle("an",!z.zu); $("sZu").classList.toggle("an",z.zu);
+  $("dAn").classList.toggle("an",z.an); $("dLos").classList.toggle("an",!z.an);
+  var h=helligkeit();
+  $("aL").textContent=h===2?"leuchtet hell":(h===1?"leuchtet schwach":"bleibt dunkel");
+  $("aS").textContent="Prüfstelle: "+(z.stoff===null?"leer":STOFFE[z.stoff].n);
+  zeichne(h);
+}
+
+// ---------- Zeichnung (bildhaft wie Fachkunde S. 24, Bild 3 bis 5) ----------
+var c=$("c"), g=c.getContext("2d");
+var DRAHT="#B8642B";
+function linie(pts,farbe,b){g.strokeStyle=farbe;g.lineWidth=b;g.lineCap="round";g.lineJoin="round";g.beginPath();
+  g.moveTo(pts[0][0],pts[0][1]);for(var i=1;i<pts.length;i++)g.lineTo(pts[i][0],pts[i][1]);g.stroke();}
+function text(t,x,y,gr,farbe,ausr,fett){g.fillStyle=farbe||"#1A2530";g.font=(fett?"bold ":"")+gr+"px 'Noto Sans',sans-serif";
+  g.textAlign=ausr||"center";g.textBaseline="middle";g.fillText(t,x,y);}
+function zeichne(h){
+  g.clearRect(0,0,c.width,c.height);
+  // Batterie (Zelle 1,5 V): Pluspol oben, Minuspol unten
+  var bg=g.createLinearGradient(40,0,110,0); bg.addColorStop(0,"#F7E27A"); bg.addColorStop(1,"#E9C443");
+  g.fillStyle=bg; g.fillRect(40,100,70,190); g.strokeStyle="#1A2530"; g.lineWidth=2; g.strokeRect(40,100,70,190);
+  g.fillStyle="#C9CDD2"; g.fillRect(63,88,24,12); g.strokeRect(63,88,24,12);
+  text("+",75,122,26,"#1A2530"); text("−",75,270,26,"#1A2530");
+  text("Batterie",75,322,22,"#1A2530"); text("1,5 V",75,346,20,"#5A666F");
+  // Klemme am Minuspol (unten rechts an der Batterie)
+  g.fillStyle="#C9CDD2"; g.fillRect(110,268,16,16); g.strokeRect(110,268,16,16);
+  // oberer Draht: Pluspol zum Schalter
+  linie([[75,88],[75,60],[165,60]],DRAHT,5);
+  // Schalter
+  g.fillStyle="#1A2530"; g.beginPath(); g.arc(165,60,6,0,6.283); g.fill(); g.beginPath(); g.arc(228,60,6,0,6.283); g.fill();
+  if(z.zu) linie([[165,60],[228,60]],"#1A2530",5); else linie([[165,60],[222,24]],"#1A2530",5);
+  text("Schalter",197,94,22,"#1A2530");
+  // Draht zur Prüfstelle
+  linie([[228,60],[285,60]],DRAHT,5);
+  // Prüfstelle
+  var s=z.stoff===null?null:STOFFE[z.stoff];
+  if(s&&s.fl){
+    g.fillStyle=s.f; g.fillRect(292,112,106,60);          // Flüssigkeit zuerst, die Kupferdrähte tauchen sichtbar ein
+    linie([[285,60],[312,60],[312,150]],DRAHT,5); linie([[378,150],[378,60],[405,60]],DRAHT,5);
+    g.strokeStyle="#1A2530"; g.lineWidth=2; g.beginPath(); g.moveTo(288,92); g.lineTo(292,174); g.lineTo(398,174); g.lineTo(402,92); g.stroke();
+    text(s.n,345,198,20,"#1A2530");
+  } else {
+    // Klemmen
+    g.fillStyle="#C9CDD2"; g.strokeStyle="#1A2530"; g.lineWidth=2;
+    g.fillRect(285,50,12,20); g.strokeRect(285,50,12,20); g.fillRect(393,50,12,20); g.strokeRect(393,50,12,20);
+    if(s){ g.fillStyle=s.f; g.fillRect(297,52,96,16); g.strokeRect(297,52,96,16); text(s.n,345,96,20,"#1A2530"); }
+    else { g.setLineDash([5,5]); g.strokeStyle="#5A666F"; g.strokeRect(297,52,96,16); g.setLineDash([]); text("leer",345,96,20,"#5A666F"); }
+    linie([[405,60],[405,60]],DRAHT,5);
+  }
+  text("Prüfstelle",345,22,22,"#A34E0E",null,true);
+  // Draht zur Lampe
+  linie([[405,60],[480,60],[480,150]],DRAHT,5);
+  // Lampe: Sockel oben, Glaskolben darunter
+  var gx=480, gy=196;
+  if(h>0){ var r=h===2?78:46, a=h===2?.75:.4;
+    var gl=g.createRadialGradient(gx,gy,8,gx,gy,r); gl.addColorStop(0,"rgba(255,214,90,"+a+")"); gl.addColorStop(1,"rgba(255,214,90,0)");
+    g.fillStyle=gl; g.beginPath(); g.arc(gx,gy,r,0,6.283); g.fill(); }
+  g.fillStyle="#C9CDD2"; g.fillRect(466,150,28,22); g.strokeStyle="#1A2530"; g.lineWidth=2; g.strokeRect(466,150,28,22);
+  for(var k=154;k<172;k+=5){ linie([[466,k],[494,k+3]],"#8C949B",1.5); }
+  g.fillStyle=h===2?"#FFE680":(h===1?"#F7DFA8":"#FFFFFF"); g.beginPath(); g.arc(gx,gy,26,0,6.283); g.fill();
+  g.strokeStyle="#1A2530"; g.lineWidth=2; g.stroke();
+  var fd=h>0?"#C0392B":"#5A666F";                       // Glühfaden: zwei Halter und eine Wendel
+  linie([[474,172],[474,194]],fd,2); linie([[486,172],[486,194]],fd,2);
+  var wd=[]; for(var q=0;q<=24;q++){ wd.push([474+q/2, 194+2.5*Math.sin(q*Math.PI/3)]); } linie(wd,fd,2);
+  text("Lampe",480,246,22,"#1A2530");
+  // unterer Draht: Lampe zurück zur Batterie
+  linie([[494,166],[520,166],[520,315],[150,315]],DRAHT,5);
+  if(z.an){ linie([[150,315],[150,276],[126,276]],DRAHT,5); }
+  else { linie([[150,315],[176,300],[186,286]],DRAHT,5); g.fillStyle="#5A666F"; text("gelöst",200,272,20,"#5A666F","left"); }
+  text("unterer Draht",335,340,20,"#5A666F");
+}
+
+function knoepfe(){
+  STOFFE.forEach(function(s,i){var b=document.createElement("button");b.textContent=s.n;b.onclick=function(){z.stoff=i;auffrischen();};$("stoffe").appendChild(b);});
+}
+$("sOffen").onclick=function(){z.zu=false;auffrischen();};
+$("sZu").onclick=function(){z.zu=true;auffrischen();};
+$("dAn").onclick=function(){z.an=true;auffrischen();};
+$("dLos").onclick=function(){z.an=false;auffrischen();};
+$("bReset").onclick=function(){z={stoff:null,zu:false,an:true};auffrischen();};
+knoepfe(); auffrischen();
+})();
+</script>
+</body></html>
