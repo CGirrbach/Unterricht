@@ -1,0 +1,230 @@
+<!doctype html>
+<!-- Block EG1-B18 · Messplatz Elektrowärme (Neubau 12.10.2026, Aufgabe IN der Stunde; Modell aus
+     013_simulation_eg1_b18_wasser_erwaermen.html übernommen, Formelanzeige „Ergebnis anzeigen“ entfernt) -->
+<!-- Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht):
+     (1) Im gut isolierten Laborgefäß wächst die Wärmemenge Q im selben Verhältnis wie die Temperaturdifferenz
+         und wie die Masse: doppelte Temperaturdifferenz oder doppelte Masse, doppelte Wärmemenge.
+     (2) Q geteilt durch (m · Δϑ) ist immer gleich: 4,19 kJ/(kg · K), die spezifische Wärmekapazität des Wassers
+         (Tabellenbuch S. 29, Formel 5 und Tabelle; Fachkunde S. 47).
+     (3) Im Topf auf der Kochplatte zeigt der Zähler mehr, als im Wasser ankommt: Anteil 0,8 (Wärmenutzungsgrad).
+     Modell: Q_nutz = Δϑ · c · m, c = 4,19 kJ/(kg · K), ϑ1 = 20 °C; Laborgefäß ζ = 1 (Verluste vernachlässigt),
+     Tauchsieder 1000 W; Topf ζ = 0,8, Kochplatte 1250 W; Zähler W = Q_S = Q_nutz/ζ; Heizzeit t = W/P.
+     In beiden Gefäßen kommen 1000 W im Wasser an, die Heizzeit in s ist deshalb zahlengleich mit Q_nutz in kJ.
+     Alle Werte werden ganzzahlig in 1/10000 kJ gerechnet und exakt angezeigt (keine Rundung der Endwerte).
+     Grenzfall im Einstellbereich: Endtemperatur 20 °C, keine Erwärmung, Zähler 0.
+     Startstellung neutral: kein Gefäß, keine Wassermenge, keine Endtemperatur, Zähler 0. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Elektrowärme (Block 18)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"gefaess":null,"m":null,"theta2":null,"W":0},"loesungswerte":{"Laborgefäß 1 kg 30 °C":"41,9 kJ","Laborgefäß 1 kg 40 °C":"83,8 kJ","Laborgefäß 1 kg 60 °C":"167,6 kJ","Laborgefäß 2 kg 40 °C":"167,6 kJ","Laborgefäß 1,5 kg 80 °C":"377,1 kJ","Topf 1 kg 60 °C":"209,5 kJ"}}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62;--rot:#B23A33}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:980px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px}
+ @media(min-width:760px){.buehne{grid-template-columns:1.25fr 1fr}}
+ canvas{width:100%;height:auto;display:block;border:1px solid var(--linie);background:#fff;touch-action:manipulation}
+ .anzeigen{display:grid;grid-template-columns:1fr;gap:8px}
+ .anz{border:1.4px solid var(--ink);padding:8px 12px;background:var(--hell)}
+ .anz .name{font-size:14px;font-weight:700;color:var(--grau)}
+ .anz .wert{font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink)}
+ .anz.zaehler .wert{color:var(--kupfer)}
+ .wahl{margin:12px 0 4px}
+ .wahl .titel{font-size:14px;font-weight:700;margin:10px 0 4px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px}
+ button{font:inherit;font-size:15px;min-height:46px;padding:8px 14px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer}
+ #temperaturen button{min-width:64px;padding:8px 10px}
+ button.an{background:var(--kupfer);color:#fff}
+ button:disabled{opacity:.45;cursor:not-allowed}
+ button.start{border-color:var(--gruen);color:#fff;background:var(--gruen);font-weight:700}
+ button.start:disabled{background:#fff;color:var(--gruen)}
+ table{width:100%;border-collapse:collapse;margin-top:12px;font-size:15px}
+ th,td{border:1px solid var(--linie);padding:6px 8px;text-align:left}
+ th{background:var(--hell);font-size:14px}
+ .tabelle{overflow-x:auto}
+ td.z{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+ .leer{color:var(--grau);font-style:italic}
+ i{font-family:Cambria,Caladea,'Times New Roman',serif}
+ @media(max-width:420px){.anz .wert{font-size:26px} th,td{padding:5px 4px;font-size:13px} .wrap{padding:12px 10px 18px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E1EG · Lernfeld 1 · Block 18</div><h1>Messplatz Elektrowärme</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Gefäß, Wassermenge und Endtemperatur wählen, dann <b>Heizen starten</b>. Das Wasser beginnt immer bei 20&nbsp;°C. Der Zähler zeigt die zugeführte elektrische Arbeit. Zeitraffer: 1&nbsp;s auf dem Bildschirm entspricht 1&nbsp;min. Jede Messung landet unten im Messprotokoll.</div>
+
+ <div class="buehne">
+  <canvas id="c" width="560" height="330" data-quelle="Schemadarstellung nach Tabellenbuch Elektrotechnik 32. A., S. 36, Bild „Elektrische Arbeit und Wärme“ (Topf auf der Kochplatte mit Thermometer, zugeführte Arbeit W); Laborgefäß mit Tauchsieder als Variante ohne Verluste"
+   aria-label="Ein Gefäß mit Wasser wird elektrisch beheizt: entweder ein gut isoliertes Laborgefäß mit Tauchsieder oder ein Topf auf der Kochplatte, der Wärme an die Umgebung abgibt. Rechts ein Thermometer, links oben der Zähler für die zugeführte elektrische Arbeit."></canvas>
+  <div class="anzeigen">
+   <div class="anz"><div class="name">Thermometer</div><div class="wert" id="aT">20 °C</div></div>
+   <div class="anz zaehler"><div class="name">Zähler (zugeführte elektrische Arbeit <i>W</i>)</div><div class="wert" id="aW">0 kJ</div></div>
+   <div class="anz"><div class="name">Heizzeit <i>t</i> (Stoppuhr)</div><div class="wert" id="aZ">0 s</div></div>
+  </div>
+ </div>
+
+ <div class="wahl">
+  <div class="titel">1. Gefäß</div>
+  <div class="knoepfe" id="gefaesse"></div>
+  <div class="titel">2. Wassermenge (Masse <i>m</i>)</div>
+  <div class="knoepfe" id="massen"></div>
+  <div class="titel">3. Endtemperatur <i>ϑ</i><sub>2</sub></div>
+  <div class="knoepfe" id="temperaturen"></div>
+  <div class="titel">4. Messen</div>
+  <div class="knoepfe"><button class="start" id="bStart" disabled>Heizen starten</button><button id="bReset">Zurücksetzen</button></div>
+ </div>
+
+ <div class="tabelle"><table id="protokoll">
+  <tr><th>Nr.</th><th>Gefäß</th><th>Masse <i>m</i></th><th>Endtemp. <i>ϑ</i><sub>2</sub></th><th>Zähler <i>W</i></th><th>Heizzeit <i>t</i></th></tr>
+  <tr class="leer"><td colspan="6">Noch keine Messung.</td></tr>
+ </table></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+// Laborgefäß: gut isoliert, Verluste vernachlässigt (Anteil 1), Tauchsieder 1000 W.
+// Topf auf der Kochplatte: Anteil im Wasser 0,8, Kochplatte 1250 W (0,8 · 1250 W = 1000 W kommen im Wasser an).
+var GEF=[{n:"Laborgefäß (gut isoliert), Tauchsieder 1000 W",k:"Laborgefäß",P:1000,viertel:4},
+         {n:"Topf auf der Kochplatte, 1250 W",k:"Topf",P:1250,viertel:5}];   // W = Q · viertel / 4
+var MASSEN=[1,2,3,4];                         // in halben Kilogramm: 0,5 kg, 1 kg, 1,5 kg, 2 kg
+var TEMP=[20,30,40,50,60,70,80,90,100];        // Endtemperatur in °C, Anfang immer 20 °C
+var T1=20, RAFFER=60;                          // Zeitraffer: 1 s Bildschirm = 60 s Heizzeit
+var zustand={g:null,m:null,t2:null,laeuft:false,anteil:0,fertig:false,start:0,dauer:0,nr:0};
+var $=function(id){return document.getElementById(id);};
+var ruhig=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// ganzzahlig in 1/10000 kJ: Q = (m2/2 kg) · Δϑ · 4,19 kJ/(kg · K) = m2 · Δϑ · 20950 · 10^-4 kJ
+function q4(m2,d){return m2*d*20950;}
+function w4(){var g=GEF[zustand.g];return q4(MASSEN[zustand.m],TEMP[zustand.t2]-T1)*g.viertel/4;}
+function exakt(n4){                              // ganze Zahl in 1/10000 → Text mit Komma, ohne Nullen am Ende
+  var ganz=Math.floor(n4/10000), rest=n4%10000;
+  if(rest===0) return String(ganz);
+  var s=String(rest); while(s.length<4) s="0"+s; s=s.replace(/0+$/,"");
+  return ganz+","+s;
+}
+function eins(x){return x.toFixed(1).replace(".",",");}
+function masse(i){return MASSEN[i]%2===0?String(MASSEN[i]/2):(MASSEN[i]===1?"0,5":(Math.floor(MASSEN[i]/2)+",5"));}
+
+function knoepfe(){
+  GEF.forEach(function(g,i){var b=document.createElement("button");b.textContent=g.n;b.onclick=function(){if(zustand.laeuft)return;zustand.g=i;neu();};$("gefaesse").appendChild(b);});
+  MASSEN.forEach(function(m,i){var b=document.createElement("button");b.textContent=masse(i)+" kg";b.onclick=function(){if(zustand.laeuft)return;zustand.m=i;neu();};$("massen").appendChild(b);});
+  TEMP.forEach(function(t,i){var b=document.createElement("button");b.textContent=t+" °C";b.onclick=function(){if(zustand.laeuft)return;zustand.t2=i;neu();};$("temperaturen").appendChild(b);});
+}
+function neu(){zustand.anteil=0;zustand.fertig=false;auffrischen();zeichne();}
+function bereit(){return zustand.g!==null&&zustand.m!==null&&zustand.t2!==null;}
+function auffrischen(){
+  [["gefaesse","g"],["massen","m"],["temperaturen","t2"]].forEach(function(p){
+    Array.prototype.forEach.call($(p[0]).children,function(b,i){b.classList.toggle("an",zustand[p[1]]===i);b.disabled=zustand.laeuft;});
+  });
+  $("bStart").disabled=zustand.laeuft||!bereit();
+  if(!bereit()||(!zustand.laeuft&&!zustand.fertig)){
+    $("aT").textContent="20 °C"; $("aW").textContent="0 kJ"; $("aZ").textContent="0 s"; return;
+  }
+  var d=TEMP[zustand.t2]-T1, W=w4(), Q=q4(MASSEN[zustand.m],d);
+  if(zustand.fertig){
+    $("aT").textContent=TEMP[zustand.t2]+" °C";
+    $("aW").textContent=exakt(W)+" kJ";
+    $("aZ").textContent=exakt(Q)+" s";          // t = W/P; in beiden Gefäßen kommen 1000 W im Wasser an
+  } else {
+    var a=zustand.anteil;
+    $("aT").textContent=eins(T1+d*a)+" °C";
+    $("aW").textContent=eins(W*a/10000)+" kJ";
+    $("aZ").textContent=eins(Q*a/10000)+" s";
+  }
+}
+function protokoll(){
+  var tb=$("protokoll"),leer=tb.querySelector("tr.leer"); if(leer) leer.remove();
+  var tr=document.createElement("tr"), d=TEMP[zustand.t2]-T1;
+  tr.innerHTML="<td>"+zustand.nr+"</td><td>"+GEF[zustand.g].k+"</td><td class='z'>"+masse(zustand.m)+" kg</td><td class='z'>"+TEMP[zustand.t2]+" °C</td><td class='z'>"+exakt(w4())+" kJ</td><td class='z'>"+exakt(q4(MASSEN[zustand.m],d))+" s</td>";
+  tb.appendChild(tr);
+}
+function starten(){
+  if(!bereit()) return;
+  var d=TEMP[zustand.t2]-T1, t=q4(MASSEN[zustand.m],d)/10000;   // Heizzeit in s
+  zustand.dauer=Math.max(0.4,t/RAFFER)*1000; zustand.anteil=0; zustand.fertig=false;
+  if(ruhig||d===0){ beenden(); return; }
+  zustand.laeuft=true; zustand.start=performance.now(); auffrischen(); requestAnimationFrame(schritt);
+}
+function beenden(){ zustand.laeuft=false; zustand.anteil=1; zustand.fertig=true; zustand.nr++; protokoll(); auffrischen(); zeichne(); }
+function schritt(jetzt){
+  if(!zustand.laeuft) return;
+  zustand.anteil=Math.min(1,(jetzt-zustand.start)/zustand.dauer);
+  if(zustand.anteil>=1){ beenden(); return; }
+  auffrischen(); zeichne(jetzt); requestAnimationFrame(schritt);
+}
+function zuruecksetzen(){
+  zustand={g:null,m:null,t2:null,laeuft:false,anteil:0,fertig:false,start:0,dauer:0,nr:0};
+  var tb=$("protokoll"); while(tb.rows.length>1) tb.deleteRow(1);
+  var tr=tb.insertRow(); tr.className="leer"; tr.innerHTML="<td colspan='6'>Noch keine Messung.</td>";
+  auffrischen(); zeichne();
+}
+
+// ---------- Zeichnung (Schema nach Tabellenbuch S. 36) ----------
+var c=$("c"), g2=c.getContext("2d");
+function pfeil(x1,y1,x2,y2){
+  g2.strokeStyle="#B23A33"; g2.fillStyle="#B23A33"; g2.lineWidth=3;
+  g2.beginPath(); g2.moveTo(x1,y1); g2.lineTo(x2,y2); g2.stroke();
+  var a=Math.atan2(y2-y1,x2-x1), l=11;
+  g2.beginPath(); g2.moveTo(x2,y2); g2.lineTo(x2-l*Math.cos(a-0.45),y2-l*Math.sin(a-0.45)); g2.lineTo(x2-l*Math.cos(a+0.45),y2-l*Math.sin(a+0.45)); g2.closePath(); g2.fill();
+}
+function zeichne(){
+  var W=c.width,H=c.height; g2.clearRect(0,0,W,H);
+  var x0=150,x1=370,yb=250,hoehe=150;
+  var heizt=zustand.laeuft, warm=zustand.laeuft||zustand.fertig;
+  var d=bereit()?TEMP[zustand.t2]-T1:0;
+  var T=T1+(warm?d*zustand.anteil:0);
+  // Wasser (Menge nach Masse; die Temperatur zeigt nur das Thermometer)
+  if(zustand.m!==null){
+    var pegel=yb-10-(hoehe-30)*(MASSEN[zustand.m]/4);
+    g2.fillStyle="#BFDDF2"; g2.fillRect(x0+5,pegel,x1-x0-10,yb-5-pegel);
+  }
+  g2.strokeStyle="#1A2530"; g2.lineWidth=3;
+  if(zustand.g===1){                     // Topf auf der Kochplatte
+    g2.beginPath(); g2.moveTo(x0,yb-hoehe); g2.lineTo(x0,yb); g2.lineTo(x1,yb); g2.lineTo(x1,yb-hoehe); g2.stroke();
+    g2.beginPath(); g2.moveTo(x0-22,yb-hoehe+30); g2.lineTo(x0,yb-hoehe+30); g2.moveTo(x1,yb-hoehe+30); g2.lineTo(x1+22,yb-hoehe+30); g2.stroke();
+    g2.fillStyle=heizt?"#C2185B":"#B23A33"; g2.fillRect(x0-10,yb+3,x1-x0+20,10);
+    g2.fillStyle="#D6DADD"; g2.fillRect(x0-25,yb+13,x1-x0+50,32); g2.strokeRect(x0-25,yb+13,x1-x0+50,32);
+    if(warm&&d>0){ pfeil(x0-6,yb-50,x0-40,yb-80); pfeil(x1+6,yb-50,x1+40,yb-80); pfeil(x0+40,yb-hoehe-6,x0+28,yb-hoehe-44); pfeil(x1-40,yb-hoehe-6,x1-28,yb-hoehe-44); }
+    g2.fillStyle="#1A2530"; g2.font="22px 'Noto Sans',sans-serif"; g2.textAlign="center";
+    g2.fillText("Kochplatte 1250 W",(x0+x1)/2,yb+70);
+  } else if(zustand.g===0){              // Laborgefäß mit Tauchsieder
+    g2.strokeRect(x0,yb-hoehe,x1-x0,hoehe);
+    g2.setLineDash([7,5]); g2.lineWidth=2; g2.strokeRect(x0-10,yb-hoehe-6,x1-x0+20,hoehe+14); g2.setLineDash([]);
+    g2.strokeStyle=heizt?"#C2185B":"#A34E0E"; g2.lineWidth=4;
+    g2.beginPath(); g2.moveTo(x1-30,yb-hoehe-30); g2.lineTo(x1-30,yb-28);
+    for(var i=0;i<6;i++){ g2.lineTo(x1-42-i*24,yb-16); g2.lineTo(x1-54-i*24,yb-28); }
+    g2.lineTo(x0+40,yb-28); g2.lineTo(x0+40,yb-hoehe-30); g2.stroke();
+    g2.fillStyle="#1A2530"; g2.font="22px 'Noto Sans',sans-serif"; g2.textAlign="center";
+    g2.fillText("Tauchsieder 1000 W",(x0+x1)/2,yb+40);
+  } else {
+    g2.fillStyle="#5A666F"; g2.font="22px 'Noto Sans',sans-serif"; g2.textAlign="center";
+    g2.fillText("Gefäß wählen",(x0+x1)/2,yb-hoehe/2);
+  }
+  // Thermometer mit Skala 0 bis 100 °C
+  var tx=455, ty0=40, ty1=250;
+  g2.strokeStyle="#1A2530"; g2.lineWidth=2; g2.fillStyle="#fff";
+  g2.fillRect(tx-9,ty0,18,ty1-ty0); g2.strokeRect(tx-9,ty0,18,ty1-ty0);
+  g2.beginPath(); g2.arc(tx,ty1+14,15,0,2*Math.PI); g2.fillStyle="#B23A33"; g2.fill(); g2.stroke();
+  var yT=ty1-(ty1-ty0)*(T/100);
+  g2.fillStyle="#B23A33"; g2.fillRect(tx-5,yT,10,ty1-yT+6);
+  g2.fillStyle="#1A2530"; g2.font="20px 'Noto Sans',sans-serif"; g2.textAlign="left";
+  for(var s=0;s<=100;s+=20){ var ys=ty1-(ty1-ty0)*(s/100); g2.fillRect(tx+9,ys-1,8,2); g2.fillText(s+" °C",tx+21,ys+7); }
+  // Zähler
+  g2.fillStyle="#fff"; g2.strokeStyle="#1A2530"; g2.lineWidth=2;
+  g2.fillRect(14,14,120,62); g2.strokeRect(14,14,120,62);
+  g2.fillStyle="#A34E0E"; g2.font="bold 20px 'Noto Sans',sans-serif"; g2.textAlign="center";
+  g2.fillText("Zähler",74,38);
+  g2.fillStyle="#1A2530"; g2.font="20px 'Noto Sans',sans-serif";
+  g2.fillText(zustand.fertig?exakt(w4())+" kJ":(warm?eins(w4()*zustand.anteil/10000)+" kJ":"0 kJ"),74,64);
+}
+$("bStart").onclick=starten; $("bReset").onclick=zuruecksetzen;
+knoepfe(); auffrischen(); zeichne();
+})();
+</script>
+</body></html>
