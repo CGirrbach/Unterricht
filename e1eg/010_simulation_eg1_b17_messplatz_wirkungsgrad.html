@@ -9,7 +9,8 @@
      Modell (ausgedacht, Zahlen zum Rechnen gewählt):
        Motor:    P_v = 25 W + P_ab² / 400 W  (fester Anteil Reibung, Lüftung, Eisen; wachsender Anteil Wicklung).
                  Größter Wirkungsgrad dort, wo beide Anteile gleich sind: P_ab = 100 W (Bemessungsleistung), η = 2/3.
-       Netzteil: fester Wirkungsgrad 0,75, P_Netz = P_zu / 0,75.
+       Netzteil: fester Wirkungsgrad 0,75, P_Netz = P_zu / 0,75; Anzeige mit zwei Stellen nach dem Komma
+                 (33,33 W, 61,33 W …), damit P_zu durch P_Netz in jeder Stellung 0,750 ergibt.
      Werte in 20-W-Schritten (alle P_zu ganzzahlig): 0 W → 25 W, 20 → 46, 40 → 69, 60 → 94, 80 → 121, 100 → 150,
        120 → 181, 140 → 214, 160 → 249. Mit Netzteil bei 100 W: P_Netz = 200 W (Aufgabe 4: 0,75 · 2/3 = 0,5).
      Formeln: Tabellenbuch S. 26, Formel 8, 9, 10; Leistungsschaubild nach Europa Fachkunde S. 46, Bild 2.
@@ -87,9 +88,9 @@ var $=function(id){return document.getElementById(id);};
 var ruhig=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 function komma(s){return String(s).replace(".",",");}
-function watt(x){                               // ganze Zahl ohne Komma, sonst eine Stelle nach dem Komma
-  var r=Math.round(x*10)/10;
-  return (Math.abs(r-Math.round(r))<1e-9 ? String(Math.round(r)) : komma(r.toFixed(1)))+" W";
+function watt(x){                               // ganze Zahl ohne Komma, sonst zwei Stellen nach dem Komma:
+  var r=Math.round(x*100)/100;                  // 25 W durch 33,33 W = 0,750 (mit 33,3 W wären es 0,751; Prüfer B17)
+  return (Math.abs(r-Math.round(r))<1e-9 ? String(Math.round(r)) : komma(r.toFixed(2)))+" W";
 }
 function werte(){
   if(zustand.last===null) return {lauf:false,ab:0,zu:0,netz:0};
