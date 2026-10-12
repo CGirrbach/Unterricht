@@ -9,18 +9,19 @@
          Helligkeit)“, „Metalle leiten den elektrischen Strom gut, Kohle weniger gut; Glas, Porzellan und
          Kunststoffe leiten den Strom gar nicht“, „Bei destilliertem Wasser bleibt die Lampe dunkel. Nach
          Auflösen des Salzes leuchtet die Lampe“).
-     (3) Grenzfall Silicium (rein): Die Lampe bleibt dunkel, obwohl Silicium kein Nichtleiter ist. Reines
+     (3) Grenzfall reines Silicium: Die Lampe bleibt dunkel, obwohl Silicium kein Nichtleiter ist. Reines
          Silicium hat nur eine geringe Leitfähigkeit (Eigenleitung, Fachkunde S. 196); für die Lampe reicht das
          nicht. Das klärt Aufgabe 5 b) des Arbeitsblatts, die Seite sagt es nicht.
      Fachliche Entscheidung: Die Salzlösung zeigt „leuchtet schwach“ wie die Kohle. Das Buch sagt nur „leuchtet“;
      an einer 1,5-V-Batterie mit Kupferdrähten als Elektroden leuchtet die Lampe schwächer als mit einem
      Metallstab. Beides ist Leiter (Verlaufsplan, Hinweise).
      Die Seite nennt keine Werkstoffgruppe (Leiter, Nichtleiter, Halbleiter): die Einteilung ist Aufgabe 5.
-     Startstellung neutral: Prüfstelle leer, Schalter offen, unterer Draht angeschlossen. -->
+     Startstellung neutral: Prüfstelle leer, Schalter offen, unterer Draht angeschlossen.
+     Berichtigt 12.10.2026 (Prüfer B04): Knopf „reines Silicium“ statt „Silicium“, passend zum Kasten des Arbeitsblatts. -->
 <html lang="de"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Messplatz Stromkreis (Block 04)</title>
-<script type="application/json" id="sim-meta">{"startwerte":{"pruefstelle":null,"schalter":"offen","unterer_draht":"angeschlossen"},"loesungswerte":{"Kupfer, Schalter offen":"bleibt dunkel","Kupfer, Schalter geschlossen":"leuchtet hell","Kupfer, Schalter geschlossen, Draht gelöst":"bleibt dunkel","Kupfer":"leuchtet hell","Aluminium":"leuchtet hell","Stahl":"leuchtet hell","Kohle":"leuchtet schwach","Glas":"bleibt dunkel","Porzellan":"bleibt dunkel","Kunststoff":"bleibt dunkel","destilliertes Wasser":"bleibt dunkel","Salzlösung":"leuchtet schwach","Silicium":"bleibt dunkel"}}</script>
+<script type="application/json" id="sim-meta">{"startwerte":{"pruefstelle":null,"schalter":"offen","unterer_draht":"angeschlossen"},"loesungswerte":{"Kupfer, Schalter offen":"bleibt dunkel","Kupfer, Schalter geschlossen":"leuchtet hell","Kupfer, Schalter geschlossen, Draht gelöst":"bleibt dunkel","Kupfer":"leuchtet hell","Aluminium":"leuchtet hell","Stahl":"leuchtet hell","Kohle":"leuchtet schwach","Glas":"bleibt dunkel","Porzellan":"bleibt dunkel","Kunststoff":"bleibt dunkel","destilliertes Wasser":"bleibt dunkel","Salzlösung":"leuchtet schwach","reines Silicium":"bleibt dunkel"}}</script>
 <style>
  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
  :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62}
@@ -80,7 +81,7 @@ var STOFFE=[
  {n:"Kupfer",h:2,f:"#C46A2F"},{n:"Aluminium",h:2,f:"#C9CDD2"},{n:"Stahl",h:2,f:"#8C949B"},
  {n:"Kohle",h:1,f:"#3A3A3A"},{n:"Glas",h:0,f:"#D8EEF2"},{n:"Porzellan",h:0,f:"#F4F1EA"},
  {n:"Kunststoff",h:0,f:"#E3B53B"},{n:"destilliertes Wasser",h:0,f:"#CFE8F7",fl:true},
- {n:"Salzlösung",h:1,f:"#A9D6F2",fl:true},{n:"Silicium",h:0,f:"#6E7A8A"}];
+ {n:"Salzlösung",h:1,f:"#A9D6F2",fl:true},{n:"reines Silicium",h:0,f:"#6E7A8A"}];
 var z={stoff:null,zu:false,an:true};
 var $=function(id){return document.getElementById(id);};
 
