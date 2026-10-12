@@ -58,7 +58,7 @@
 </style></head><body>
 <div class="wrap">
  <div class="kopf"><div class="reihe">E1EG · Lernfeld 1 · Block 14</div><h1>Messplatz Widerstand und Temperatur</h1></div>
- <div class="anleitung"><b>So messen Sie:</b> Werkstoff wählen, Widerstand <i>R</i><sub>1</sub> bei 20&nbsp;°C wählen, Temperatur des Ölbads einstellen, <b>Messung starten</b>. Das Ölbad wird von 20&nbsp;°C aus erwärmt. Jede Messung landet unten im Messprotokoll.</div>
+ <div class="anleitung"><b>So messen Sie:</b> Werkstoff wählen, Widerstand <i>R</i><sub>1</sub> bei 20&nbsp;°C wählen, Temperatur des Ölbads einstellen, <b>Messung starten</b>. Das Ölbad wird von 20&nbsp;°C aus auf diese Temperatur erwärmt oder abgekühlt. Jede Messung landet unten im Messprotokoll.</div>
 
  <div class="buehne">
   <canvas id="c" width="560" height="330" data-quelle="eigene schematische Darstellung ohne Buchbild: Draht im Ölbad mit Thermometer am Widerstandsmesser (Messaufbau nach Europa-Rechenbuch S. 46, Aufgabe 12, Ölbad); Rechenmodell Tabellenbuch S. 29, Formel 10 und 11"
@@ -179,8 +179,8 @@ function zeichne(){
   g.strokeStyle="#1A2530"; g.lineWidth=3;
   g.beginPath(); g.moveTo(bx,by); g.lineTo(bx,by+bh); g.lineTo(bx+bw,by+bh); g.lineTo(bx+bw,by); g.stroke();
   g.fillStyle="#5A666F"; g.font="22px 'Noto Sans',sans-serif"; g.textAlign="right"; g.fillText("Ölbad",bx-12,by+bh-14);
-  // Heizplatte, rot während des Erwärmens
-  g.fillStyle=z.laeuft&&z.ziel>20?"#C0392B":"#D5DBE0"; g.fillRect(bx-10,by+bh+6,bw+20,14);
+  // Temperierplatte: rot beim Erwärmen, blau beim Abkühlen
+  g.fillStyle=!z.laeuft?"#D5DBE0":(z.ziel>20?"#C0392B":(z.ziel<20?"#2557A3":"#D5DBE0")); g.fillRect(bx-10,by+bh+6,bw+20,14);
   g.strokeStyle="#1A2530"; g.lineWidth=2; g.strokeRect(bx-10,by+bh+6,bw+20,14);
   // Drahtwendel
   var x0=255,x1=400,yw=205;
