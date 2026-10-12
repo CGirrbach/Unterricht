@@ -1,0 +1,210 @@
+<!doctype html>
+<!-- Block EG1-B15 · Messplatz elektrische Arbeit (Neubau 12.10.2026, Aufgabe IN der Stunde) -->
+<!-- Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht):
+     (1) Doppelte Messzeit, doppelte Arbeit am Zähler.
+     (2) Spannung mal Stromstärke mal Messzeit ergibt genau die Anzeige des Zählers (W = U · I · t), 1 Ws = 1 VAs.
+     (3) Dieselbe Messung in drei Einheiten: 1 Wh = 3600 Ws, 1 kWh = 1000 Wh = 3 600 000 Ws.
+     (4) Eine Rechnung (Fernsehgerät 10 h, Lampe 4 h) lässt sich am Zähler prüfen.
+     Geräte und Werte: Lampe 230 V, 0,44 A und Fernsehgerät 230 V, 0,32 A (Europa Fachkunde S. 43, Beispiel 1 und 2);
+     Heizlüfter 230 V, 8,7 A (Europa-Rechenbuch S. 59, Beispiel); Halogenlampe 12 V, 6,25 A (Europa-Rechenbuch S. 58,
+     Aufgabe 1). Zähler: Anzeige umschaltbar in Ws, Wh, kWh; 1 kWh = 3 600 000 Ws (Tabellenbuch S. 36: 3,6 MJ = 1 kWh).
+     Rechnung intern ganzzahlig (Stromstärke in mA), alle 24 Einstellungen ergeben in Ws ganze Zahlen; in Wh und kWh
+     sind alle Einstellungen ab 1 h mit höchstens vier gültigen Ziffern EXAKT; die Sekunden-Messungen erscheinen in Wh und
+     kWh gerundet und mit „≈“ gekennzeichnet.
+     Messzeiten 10 s, 20 s, 30 s in Echtzeit; 1 h, 4 h, 10 h im Zeitraffer (8 s).
+     Grenzfall: Schalter offen (vor und nach der Messung) ergibt 0 V, 0 A, der Zähler steht.
+     Startstellung neutral: kein Gerät, keine Messzeit, Schalter offen, Zähler 0, Anzeige in Ws. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz elektrische Arbeit (Block 15)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"geraet":null,"messzeit":null,"W":0,"einheit":"Ws"},"loesungswerte":{"Lampe 10 s":"1012 Ws","Lampe 20 s":"2024 Ws","Halogenlampe 10 s":"750 Ws","Lampe 1 h":"364 320 Ws = 101,2 Wh = 0,1012 kWh","Fernsehgerät 10 h":"0,736 kWh","Lampe 4 h":"404,8 Wh"}}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62;--blau:#2557A3}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:980px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px}
+ @media(min-width:760px){.buehne{grid-template-columns:1.25fr 1fr}}
+ canvas{width:100%;height:auto;display:block;border:1px solid var(--linie);background:#fff;touch-action:manipulation}
+ .anzeigen{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+ .anz{border:1.4px solid var(--ink);padding:8px 12px;background:var(--hell)}
+ .anz.breit{grid-column:1 / -1}
+ .anz .name{font-size:14px;font-weight:700;color:var(--grau)}
+ .anz .wert{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap}
+ .anz.zaehler{background:#fff;border-color:var(--kupfer)}
+ .anz.zaehler .wert{font-size:30px;color:var(--kupfer)}
+ .einheit{display:flex;gap:8px;margin-top:6px}
+ .einheit button{min-width:64px}
+ .zr{font-size:13px;color:var(--kupfer);font-weight:700;min-height:1.3em}
+ .wahl{margin:12px 0 4px}
+ .wahl .titel{font-size:14px;font-weight:700;margin:8px 0 4px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px}
+ button{font:inherit;font-size:15px;min-height:46px;padding:8px 14px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer}
+ button.an{background:var(--kupfer);color:#fff}
+ button:disabled{opacity:.45;cursor:not-allowed}
+ button.start{border-color:var(--gruen);color:#fff;background:var(--gruen);font-weight:700}
+ button.start:disabled{background:#fff;color:var(--gruen)}
+ table{width:100%;border-collapse:collapse;margin-top:12px;font-size:15px}
+ th,td{border:1px solid var(--linie);padding:6px 8px;text-align:left}
+ th{background:var(--hell);font-size:14px}
+ .tabelle{overflow-x:auto}
+ td.z{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+ .leer{color:var(--grau);font-style:italic}
+ .fz{font-family:Cambria,Caladea,'Noto Serif',Georgia,serif;font-style:italic}  /* Formelzeichen mit Serifen */
+ @media(max-width:420px){.anz .wert{font-size:22px} .anz.zaehler .wert{font-size:26px} th,td{padding:5px 4px;font-size:13px} button{padding:8px 11px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E1EG · Lernfeld 1 · Block 15</div><h1>Messplatz elektrische Arbeit</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Gerät wählen, Messzeit wählen, <b>Messung starten</b>. Während der Messung ist der Schalter geschlossen. Messzeiten ab 1 h laufen im Zeitraffer. Die Anzeige des Zählers schalten Sie mit <b>Ws</b>, <b>Wh</b> und <b>kWh</b> um. Jede Messung landet unten im Messprotokoll.</div>
+
+ <div class="buehne">
+  <canvas id="c" width="560" height="330" data-quelle="Messschaltung nach Europa Fachkunde S. 43, Bild Elektrizitätszähler (Zähler in der Zuleitung), Strommesser in Reihe, Spannungsmesser parallel zum Gerät wie Tabellenbuch S. 36"
+   aria-label="Stromkreis aus Spannungsquelle, Schalter, Zähler, Strommesser und Gerät; der Spannungsmesser liegt parallel zum Gerät. Bei geschlossenem Schalter dreht sich die Scheibe im Zähler."></canvas>
+  <div class="anzeigen">
+   <div class="anz"><div class="name">Spannungsmesser <span class="fz">U</span></div><div class="wert" id="aU">0 V</div></div>
+   <div class="anz"><div class="name">Strommesser <span class="fz">I</span></div><div class="wert" id="aI">0 A</div></div>
+   <div class="anz breit"><div class="name">Zeit <span class="fz">t</span> (Stoppuhr)</div><div class="wert" id="aT">0,0 s</div><div class="zr" id="aZR">&nbsp;</div></div>
+   <div class="anz zaehler breit"><div class="name">Zähler <span class="fz">W</span></div><div class="wert" id="aW">0 Ws</div>
+    <div class="einheit" id="einheiten" role="group" aria-label="Einheit der Zähleranzeige"></div></div>
+  </div>
+ </div>
+
+ <div class="wahl">
+  <div class="titel">1. Gerät</div>
+  <div class="knoepfe" id="geraete"></div>
+  <div class="titel">2. Messzeit</div>
+  <div class="knoepfe" id="zeiten"></div>
+  <div class="titel">3. Messen</div>
+  <div class="knoepfe"><button class="start" id="bStart" disabled>Messung starten</button><button id="bReset">Zurücksetzen</button></div>
+ </div>
+
+ <div class="tabelle"><table id="protokoll">
+  <tr><th>Nr.</th><th>Gerät</th><th><span class="fz">U</span></th><th><span class="fz">I</span></th><th>Messzeit <span class="fz">t</span></th><th>Zähler <span class="fz">W</span></th></tr>
+  <tr class="leer"><td colspan="6">Noch keine Messung.</td></tr>
+ </table></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+// Stromstärke in mA (ganzzahlig): die Arbeit in Ws bleibt ganzzahlig und exakt
+var GERAETE=[{n:"Lampe",U:230,mA:440,q:"Netz 230 V"},{n:"Fernsehgerät",U:230,mA:320,q:"Netz 230 V"},
+             {n:"Heizlüfter",U:230,mA:8700,q:"Netz 230 V"},{n:"Halogenlampe",U:12,mA:6250,q:"Netzgerät 12 V"}];
+var ZEITEN=[{s:10,t:"10 s"},{s:20,t:"20 s"},{s:30,t:"30 s"},{s:3600,t:"1 h"},{s:14400,t:"4 h"},{s:36000,t:"10 h"}];
+var EINHEITEN=[{n:"Ws",f:1},{n:"Wh",f:3600},{n:"kWh",f:3600000}];
+var RAFFER=8;                                   // Sekunden Echtzeit für Messzeiten ab 1 h
+var START={g:null,tz:null,laeuft:false,t:0,W:0,start:0,nr:0,e:0};
+var z=JSON.parse(JSON.stringify(START)), messungen=[];
+var $=function(id){return document.getElementById(id);};
+var ruhig=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function gruppen(s){                             // Dreiergruppen ab fünf Stellen (1012, 20 010, 364 320)
+  var t=s.split(","), g=t[0];
+  if(g.replace("-","").length>4) g=g.replace(/\B(?=(\d{3})+(?!\d))/g," ");
+  return g+(t.length>1?","+t[1]:"");
+}
+function zahl(v,lauf){                            // mindestens vier gültige Ziffern, alle Stellen vor dem Komma
+  if(v===0) return "0";
+  var stellen=Math.floor(Math.log10(Math.abs(v)))+1, dez=Math.max(0,4-stellen);
+  var r=Number(v.toFixed(dez)), genau=Math.abs(r-v)<=1e-9*Math.max(1,Math.abs(v));
+  var s=r.toFixed(dez); if(s.indexOf(".")>=0) s=s.replace(/0+$/,"").replace(/\.$/,"");
+  return (genau||lauf?"":"≈ ")+gruppen(s.replace(".",","));
+}
+function arbeit(Ws,lauf){ var e=EINHEITEN[z.e]; return zahl(Ws/e.f,lauf)+" "+e.n; }
+function strom(mA){ return mA===0?"0 A":zahl(mA/1000,true)+" A"; }
+function zeit(s,T){
+  if(T<3600) return (s).toFixed(1).replace(".",",")+" s";
+  var h=Math.floor(s/3600+1e-9), m=Math.floor((s-h*3600)/60+1e-9);
+  return h+" h"+(m>0||s<T?" "+m+" min":"");
+}
+
+function knoepfe(){
+  GERAETE.forEach(function(g,i){var b=document.createElement("button");b.textContent=g.n+(g.U!==230?" "+g.U+" V":"");b.onclick=function(){if(z.laeuft)return;z.g=i;auffrischen();};$("geraete").appendChild(b);});
+  ZEITEN.forEach(function(t,i){var b=document.createElement("button");b.textContent=t.t;b.onclick=function(){if(z.laeuft)return;z.tz=i;auffrischen();};$("zeiten").appendChild(b);});
+  EINHEITEN.forEach(function(e,i){var b=document.createElement("button");b.textContent=e.n;b.onclick=function(){z.e=i;auffrischen();protokoll();};$("einheiten").appendChild(b);});
+}
+function auffrischen(){
+  Array.prototype.forEach.call($("geraete").children,function(b,i){b.classList.toggle("an",z.g===i);b.disabled=z.laeuft;});
+  Array.prototype.forEach.call($("zeiten").children,function(b,i){b.classList.toggle("an",z.tz===i);b.disabled=z.laeuft;});
+  Array.prototype.forEach.call($("einheiten").children,function(b,i){b.classList.toggle("an",z.e===i);b.setAttribute("aria-pressed",z.e===i?"true":"false");});
+  $("bStart").disabled=z.laeuft||z.g===null||z.tz===null;
+  var g=z.g===null?null:GERAETE[z.g];
+  $("aU").textContent=(z.laeuft&&g)?g.U+" V":"0 V";
+  $("aI").textContent=(z.laeuft&&g)?strom(g.mA):"0 A";
+  var T=z.tz===null?10:ZEITEN[z.tz].s;
+  $("aT").textContent=zeit(z.t,T);
+  $("aZR").textContent=(z.tz!==null&&T>=3600)?"Zeitraffer: "+ZEITEN[z.tz].t+" in "+RAFFER+" s":" ";
+  $("aW").textContent=arbeit(z.W,z.laeuft);
+}
+function protokoll(){
+  var tb=$("protokoll"); while(tb.rows.length>1) tb.deleteRow(1);
+  if(!messungen.length){var tr=tb.insertRow();tr.className="leer";tr.innerHTML="<td colspan='6'>Noch keine Messung.</td>";return;}
+  messungen.forEach(function(m){
+    var g=GERAETE[m.g],tr=tb.insertRow();
+    tr.innerHTML="<td>"+m.nr+"</td><td>"+g.n+"</td><td class='z'>"+g.U+" V</td><td class='z'>"+strom(g.mA)+"</td><td class='z'>"+ZEITEN[m.tz].t+"</td><td class='z'>"+arbeit(m.W,false)+"</td>";
+  });
+}
+function starten(){ z.laeuft=true; z.t=0; z.W=0; z.start=performance.now(); auffrischen(); requestAnimationFrame(schritt); }
+function schritt(jetzt){
+  if(!z.laeuft) return;
+  var T=ZEITEN[z.tz].s, g=GERAETE[z.g], dauer=T>=3600?RAFFER:T;
+  var anteil=Math.min(1,(jetzt-z.start)/1000/dauer);
+  z.t=anteil*T; z.W=g.U*g.mA*z.t/1000;
+  if(anteil>=1){ z.t=T; z.W=g.U*g.mA*T/1000; z.laeuft=false; z.nr++; messungen.push({nr:z.nr,g:z.g,tz:z.tz,W:z.W}); protokoll(); }
+  auffrischen(); zeichne(jetzt);
+  if(z.laeuft) requestAnimationFrame(schritt);
+}
+function zuruecksetzen(){ z=JSON.parse(JSON.stringify(START)); messungen=[]; protokoll(); auffrischen(); zeichne(0); }
+
+// ---------- Schaltung ----------
+var c=$("c"), k=c.getContext("2d"), winkel=0, vorher=0;
+function zeichne(jetzt){
+  var g=z.g===null?null:GERAETE[z.g], zu=z.laeuft;
+  k.clearRect(0,0,c.width,c.height);
+  k.lineWidth=3; k.strokeStyle="#1A2530"; k.fillStyle="#1A2530"; k.textAlign="center";
+  // Spannungsquelle
+  k.fillStyle="#F4F6F8"; k.fillRect(30,60,100,220); k.strokeRect(30,60,100,220);
+  k.fillStyle="#1A2530"; k.font="bold 26px 'Noto Sans',sans-serif"; k.fillText("+",112,96); k.fillText("−",112,270);
+  k.font="21px 'Noto Sans',sans-serif"; k.save(); k.translate(66,170); k.rotate(-Math.PI/2);
+  k.fillText(g?g.q:"Spannungsquelle",0,0); k.restore();
+  // Leitungen
+  k.beginPath(); k.moveTo(130,80); k.lineTo(150,80); k.moveTo(195,80); k.lineTo(230,80); k.moveTo(310,80); k.lineTo(345,80);
+  k.moveTo(395,80); k.lineTo(470,80); k.lineTo(470,135); k.moveTo(470,225); k.lineTo(470,270); k.lineTo(130,270);
+  k.moveTo(470,105); k.lineTo(530,105); k.lineTo(530,155); k.moveTo(530,205); k.lineTo(530,250); k.lineTo(470,250); k.stroke();
+  // Schalter
+  k.beginPath(); k.arc(150,80,4,0,6.283); k.arc(195,80,4,0,6.283); k.fill();
+  k.beginPath(); k.moveTo(150,80); if(zu) k.lineTo(195,80); else k.lineTo(190,50); k.stroke();
+  k.font="20px 'Noto Sans',sans-serif"; k.fillText(zu?"Schalter zu":"Schalter offen",172,34);
+  // Zähler mit Zählerscheibe
+  k.fillStyle="#F5EBDF"; k.fillRect(230,55,80,100); k.strokeRect(230,55,80,100);
+  k.fillStyle="#1A2530"; k.font="bold 20px 'Noto Sans',sans-serif"; k.fillText("kWh",270,80);
+  k.beginPath(); k.ellipse(270,122,26,10,0,0,6.283); k.stroke();
+  var dt=vorher?Math.min(0.1,(jetzt-vorher)/1000):0; vorher=jetzt;
+  if(zu&&g&&!ruhig){ winkel+=dt*(1.2+Math.log10(g.U*g.mA/1000)); }
+  var mx=270+24*Math.cos(winkel), my=122+9*Math.sin(winkel);
+  k.fillStyle="#A34E0E"; k.beginPath(); k.arc(mx,my,4,0,6.283); k.fill();
+  k.fillStyle="#5A666F"; k.font="19px 'Noto Sans',sans-serif"; k.fillText("Zähler",270,178);
+  // Strommesser
+  k.fillStyle="#fff"; k.beginPath(); k.arc(370,80,25,0,6.283); k.fill(); k.stroke();
+  k.fillStyle="#1A2530"; k.font="bold 24px 'Noto Sans',sans-serif"; k.fillText("A",370,89);
+  // Gerät
+  k.fillStyle=zu&&g?"#FBE3C8":"#fff"; k.fillRect(445,135,50,90); k.strokeRect(445,135,50,90);
+  k.fillStyle="#1A2530"; k.font="19px 'Noto Sans',sans-serif"; k.textAlign="right";
+  k.fillText(g?g.n:"Gerät",436,186);
+  // Spannungsmesser parallel zum Gerät, Abzweigpunkte
+  k.textAlign="center"; k.beginPath(); k.arc(470,105,5,0,6.283); k.arc(470,250,5,0,6.283); k.fill();
+  k.fillStyle="#fff"; k.beginPath(); k.arc(530,180,25,0,6.283); k.fill(); k.stroke();
+  k.fillStyle="#1A2530"; k.font="bold 24px 'Noto Sans',sans-serif"; k.fillText("V",530,189);
+}
+function schleife(t){ if(!z.laeuft) zeichne(t); requestAnimationFrame(schleife); }
+$("bStart").onclick=starten; $("bReset").onclick=zuruecksetzen;
+knoepfe(); auffrischen(); requestAnimationFrame(schleife);
+})();
+</script>
+</body></html>
