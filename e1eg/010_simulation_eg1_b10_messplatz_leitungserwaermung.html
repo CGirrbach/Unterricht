@@ -24,13 +24,15 @@
        4 B2:   30 A -> 70,0 °C; 30,5 A -> 71,3 °C      2,5 C:  27 A -> 70,0 °C; 27,5 A -> 71,5 °C
        10 C:   63 A -> 70,0 °C; 63,5 A -> 70,6 °C      (kleinster Sprung über die Grenze im ganzen Bereich)
        4 C:    36 A -> 70,0 °C; 36,5 A -> 71,1 °C      (Arbeitsblatt Aufgabe 2: 1,5 B2, 4 B2, 4 C)
-       18 A: 1,5 B2 -> 77,6 °C; 1,5 C -> 64,1 °C; 2,5 B2 -> 54,5 °C (Arbeitsblatt Aufgabe 4, Folie 10)
+       32 A: 4 B2 -> 75,5 °C; 6 B2 -> 58,4 °C; 4 C -> 61,6 °C; 2,5 C -> 86,2 °C (Arbeitsblatt Aufgabe 4, Folie 10)
+     Als Rechenmodell gekennzeichnet (Prüfer B10); dass es auf das Tabellenbuch geeicht ist, nennt erst Folie 10,
+     sonst ließen sich die Messwerte von Aufgabe 2 nachschlagen statt messen.
      Grenzfall im Einstellbereich: 1,5 mm² B2 mit 70 A -> weit über 150 °C (Anzeige „über 150 °C").
      Startstellung neutral: kein Querschnitt, keine Verlegeart, I = 0 A, Leiter auf Umgebungstemperatur 30 °C. -->
 <html lang="de"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Messplatz Leitungserwärmung (Block 10)</title>
-<script type="application/json" id="sim-meta">{"startwerte":{"querschnitt":null,"verlegeart":null,"I":0},"loesungswerte":{"1,5 mm² B2":"16,5 A","4 mm² B2":"30 A","4 mm² C":"36 A","18 A, 1,5 mm² B2":"77,6 °C","18 A, 1,5 mm² C":"64,1 °C","18 A, 2,5 mm² B2":"54,5 °C"}}</script>
+<script type="application/json" id="sim-meta">{"startwerte":{"querschnitt":null,"verlegeart":null,"I":0},"loesungswerte":{"1,5 mm² B2":"16,5 A","4 mm² B2":"30 A","4 mm² C":"36 A","32 A, 4 mm² B2":"75,5 °C","32 A, 6 mm² B2":"58,4 °C","32 A, 4 mm² C":"61,6 °C"}}</script>
 <style>
  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
  :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62;--rot:#B23A33}
@@ -85,7 +87,7 @@
    <div class="anz"><div class="name">Strommesser</div><div class="wert" id="aI">0 A</div></div>
    <div class="anz temp"><div class="name">Leitertemperatur im Dauerbetrieb</div><div class="wert" id="aT">30,0 °C</div></div>
    <div class="anz zustand" id="kZ"><div class="name">Isolation</div><div class="wert" id="aZ">noch nicht eingestellt</div></div>
-   <div class="fest">Fest eingestellt: Mantelleitung mit 2 Strom führenden Leitern aus Kupfer, Umgebungstemperatur 30 °C.</div>
+   <div class="fest">Fest eingestellt: Mantelleitung mit 2 Strom führenden Leitern aus Kupfer, Umgebungstemperatur 30 °C.<br><b>Rechenmodell:</b> Die Temperaturen werden berechnet, nicht an einer echten Leitung gemessen.</div>
   </div>
  </div>
 
