@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>U03 Messplatz: Der umlaufende Zeiger</title>
+<!--
+  E2EG U03 „Winkel, Bogenmaß und Kreisfrequenz“, Neubau 12.10.2026 (ersetzt für den neuen Block
+  U03_Simulation_Zeiger.html, deren Adresse auf alten Blättern steht und unverändert bleibt).
+  Messplatz-Prinzip wie E1EG Block 07: Die Schüler wählen Frequenz und Messzeit, lesen Winkel und Bogenlänge ab
+  und werten auf dem Arbeitsblatt selbst aus. Die Seite nennt weder eine Formel noch das Ergebnis der Auswertung.
+  Exaktheit: Frequenz 25, 50 oder 100 Hz, Messzeit 5, 10, 15 oder 20 ms; die Umdrehungen sind exakt,
+  der Winkel in Grad ganzzahlig, die Bogenlänge auf vier Nachkommastellen gerundet (alle 12 Einstellungen geprüft).
+  Modell: Rechenbuch Elektrotechnik S. 25 (Bild 1, Einheitskreis) und S. 92 (Bild 1); Tabellenbuch S. 35.
+-->
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--linie:#C7D2DA;--blau:#2557A3;--grau:#5A666F;--hell:#F4F6F8}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:#fff;line-height:1.4}
+header{border-top:6px solid var(--kupfer);padding:12px 16px 4px;max-width:980px;margin:0 auto}
+h1{margin:0;font-size:clamp(20px,4.6vw,28px)}
+.kurz{max-width:980px;margin:6px auto 0;padding:0 16px;font-size:clamp(15px,3.6vw,17px)}
+.kurz p{margin:4px 0}
+.zeitlupe{display:inline-block;background:var(--hell);border-left:4px solid var(--ink);padding:4px 10px;font-weight:600}
+.wahl{max-width:980px;margin:8px auto 0;padding:0 16px}
+.zeile{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:10px 0}
+.zeile .name{flex:0 0 100%;font-weight:700;font-size:clamp(15px,3.6vw,17px)}
+button{font:inherit;font-weight:700;font-size:clamp(16px,4vw,18px);min-height:48px;min-width:72px;padding:10px 14px;
+       border:2px solid var(--ink);background:#fff;color:var(--ink);cursor:pointer;border-radius:6px;touch-action:manipulation}
+button[aria-pressed="true"]{background:var(--kupfer);border-color:var(--kupfer);color:#fff}
+button.los{background:var(--ink);color:#fff;flex:1 1 180px}
+button.los:disabled{opacity:.45;cursor:default}
+button:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
+canvas{display:block;width:100%;max-width:980px;margin:6px auto 0;height:auto}
+.anzeigen{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;max-width:980px;margin:8px auto 0;padding:0 16px}
+.kachel{border:1.5px solid var(--linie);border-radius:6px;padding:8px 10px;min-width:0}
+.kachel span{display:block;font-size:clamp(13px,3.3vw,15px);color:var(--grau);font-weight:700}
+.kachel b{display:block;font-size:clamp(20px,5.4vw,26px);font-variant-numeric:tabular-nums;white-space:nowrap}
+.kachel.bogen{border-color:var(--blau)}
+.kachel.bogen span{color:var(--blau)}
+.status{max-width:980px;margin:8px auto 24px;padding:0 16px;font-size:clamp(15px,3.6vw,17px);color:var(--grau);min-height:1.5em}
+@media (max-width:640px){.anzeigen{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><h1>Messplatz: Der umlaufende Zeiger</h1></header>
+
+<div class="kurz">
+<p>Der Zeiger dreht sich links herum, eine Umdrehung je Periode. Der Kreis hat den Radius <i>r</i>&nbsp;=&nbsp;1.
+Blau: der Bogen, den die Zeigerspitze während der Messzeit überstreicht.</p>
+<p><span class="zeitlupe">Zeitlupe: 1 ms dauert hier 0,2 s.</span></p>
+</div>
+
+<script type="application/json" id="sim-meta">
+{
+  "erkenntnis": "Die Bogenlänge im Kreis mit dem Radius 1 ist ein Maß für den Winkel; die Bogenlänge je Zeit hängt nur von der Frequenz ab.",
+  "startwerte": {"frequenz_hz": 25, "messzeit_ms": 5, "gemessen": false},
+  "loesungswerte": {"frequenz_hz": 50, "messzeit_ms": 20, "gemessen": true},
+  "quelle": "Rechenbuch Elektrotechnik S. 25 Bild 1 und S. 92 Bild 1; Tabellenbuch S. 20 und S. 35"
+}
+</script>
+
+<div class="wahl">
+  <div class="zeile" role="group" aria-label="Frequenz">
+    <span class="name">Frequenz <i>f</i></span>
+    <button type="button" data-f="25">25 Hz</button>
+    <button type="button" data-f="50">50 Hz</button>
+    <button type="button" data-f="100">100 Hz</button>
+  </div>
+  <div class="zeile" role="group" aria-label="Messzeit">
+    <span class="name">Messzeit <i>t</i></span>
+    <button type="button" data-t="5">5 ms</button>
+    <button type="button" data-t="10">10 ms</button>
+    <button type="button" data-t="15">15 ms</button>
+    <button type="button" data-t="20">20 ms</button>
+  </div>
+  <div class="zeile">
+    <button type="button" class="los" id="los">Messung starten</button>
+    <button type="button" id="reset">Zurücksetzen</button>
+  </div>
+</div>
+
+<canvas id="buehne" width="980" height="400" aria-label="Zeiger im Kreis mit dem Radius 1 und Liniendiagramm"
+        data-quelle="Rechenbuch Elektrotechnik S. 25 Bild 1 (Einheitskreis), S. 92 Bild 1 (sinusförmige Wechselspannung)"></canvas>
+
+<div class="anzeigen" aria-live="polite">
+  <div class="kachel"><span>Messzeit <i>t</i></span><b id="aT">0 ms</b></div>
+  <div class="kachel"><span>Umdrehungen</span><b id="aU">0</b></div>
+  <div class="kachel"><span>Winkel in Grad</span><b id="aG">0°</b></div>
+  <div class="kachel bogen"><span>Bogenlänge (<i>r</i>&nbsp;=&nbsp;1)</span><b id="aB">0</b></div>
+</div>
+<div class="status" id="status">Wählen Sie Frequenz und Messzeit, dann „Messung starten“.</div>
+
+<script>
+(function () {
+  "use strict";
+  var meta = JSON.parse(document.getElementById("sim-meta").textContent);
+  var START = meta.startwerte;
+  var ZEITLUPE = 200;                 /* 1 ms wirkliche Zeit dauert 200 ms auf dem Bildschirm */
+  var f = START.frequenz_hz, tMess = START.messzeit_ms;
+  var tJetzt = 0;                     /* wirkliche Zeit in ms seit Messbeginn */
+  var laeuft = false, fertig = false, raf = null, t0 = null;
+  var ruhig = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var cv = document.getElementById("buehne"), ctx = cv.getContext("2d");
+  var BREIT = {W: 980, H: 420, CX: 215, CY: 210, R: 140, X0: 440, BW: 460, Y0: 210, A: 140, sz: 18, lw: 1},
+      SCHMAL = {W: 600, H: 780, CX: 300, CY: 220, R: 150, X0: 60, BW: 430, Y0: 590, A: 135, sz: 26, lw: 1.5};
+  var G = BREIT;
+
+  function anordnen() {
+    var neu = (cv.parentNode.clientWidth || window.innerWidth) < 640 ? SCHMAL : BREIT;
+    if (neu !== G || cv.width !== neu.W) { G = neu; cv.width = G.W; cv.height = G.H; }
+  }
+
+  function komma(x, stellen) { return x.toFixed(stellen).replace(".", ","); }
+  function knapp(x) {               /* exakte Werte ohne überflüssige Nullen: 0,125 · 1,5 · 2 */
+    var s = x.toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
+    return s.replace(".", ",");
+  }
+
+  /* Werte zur wirklichen Zeit tms (in ms). Am Ende exakt aus f und tMess, nicht aus aufsummierten Schritten. */
+  function werte(tms) {
+    var umdr = f * tms / 1000;
+    return {umdr: umdr, grad: 360 * umdr, bogen: 2 * Math.PI * umdr};
+  }
+
+  function zeige() {
+    var w = werte(tJetzt);
+    var tEl = document.getElementById("aT"), uEl = document.getElementById("aU"),
+        gEl = document.getElementById("aG"), bEl = document.getElementById("aB");
+    if (fertig) {
+      tEl.textContent = tMess + " ms";
+      uEl.textContent = knapp(w.umdr);
+      gEl.textContent = Math.round(w.grad) + "°";
+      bEl.textContent = komma(w.bogen, 4);
+    } else if (laeuft) {
+      tEl.textContent = komma(tJetzt, 1) + " ms";
+      uEl.textContent = komma(w.umdr, 2);
+      gEl.textContent = Math.floor(w.grad) + "°";
+      bEl.textContent = komma(w.bogen, 4);
+    } else {
+      tEl.textContent = "0 ms"; uEl.textContent = "0"; gEl.textContent = "0°"; bEl.textContent = "0";
+    }
+  }
+
+  function knoepfe() {
+    document.querySelectorAll("[data-f]").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(+b.dataset.f === f));
+    });
+    document.querySelectorAll("[data-t]").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(+b.dataset.t === tMess));
+    });
+    document.getElementById("los").disabled = laeuft;
+  }
+
+  function pfeil(x1, y1, x2, y2, gr) {
+    var a = Math.atan2(y2 - y1, x2 - x1);
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - gr * Math.cos(a - 0.4), y2 - gr * Math.sin(a - 0.4));
+    ctx.lineTo(x2 - gr * Math.cos(a + 0.4), y2 - gr * Math.sin(a + 0.4));
+    ctx.closePath(); ctx.fill();
+  }
+
+  function zeichne() {
+    var CX = G.CX, CY = G.CY, R = G.R, lw = G.lw;
+    var w = werte(tJetzt), winkel = w.bogen;
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.font = G.sz + "px system-ui, sans-serif";
+    ctx.textBaseline = "middle";
+
+    /* Achsenkreuz und Kreis mit dem Radius 1 */
+    ctx.strokeStyle = "#C7D2DA"; ctx.lineWidth = 1.5 * lw;
+    ctx.beginPath(); ctx.moveTo(CX - R - 24, CY); ctx.lineTo(CX + R + 24, CY);
+    ctx.moveTo(CX, CY - R - 24); ctx.lineTo(CX, CY + R + 24); ctx.stroke();
+    ctx.strokeStyle = "#1A2530"; ctx.lineWidth = 2 * lw;
+    ctx.beginPath(); ctx.arc(CX, CY, R, 0, 2 * Math.PI); ctx.stroke();
+    ctx.fillStyle = "#5A666F"; ctx.textAlign = "center";
+    ctx.fillText("0°", CX + R + 34 * lw, CY - 16 * lw);
+    ctx.fillText("90°", CX + 30 * lw, CY - R - 26 * lw);
+    ctx.fillText("180°", CX - R - 36 * lw, CY - 16 * lw);
+    ctx.fillText("270°", CX + 34 * lw, CY + R + 26 * lw);
+
+    /* überstrichener Bogen: jede weitere Umdrehung etwas weiter außen */
+    ctx.strokeStyle = "#2557A3"; ctx.lineWidth = 6 * lw;
+    var rest = winkel, ring = 0;
+    while (rest > 1e-9) {
+      var stueck = Math.min(rest, 2 * Math.PI);
+      ctx.beginPath(); ctx.arc(CX, CY, R + ring * 9 * lw, 0, -stueck, true); ctx.stroke();
+      rest -= stueck; ring += 1;
+    }
+
+    /* Radius r = 1 (Bezugslinie bei 0°) */
+    ctx.strokeStyle = "#5A666F"; ctx.lineWidth = 1.5 * lw; ctx.setLineDash([6 * lw, 5 * lw]);
+    ctx.beginPath(); ctx.moveTo(CX, CY); ctx.lineTo(CX + R, CY); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = "#5A666F"; ctx.textAlign = "center";
+    ctx.font = "italic " + G.sz + "px system-ui, sans-serif";
+    ctx.fillText("r = 1", CX + R / 2, CY + 18 * lw);
+    ctx.font = G.sz + "px system-ui, sans-serif";
+
+    /* Zeiger */
+    var tx = CX + R * Math.cos(winkel), ty = CY - R * Math.sin(winkel);
+    ctx.strokeStyle = "#A34E0E"; ctx.fillStyle = "#A34E0E"; ctx.lineWidth = 4 * lw;
+    pfeil(CX, CY, tx, ty, 16 * lw);
+
+    /* Liniendiagramm u über t, 0 bis 20 ms */
+    var X0 = G.X0, BW = G.BW, Y0 = G.Y0, A = G.A, tmax = 20;
+    ctx.strokeStyle = "#1A2530"; ctx.fillStyle = "#1A2530"; ctx.lineWidth = 1.5 * lw;
+    pfeil(X0, Y0, X0 + BW + 30 * lw, Y0, 10 * lw);
+    pfeil(X0, Y0 + A + 10 * lw, X0, Y0 - A - 22 * lw, 10 * lw);
+    for (var k = 5; k <= tmax; k += 5) {
+      var xs = X0 + BW * k / tmax;
+      ctx.beginPath(); ctx.moveTo(xs, Y0 - 5 * lw); ctx.lineTo(xs, Y0 + 5 * lw); ctx.stroke();
+    }
+    ctx.textAlign = "left";
+    ctx.font = "italic " + G.sz + "px system-ui, sans-serif";
+    ctx.fillText("u", X0 + 12 * lw, Y0 - A - 14 * lw);
+    ctx.font = G.sz + "px system-ui, sans-serif";
+
+    if (tJetzt > 0) {
+      ctx.strokeStyle = "#A34E0E"; ctx.lineWidth = 3.5 * lw; ctx.beginPath();
+      var schritte = Math.max(2, Math.ceil(tJetzt * 12));
+      for (var i = 0; i <= schritte; i++) {
+        var tt = tJetzt * i / schritte;
+        var x = X0 + BW * tt / tmax, y = Y0 - A * Math.sin(2 * Math.PI * f * tt / 1000);
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      /* Höhe der Zeigerspitze bis zum Kurvenpunkt (nur in der breiten Anordnung waagerecht sinnvoll) */
+      var xe = X0 + BW * tJetzt / tmax, ye = Y0 - A * Math.sin(winkel);
+      ctx.fillStyle = "#A34E0E"; ctx.beginPath(); ctx.arc(xe, ye, 6 * lw, 0, 2 * Math.PI); ctx.fill();
+      if (G === BREIT) {
+        ctx.strokeStyle = "#C7D2DA"; ctx.lineWidth = 1.2; ctx.setLineDash([5, 5]);
+        ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(xe, ye); ctx.stroke(); ctx.setLineDash([]);
+      }
+    }
+    /* Zeitmarken und Achsenname zuletzt, mit weißem Rand: bleiben lesbar, wo die Kurve hindurchläuft */
+    ctx.lineJoin = "round"; ctx.textAlign = "center";
+    function marke(text, x, y) {
+      ctx.strokeStyle = "#FFFFFF"; ctx.lineWidth = 6 * lw; ctx.strokeText(text, x, y);
+      ctx.fillStyle = "#5A666F"; ctx.fillText(text, x, y);
+    }
+    for (var m = 5; m <= tmax; m += 5) marke(String(m), X0 + BW * m / tmax + 14 * lw, Y0 + 22 * lw);
+    ctx.textAlign = "left";
+    marke("t in ms", X0 + BW + 12 * lw, Y0 + 50 * lw);
+  }
+
+  function takt(jetzt) {
+    if (t0 === null) t0 = jetzt;
+    tJetzt = Math.min(tMess, (jetzt - t0) / ZEITLUPE);
+    if (tJetzt >= tMess) { beenden(); return; }
+    zeige(); zeichne();
+    raf = requestAnimationFrame(takt);
+  }
+
+  function beenden() {
+    laeuft = false; fertig = true; tJetzt = tMess; raf = null;
+    zeige(); zeichne(); knoepfe();
+    document.getElementById("status").textContent =
+      "Messung beendet: f = " + f + " Hz, t = " + tMess + " ms.";
+  }
+
+  function nullstellen(text) {
+    if (raf) cancelAnimationFrame(raf);
+    raf = null; laeuft = false; fertig = false; tJetzt = 0; t0 = null;
+    zeige(); zeichne(); knoepfe();
+    document.getElementById("status").textContent = text;
+  }
+
+  document.querySelectorAll("[data-f]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      f = +b.dataset.f;
+      nullstellen("Frequenz " + f + " Hz gewählt. Messzeit wählen, dann „Messung starten“.");
+    });
+  });
+  document.querySelectorAll("[data-t]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      tMess = +b.dataset.t;
+      nullstellen("Messzeit " + tMess + " ms gewählt. Dann „Messung starten“.");
+    });
+  });
+  document.getElementById("los").addEventListener("click", function () {
+    nullstellen("Messung läuft (Zeitlupe) …");
+    if (ruhig) { beenden(); return; }
+    laeuft = true; knoepfe();
+    raf = requestAnimationFrame(takt);
+  });
+  document.getElementById("reset").addEventListener("click", function () {
+    f = START.frequenz_hz; tMess = START.messzeit_ms;
+    nullstellen("Wählen Sie Frequenz und Messzeit, dann „Messung starten“.");
+  });
+  window.addEventListener("resize", function () { anordnen(); zeichne(); });
+
+  /* Prüfhilfe (ohne Anzeige): Endwerte einer Einstellung ohne Warten, für sim_pruefen.py */
+  window.__messung = function (fh, tms) {
+    f = fh; tMess = tms; nullstellen(""); beenden();
+    return [document.getElementById("aT").textContent, document.getElementById("aU").textContent,
+            document.getElementById("aG").textContent, document.getElementById("aB").textContent];
+  };
+
+  anordnen(); zeige(); zeichne(); knoepfe();
+})();
+</script>
+</body>
+</html>
