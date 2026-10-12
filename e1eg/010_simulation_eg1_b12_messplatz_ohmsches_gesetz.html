@@ -1,0 +1,228 @@
+<!doctype html>
+<!-- Block EG1-B12 · Messplatz „Messen von Strom und Spannung“ (Neubau 12.10.2026, Aufgabe IN der Stunde) -->
+<!-- Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht):
+     (1) Bei festem Widerstand wächst die Stromstärke im gleichen Verhältnis wie die Spannung (Versuch 1).
+     (2) Spannung geteilt durch Stromstärke ergibt den eingestellten Widerstand (R = U/I).
+     (3) Bei fester Spannung halbiert sich die Stromstärke, wenn sich der Widerstand verdoppelt (Versuch 2).
+     (4) Mit dem Ohm'schen Gesetz lässt sich vorhersagen, was der Strommesser zeigt (Aufgabe 6).
+     Einstellbereich: U = 0 bis 12 V in 1-V-Schritten; R = 1, 2, 4, 5, 8, 10, 20 Ohm.
+     Alle 91 Einstellungen ergeben abbrechende Dezimalzahlen mit höchstens vier gültigen Ziffern
+     (1,125 A; 1,375 A; 0,05 A …): die Anzeige ist EXAKT, U geteilt durch I ergibt genau R.
+     Grenzfälle: U = 0 V ergibt 0 A; 12 V an 1 Ohm ergibt 12 A; ohne Widerstand ist der Kreis offen (0 A).
+     Schaltung nach Europa Fachkunde S. 37, Bild 1 (Netzgerät G einstellbar, Strommesser in Reihe,
+     Spannungsmesser parallel zum einstellbaren Widerstand R). Formelbeleg im Arbeitsblatt: Tabellenbuch S. 30, Formel 7 und 8.
+     Startstellung neutral: kein Widerstand gewählt, U = 0 V, Strommesser 0 A, Protokoll leer. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messen von Strom und Spannung (Block 12)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"R":null,"U":0,"I":0},"loesungswerte":{"R 4 Ohm, U 6 V":"1,5 A","R 10 Ohm, U 6 V":"0,6 A","U 10 V, R 5 Ohm":"2 A","R 8 Ohm, U 6 V":"0,75 A","R 20 Ohm, U 12 V":"0,6 A"}}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62;--blau:#2557A3;--magenta:#C2186B}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:980px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px}
+ @media(min-width:760px){.buehne{grid-template-columns:1.35fr 1fr}}
+ canvas{width:100%;height:auto;display:block;border:1px solid var(--linie);background:#FFFDF2;touch-action:manipulation}
+ .anzeigen{display:grid;grid-template-columns:1fr;gap:8px}
+ .anz{border:1.4px solid var(--ink);padding:8px 12px;background:var(--hell)}
+ .anz .name{font-size:14px;font-weight:700;color:var(--grau)}
+ .anz .wert{font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink)}
+ .anz.strom .wert{color:var(--kupfer)}
+ .anz .klein{font-size:13px;color:var(--grau)}
+ .wahl{margin:12px 0 4px}
+ .wahl .titel{font-size:14px;font-weight:700;margin:10px 0 4px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+ button{font:inherit;font-size:15px;min-height:46px;min-width:46px;padding:8px 14px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer}
+ button.an{background:var(--kupfer);color:#fff}
+ button:disabled{opacity:.45;cursor:not-allowed}
+ button.notieren{border-color:var(--gruen);color:#fff;background:var(--gruen);font-weight:700}
+ button.notieren:disabled{background:#fff;color:var(--gruen)}
+ button.schritt{font-size:22px;font-weight:700;padding:4px 0;width:52px}
+ .regler{display:flex;align-items:center;gap:10px;flex-wrap:nowrap}
+ .regler input[type=range]{flex:1 1 auto;min-width:120px;height:46px;accent-color:var(--kupfer);cursor:pointer}
+ .regler .wertU{font-weight:700;font-size:18px;min-width:56px;text-align:right;font-variant-numeric:tabular-nums}
+ table{width:100%;border-collapse:collapse;margin-top:12px;font-size:15px}
+ th,td{border:1px solid var(--linie);padding:6px 8px;text-align:left}
+ th{background:var(--hell);font-size:14px}
+ .tabelle{overflow-x:auto}
+ td.z{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+ .leer{color:var(--grau);font-style:italic}
+ .hinweis{font-size:14px;color:var(--kupfer);min-height:1.4em;margin-top:4px}
+ @media(max-width:420px){.anz .wert{font-size:26px} th,td{padding:5px 5px;font-size:14px} button{padding:8px 11px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E1EG · Lernfeld 1 · Block 12</div><h1>Messen von Strom und Spannung</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Widerstand wählen, Spannung einstellen, Strommesser ablesen. Mit <b>Messwert notieren</b> landet die Messung unten im Messprotokoll.</div>
+
+ <div class="buehne">
+  <canvas id="c" width="560" height="300" data-quelle="Messschaltung nach Europa Fachkunde S. 37, Bild 1 (Netzgerät G einstellbar, Strommesser in Reihe, Spannungsmesser parallel zum einstellbaren Widerstand R); Elektronen vom Minuspol wie Block 07"
+   aria-label="Messschaltung: Ein einstellbares Netzgerät treibt über einen Strommesser einen Strom durch einen einstellbaren Widerstand. Ein Spannungsmesser liegt parallel zum Widerstand. Blaue Punkte zeigen die Elektronen; sie bewegen sich umso schneller, je größer die Stromstärke ist."></canvas>
+  <div class="anzeigen">
+   <div class="anz"><div class="name">Spannungsmesser</div><div class="wert" id="aU">0 V</div></div>
+   <div class="anz strom"><div class="name">Strommesser</div><div class="wert" id="aI">0 A</div></div>
+   <div class="anz"><div class="name">Widerstand R</div><div class="wert" id="aR">nicht gewählt</div></div>
+  </div>
+ </div>
+
+ <div class="wahl">
+  <div class="titel">1. Widerstand R</div>
+  <div class="knoepfe" id="widerstaende" role="group" aria-label="Widerstand wählen"></div>
+  <div class="titel">2. Spannung U am Netzgerät</div>
+  <div class="regler">
+   <button class="schritt" id="bMinus" aria-label="Spannung um 1 V verringern">−</button>
+   <input id="rU" type="range" min="0" max="12" step="1" value="0" aria-label="Spannung U in Volt">
+   <button class="schritt" id="bPlus" aria-label="Spannung um 1 V erhöhen">+</button>
+   <span class="wertU" id="wU">0 V</span>
+  </div>
+  <div class="titel">3. Notieren</div>
+  <div class="knoepfe"><button class="notieren" id="bNotieren" disabled>Messwert notieren</button><button id="bReset">Zurücksetzen</button></div>
+  <div class="hinweis" id="hinweis" aria-live="polite"></div>
+ </div>
+
+ <div class="tabelle"><table id="protokoll">
+  <tr><th>Nr.</th><th>Widerstand R</th><th>Spannung U</th><th>Stromstärke I</th></tr>
+  <tr class="leer"><td colspan="4">Noch keine Messung.</td></tr>
+ </table></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var WIDERSTAENDE=[1,2,4,5,8,10,20];
+var START={R:null,U:0};
+var z={R:START.R,U:START.U,nr:0};
+var $=function(id){return document.getElementById(id);};
+var ruhig=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function komma(s){return String(s).replace(".",",");}
+function strom(){ return z.R===null ? 0 : z.U/z.R; }   // offener Kreis ohne Widerstand: kein Strom
+function zeigeI(I){                                    // höchstens vier gültige Ziffern; im Einstellbereich exakt
+  if(I===0) return "0 A";
+  return komma(Number(I.toPrecision(4)).toString())+" A";
+}
+function zeigeR(r){ return r===null ? "nicht gewählt" : r+" Ω"; }
+
+function knoepfe(){
+  var d=$("widerstaende");
+  WIDERSTAENDE.forEach(function(r){
+    var b=document.createElement("button"); b.textContent=r+" Ω"; b.setAttribute("aria-pressed","false");
+    b.onclick=function(){ z.R=r; auffrischen(); }; d.appendChild(b);
+  });
+}
+function auffrischen(){
+  Array.prototype.forEach.call($("widerstaende").children,function(b,i){
+    var an=(z.R===WIDERSTAENDE[i]); b.classList.toggle("an",an); b.setAttribute("aria-pressed",an?"true":"false");
+  });
+  $("rU").value=z.U;
+  $("wU").textContent=z.U+" V";
+  $("aU").textContent=z.U+" V";
+  $("aI").textContent=zeigeI(strom());
+  $("aR").textContent=zeigeR(z.R);
+  $("bMinus").disabled=(z.U<=0); $("bPlus").disabled=(z.U>=12);
+  $("bNotieren").disabled=(z.R===null);
+  $("hinweis").textContent = z.R===null ? "Wählen Sie zuerst einen Widerstand." : "";
+  zeichne(performance.now());
+}
+function notieren(){
+  if(z.R===null) return;
+  var tb=$("protokoll"), leer=tb.querySelector("tr.leer"); if(leer) leer.remove();
+  z.nr++;
+  var tr=document.createElement("tr");
+  tr.innerHTML="<td>"+z.nr+"</td><td class='z'>"+z.R+" Ω</td><td class='z'>"+z.U+" V</td><td class='z'>"+zeigeI(strom())+"</td>";
+  tb.appendChild(tr);
+}
+function zuruecksetzen(){
+  z={R:START.R,U:START.U,nr:0};
+  var tb=$("protokoll"); while(tb.rows.length>1) tb.deleteRow(1);
+  var tr=tb.insertRow(); tr.className="leer"; tr.innerHTML="<td colspan='4'>Noch keine Messung.</td>";
+  auffrischen();
+}
+
+// ---------- Messschaltung nach Fachkunde S. 37, Bild 1 ----------
+var c=$("c"), g=c.getContext("2d");
+var XL=70, XR=470, YO=50, YU=250, XV=300;
+// Elektronenweg außerhalb der Quelle: vom Minuspol (unten links) über den Widerstand zum Pluspol (oben links)
+var WEG=[[XL,190],[XL,YU],[XR,YU],[XR,YO],[XL,YO],[XL,110]];
+function laenge(){var s=0;for(var i=1;i<WEG.length;i++)s+=Math.hypot(WEG[i][0]-WEG[i-1][0],WEG[i][1]-WEG[i-1][1]);return s;}
+var L=laenge(), phase=0, letzte=0;
+function punkt(s){for(var i=1;i<WEG.length;i++){var a=WEG[i-1],b=WEG[i],d=Math.hypot(b[0]-a[0],b[1]-a[1]);if(s<=d)return[a[0]+(b[0]-a[0])*s/d,a[1]+(b[1]-a[1])*s/d];s-=d;}return WEG[WEG.length-1];}
+function pfeil(x0,y0,x1,y1,farbe){
+  g.strokeStyle=farbe; g.fillStyle=farbe; g.lineWidth=2.5;
+  g.beginPath(); g.moveTo(x0,y0); g.lineTo(x1,y1); g.stroke();
+  var w=Math.atan2(y1-y0,x1-x0);
+  g.beginPath(); g.moveTo(x1,y1); g.lineTo(x1-12*Math.cos(w-0.4),y1-12*Math.sin(w-0.4)); g.lineTo(x1-12*Math.cos(w+0.4),y1-12*Math.sin(w+0.4)); g.closePath(); g.fill();
+}
+function zeichne(jetzt){
+  var W=c.width,H=c.height, I=strom();
+  g.clearRect(0,0,W,H);
+  g.lineCap="round"; g.lineJoin="round";
+  // Leitungen
+  g.strokeStyle="#1A2530"; g.lineWidth=3;
+  g.beginPath();
+  g.moveTo(XL,110); g.lineTo(XL,YO); g.lineTo(156,YO); g.moveTo(204,YO); g.lineTo(XR,YO); g.lineTo(XR,110);
+  g.moveTo(XR,190); g.lineTo(XR,YU); g.lineTo(XL,YU); g.lineTo(XL,190);
+  g.moveTo(XV,YO); g.lineTo(XV,126); g.moveTo(XV,174); g.lineTo(XV,YU);
+  g.stroke();
+  g.fillStyle="#1A2530"; [[XV,YO],[XV,YU]].forEach(function(p){g.beginPath();g.arc(p[0],p[1],5,0,6.283);g.fill();});
+  // Elektronen
+  if(I>0){
+    var v=12+30*Math.log10(1+I*10);          // px je s, wächst mit der Stromstärke
+    var ph=ruhig?0:phase;
+    g.fillStyle="#2557A3";
+    for(var s=ph%30;s<L;s+=30){
+      var p=punkt(s);
+      if(Math.hypot(p[0]-180,p[1]-YO)<27) continue;            // nicht durch den Strommesser zeichnen
+      if(p[0]===XR && p[1]>106 && p[1]<194) continue;          // nicht durch den Widerstand zeichnen
+      g.beginPath(); g.arc(p[0],p[1],4.5,0,6.283); g.fill();
+    }
+    g.font="20px 'Noto Sans',sans-serif"; g.textAlign="left"; g.fillText("Elektronen",XL+18,YU-12);
+  }
+  // Netzgerät G (einstellbar), Pole wie im Buchbild
+  g.fillStyle="#fff"; g.strokeStyle="#1A2530"; g.lineWidth=3;
+  g.fillRect(XL-30,110,60,80); g.strokeRect(XL-30,110,60,80);
+  g.fillStyle="#1A2530"; g.font="bold 26px 'Noto Sans',sans-serif"; g.textAlign="center"; g.fillText("G",XL,150);
+  g.lineWidth=2.5; g.beginPath(); g.moveTo(XL-14,166); g.lineTo(XL+14,166); g.stroke();
+  g.setLineDash([5,4]); g.beginPath(); g.moveTo(XL-14,175); g.lineTo(XL+14,175); g.stroke(); g.setLineDash([]);
+  pfeil(XL-48,192,XL+10,104,"#1A2530");
+  g.fillStyle="#1A2530"; g.font="bold 22px 'Noto Sans',sans-serif"; g.fillText("+",XL+44,108); g.fillText("−",XL+44,206);
+  // Strommesser in Reihe
+  g.fillStyle="#fff"; g.strokeStyle="#1A2530"; g.lineWidth=3;
+  g.beginPath(); g.arc(180,YO,24,0,6.283); g.fill(); g.stroke();
+  g.fillStyle="#1A2530"; g.font="bold 24px 'Noto Sans',sans-serif"; g.fillText("A",180,YO+8);
+  pfeil(222,34,262,34,"#C2186B"); g.fillStyle="#C2186B"; g.font="italic 22px 'Noto Sans',sans-serif"; g.fillText("I",242,24);
+  g.fillStyle="#A34E0E"; g.font="bold 21px 'Noto Sans',sans-serif"; g.fillText(zeigeI(I),180,YO+52);
+  // Spannungsmesser parallel
+  g.fillStyle="#fff"; g.strokeStyle="#1A2530"; g.lineWidth=3;
+  g.beginPath(); g.arc(XV,150,24,0,6.283); g.fill(); g.stroke();
+  g.fillStyle="#1A2530"; g.font="bold 24px 'Noto Sans',sans-serif"; g.fillText("V",XV,158);
+  pfeil(365,72,365,228,"#2557A3"); g.fillStyle="#2557A3"; g.font="italic 22px 'Noto Sans',sans-serif"; g.textAlign="left"; g.fillText("U",376,190);
+  g.fillStyle="#1A2530"; g.font="bold 21px 'Noto Sans',sans-serif"; g.textAlign="right"; g.fillText(z.U+" V",XV-32,157);
+  // einstellbarer Widerstand
+  g.fillStyle="#fff"; g.strokeStyle="#1A2530"; g.lineWidth=3;
+  g.fillRect(XR-12,110,24,80); g.strokeRect(XR-12,110,24,80);
+  pfeil(XR-34,206,XR+32,96,"#1A2530");
+  g.fillStyle="#1A2530"; g.font="italic 22px 'Noto Sans',sans-serif"; g.textAlign="right"; g.fillText("R",XR-22,128);
+  g.font="bold 21px 'Noto Sans',sans-serif"; g.fillText(z.R===null?"?":z.R+" Ω",XR-22,160);
+}
+function schleife(t){
+  var dt=letzte?(t-letzte)/1000:0; letzte=t;
+  var I=strom();
+  if(!ruhig && I>0) phase+= (12+30*Math.log10(1+I*10))*dt;
+  zeichne(t);
+  requestAnimationFrame(schleife);
+}
+$("rU").addEventListener("input",function(){ z.U=parseInt(this.value,10); auffrischen(); });
+$("bMinus").onclick=function(){ if(z.U>0){z.U--; auffrischen();} };
+$("bPlus").onclick=function(){ if(z.U<12){z.U++; auffrischen();} };
+$("bNotieren").onclick=notieren; $("bReset").onclick=zuruecksetzen;
+knoepfe(); auffrischen(); requestAnimationFrame(schleife);
+})();
+</script>
+</body></html>
