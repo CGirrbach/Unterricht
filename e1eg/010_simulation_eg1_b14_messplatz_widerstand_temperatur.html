@@ -1,0 +1,214 @@
+<!doctype html>
+<!-- Block EG1-B14 · Messplatz Widerstand und Temperatur (Neubau 12.10.2026, Aufgabe IN der Stunde, Muster B07) -->
+<!-- Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht):
+     (1) Doppelte Temperaturänderung Δϑ ergibt doppelte Widerstandsänderung ΔR (Kupfer 100 Ω: 40 °C und 60 °C).
+     (2) Doppelter Widerstand R1 bei 20 °C ergibt doppelte Widerstandsänderung (Kupfer 60 °C: 100 Ω und 200 Ω).
+     (3) ΔR geteilt durch R1 · Δϑ hängt nur vom Werkstoff ab: der Temperaturkoeffizient α (Tabellenbuch S. 559).
+     (4) Kohle: der Widerstand sinkt beim Erwärmen (Heißleiter).
+     Rechenmodell: Tabellenbuch S. 29, Formel 10 und 11 (ΔR = α · R1 · Δϑ, R2 = R1 + ΔR, für Δϑ < 300 K), ϑ1 = 20 °C.
+     α in 1/K: Tabellenbuch S. 559 (Kupfer 0,0039; Aluminium 0,004; Eisen rein 0,00657; Konstantan 0,00004);
+     Kohle −0,00045 nach Europa Fachkunde S. 39, Tabelle 2 (steht nicht im Tabellenbuch).
+     Anzeige EXAKT: Rechnung in ganzen Zahlen (α · 100 000), Endwert ohne Rundung, Nullen am Ende weggelassen.
+     Startstellung neutral: kein Werkstoff, kein R1, Ölbad 20 °C, Widerstandsmesser zeigt nichts.
+     Grenzfälle im Einstellbereich: 20 °C (keine Änderung), −20 °C (Abkühlen), Konstantan (fast keine Änderung). -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Widerstand und Temperatur (Block 14)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"werkstoff":null,"R1":null,"theta2":20,"R":null},"loesungswerte":{"Kupfer 100 Ω 40 °C":"107,8 Ω","Kupfer 100 Ω 60 °C":"115,6 Ω","Kupfer 200 Ω 60 °C":"231,2 Ω","Eisen 100 Ω 60 °C":"126,28 Ω","Kohle 100 Ω 60 °C":"98,2 Ω","Kupfer 30 Ω 80 °C":"37,02 Ω","Aluminium 50 Ω 65 °C":"59 Ω"}}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62;--blau:#2557A3}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:980px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px}
+ @media(min-width:760px){.buehne{grid-template-columns:1.25fr 1fr}}
+ canvas{width:100%;height:auto;display:block;border:1px solid var(--linie);background:#fff;touch-action:manipulation}
+ .anzeigen{display:grid;grid-template-columns:1fr;gap:8px;align-content:start}
+ .anz{border:1.4px solid var(--ink);padding:8px 12px;background:var(--hell)}
+ .anz .name{font-size:14px;font-weight:700;color:var(--grau)}
+ .anz .wert{font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap}
+ .anz.mess .wert{color:var(--kupfer)}
+ .anz .klein{font-size:14px;color:var(--grau)}
+ .wahl{margin:12px 0 4px}
+ .wahl .titel{font-size:14px;font-weight:700;margin:10px 0 4px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+ button{font:inherit;font-size:15px;min-height:46px;padding:8px 14px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer}
+ button.an{background:var(--kupfer);color:#fff}
+ button:disabled{opacity:.45;cursor:not-allowed}
+ button.pm{min-width:52px;font-size:22px;font-weight:700;padding:4px 10px}
+ button.start{border-color:var(--gruen);color:#fff;background:var(--gruen);font-weight:700}
+ button.start:disabled{background:#fff;color:var(--gruen)}
+ .regler{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+ .regler input[type=range]{flex:1 1 150px;min-width:120px;height:46px;accent-color:var(--kupfer);cursor:pointer}
+ .regler .rwert{font-size:20px;font-weight:700;min-width:84px;text-align:right;font-variant-numeric:tabular-nums}
+ table{width:100%;border-collapse:collapse;margin-top:12px;font-size:15px}
+ th,td{border:1px solid var(--linie);padding:6px 8px;text-align:left}
+ th{background:var(--hell);font-size:14px}
+ .tabelle{overflow-x:auto}
+ td.z{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+ .leer{color:var(--grau);font-style:italic}
+ sub{font-size:.72em}
+ @media(max-width:420px){.anz .wert{font-size:26px} th,td{padding:5px 4px;font-size:13px} button{padding:8px 11px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E1EG · Lernfeld 1 · Block 14</div><h1>Messplatz Widerstand und Temperatur</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Werkstoff wählen, Widerstand <i>R</i><sub>1</sub> bei 20&nbsp;°C wählen, Temperatur des Ölbads einstellen, <b>Messung starten</b>. Das Ölbad wird von 20&nbsp;°C aus erwärmt. Jede Messung landet unten im Messprotokoll.</div>
+
+ <div class="buehne">
+  <canvas id="c" width="560" height="330" data-quelle="eigene schematische Darstellung ohne Buchbild: Draht im Ölbad mit Thermometer am Widerstandsmesser (Messaufbau nach Europa-Rechenbuch S. 46, Aufgabe 12, Ölbad); Rechenmodell Tabellenbuch S. 29, Formel 10 und 11"
+   aria-label="Ein Draht liegt als Wendel in einem Ölbad. Ein Thermometer zeigt die Temperatur des Ölbads. Zwei Messleitungen führen von den Drahtenden zum Widerstandsmesser. Unter dem Ölbad liegt eine Heizplatte."></canvas>
+  <div class="anzeigen">
+   <div class="anz mess"><div class="name">Widerstandsmesser</div><div class="wert" id="aR">–</div></div>
+   <div class="anz"><div class="name">Thermometer im Ölbad</div><div class="wert" id="aT">20 °C</div></div>
+   <div class="anz"><div class="name">Draht</div><div class="klein" id="aD">Noch kein Werkstoff gewählt.</div></div>
+  </div>
+ </div>
+
+ <div class="wahl">
+  <div class="titel">1. Werkstoff des Drahtes</div>
+  <div class="knoepfe" id="stoffe"></div>
+  <div class="titel">2. Widerstand <i>R</i><sub>1</sub> des Drahtes bei 20 °C</div>
+  <div class="knoepfe" id="widerstaende"></div>
+  <div class="titel">3. Temperatur <i>ϑ</i><sub>2</sub> des Ölbads</div>
+  <div class="regler">
+   <button class="pm" id="bMinus" aria-label="Temperatur 5 Grad kleiner">−</button>
+   <input id="rT" type="range" min="-20" max="150" step="5" value="20" aria-label="Temperatur des Ölbads in Grad Celsius">
+   <button class="pm" id="bPlus" aria-label="Temperatur 5 Grad größer">+</button>
+   <span class="rwert" id="wT">20 °C</span>
+  </div>
+  <div class="titel">4. Messen</div>
+  <div class="knoepfe"><button class="start" id="bStart" disabled>Messung starten</button><button id="bReset">Zurücksetzen</button></div>
+ </div>
+
+ <div class="tabelle"><table id="protokoll">
+  <tr><th>Nr.</th><th>Werkstoff</th><th><i>R</i><sub>1</sub> bei 20&nbsp;°C</th><th><i>ϑ</i><sub>2</sub></th><th>Widerstandsmesser <i>R</i><sub>2</sub></th></tr>
+  <tr class="leer"><td colspan="5">Noch keine Messung.</td></tr>
+ </table></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+// a5 = α · 100 000 (α in 1/K): ganze Zahlen, damit die Anzeige exakt bleibt
+var STOFFE=[{n:"Kupfer",a5:390,f:"#C9722B"},{n:"Aluminium",a5:400,f:"#9AA5AE"},{n:"Eisen",a5:657,f:"#5F676D"},
+            {n:"Konstantan",a5:4,f:"#8E7C63"},{n:"Kohle",a5:-45,f:"#2B2B2B"}];
+var WIDERSTAENDE=[30,50,100,200];
+var DAUER=2500;                                    // ms für das Erwärmen von 20 °C bis zur Zieltemperatur
+var ruhig=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+var z={s:null,r:null,ziel:20,t:20,laeuft:false,start:0,nr:0,fertig:false};
+var $=function(id){return document.getElementById(id);};
+
+function komma(s){return String(s).replace(".",",").replace("-","−");}
+// exakter Widerstand bei ganzzahliger Temperatur: R1 · 100000 + a5 · R1 · Δϑ, dann als Dezimalzahl ohne Nullen am Ende
+function exakt(R1,a5,dT){
+  var e=R1*100000+a5*R1*dT, neg=e<0; if(neg)e=-e;
+  var ganz=Math.floor(e/100000), rest=String(e%100000);
+  while(rest.length<5) rest="0"+rest;
+  rest=rest.replace(/0+$/,"");
+  return (neg?"−":"")+ganz+(rest?","+rest:"");
+}
+function live(R1,a5,t){ var R=R1*(1+a5/100000*(t-20)); return komma(R.toFixed(2)); }
+function grad(t){ return komma(String(Math.round(t)))+" °C"; }
+
+function knoepfe(){
+  STOFFE.forEach(function(s,i){var b=document.createElement("button");b.textContent=s.n;
+    b.onclick=function(){if(z.laeuft)return;z.s=i;z.t=20;z.fertig=false;auffrischen();};$("stoffe").appendChild(b);});
+  WIDERSTAENDE.forEach(function(r,i){var b=document.createElement("button");b.textContent=r+" Ω";
+    b.onclick=function(){if(z.laeuft)return;z.r=i;z.t=20;z.fertig=false;auffrischen();};$("widerstaende").appendChild(b);});
+}
+function setzeZiel(v){ if(z.laeuft)return; z.ziel=Math.max(-20,Math.min(150,v)); $("rT").value=z.ziel; z.t=20; z.fertig=false; auffrischen(); }
+
+function auffrischen(){
+  Array.prototype.forEach.call($("stoffe").children,function(b,i){b.classList.toggle("an",z.s===i);b.disabled=z.laeuft;});
+  Array.prototype.forEach.call($("widerstaende").children,function(b,i){b.classList.toggle("an",z.r===i);b.disabled=z.laeuft;});
+  $("rT").disabled=$("bMinus").disabled=$("bPlus").disabled=z.laeuft;
+  $("wT").textContent=grad(z.ziel);
+  $("bStart").disabled=z.laeuft||z.s===null||z.r===null;
+  $("aT").textContent=grad(z.t);
+  if(z.s===null||z.r===null){ $("aR").textContent="–"; }
+  else{
+    var s=STOFFE[z.s], R1=WIDERSTAENDE[z.r];
+    $("aR").textContent=(z.fertig? exakt(R1,s.a5,z.ziel-20) : (z.t===20? exakt(R1,s.a5,0) : live(R1,s.a5,z.t)))+" Ω";
+  }
+  $("aD").innerHTML=z.s===null?"Noch kein Werkstoff gewählt.":
+    STOFFE[z.s].n+(z.r===null?", Widerstand bei 20 °C noch nicht gewählt.":", <i>R</i><sub>1</sub> = "+WIDERSTAENDE[z.r]+" Ω bei 20 °C");
+  zeichne();
+}
+function protokoll(){
+  var tb=$("protokoll"),leer=tb.querySelector("tr.leer"); if(leer) leer.remove();
+  var s=STOFFE[z.s],R1=WIDERSTAENDE[z.r],tr=document.createElement("tr");
+  tr.innerHTML="<td>"+z.nr+"</td><td>"+s.n+"</td><td class='z'>"+R1+" Ω</td><td class='z'>"+grad(z.ziel)+"</td><td class='z'>"+exakt(R1,s.a5,z.ziel-20)+" Ω</td>";
+  tb.appendChild(tr);
+}
+function starten(){
+  z.laeuft=true; z.fertig=false; z.t=20; z.start=performance.now(); auffrischen();
+  if(ruhig||z.ziel===20){ fertig(); return; }
+  requestAnimationFrame(schritt);
+}
+function schritt(jetzt){
+  if(!z.laeuft) return;
+  var dauer=DAUER*Math.max(0.3,Math.abs(z.ziel-20)/130), q=Math.min(1,(jetzt-z.start)/dauer);
+  z.t=20+(z.ziel-20)*q;
+  if(q>=1){ fertig(); return; }
+  auffrischen(); requestAnimationFrame(schritt);
+}
+function fertig(){ z.t=z.ziel; z.laeuft=false; z.fertig=true; z.nr++; protokoll(); auffrischen(); }
+function zuruecksetzen(){
+  z={s:null,r:null,ziel:20,t:20,laeuft:false,start:0,nr:0,fertig:false}; $("rT").value=20;
+  var tb=$("protokoll"); while(tb.rows.length>1) tb.deleteRow(1);
+  var tr=tb.insertRow(); tr.className="leer"; tr.innerHTML="<td colspan='5'>Noch keine Messung.</td>";
+  auffrischen();
+}
+
+// ---------- Messaufbau ----------
+var c=$("c"), g=c.getContext("2d");
+function oelfarbe(t){ var k=Math.max(0,Math.min(1,(t+20)/170));
+  return "rgb("+Math.round(236+8*k)+","+Math.round(226-70*k)+","+Math.round(170-120*k)+")"; }
+function zeichne(){
+  var W=c.width,H=c.height; g.clearRect(0,0,W,H);
+  g.lineCap="round"; g.lineJoin="round";
+  // Ölbad: Behälter offen nach oben, Öl darin
+  var bx=210,by=100,bw=300,bh=185;
+  g.fillStyle=oelfarbe(z.t); g.fillRect(bx,by+30,bw,bh-30);
+  g.strokeStyle="#1A2530"; g.lineWidth=3;
+  g.beginPath(); g.moveTo(bx,by); g.lineTo(bx,by+bh); g.lineTo(bx+bw,by+bh); g.lineTo(bx+bw,by); g.stroke();
+  g.fillStyle="#5A666F"; g.font="22px 'Noto Sans',sans-serif"; g.textAlign="right"; g.fillText("Ölbad",bx-12,by+bh-14);
+  // Heizplatte, rot während des Erwärmens
+  g.fillStyle=z.laeuft&&z.ziel>20?"#C0392B":"#D5DBE0"; g.fillRect(bx-10,by+bh+6,bw+20,14);
+  g.strokeStyle="#1A2530"; g.lineWidth=2; g.strokeRect(bx-10,by+bh+6,bw+20,14);
+  // Drahtwendel
+  var x0=255,x1=400,yw=205;
+  g.strokeStyle=z.s===null?"#B8C0C6":STOFFE[z.s].f; g.lineWidth=5; g.beginPath();
+  for(var i=0;i<=x1-x0;i++){ var y=yw+20*Math.sin(i/(x1-x0)*7*Math.PI); if(i===0) g.moveTo(x0,y); else g.lineTo(x0+i,y); }
+  g.stroke();
+  // Messleitungen: obere zum fernen Drahtende, untere zum nahen (sie kreuzen sich nicht)
+  g.strokeStyle="#1A2530"; g.lineWidth=2.5; g.beginPath();
+  g.moveTo(118,62); g.lineTo(x1,62); g.lineTo(x1,yw);
+  g.moveTo(118,98); g.lineTo(x0,98); g.lineTo(x0,yw); g.stroke();
+  // Widerstandsmesser
+  g.fillStyle="#fff"; g.lineWidth=3; g.beginPath(); g.arc(82,80,38,0,6.283); g.fill(); g.stroke();
+  g.fillStyle="#A34E0E"; g.font="bold 34px 'Noto Sans',sans-serif"; g.textAlign="center"; g.fillText("Ω",82,92);
+  g.fillStyle="#1A2530"; g.font="20px 'Noto Sans',sans-serif"; g.fillText("Widerstands-",82,148); g.fillText("messer",82,170);
+  // Thermometer
+  var tx=470, t0=40, t1=262;
+  g.fillStyle="#fff"; g.strokeStyle="#1A2530"; g.lineWidth=2;
+  g.fillRect(tx-7,t0,14,t1-t0); g.strokeRect(tx-7,t0,14,t1-t0);
+  g.beginPath(); g.arc(tx,t1+10,13,0,6.283); g.fillStyle="#B23A33"; g.fill(); g.stroke();
+  var h=(t1-t0-8)*((z.t+20)/170); g.fillStyle="#B23A33"; g.fillRect(tx-4,t1-h,8,h+4);
+  g.fillStyle="#1A2530"; g.font="italic 26px Cambria,Caladea,'Noto Serif',serif"; g.textAlign="center"; g.fillText("ϑ",tx,30);
+  // Werkstoff an der Wendel
+  if(z.s!==null){ g.fillStyle="#1A2530"; g.font="22px 'Noto Sans',sans-serif"; g.textAlign="center"; g.fillText(STOFFE[z.s].n,(x0+x1)/2,yw+60); }
+}
+$("bStart").onclick=starten; $("bReset").onclick=zuruecksetzen;
+$("bMinus").onclick=function(){setzeZiel(z.ziel-5);}; $("bPlus").onclick=function(){setzeZiel(z.ziel+5);};
+$("rT").addEventListener("input",function(){setzeZiel(+$("rT").value);});
+knoepfe(); auffrischen();
+})();
+</script>
+</body></html>
