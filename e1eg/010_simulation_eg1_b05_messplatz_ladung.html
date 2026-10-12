@@ -1,0 +1,200 @@
+<!doctype html>
+<!-- Block EG1-B05 · Messplatz Ladung (Neubau 12.10.2026, Aufgabe IN der Stunde) -->
+<!-- Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht):
+     (1) Doppelt so viele Elektronen auf der Kugel, doppelte Ladung: Q wächst mit der Anzahl n.
+     (2) Q geteilt durch n ergibt bei jeder Messung denselben Betrag 0,16022 · 10^-18 As,
+         die Elementarladung e (Tabellenbuch S. 30): Q = n · e.
+     (3) Elektronenüberschuss: Ladung negativ; Elektronenmangel: Ladung positiv.
+     (4) Es gibt keine Ladung zwischen zwei Vielfachen von e (kein halbes Elektron).
+     Grenzfälle im Einstellbereich: n = 0 (ausgeglichen, Q = 0), n = 1 (kleinste Ladung), |n| = 1000.
+     Rechenmodell: Q = −k · e mit k = Elektronenüberschuss (k < 0: Mangel), e = 0,16022 · 10^-18 As
+     (Tabellenbuch S. 30). Angezeigt wird Q exakt (ganzzahlig k · 16022, fester Bereich 10^-18 As),
+     damit Q durch n genau 0,16022 · 10^-18 As ergibt.
+     Begriffe: Ladungsmesser (Europa Fachkunde S. 72), Elektronenüberschuss/Elektronenmangel (S. 27, 28).
+     Startstellung neutral: Kugel ausgeglichen, Q = 0, Protokoll leer. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Ladung (Block 05)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"k":0,"Q":"0 As"},"loesungswerte":{"Überschuss 1":"−0,16022 · 10^−18 As","Überschuss 2":"−0,32044 · 10^−18 As","Überschuss 10":"−1,6022 · 10^−18 As","Mangel 10":"+1,6022 · 10^−18 As","Überschuss 50":"−8,011 · 10^−18 As","Mangel 100":"+16,022 · 10^−18 As"}}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62;--blau:#2557A3;--rot:#B23A33}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:980px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px}
+ @media(min-width:760px){.buehne{grid-template-columns:1.25fr 1fr}}
+ canvas{width:100%;height:auto;display:block;border:1px solid var(--linie);background:#fff;touch-action:manipulation}
+ .anzeigen{display:grid;grid-template-columns:1fr;gap:8px;align-content:start}
+ .anz{border:1.4px solid var(--ink);padding:8px 12px;background:var(--hell)}
+ .anz .name{font-size:14px;font-weight:700;color:var(--grau)}
+ .anz .wert{font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap}
+ .anz.q .wert{color:var(--kupfer)}
+ .anz .wert.klein{font-size:20px;white-space:normal}
+ sup{font-size:.62em;line-height:0}
+ .wahl{margin:12px 0 4px}
+ .wahl .titel{font-size:14px;font-weight:700;margin:10px 0 4px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px}
+ button{font:inherit;font-size:16px;min-height:46px;min-width:64px;padding:8px 14px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer}
+ button:disabled{opacity:.45;cursor:not-allowed}
+ button.dazu{border-color:var(--blau);color:var(--blau)}
+ button.weg{border-color:var(--rot);color:var(--rot)}
+ button.eintragen{border-color:var(--gruen);color:#fff;background:var(--gruen);font-weight:700}
+ table{width:100%;border-collapse:collapse;margin-top:12px;font-size:15px}
+ th,td{border:1px solid var(--linie);padding:6px 8px;text-align:left}
+ th{background:var(--hell);font-size:14px}
+ .tabelle{overflow-x:auto}
+ td.z{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+ .leer{color:var(--grau);font-style:italic}
+ @media(max-width:420px){.anz .wert{font-size:23px} .anz .wert.klein{font-size:18px} th,td{padding:5px 5px;font-size:14px} button{padding:8px 10px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E1EG · Lernfeld 1 · Block 05</div><h1>Messplatz Ladung</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Bringen Sie Elektronen auf die Metallkugel oder nehmen Sie Elektronen von ihr weg. Der Ladungsmesser zeigt die Ladung der Kugel. Mit <b>Messung eintragen</b> landet der Wert im Messprotokoll.</div>
+
+ <div class="buehne">
+  <canvas id="c" width="560" height="330" data-quelle="Modellversuch: Metallkugel auf isolierendem Ständer mit Ladungsmesser (Begriff Ladungsmesser: Europa Fachkunde S. 72); Ladungsträger nach Fachkunde S. 27 (Elektron negativ, Proton positiv); schematisch, ohne Buchbild-Entsprechung"
+   aria-label="Eine Metallkugel steht auf einem isolierenden Ständer und ist mit einem Ladungsmesser verbunden. Bei Elektronenüberschuss sind auf der Kugel blaue Minuszeichen gezeichnet, bei Elektronenmangel rote Pluszeichen, je Zeichen eine Elementarladung."></canvas>
+  <div class="anzeigen">
+   <div class="anz q"><div class="name">Ladungsmesser: Ladung Q der Kugel</div><div class="wert" id="aQ">0 As</div></div>
+   <div class="anz"><div class="name">Kugel</div><div class="wert klein" id="aK">ausgeglichen</div></div>
+  </div>
+ </div>
+
+ <div class="wahl">
+  <div class="titel">Elektronen auf die Kugel bringen</div>
+  <div class="knoepfe" id="dazu"></div>
+  <div class="titel">Elektronen von der Kugel wegnehmen</div>
+  <div class="knoepfe" id="weg"></div>
+  <div class="titel">Messen</div>
+  <div class="knoepfe"><button class="eintragen" id="bEin">Messung eintragen</button><button id="bReset">Zurücksetzen</button></div>
+ </div>
+
+ <div class="tabelle"><table id="protokoll">
+  <tr><th>Nr.</th><th>Elektronen</th><th>Anzahl n</th><th>Ladung Q</th></tr>
+  <tr class="leer"><td colspan="4">Noch keine Messung.</td></tr>
+ </table></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var E_ZIFFERN=16022;          // Tabellenbuch S. 30: e = 0,16022 · 10^-18 As (Ziffern ohne Komma, 5 Nachkommastellen)
+var GRENZE=1000;              // höchstens 1000 Elektronen Überschuss oder Mangel
+var SCHRITTE=[1,10,100];
+var k=0, nr=0;                // k > 0: Elektronenüberschuss, k < 0: Elektronenmangel
+var $=function(id){return document.getElementById(id);};
+
+// Ladung exakt im festen Bereich 10^-18 As: |k| · 0,16022, ohne Rundung
+function betrag(n){
+  var m=n*E_ZIFFERN, ganz=Math.floor(m/100000), rest=String(m%100000);
+  while(rest.length<5) rest="0"+rest;
+  rest=rest.replace(/0+$/,"");
+  return ganz+(rest?","+rest:"");
+}
+function ladungHTML(kk){
+  if(kk===0) return "0 As";
+  return (kk>0?"−":"+")+betrag(Math.abs(kk))+" · 10<sup>−18</sup> As";
+}
+function kugelText(kk){
+  if(kk===0) return "ausgeglichen";
+  var n=Math.abs(kk);
+  return (kk>0?"Elektronenüberschuss: ":"Elektronenmangel: ")+n+(n===1?" Elektron":" Elektronen");
+}
+
+function knoepfe(){
+  SCHRITTE.forEach(function(s){
+    var b=document.createElement("button"); b.className="dazu"; b.textContent=s+(s===1?" Elektron":" Elektronen");
+    b.onclick=function(){ aendern(s); }; $("dazu").appendChild(b);
+    var w=document.createElement("button"); w.className="weg"; w.textContent=s+(s===1?" Elektron":" Elektronen");
+    w.onclick=function(){ aendern(-s); }; $("weg").appendChild(w);
+  });
+}
+function aendern(d){
+  if(Math.abs(k+d)>GRENZE) return;
+  k+=d; auffrischen();
+}
+function auffrischen(){
+  Array.prototype.forEach.call($("dazu").children,function(b,i){ b.disabled = k+SCHRITTE[i]>GRENZE; });
+  Array.prototype.forEach.call($("weg").children,function(b,i){ b.disabled = k-SCHRITTE[i]<-GRENZE; });
+  $("aQ").innerHTML=ladungHTML(k);
+  $("aK").textContent=kugelText(k);
+  zeichne();
+}
+function eintragen(){
+  var tb=$("protokoll"), leer=tb.querySelector("tr.leer"); if(leer) leer.remove();
+  nr++;
+  var tr=document.createElement("tr");
+  var art = k===0 ? "ausgeglichen" : (k>0 ? "Überschuss" : "Mangel");
+  tr.innerHTML="<td>"+nr+"</td><td>"+art+"</td><td class='z'>"+Math.abs(k)+"</td><td class='z'>"+ladungHTML(k)+"</td>";
+  tb.appendChild(tr);
+}
+function zuruecksetzen(){
+  k=0; nr=0;
+  var tb=$("protokoll"); while(tb.rows.length>1) tb.deleteRow(1);
+  var tr=tb.insertRow(); tr.className="leer"; tr.innerHTML="<td colspan='4'>Noch keine Messung.</td>";
+  auffrischen();
+}
+
+// ---------- Bild: Metallkugel, isolierender Ständer, Ladungsmesser ----------
+var c=$("c"), g=c.getContext("2d");
+var KX=170, KY=140, KR=100;
+function zeichne(){
+  var W=c.width,H=c.height; g.clearRect(0,0,W,H);
+  g.lineWidth=3; g.strokeStyle="#1A2530";
+  // Ständer aus Isolierstoff und Fuß
+  g.fillStyle="#E8DCC4"; g.fillRect(KX-9,KY+KR-2,18,300-(KY+KR)); g.strokeRect(KX-9,KY+KR-2,18,300-(KY+KR));
+  g.fillStyle="#5A666F"; g.fillRect(KX-60,300,120,12);
+  // Leitung zum Ladungsmesser
+  g.beginPath(); g.moveTo(KX+KR,KY); g.lineTo(390,KY); g.stroke();
+  // Kugel
+  var grad=g.createRadialGradient(KX-35,KY-40,10,KX,KY,KR);
+  grad.addColorStop(0,"#FFFFFF"); grad.addColorStop(1,"#B9C3CB");
+  g.fillStyle=grad; g.beginPath(); g.arc(KX,KY,KR,0,6.2832); g.fill(); g.stroke();
+  // Ladungen: je Zeichen eine Elementarladung (Fibonacci-Verteilung über die Kugelfläche)
+  var n=Math.abs(k);
+  if(n>0){
+    var r=Math.max(2.2,Math.min(10,62/Math.sqrt(n)));
+    var farbe=k>0?"#2557A3":"#B23A33";
+    for(var i=0;i<n;i++){
+      var rad=(KR-r-4)*Math.sqrt((i+0.5)/n), win=i*2.39996;
+      var x=KX+rad*Math.cos(win), y=KY+rad*Math.sin(win);
+      g.beginPath(); g.arc(x,y,r,0,6.2832); g.fillStyle=farbe; g.fill();
+      if(r>=5){
+        g.fillStyle="#fff"; g.font="bold "+Math.round(r*1.6)+"px 'Noto Sans',sans-serif";
+        g.textAlign="center"; g.textBaseline="middle"; g.fillText(k>0?"−":"+",x,y+0.5);
+      }
+    }
+  }
+  g.textBaseline="alphabetic";
+  // Ladungsmesser
+  g.lineWidth=3; g.strokeStyle="#1A2530"; g.fillStyle="#F4F6F8";
+  g.fillRect(390,95,150,95); g.strokeRect(390,95,150,95);
+  g.fillStyle="#1A2530"; g.fillRect(402,107,126,40);
+  g.fillStyle="#7FE0B0"; g.font="bold 22px 'Noto Sans',sans-serif"; g.textAlign="center";
+  g.fillText(k===0?"0":(k>0?"−":"+")+betrag(n),465,135);
+  // Bereich des Messgeräts: · 10^−18 As, Breiten gemessen, nicht geschätzt
+  g.fillStyle="#1A2530"; g.textAlign="left";
+  g.font="18px 'Noto Sans',sans-serif"; var t1="· 10", t3=" As", b1=g.measureText(t1).width, b3=g.measureText(t3).width;
+  g.font="13px 'Noto Sans',sans-serif"; var t2="−18", b2=g.measureText(t2).width;
+  var x0=465-(b1+b2+b3)/2;
+  g.font="18px 'Noto Sans',sans-serif"; g.fillText(t1,x0,177);
+  g.font="13px 'Noto Sans',sans-serif"; g.fillText(t2,x0+b1+1,168);
+  g.font="18px 'Noto Sans',sans-serif"; g.fillText(t3,x0+b1+b2+2,177); g.textAlign="center";
+  // Beschriftungen
+  g.fillStyle="#1A2530"; g.font="22px 'Noto Sans',sans-serif";
+  g.fillText("Ladungsmesser",465,80);
+  g.textAlign="left"; g.fillText("Metallkugel",20,26);
+  g.fillStyle="#5A666F"; g.font="19px 'Noto Sans',sans-serif"; g.fillText("isolierender Ständer",KX+18,285);
+}
+
+$("bEin").onclick=eintragen; $("bReset").onclick=zuruecksetzen;
+knoepfe(); auffrischen();
+})();
+</script>
+</body></html>
