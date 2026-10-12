@@ -1,0 +1,201 @@
+<!doctype html>
+<!-- Block EG1-B16 · Messplatz Leistung (Neubau 12.10.2026, Aufgabe IN der Stunde, Muster B07) -->
+<!-- Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht):
+     (1) Spannungsmesser mal Strommesser ergibt genau die Anzeige des Leistungsmessers: P = U · I.
+     (2) Am selben Widerstand: doppelte Spannung, doppelte Stromstärke, vierfache Leistung;
+         dreifache Spannung, neunfache Leistung (P = U²/R).
+     (3) Ein Widerstand darf höchstens mit seiner Belastbarkeit belastet werden: 100 Ω, 1 W ergibt
+         Umax = 10 V und Imax = 100 mA (Punkt auf der Leistungshyperbel); darüber meldet der Messplatz Überlastung.
+     Rechenmodell: I = U/R (Ohm'sches Gesetz, Tabellenbuch S. 30, Formel 8), P = U · I (Tabellenbuch S. 36, Formel 1).
+     Schaltung nach Europa Fachkunde S. 45, Bild 1 (indirekte und direkte Leistungsmessung): Strommesser und
+     Strompfad des Leistungsmessers in Reihe, Spannungsmesser parallel zum Widerstand, Spannungspfad zwischen den Leitern.
+     Anzeigen mit höchstens fünf geltenden Ziffern: bei 100 Ω sind alle Werte exakt (I in 5-mA-Schritten,
+     P = k²/400 W hat höchstens vier Nachkommastellen); 220 Ω, 11 V ergibt exakt 50 mA und 550 mW.
+     Startstellung neutral: kein Widerstand, 0 V. Grenzfälle: 0 V (keine Leistung), genau 1 W (zulässig), über 1 W. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Leistung (Block 16)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"R":null,"U":0},"loesungswerte":{"100 Ω, 2 V":"20 mA, 40 mW","100 Ω, 4 V":"40 mA, 160 mW","100 Ω, 6 V":"60 mA, 360 mW","220 Ω, 11 V":"50 mA, 550 mW","100 Ω, 10 V":"100 mA, 1 W"}}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62;--rot:#B23A33}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:980px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px}
+ @media(min-width:760px){.buehne{grid-template-columns:1.25fr 1fr}}
+ canvas{width:100%;height:auto;display:block;border:1px solid var(--linie);background:#fff;touch-action:manipulation}
+ .anzeigen{display:grid;grid-template-columns:1fr;gap:8px}
+ .anz{border:1.4px solid var(--ink);padding:8px 12px;background:var(--hell)}
+ .anz .name{font-size:14px;font-weight:700;color:var(--grau)}
+ .anz .wert{font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink)}
+ .anz.leistung .wert{color:var(--kupfer)}
+ .anz.leistung.ueber{border-color:var(--rot);background:#FBEDEC}
+ .anz.leistung.ueber .wert{color:var(--rot)}
+ .warnung{min-height:1.5em;font-weight:700;color:var(--rot);font-size:15px}
+ .wahl{margin:12px 0 4px}
+ .wahl .titel{font-size:14px;font-weight:700;margin:8px 0 4px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+ button{font:inherit;font-size:15px;min-height:46px;padding:8px 14px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer}
+ button.an{background:var(--kupfer);color:#fff}
+ button:disabled{opacity:.45;cursor:not-allowed}
+ button.pm{min-width:52px;font-size:22px;font-weight:700;padding:4px 10px}
+ button.eintragen{border-color:var(--gruen);color:#fff;background:var(--gruen);font-weight:700}
+ button.eintragen:disabled{background:#fff;color:var(--gruen)}
+ .regler{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+ .regler input[type=range]{flex:1 1 180px;height:46px;accent-color:var(--kupfer);cursor:pointer}
+ .regler .wert{font-weight:700;min-width:70px;text-align:right;font-variant-numeric:tabular-nums;font-size:18px}
+ .formelzeichen{font-family:Cambria,Caladea,Georgia,serif;font-style:italic}
+ table{width:100%;border-collapse:collapse;margin-top:12px;font-size:15px}
+ th,td{border:1px solid var(--linie);padding:6px 8px;text-align:left}
+ th{background:var(--hell);font-size:14px}
+ .tabelle{overflow-x:auto}
+ td.z{text-align:right;font-variant-numeric:tabular-nums}
+ td.z span{white-space:nowrap}
+ td.ueber{color:var(--rot);font-weight:700}
+ .warnung.hinweis{color:var(--grau);font-weight:400}
+ .leer{color:var(--grau);font-style:italic}
+ @media(max-width:420px){.anz .wert{font-size:26px} th,td{padding:5px 3px;font-size:12.5px;hyphens:manual}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E1EG · Lernfeld 1 · Block 16</div><h1>Messplatz Leistung</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Widerstand wählen, Spannung am Netzgerät einstellen, die drei Messgeräte ablesen. <b>Messwert eintragen</b> schreibt die Messung unten ins Messprotokoll.</div>
+
+ <div class="buehne">
+  <canvas id="c" width="560" height="330" data-quelle="Schaltung nach Europa Fachkunde S. 45, Bild 1 (indirekte und direkte Leistungsmessung): Strommesser und Strompfad des Leistungsmessers in Reihe, Spannungsmesser parallel zum Widerstand"
+   aria-label="Ein Netzgerät speist über einen Strommesser und einen Leistungsmesser einen Widerstand. Ein Spannungsmesser liegt parallel zum Widerstand, der Spannungspfad des Leistungsmessers zwischen den beiden Leitungen."></canvas>
+  <div class="anzeigen">
+   <div class="anz"><div class="name">Spannungsmesser</div><div class="wert" id="aU">0 V</div></div>
+   <div class="anz"><div class="name">Strommesser</div><div class="wert" id="aI">0 mA</div></div>
+   <div class="anz leistung" id="kP"><div class="name">Leistungsmesser</div><div class="wert" id="aP">0 mW</div></div>
+   <div class="warnung" id="aW" aria-live="polite"></div>
+  </div>
+ </div>
+
+ <div class="wahl">
+  <div class="titel">1. Widerstand</div>
+  <div class="knoepfe" id="widerstaende"></div>
+  <div class="titel">2. Spannung am Netzgerät</div>
+  <div class="regler">
+   <button class="pm" id="bMinus" type="button" aria-label="Spannung 0,5 V kleiner">−</button>
+   <input id="rU" type="range" min="0" max="24" step="0.5" value="0" aria-label="Spannung am Netzgerät in Volt">
+   <button class="pm" id="bPlus" type="button" aria-label="Spannung 0,5 V größer">+</button>
+   <span class="wert" id="wU">0 V</span>
+  </div>
+  <div class="titel">3. Messprotokoll</div>
+  <div class="knoepfe"><button class="eintragen" id="bEin" type="button" disabled>Messwert eintragen</button><button id="bReset" type="button">Zurücksetzen</button></div>
+ </div>
+
+ <div class="tabelle"><table id="protokoll">
+  <tr><th>Nr.</th><th>Wider&shy;stand</th><th>Spannungs&shy;messer <span class="formelzeichen">U</span></th><th>Strom&shy;messer <span class="formelzeichen">I</span></th><th>Leistungs&shy;messer <span class="formelzeichen">P</span></th></tr>
+  <tr class="leer"><td colspan="5">Noch keine Messung.</td></tr>
+ </table></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var WIDERSTAENDE=[{R:100,B:1},{R:220,B:1}];      // Widerstand in Ω, Belastbarkeit in W
+var START={r:null,U:0};
+var zustand={r:START.r,U:START.U,nr:0};
+var $=function(id){return document.getElementById(id);};
+
+function komma(s){return s.replace(".",",");}
+function sig(x,n){                                // höchstens n geltende Ziffern, ohne Nullen am Ende
+  if(x===0) return "0";
+  var s=Number((x*(1+1e-12)).toPrecision(n)).toString();
+  if(s.indexOf("e")>=0) s=Number((x*(1+1e-12)).toPrecision(n)).toFixed(8).replace(/0+$/,"").replace(/\.$/,"");
+  return komma(s);
+}
+function spannung(U){return komma(String(U))+" V";}
+function strom(I){ if(I===0) return "0 mA"; return I<1 ? sig(I*1e3,5)+" mA" : sig(I,5)+" A"; }
+function leistung(P){ if(P===0) return "0 mW"; return P<1 ? sig(P*1e3,5)+" mW" : sig(P,5)+" W"; }
+function werte(){
+  var U=zustand.U, w=zustand.r===null?null:WIDERSTAENDE[zustand.r];
+  var I=w?U/w.R:0, P=U*I;
+  return {U:U,I:I,P:P,w:w,ueber:!!w&&P>w.B*(1+1e-9)};
+}
+function name(w){return komma(String(w.R))+" Ω, "+komma(String(w.B))+" W";}
+
+function knoepfe(){
+  WIDERSTAENDE.forEach(function(w,i){
+    var b=document.createElement("button"); b.type="button"; b.textContent=name(w);
+    b.onclick=function(){zustand.r=i;auffrischen();}; $("widerstaende").appendChild(b);
+  });
+}
+function setzeU(U){ zustand.U=Math.max(0,Math.min(24,Math.round(U*2)/2)); auffrischen(); }
+function auffrischen(){
+  Array.prototype.forEach.call($("widerstaende").children,function(b,i){b.classList.toggle("an",zustand.r===i);});
+  var v=werte();
+  $("rU").value=zustand.U; $("wU").textContent=spannung(zustand.U);
+  $("aU").textContent=spannung(v.U); $("aI").textContent=strom(v.I); $("aP").textContent=leistung(v.P);
+  $("kP").classList.toggle("ueber",v.ueber);
+  $("aW").textContent=v.ueber?"Überlastung: Der Widerstand wird zu heiß.":(v.w?"":"Wählen Sie einen Widerstand.");
+  $("aW").classList.toggle("hinweis",!v.ueber);
+  $("bEin").disabled=zustand.r===null;
+  zeichne(v);
+}
+function eintragen(){
+  var v=werte(); if(!v.w) return;
+  var tb=$("protokoll"),leer=tb.querySelector("tr.leer"); if(leer) leer.remove();
+  zustand.nr++;
+  var tr=document.createElement("tr");
+  tr.innerHTML="<td>"+zustand.nr+"</td><td>"+name(v.w)+"</td><td class='z'><span>"+spannung(v.U)+"</span></td><td class='z'><span>"+
+    strom(v.I)+"</span></td><td class='z"+(v.ueber?" ueber":"")+"'><span>"+leistung(v.P)+"</span>"+(v.ueber?" <span>Überlastung</span>":"")+"</td>";
+  tb.appendChild(tr);
+}
+function zuruecksetzen(){
+  zustand={r:START.r,U:START.U,nr:0};
+  var tb=$("protokoll"); while(tb.rows.length>1) tb.deleteRow(1);
+  var tr=tb.insertRow(); tr.className="leer"; tr.innerHTML="<td colspan='5'>Noch keine Messung.</td>";
+  auffrischen();
+}
+
+// ---------- Schaltung ----------
+var c=$("c"), g=c.getContext("2d");
+function messer(x,y,z){
+  g.fillStyle="#fff"; g.beginPath(); g.arc(x,y,24,0,6.283); g.fill(); g.stroke();
+  g.fillStyle="#1A2530"; g.font="bold 24px 'Noto Sans',sans-serif"; g.textAlign="center"; g.fillText(z,x,y+8);
+}
+function zeichne(v){
+  var W=c.width,H=c.height; g.clearRect(0,0,W,H);
+  g.lineWidth=3; g.strokeStyle="#1A2530";
+  // Netzgerät
+  g.fillStyle="#F4F6F8"; g.fillRect(25,55,95,220); g.strokeRect(25,55,95,220);
+  g.fillStyle="#1A2530"; g.font="bold 26px 'Noto Sans',sans-serif"; g.textAlign="center";
+  g.fillText("+",102,92); g.fillText("−",102,262);
+  g.font="23px 'Noto Sans',sans-serif"; g.save(); g.translate(64,165); g.rotate(-Math.PI/2); g.fillText("Netzgerät",0,0); g.restore();
+  // Leitungen: oben über Strommesser und Leistungsmesser zum Widerstand, unten zurück
+  g.beginPath();
+  g.moveTo(120,75); g.lineTo(440,75); g.lineTo(440,125);
+  g.moveTo(440,205); g.lineTo(440,265); g.lineTo(120,265);
+  // Spannungspfad des Leistungsmessers zur unteren Leitung
+  g.moveTo(300,99); g.lineTo(300,265);
+  // Spannungsmesser parallel zum Widerstand
+  g.moveTo(440,100); g.lineTo(515,100); g.lineTo(515,141); g.moveTo(515,189); g.lineTo(515,240); g.lineTo(440,240);
+  g.stroke();
+  g.fillStyle="#1A2530";
+  [[440,100],[440,240],[300,265]].forEach(function(p){g.beginPath(); g.arc(p[0],p[1],5,0,6.283); g.fill();});
+  messer(200,75,"A"); messer(300,75,"W"); messer(515,165,"V");
+  // Widerstand: Farbe nach Belastung, rot bei Überlastung
+  var anteil=v.w?Math.min(1,v.P/v.B):0;
+  g.fillStyle=v.ueber?"#E8A39D":"rgb("+Math.round(255-10*anteil)+","+Math.round(255-60*anteil)+","+Math.round(255-110*anteil)+")";
+  g.fillRect(426,125,28,80); g.strokeStyle=v.ueber?"#B23A33":"#1A2530"; g.strokeRect(426,125,28,80); g.strokeStyle="#1A2530";
+  g.fillStyle="#1A2530"; g.font="23px 'Noto Sans',sans-serif"; g.textAlign="right";
+  if(v.w){ g.fillText(komma(String(v.w.R))+" Ω",414,160); g.fillText(komma(String(v.w.B))+" W",414,188); }
+  else { g.font="19px 'Noto Sans',sans-serif"; g.fillText("Widerstand",418,172); }
+  if(v.ueber){ g.fillStyle="#B23A33"; g.font="bold 24px 'Noto Sans',sans-serif"; g.textAlign="center"; g.fillText("Überlastung",370,312); }
+}
+$("rU").addEventListener("input",function(){setzeU(parseFloat(this.value));});
+$("bMinus").onclick=function(){setzeU(zustand.U-0.5);};
+$("bPlus").onclick=function(){setzeU(zustand.U+0.5);};
+$("bEin").onclick=eintragen; $("bReset").onclick=zuruecksetzen;
+knoepfe(); auffrischen();
+})();
+</script>
+</body></html>
