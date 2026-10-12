@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>U07 Messplatz: Zwei Zeiger anhalten</title>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--linie:#C7D2DA;--gruen:#2F7D62;--grau:#5A666F}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Noto Sans',system-ui,sans-serif;color:var(--ink);background:#fff}
+header{border-top:6px solid var(--kupfer);padding:14px 18px 6px}
+h1{margin:0;font-size:clamp(19px,4.6vw,26px)}
+.ziel{background:var(--kupferhell);border-left:5px solid var(--kupfer);padding:10px 14px;margin:10px 18px;
+      font-size:clamp(15px,3.6vw,17px);line-height:1.4}
+.ziel b:first-child{display:block;font-size:.8em;letter-spacing:.08em;text-transform:uppercase;color:var(--kupfer);
+      margin-bottom:3px}
+canvas{display:block;width:100%;max-width:960px;margin:0 auto;height:auto;touch-action:manipulation}
+.regler{max-width:960px;margin:0 auto;padding:4px 18px}
+.zeile{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:10px 0}
+.zeile label{flex:1 1 100%;font-weight:700;font-size:clamp(15px,3.6vw,17px)}
+input[type=range]{flex:1 1 200px;min-width:160px;height:44px;-webkit-appearance:none;appearance:none;
+      background:transparent;cursor:pointer;accent-color:var(--kupfer)}
+input[type=range]::-webkit-slider-runnable-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-moz-range-track{height:8px;background:var(--linie);border-radius:4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:30px;height:30px;margin-top:-11px;
+      border-radius:50%;background:var(--kupfer);border:2px solid #fff;box-shadow:0 0 0 1.4px var(--kupfer)}
+input[type=range]::-moz-range-thumb{width:30px;height:30px;border-radius:50%;background:var(--kupfer);border:2px solid #fff}
+input[type=range]:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
+.wert{flex:0 0 84px;text-align:right;font-variant-numeric:tabular-nums;font-size:clamp(17px,4vw,20px);font-weight:700;
+      color:var(--kupfer)}
+.knoepfe{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 4px}
+button{font:inherit;font-weight:700;font-size:clamp(15px,3.6vw,17px);padding:10px 18px;min-height:48px;
+      border:1.6px solid var(--ink);background:#fff;color:var(--ink);cursor:pointer;flex:1 1 140px}
+button.haupt{background:var(--kupfer);border-color:var(--kupfer);color:#fff}
+button:focus-visible{outline:3px solid var(--kupfer);outline-offset:2px}
+.anzeigen{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;max-width:960px;
+      margin:8px auto 0;padding:0 18px}
+.kachel{border:1.4px solid var(--linie);padding:8px 12px}
+.kachel span{display:block;font-size:clamp(13px,3.2vw,14px);color:var(--grau);font-weight:700}
+.kachel b{font-size:clamp(22px,5.2vw,26px);font-variant-numeric:tabular-nums}
+.fuss{max-width:960px;margin:12px auto 24px;padding:0 18px;font-size:clamp(14px,3.4vw,15px);color:var(--grau);
+      line-height:1.45}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<header><h1>Messplatz: Zwei Zeiger anhalten</h1></header>
+
+<div class="ziel"><b>So arbeiten Sie</b>
+Zwei Zeiger drehen sich in Zeitlupe. Daneben steht ihr Liniendiagramm. Stellen Sie ein, starten Sie, halten Sie an
+und lesen Sie unten ab.</div>
+
+<script type="application/json" id="sim-meta">
+{
+  "erkenntnis": "Zeiger gleicher Frequenz behalten beim Anhalten zu jedem Zeitpunkt denselben Winkel zueinander; deshalb darf man sie stehend zeichnen. Bei verschiedener Frequenz wandert der Winkel. Der Zeiger, der gegen den Uhrzeigersinn weiter gedreht ist, erreicht im Liniendiagramm seinen Scheitelwert früher: seine Größe eilt vor.",
+  "startwerte":    {"startlage2": 0, "frequenz2": 50},
+  "loesungswerte": {"startlage2": [40, 90, 270], "frequenz2": 60},
+  "quelle": "Fachkunde S. 129, Bild 2 (Zeigerbild und Linienbild, vier Vereinbarungen); Tabellenbuch S. 35, Bild Phasenverschiebung und Formel 9"
+}
+</script>
+
+<canvas id="buehne" width="960" height="400" aria-label="Zeigerbild mit zwei Zeigern und Liniendiagramm"></canvas>
+
+<div class="regler">
+  <div class="zeile">
+    <label for="lage2">Startlage von û₂</label>
+    <input type="range" id="lage2" min="0" max="355" step="5" value="0">
+    <span class="wert" id="lage2w">0°</span>
+  </div>
+  <div class="zeile">
+    <label for="f2">Frequenz von û₂ (û₁: 50 Hz)</label>
+    <input type="range" id="f2" min="30" max="70" step="5" value="50">
+    <span class="wert" id="f2w">50 Hz</span>
+  </div>
+  <div class="knoepfe">
+    <button type="button" id="lauf" class="haupt">Start</button>
+    <button type="button" id="start">Zurück auf Start</button>
+    <button type="button" id="reset">Zurücksetzen</button>
+  </div>
+</div>
+
+<div class="anzeigen">
+  <div class="kachel"><span>Lage von û₁</span><b id="a1">0°</b></div>
+  <div class="kachel"><span>Lage von û₂</span><b id="a2">0°</b></div>
+  <div class="kachel"><span>Winkel von û₁ bis û₂</span><b id="dw">0°</b></div>
+</div>
+
+<div class="fuss">
+Zeitlupe: Eine Umdrehung von û₁ dauert 8 s. Scheitelwerte: û₁ = 4 V, û₂ = 3 V.<br>
+Die Lage eines Zeigers und der Winkel von û₁ bis û₂ werden gegen den Uhrzeigersinn gemessen, die Lage ab der
+Waagerechten nach rechts. Im Liniendiagramm ist α die Lage von û₁.
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var cv = document.getElementById("buehne"), ctx = cv.getContext("2d");
+  var meta = JSON.parse(document.getElementById("sim-meta").textContent);
+  var F1 = 50, UD1 = 4, UD2 = 3, GRAD_JE_S = 45;       /* Zeitlupe: 360° in 8 s */
+  var lage2 = meta.startwerte.startlage2, f2 = meta.startwerte.frequenz2;
+  var alpha = 0;                                       /* Drehwinkel von û₁ seit dem Start, in Grad */
+  var raf = null, tVor = 0;
+  var ruhig = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var FARBE1 = "#1A2530", FARBE2 = "#A34E0E", GRUEN = "#2F7D62", HELLGRAU = "#C7D2DA", GRAU = "#5A666F";
+
+  /* Zwei Anordnungen: breit (Tafel) Zeiger links, Liniendiagramm rechts, gleicher Maßstab, damit die waagerechten
+     Hilfslinien von der Zeigerspitze zum Kurvenpunkt laufen; schmal (Handy) beides untereinander, größere Schrift. */
+  var BREIT  = {W: 960, H: 400, cx: 190, cy: 200, s: 36, x0: 430, x1: 915, ly: 200, f: 20, lw: 1, proj: true},
+      SCHMAL = {W: 600, H: 980, cx: 300, cy: 240, s: 48, x0: 90, x1: 560, ly: 720, f: 30, lw: 1.5, proj: false};
+  var G = BREIT;
+  function anordnen() {
+    var neu = (cv.parentNode.clientWidth || window.innerWidth) < 640 ? SCHMAL : BREIT;
+    if (neu !== G || cv.width !== neu.W) { G = neu; cv.width = G.W; cv.height = G.H; }
+  }
+
+  function mod360(x) { return ((x % 360) + 360) % 360; }
+  function rad(g) { return g * Math.PI / 180; }
+  function lage1() { return mod360(alpha); }
+  function lage2jetzt() { return mod360(alpha * f2 / F1 + lage2); }
+  /* Anzeige in ganzen Grad; der Winkel wird aus den ANGEZEIGTEN Lagen gebildet, damit die Rechnung des Schülers
+     (Lage û₂ minus Lage û₁, bei negativem Ergebnis plus 360°) immer mit der Anzeige übereinstimmt. */
+  function ganz(x) { return Math.round(x) % 360; }
+
+  function pfeil(x0, y0, x1, y1, farbe, breite) {
+    ctx.strokeStyle = farbe; ctx.fillStyle = farbe; ctx.lineWidth = breite; ctx.lineCap = "round";
+    var a = Math.atan2(y1 - y0, x1 - x0), sp = 15 * G.lw;
+    ctx.beginPath(); ctx.moveTo(x0, y0);
+    ctx.lineTo(x1 - sp * 0.8 * Math.cos(a), y1 - sp * 0.8 * Math.sin(a)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x1, y1);
+    ctx.lineTo(x1 - sp * Math.cos(a - 0.4), y1 - sp * Math.sin(a - 0.4));
+    ctx.lineTo(x1 - sp * Math.cos(a + 0.4), y1 - sp * Math.sin(a + 0.4));
+    ctx.closePath(); ctx.fill();
+  }
+
+  function schrift(px, fett, kursiv) {
+    ctx.font = (kursiv ? "italic " : "") + (fett ? "bold " : "") + px + "px 'Noto Sans', system-ui, sans-serif";
+  }
+
+  function zeichne() {
+    var g = G, cx = g.cx, cy = g.cy, s = g.s, R = UD1 * s;
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, cv.width, cv.height);
+
+    /* Zeigerbild: Achsen und Kreise */
+    ctx.strokeStyle = HELLGRAU; ctx.lineWidth = 1.4 * g.lw;
+    ctx.beginPath(); ctx.moveTo(cx - R - 24, cy); ctx.lineTo(cx + R + 24, cy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx, cy - R - 24); ctx.lineTo(cx, cy + R + 24); ctx.stroke();
+    ctx.strokeStyle = "#E3E8EC";
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, 2 * Math.PI); ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx, cy, UD2 * s, 0, 2 * Math.PI); ctx.stroke();
+    schrift(Math.round(g.f * 0.8), false); ctx.fillStyle = GRAU; ctx.textAlign = "left";
+    ctx.fillText("0°", cx + R + 6, cy + 1.6 * g.f);
+
+    var w1 = rad(alpha), w2 = rad(alpha * f2 / F1 + lage2);
+    var p1 = [cx + UD1 * s * Math.cos(w1), cy - UD1 * s * Math.sin(w1)];
+    var p2 = [cx + UD2 * s * Math.cos(w2), cy - UD2 * s * Math.sin(w2)];
+
+    /* Winkelbogen von û₁ bis û₂, gegen den Uhrzeigersinn */
+    var d = rad(mod360(alpha * f2 / F1 + lage2 - alpha));
+    if (d > 0.001) {
+      ctx.strokeStyle = GRUEN; ctx.lineWidth = 4 * g.lw;
+      ctx.beginPath(); ctx.arc(cx, cy, 1.15 * s, -w1, -w1 - d, true); ctx.stroke();
+    }
+    pfeil(cx, cy, p1[0], p1[1], FARBE1, 4.5 * g.lw);
+    pfeil(cx, cy, p2[0], p2[1], FARBE2, 4.5 * g.lw);
+    /* Beschriftung: û₁ hinter der Spitze, û₂ neben der Mitte (links der Pfeilrichtung), damit sich beide auch bei
+       gleicher Lage nicht überdecken */
+    schrift(g.f, true, true); ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillStyle = FARBE1;
+    ctx.fillText("û₁", cx + (UD1 * s + 20 * g.lw) * Math.cos(w1), cy - (UD1 * s + 20 * g.lw) * Math.sin(w1));
+    var mx = cx + 0.6 * UD2 * s * Math.cos(w2), my = cy - 0.6 * UD2 * s * Math.sin(w2);
+    ctx.fillStyle = FARBE2;
+    ctx.fillText("û₂", mx - 22 * g.lw * Math.sin(w2), my - 22 * g.lw * Math.cos(w2));
+    ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
+
+    /* Liniendiagramm über α (Lage von û₁) in der laufenden Umdrehung */
+    var x0 = g.x0, x1 = g.x1, ly = g.ly, kx = (x1 - x0) / 360;
+    ctx.strokeStyle = HELLGRAU; ctx.lineWidth = 1.2 * g.lw;
+    for (var k = 1; k <= 4; k++) {
+      var xg = x0 + 90 * k * kx;
+      ctx.beginPath(); ctx.moveTo(xg, ly - UD1 * s - 8); ctx.lineTo(xg, ly + UD1 * s + 8); ctx.stroke();
+    }
+    ctx.strokeStyle = GRAU; ctx.lineWidth = 1.6 * g.lw;
+    ctx.beginPath(); ctx.moveTo(x0, ly); ctx.lineTo(x1 + 18, ly); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x0, ly + UD1 * s + 12); ctx.lineTo(x0, ly - UD1 * s - 22); ctx.stroke();
+    schrift(Math.round(g.f * 0.8), false); ctx.fillStyle = GRAU; ctx.textAlign = "center";
+    for (k = 0; k <= 4; k++) ctx.fillText(90 * k + "°", x0 + 90 * k * kx + (k === 0 ? 14 : 0), ly + UD1 * s + 12 + g.f);
+    ctx.textAlign = "right";
+    [["4 V", ly - UD1 * s], ["−4 V", ly + UD1 * s], ["0", ly]].forEach(function (m) {
+      var bw = ctx.measureText(m[0]).width;
+      ctx.fillStyle = "#fff"; ctx.fillRect(x0 - 8 - bw, m[1] - g.f * 0.55, bw + 4, g.f * 1.05);
+      ctx.fillStyle = GRAU; ctx.fillText(m[0], x0 - 6, m[1] + g.f * 0.3);
+    });
+    ctx.strokeStyle = GRAU; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(x0 - 4, ly - UD1 * s); ctx.lineTo(x0 + 4, ly - UD1 * s);
+    ctx.moveTo(x0 - 4, ly + UD1 * s); ctx.lineTo(x0 + 4, ly + UD1 * s); ctx.stroke();
+    ctx.textAlign = "left"; schrift(Math.round(g.f * 0.85), false, true);
+    ctx.fillText("u", x0 + 8, ly - UD1 * s - 8);
+    ctx.fillText("α", x1 + 2, ly - 8);
+
+    var umlauf = Math.floor(alpha / 360) * 360;          /* Beginn der laufenden Umdrehung von û₁ */
+    function kurve(u_d, faktor, start, farbe) {
+      ctx.strokeStyle = farbe; ctx.lineWidth = 3.4 * g.lw; ctx.beginPath();
+      for (var a = 0; a <= 360; a += 2) {
+        var y = ly - u_d * s * Math.sin(rad((umlauf + a) * faktor + start));
+        if (a === 0) ctx.moveTo(x0 + a * kx, y); else ctx.lineTo(x0 + a * kx, y);
+      }
+      ctx.stroke();
+    }
+    kurve(UD1, 1, 0, FARBE1);
+    kurve(UD2, f2 / F1, lage2, FARBE2);
+    /* Legende über dem Liniendiagramm */
+    var ley = ly - UD1 * s - (g.proj ? 2 : 34), lex = x0 + 0.42 * (x1 - x0);
+    [["u₁", FARBE1, 0], ["u₂", FARBE2, 1]].forEach(function (L) {
+      var xx = lex + L[2] * 3.4 * g.f;
+      ctx.strokeStyle = L[1]; ctx.lineWidth = 3.4 * g.lw;
+      ctx.beginPath(); ctx.moveTo(xx, ley - g.f * 0.3); ctx.lineTo(xx + 1.2 * g.f, ley - g.f * 0.3); ctx.stroke();
+      schrift(g.f, true, true); ctx.fillStyle = L[1]; ctx.textAlign = "left";
+      ctx.fillText(L[0], xx + 1.4 * g.f, ley);
+    });
+
+    /* Augenblick: senkrechte Linie bei α, Punkte auf beiden Kurven, Hilfslinien von den Zeigerspitzen */
+    var xa = x0 + lage1() * kx;
+    var y1 = ly - UD1 * s * Math.sin(w1), y2 = ly - UD2 * s * Math.sin(w2);
+    ctx.setLineDash([6, 6]); ctx.strokeStyle = GRAU; ctx.lineWidth = 1.2 * g.lw;
+    ctx.beginPath(); ctx.moveTo(xa, ly - UD1 * s - 10); ctx.lineTo(xa, ly + UD1 * s + 10); ctx.stroke();
+    if (g.proj) {
+      ctx.strokeStyle = FARBE1; ctx.beginPath(); ctx.moveTo(p1[0], p1[1]); ctx.lineTo(xa, y1); ctx.stroke();
+      ctx.strokeStyle = FARBE2; ctx.beginPath(); ctx.moveTo(p2[0], p2[1]); ctx.lineTo(xa, y2); ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    ctx.fillStyle = FARBE1; ctx.beginPath(); ctx.arc(xa, y1, 6 * g.lw, 0, 2 * Math.PI); ctx.fill();
+    ctx.fillStyle = FARBE2; ctx.beginPath(); ctx.arc(xa, y2, 6 * g.lw, 0, 2 * Math.PI); ctx.fill();
+  }
+
+  function zeige() {
+    var l1 = ganz(lage1()), l2 = ganz(lage2jetzt());
+    document.getElementById("a1").textContent = l1 + "°";
+    document.getElementById("a2").textContent = l2 + "°";
+    document.getElementById("dw").textContent = mod360(l2 - l1) + "°";
+    document.getElementById("lage2w").textContent = lage2 + "°";
+    document.getElementById("f2w").textContent = f2 + " Hz";
+  }
+
+  function alles() { anordnen(); zeichne(); zeige(); }
+
+  function schritt(ts) {
+    if (!tVor) tVor = ts;
+    alpha += (ts - tVor) / 1000 * GRAD_JE_S;
+    tVor = ts;
+    alles();
+    raf = requestAnimationFrame(schritt);
+  }
+  var knopf = document.getElementById("lauf");
+  function anhalten() {
+    if (raf) { cancelAnimationFrame(raf); raf = null; }
+    alpha = Math.round(alpha);                          /* angehalten: ganze Grad, Anzeige exakt */
+    knopf.textContent = ruhig ? "Weiterdrehen um 15°" : "Start";
+    alles();
+  }
+  knopf.addEventListener("click", function () {
+    if (ruhig) { alpha += 15; alles(); return; }      /* reduzierte Bewegung: schrittweise statt Animation */
+    if (raf) { anhalten(); return; }
+    tVor = 0; knopf.textContent = "Anhalten"; raf = requestAnimationFrame(schritt);
+  });
+  document.getElementById("start").addEventListener("click", function () { anhalten(); alpha = 0; alles(); });
+  document.getElementById("reset").addEventListener("click", function () {
+    anhalten(); alpha = 0;
+    lage2 = meta.startwerte.startlage2; f2 = meta.startwerte.frequenz2;
+    document.getElementById("lage2").value = lage2; document.getElementById("f2").value = f2;
+    alles();
+  });
+  document.getElementById("lage2").addEventListener("input", function (e) {
+    lage2 = parseInt(e.target.value, 10); if (!raf) alles();
+  });
+  document.getElementById("f2").addEventListener("input", function (e) {
+    f2 = parseInt(e.target.value, 10); if (!raf) alles();
+  });
+  window.addEventListener("resize", function () { if (!raf) alles(); });
+  if (ruhig) knopf.textContent = "Weiterdrehen um 15°";
+  alles();
+})();
+</script>
+</body>
+</html>
