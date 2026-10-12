@@ -8,9 +8,10 @@
      Geräte und Werte: Lampe 230 V, 0,44 A und Fernsehgerät 230 V, 0,32 A (Europa Fachkunde S. 43, Beispiel 1 und 2);
      Heizlüfter 230 V, 8,7 A (Europa-Rechenbuch S. 59, Beispiel); Halogenlampe 12 V, 6,25 A (Europa-Rechenbuch S. 58,
      Aufgabe 1). Zähler: Anzeige umschaltbar in Ws, Wh, kWh; 1 kWh = 3 600 000 Ws (Tabellenbuch S. 36: 3,6 MJ = 1 kWh).
-     Rechnung intern ganzzahlig (Stromstärke in mA), alle 24 Einstellungen ergeben in Ws ganze Zahlen; in Wh und kWh
-     sind alle Einstellungen ab 1 h mit höchstens vier gültigen Ziffern EXAKT; die Sekunden-Messungen erscheinen in Wh und
-     kWh gerundet und mit „≈“ gekennzeichnet.
+     Rechnung intern ganzzahlig (Stromstärke in mA), alle 24 Einstellungen ergeben in Ws ganze Zahlen. Wh und kWh werden
+     in Ganzzahlen aus Ws berechnet: exakt, wenn höchstens fünf gültige Ziffern reichen (alle Einstellungen ab 1 h,
+     Heizlüfter 30 s: 16,675 Wh = 0,016675 kWh), sonst auf vier gültige Ziffern gerundet mit „≈“, in Wh und kWh gleich.
+     Netz 230 V: Anschlüsse L und N; Netzgerät 12 V: Plus und Minus.
      Messzeiten 10 s, 20 s, 30 s in Echtzeit; 1 h, 4 h, 10 h im Zeitraffer (8 s).
      Grenzfall: Schalter offen (vor und nach der Messung) ergibt 0 V, 0 A, der Zähler steht.
      Startstellung neutral: kein Gerät, keine Messzeit, Schalter offen, Zähler 0, Anzeige in Ws. -->
@@ -109,15 +110,25 @@ function gruppen(s){                             // Dreiergruppen ab fünf Stell
   if(g.replace("-","").length>4) g=g.replace(/\B(?=(\d{3})+(?!\d))/g," ");
   return g+(t.length>1?","+t[1]:"");
 }
-function zahl(v,lauf){                            // mindestens vier gültige Ziffern, alle Stellen vor dem Komma
-  if(v===0) return "0";
-  var stellen=Math.floor(Math.log10(Math.abs(v)))+1, dez=Math.max(0,4-stellen);
-  var r=Number(v.toFixed(dez)), genau=Math.abs(r-v)<=1e-9*Math.max(1,Math.abs(v));
-  var s=r.toFixed(dez); if(s.indexOf(".")>=0) s=s.replace(/0+$/,"").replace(/\.$/,"");
-  return (genau||lauf?"":"≈ ")+gruppen(s.replace(".",","));
+function bruch(zaehler,nenner,lauf){              // zaehler/nenner exakt in Ganzzahlen: exakt bis fünf gültige Ziffern,
+  if(zaehler===0) return "0";                     // sonst vier gültige Ziffern (kaufmännisch gerundet) mit „≈“
+  var v=zaehler/nenner, stellen=Math.floor(Math.log10(v)+1e-12)+1, dez, n, q, genau=false;
+  for(var g=4; g<=5; g++){
+    dez=Math.max(0,g-stellen); n=zaehler*Math.pow(10,dez);
+    if(n%nenner===0){ genau=true; break; }
+  }
+  if(!genau){ dez=Math.max(0,4-stellen); n=zaehler*Math.pow(10,dez); }
+  q=Math.floor((2*n+nenner)/(2*nenner));          // runden ohne Gleitkommafehler (16,675 Wh wird nie 16,67)
+  var s=String(q); while(s.length<=dez) s="0"+s;
+  if(dez>0){ s=s.slice(0,s.length-dez)+","+s.slice(s.length-dez); s=s.replace(/0+$/,"").replace(/,$/,""); }
+  return (genau||lauf?"":"≈ ")+gruppen(s);
 }
-function arbeit(Ws,lauf){ var e=EINHEITEN[z.e]; return zahl(Ws/e.f,lauf)+" "+e.n; }
-function strom(mA){ return mA===0?"0 A":zahl(mA/1000,true)+" A"; }
+function arbeit(Ws,lauf){                         // Ws ist am Ende jeder Messung eine ganze Zahl
+  var e=EINHEITEN[z.e];
+  if(lauf) return bruch(Math.round(Ws*1000),e.f*1000,true)+" "+e.n;
+  return bruch(Math.round(Ws),e.f,false)+" "+e.n;
+}
+function strom(mA){ return mA===0?"0 A":bruch(mA,1000,true)+" A"; }
 function zeit(s,T){
   if(T<3600) return (s).toFixed(1).replace(".",",")+" s";
   var h=Math.floor(s/3600+1e-9), m=Math.floor((s-h*3600)/60+1e-9);
@@ -170,7 +181,9 @@ function zeichne(jetzt){
   k.lineWidth=3; k.strokeStyle="#1A2530"; k.fillStyle="#1A2530"; k.textAlign="center";
   // Spannungsquelle
   k.fillStyle="#F4F6F8"; k.fillRect(30,60,100,220); k.strokeRect(30,60,100,220);
-  k.fillStyle="#1A2530"; k.font="bold 26px 'Noto Sans',sans-serif"; k.fillText("+",112,96); k.fillText("−",112,270);
+  k.fillStyle="#1A2530"; k.font="bold 24px 'Noto Sans',sans-serif";
+  if(g&&g.U!==230){ k.fillText("+",112,96); k.fillText("−",112,270); }      // Netzgerät: Gleichspannung
+  else if(g){ k.fillText("L",112,96); k.fillText("N",112,268); }          // Netz: Außenleiter und Neutralleiter
   k.font="21px 'Noto Sans',sans-serif"; k.save(); k.translate(66,170); k.rotate(-Math.PI/2);
   k.fillText(g?g.q:"Spannungsquelle",0,0); k.restore();
   // Leitungen
@@ -195,8 +208,8 @@ function zeichne(jetzt){
   k.fillStyle="#1A2530"; k.font="bold 24px 'Noto Sans',sans-serif"; k.fillText("A",370,89);
   // Gerät
   k.fillStyle=zu&&g?"#FBE3C8":"#fff"; k.fillRect(445,135,50,90); k.strokeRect(445,135,50,90);
-  k.fillStyle="#1A2530"; k.font="19px 'Noto Sans',sans-serif"; k.textAlign="right";
-  k.fillText(g?g.n:"Gerät",436,186);
+  k.fillStyle="#1A2530"; k.font="19px 'Noto Sans',sans-serif"; k.textAlign="center";
+  k.fillText(g?g.n:"Gerät",478,302);                                    // unter der Leitung, frei vom Zähler
   // Spannungsmesser parallel zum Gerät, Abzweigpunkte
   k.textAlign="center"; k.beginPath(); k.arc(470,105,5,0,6.283); k.arc(470,250,5,0,6.283); k.fill();
   k.fillStyle="#fff"; k.beginPath(); k.arc(530,180,25,0,6.283); k.fill(); k.stroke();
