@@ -10,12 +10,13 @@
      Schaltung nach Europa Fachkunde S. 45, Bild 1 (indirekte und direkte Leistungsmessung): Strommesser und
      Strompfad des Leistungsmessers in Reihe, Spannungsmesser parallel zum Widerstand, Spannungspfad zwischen den Leitern.
      Anzeigen mit höchstens fünf geltenden Ziffern: bei 100 Ω sind alle Werte exakt (I in 5-mA-Schritten,
-     P = k²/400 W hat höchstens vier Nachkommastellen); 220 Ω, 11 V ergibt exakt 50 mA und 550 mW.
+     P = k²/400 W hat höchstens vier Nachkommastellen); bei 50 Ω ebenso (I in 10-mA-Schritten, P = k²/200 W).
+     Berichtigt 12.10.2026 (Prüfer B16): 220 Ω durch 50 Ω ersetzt, 220 Ω zeigte 44 von 49 Spannungsstufen gerundet.
      Startstellung neutral: kein Widerstand, 0 V. Grenzfälle: 0 V (keine Leistung), genau 1 W (zulässig), über 1 W. -->
 <html lang="de"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Messplatz Leistung (Block 16)</title>
-<script type="application/json" id="sim-meta">{"startwerte":{"R":null,"U":0},"loesungswerte":{"100 Ω, 2 V":"20 mA, 40 mW","100 Ω, 4 V":"40 mA, 160 mW","100 Ω, 6 V":"60 mA, 360 mW","220 Ω, 11 V":"50 mA, 550 mW","100 Ω, 10 V":"100 mA, 1 W"}}</script>
+<script type="application/json" id="sim-meta">{"startwerte":{"R":null,"U":0},"loesungswerte":{"100 Ω, 2 V":"20 mA, 40 mW","100 Ω, 4 V":"40 mA, 160 mW","100 Ω, 6 V":"60 mA, 360 mW","100 Ω, 10 V":"100 mA, 1 W"}}</script>
 <style>
  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
  :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62;--rot:#B23A33}
@@ -100,7 +101,7 @@
 <script>
 (function(){
 "use strict";
-var WIDERSTAENDE=[{R:100,B:1},{R:220,B:1}];      // Widerstand in Ω, Belastbarkeit in W
+var WIDERSTAENDE=[{R:100,B:1},{R:50,B:1}];      // Widerstand in Ω, Belastbarkeit in W
 var START={r:null,U:0};
 var zustand={r:START.r,U:START.U,nr:0};
 var $=function(id){return document.getElementById(id);};
