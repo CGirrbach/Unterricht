@@ -8,8 +8,9 @@
          (Tabellenbuch S. 29, Formel 5 und Tabelle; Fachkunde S. 47).
      (3) Im Topf auf der Kochplatte zeigt der Zähler mehr, als im Wasser ankommt: Anteil 0,8 (Wärmenutzungsgrad).
      Modell: Q_nutz = Δϑ · c · m, c = 4,19 kJ/(kg · K), ϑ1 = 20 °C; Laborgefäß ζ = 1 (Verluste vernachlässigt),
-     Tauchsieder 1000 W; Topf ζ = 0,8, Kochplatte 1250 W; Zähler W = Q_S = Q_nutz/ζ; Heizzeit t = W/P.
-     In beiden Gefäßen kommen 1000 W im Wasser an, die Heizzeit in s ist deshalb zahlengleich mit Q_nutz in kJ.
+     Tauchsieder 1000 W; Topf ζ = 0,8, Kochplatte 1000 W; Zähler W = Q_S = Q_nutz/ζ; Heizzeit t = W/P.
+     Beide Heizungen haben 1000 W: Die Heizzeit in s ist zahlengleich mit dem Zählerwert in kJ, der Topf braucht
+     länger (1 kg, 60 °C: 209,5 s statt 167,6 s im Laborgefäß).
      Alle Werte werden ganzzahlig in 1/10000 kJ gerechnet und exakt angezeigt (keine Rundung der Endwerte).
      Grenzfall im Einstellbereich: Endtemperatur 20 °C, keine Erwärmung, Zähler 0.
      Startstellung neutral: kein Gefäß, keine Wassermenge, keine Endtemperatur, Zähler 0. -->
@@ -51,7 +52,7 @@
  td.z{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
  .leer{color:var(--grau);font-style:italic}
  i{font-family:Cambria,Caladea,'Times New Roman',serif}
- @media(max-width:420px){.anz .wert{font-size:26px} th,td{padding:5px 4px;font-size:13px} .wrap{padding:12px 10px 18px}}
+ @media(max-width:420px){.anz .wert{font-size:26px} th,td{padding:5px 3px;font-size:12px} .wrap{padding:12px 8px 18px} body{padding:14px 6px 40px}}
  @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style></head><body>
 <div class="wrap">
@@ -80,7 +81,7 @@
  </div>
 
  <div class="tabelle"><table id="protokoll">
-  <tr><th>Messung</th><th>Gefäß</th><th>Masse <i>m</i></th><th>Endtemperatur <i>ϑ</i><sub>2</sub></th><th>Zähler <i>W</i></th><th>Heizzeit <i>t</i></th></tr>
+  <tr><th>Mes&shy;sung</th><th>Gefäß</th><th>Masse <i>m</i></th><th>End&shy;tempe&shy;ratur <i>ϑ</i><sub>2</sub></th><th>Zähler <i>W</i></th><th>Heiz&shy;zeit <i>t</i></th></tr>
   <tr class="leer"><td colspan="6">Noch keine Messung.</td></tr>
  </table></div>
 </div>
@@ -89,9 +90,9 @@
 (function(){
 "use strict";
 // Laborgefäß: gut isoliert, Verluste vernachlässigt (Anteil 1), Tauchsieder 1000 W.
-// Topf auf der Kochplatte: Anteil im Wasser 0,8, Kochplatte 1250 W (0,8 · 1250 W = 1000 W kommen im Wasser an).
+// Topf auf der Kochplatte: Anteil im Wasser 0,8, Kochplatte 1000 W (nur 800 W kommen im Wasser an, der Topf braucht länger).
 var GEF=[{n:"Laborgefäß (gut isoliert), Tauchsieder 1000 W",k:"Laborgefäß",P:1000,viertel:4},
-         {n:"Topf auf der Kochplatte, 1250 W",k:"Topf",P:1250,viertel:5}];   // W = Q · viertel / 4
+         {n:"Topf auf der Kochplatte, 1000 W",k:"Topf",P:1000,viertel:5}];   // W = Q · viertel / 4
 var MASSEN=[1,2,3,4];                         // in halben Kilogramm: 0,5 kg, 1 kg, 1,5 kg, 2 kg
 var TEMP=[20,30,40,50,60,70,80,90,100];        // Endtemperatur in °C, Anfang immer 20 °C
 var T1=20, RAFFER=60;                          // Zeitraffer: 1 s Bildschirm = 60 s Heizzeit
@@ -126,27 +127,27 @@ function auffrischen(){
   if(!bereit()||(!zustand.laeuft&&!zustand.fertig)){
     $("aT").textContent="20 °C"; $("aW").textContent="0 kJ"; $("aZ").textContent="0 s"; return;
   }
-  var d=TEMP[zustand.t2]-T1, W=w4(), Q=q4(MASSEN[zustand.m],d);
+  var d=TEMP[zustand.t2]-T1, W=w4();
   if(zustand.fertig){
     $("aT").textContent=TEMP[zustand.t2]+" °C";
     $("aW").textContent=exakt(W)+" kJ";
-    $("aZ").textContent=exakt(Q)+" s";          // t = W/P; in beiden Gefäßen kommen 1000 W im Wasser an
+    $("aZ").textContent=exakt(W)+" s";          // t = W/P mit P = 1000 W: Sekunden zahlengleich mit kJ
   } else {
     var a=zustand.anteil;
     $("aT").textContent=eins(T1+d*a)+" °C";
     $("aW").textContent=eins(W*a/10000)+" kJ";
-    $("aZ").textContent=eins(Q*a/10000)+" s";
+    $("aZ").textContent=eins(W*a/10000)+" s";
   }
 }
 function protokoll(){
   var tb=$("protokoll"),leer=tb.querySelector("tr.leer"); if(leer) leer.remove();
   var tr=document.createElement("tr"), d=TEMP[zustand.t2]-T1;
-  tr.innerHTML="<td>"+zustand.nr+"</td><td>"+GEF[zustand.g].k+"</td><td class='z'>"+masse(zustand.m)+" kg</td><td class='z'>"+TEMP[zustand.t2]+" °C</td><td class='z'>"+exakt(w4())+" kJ</td><td class='z'>"+exakt(q4(MASSEN[zustand.m],d))+" s</td>";
+  tr.innerHTML="<td>"+zustand.nr+"</td><td>"+GEF[zustand.g].k+"</td><td class='z'>"+masse(zustand.m)+" kg</td><td class='z'>"+TEMP[zustand.t2]+" °C</td><td class='z'>"+exakt(w4())+" kJ</td><td class='z'>"+exakt(w4())+" s</td>";
   tb.appendChild(tr);
 }
 function starten(){
   if(!bereit()) return;
-  var d=TEMP[zustand.t2]-T1, t=q4(MASSEN[zustand.m],d)/10000;   // Heizzeit in s
+  var d=TEMP[zustand.t2]-T1, t=w4()/10000;                     // Heizzeit in s (t = W/P, P = 1000 W)
   zustand.dauer=Math.max(0.4,t/RAFFER)*1000; zustand.anteil=0; zustand.fertig=false;
   if(ruhig||d===0){ beenden(); return; }
   zustand.laeuft=true; zustand.start=performance.now(); auffrischen(); requestAnimationFrame(schritt);
@@ -192,7 +193,7 @@ function zeichne(){
     g2.fillStyle="#D6DADD"; g2.fillRect(x0-25,yb+13,x1-x0+50,32); g2.strokeRect(x0-25,yb+13,x1-x0+50,32);
     if(warm&&d>0){ pfeil(x0-6,yb-50,x0-40,yb-80); pfeil(x1+6,yb-50,x1+40,yb-80); pfeil(x0+40,yb-hoehe-6,x0+28,yb-hoehe-44); pfeil(x1-40,yb-hoehe-6,x1-28,yb-hoehe-44); }
     g2.fillStyle="#1A2530"; g2.font="22px 'Noto Sans',sans-serif"; g2.textAlign="center";
-    g2.fillText("Kochplatte 1250 W",(x0+x1)/2,yb+70);
+    g2.fillText("Kochplatte 1000 W",(x0+x1)/2,yb+70);
   } else if(zustand.g===0){              // Laborgefäß mit Tauchsieder
     g2.strokeRect(x0,yb-hoehe,x1-x0,hoehe);
     g2.setLineDash([7,5]); g2.lineWidth=2; g2.strokeRect(x0-10,yb-hoehe-6,x1-x0+20,hoehe+14); g2.setLineDash([]);
