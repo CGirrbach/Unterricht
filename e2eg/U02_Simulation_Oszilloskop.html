@@ -1,0 +1,179 @@
+<!doctype html>
+<!-- E2EG U02 · Messplatz Oszilloskop (neu 12.10.2026, Aufgabe IN der Stunde nach dem Muster E1EG Block 07) -->
+<!-- Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht):
+     (1) Die Frequenz ist die Anzahl der Perioden je Sekunde: 5 Hz bei 100 ms je div zeigt auf 10 div = 1 s genau 5 Perioden.
+     (2) Doppelte Frequenz, halbe Periodendauer; 1 geteilt durch die Periodendauer ergibt die Frequenz des Generators
+         (50 Hz, 2 ms je div: 10 div, T = 20 ms; 100 Hz, 2 ms je div: 5 div, T = 10 ms; 200 Hz, 1 ms je div: 5 div, T = 5 ms).
+     Rechenmodell: u = û · sin(360° · f · t), û = 6 V, Bildschirm 10 div waagerecht, 8 div senkrecht, Amplitude 2 V je div
+     (û = 3 div), getriggert auf den steigenden Nulldurchgang am linken Rand.
+     Vorbild: Versuch mit Funktionsgenerator und Oszilloskop (Europa Fachkunde Elektrotechnik S. 127), Oszillogramm mit
+     Einstellung „Amplitude, Time Base“ (S. 129 Bild 1, S. 185 Praxistipp Messen mit dem Oszilloskop), Steller „Amplitude
+     Volt/div“ und „Zeit/div“ (S. 184), Zeitbasis (S. 183). div = division (engl.) = Teilung, Rastereinheit (S. 182, 185).
+     Exaktheit: Die Kurve wird aus der Formel gezeichnet (mindestens 24 Punkte je Periode und ein Punkt je Bildpunkt);
+     Nulldurchgänge und Scheitel der Aufgabeneinstellungen liegen auf Rasterlinien bzw. Teilstrichen (0,2 div).
+     Startstellung neutral: 25 Hz, 5 ms je div (eine Periode = 8 div), keine Aufgabeneinstellung.
+     Grenzfälle im Einstellbereich: sehr viele Perioden (500 Hz, 100 ms je div: Band), weniger als eine Periode
+     (5 Hz, 0,5 ms je div: fast gerade Linie). -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Oszilloskop (U02)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"frequenz_Hz":25,"zeitbasis_ms_je_div":5},"loesungswerte":{"5 Hz, 100 ms je div":"5 Perioden auf 10 div = 1 s","50 Hz, 2 ms je div":"eine Periode 10 div, T = 20 ms","100 Hz, 2 ms je div":"eine Periode 5 div, T = 10 ms","200 Hz, 1 ms je div":"eine Periode 5 div, T = 5 ms"}}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:980px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px;align-items:start}
+ @media(min-width:760px){.buehne{grid-template-columns:1.6fr 1fr}}
+ .schirm{border:3px solid var(--ink);background:#30363c;padding:8px;border-radius:6px}
+ canvas{width:100%;height:auto;display:block;background:#DDE8DC;touch-action:manipulation}
+ .einstellung{display:flex;flex-wrap:wrap;gap:4px 18px;align-items:center;color:#fff;font-size:15px;padding:8px 2px 2px}
+ .einstellung b{color:#FFE66B}
+ .generator{border:3px solid var(--ink);background:var(--hell);padding:10px 12px;border-radius:6px}
+ .generator .name{font-size:14px;font-weight:700;color:var(--grau)}
+ .lcd{background:#20313a;color:#9BF0B4;font-variant-numeric:tabular-nums;font-size:34px;font-weight:700;padding:6px 12px;margin:6px 0;border-radius:4px;text-align:right}
+ .lcd small{font-size:16px;color:#cfe;font-weight:400;float:left;margin-top:12px}
+ .generator .form{font-size:14px;color:var(--grau)}
+ .wahl{margin:14px 0 4px}
+ .wahl .titel{font-size:15px;font-weight:700;margin:10px 0 5px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+ button{font:inherit;font-size:16px;min-height:48px;min-width:58px;padding:6px 12px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+ button.an{background:var(--kupfer);color:#fff}
+ button.zurueck{border-color:var(--ink);color:var(--ink)}
+ .bruch{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;font-size:.78em;line-height:1.05}
+ .bruch>span:first-child{border-bottom:1.3px solid currentColor;padding:0 2px}
+ .bruch>span:last-child{padding:0 2px}
+ .formelzeichen{font-family:Cambria,Caladea,Georgia,serif;font-style:italic}
+ .hinweis{font-size:14px;color:var(--grau);margin-top:10px}
+ @media(max-width:420px){.lcd{font-size:28px} button{min-width:52px;padding:6px 9px;font-size:15px} .einstellung{font-size:14px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E2EG · LF 5 · U02</div><h1>Messplatz Oszilloskop</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Am Funktionsgenerator die Frequenz wählen, am Oszilloskop die Zeitbasis wählen.
+  Dann auf dem Bildschirm die Kästchen (div) zählen. 1 div ist ein Kästchen des Rasters.</div>
+
+ <div class="buehne">
+  <div class="schirm">
+   <canvas id="c" width="600" height="480" aria-label="Bildschirm des Oszilloskops mit Raster aus 10 mal 8 Kästchen und der Sinuskurve der Generatorspannung."></canvas>
+   <div class="einstellung" aria-live="polite">
+    <span>Amplitude: <b>2 <span class="bruch"><span>V</span><span>div</span></span></b></span>
+    <span>Zeitbasis: <b id="aZ"></b></span>
+   </div>
+  </div>
+  <div class="generator">
+   <div class="name">Funktionsgenerator</div>
+   <div class="lcd" id="aF"><small>Frequenz</small>25 Hz</div>
+   <div class="form">Signalform: Sinus</div>
+  </div>
+ </div>
+
+ <div class="wahl">
+  <div class="titel">1. Frequenz am Funktionsgenerator</div>
+  <div class="knoepfe" id="frequenzen"></div>
+  <div class="titel">2. Zeitbasis am Oszilloskop</div>
+  <div class="knoepfe" id="zeitbasen"></div>
+  <div class="titel">3. Neu beginnen</div>
+  <div class="knoepfe"><button class="zurueck" id="bReset" type="button">Zurücksetzen</button></div>
+ </div>
+ <div class="hinweis">Der Bildschirm ist 10 div breit und 8 div hoch. Die Kurve beginnt am linken Rand mit dem steigenden Nulldurchgang.</div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var FREQUENZEN=[5,25,50,100,200,250,500];           // Hz
+var ZEITBASEN=[0.5,1,2,5,10,20,50,100];             // ms je div
+var START={f:25,z:5};
+var UHAT=6, VDIV=2;                                 // Scheitelwert in V, Amplitude in V je div (3 div)
+var zustand={f:START.f,z:START.z};
+var $=function(id){return document.getElementById(id);};
+var bewegung=!(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+
+function komma(x){return String(x).replace(".",",");}
+function bruch(z,n){return "<span class='bruch'><span>"+z+"</span><span>"+n+"</span></span>";}
+function zeitbasisHtml(z){return komma(z)+" "+bruch("ms","div");}
+
+function knoepfe(){
+  FREQUENZEN.forEach(function(f){
+    var b=document.createElement("button"); b.type="button"; b.textContent=komma(f)+" Hz"; b.dataset.wert=f;
+    b.setAttribute("aria-label","Frequenz "+komma(f)+" Hertz");
+    b.onclick=function(){zustand.f=f;auffrischen(true);}; $("frequenzen").appendChild(b);
+  });
+  ZEITBASEN.forEach(function(z){
+    var b=document.createElement("button"); b.type="button"; b.innerHTML=zeitbasisHtml(z); b.dataset.wert=z;
+    b.setAttribute("aria-label","Zeitbasis "+komma(z)+" Millisekunden je div");
+    b.onclick=function(){zustand.z=z;auffrischen(true);}; $("zeitbasen").appendChild(b);
+  });
+}
+function markiere(id,wert){
+  Array.prototype.forEach.call($(id).children,function(b){b.classList.toggle("an",parseFloat(b.dataset.wert)===wert);});
+}
+function auffrischen(animiert){
+  markiere("frequenzen",zustand.f); markiere("zeitbasen",zustand.z);
+  $("aF").innerHTML="<small>Frequenz</small>"+komma(zustand.f)+" Hz";
+  $("aZ").innerHTML=zeitbasisHtml(zustand.z);
+  zeichne(animiert&&bewegung);
+}
+
+// ---------- Bildschirm ----------
+var c=$("c"), g=c.getContext("2d");
+var DPR=Math.max(1,Math.min(3,window.devicePixelRatio||1));
+var BW=600, BH=480, DIV=60;                          // logische Größe: 10 × 8 div zu je 60 Bildpunkten
+c.width=BW*DPR; c.height=BH*DPR; g.scale(DPR,DPR);
+var lauf=null;
+
+function raster(){
+  g.fillStyle="#DDE8DC"; g.fillRect(0,0,BW,BH);
+  g.strokeStyle="rgba(26,37,48,0.45)"; g.lineWidth=1;
+  for(var i=0;i<=10;i++){ var x=Math.round(i*DIV)+0.5; if(i===10) x-=1; g.beginPath(); g.moveTo(x,0); g.lineTo(x,BH); g.stroke(); }
+  for(var j=0;j<=8;j++){ var y=Math.round(j*DIV)+0.5; if(j===8) y-=1; g.beginPath(); g.moveTo(0,y); g.lineTo(BW,y); g.stroke(); }
+  // Mittellinien kräftiger, mit Teilstrichen alle 0,2 div
+  g.strokeStyle="#1A2530"; g.lineWidth=2;
+  g.beginPath(); g.moveTo(0,BH/2); g.lineTo(BW,BH/2); g.moveTo(BW/2,0); g.lineTo(BW/2,BH); g.stroke();
+  g.lineWidth=1.5;
+  for(var k=0;k<=50;k++){ var xt=k*DIV/5; g.beginPath(); g.moveTo(xt,BH/2-5); g.lineTo(xt,BH/2+5); g.stroke(); }
+  for(var m=0;m<=40;m++){ var yt=m*DIV/5; g.beginPath(); g.moveTo(BW/2-5,yt); g.lineTo(BW/2+5,yt); g.stroke(); }
+}
+function punkte(){
+  // Spannung über der Zeit: t von 0 bis 10 div · Zeitbasis; u = û · sin(2π · f · t)
+  var tGes=10*zustand.z/1000, perioden=zustand.f*tGes;
+  var n=Math.max(BW*2, Math.ceil(perioden*24));
+  var p=[];
+  for(var i=0;i<=n;i++){
+    var t=tGes*i/n, u=UHAT*Math.sin(2*Math.PI*zustand.f*t);
+    p.push([BW*i/n, BH/2-u/VDIV*DIV]);
+  }
+  return p;
+}
+function kurve(p,bis){
+  g.strokeStyle="#1F5FA8"; g.lineWidth=3; g.lineJoin="round";
+  g.beginPath(); g.moveTo(p[0][0],p[0][1]);
+  for(var i=1;i<=bis;i++) g.lineTo(p[i][0],p[i][1]);
+  g.stroke();
+}
+function zeichne(animiert){
+  if(lauf){ cancelAnimationFrame(lauf); lauf=null; }
+  var p=punkte();
+  if(!animiert){ raster(); kurve(p,p.length-1); return; }
+  var start=null, dauer=350;
+  function schritt(ts){
+    if(start===null) start=ts;
+    var a=Math.min(1,(ts-start)/dauer);
+    raster(); kurve(p,Math.max(1,Math.round(a*(p.length-1))));
+    if(a<1) lauf=requestAnimationFrame(schritt); else lauf=null;
+  }
+  lauf=requestAnimationFrame(schritt);
+}
+function zuruecksetzen(){ zustand={f:START.f,z:START.z}; auffrischen(false); }
+
+$("bReset").onclick=zuruecksetzen;
+knoepfe(); auffrischen(false);
+})();
+</script>
+</body></html>
