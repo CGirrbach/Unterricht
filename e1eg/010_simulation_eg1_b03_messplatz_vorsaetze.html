@@ -1,0 +1,181 @@
+<!doctype html>
+<!-- Block EG1-B03 · Messplatz Vorsätze (Neubau 12.10.2026, Aufgabe IN der Stunde, ersetzt den alten Vorsatz-Umrechner) -->
+<!-- Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht):
+     (1) Derselbe Messwert lässt sich mit verschiedenen Vorsätzen anzeigen; der Wert der Größe bleibt gleich.
+     (2) Ein Vorsatz kleiner: Zahlenwert 1000-mal so groß, Komma drei Stellen nach rechts.
+         Ein Vorsatz größer: Zahlenwert geteilt durch 1000, Komma drei Stellen nach links.
+     (3) Ein unpassender Vorsatz ergibt lange Zahlen mit vielen Nullen (Grenzfälle pA und GA, pV und GV).
+     Messwerte: Europa Fachkunde S. 31, Tabelle „Beispiele elektrischer Stromstärken“, und S. 28, Tabelle
+     „Spannungsbeispiele“ (Blitz: „bis 1000 MV“, hier als Höchstwert). Die Seite rechnet die Anzeige als
+     Zeichenkette um (Komma verschieben), nicht mit Gleitkommazahlen: jede Anzeige ist exakt.
+     Startstellung neutral: keine Messgröße, kein Messobjekt, keine Anzeige gewählt. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Vorsätze (Block 03)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"messgroesse":null,"messobjekt":null,"anzeige":null},"loesungswerte":{"Taschenrechner in mA":"0,1 mA","Taschenrechner in A":"0,0001 A","LED-Lampe in µA":"43 000 µA","LED-Lampe in A":"0,043 A","Bügeleisen in µA":"4 350 000 µA","Bügeleisen in mA":"4350 mA","Höchstspannung in V":"380 000 V","Höchstspannung in MV":"0,38 MV"}}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62;--lcd:#DDE7DC}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:980px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .buehne{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+ .buehne>*{min-width:0}
+ @media(min-width:760px){.buehne{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}}
+ .geraet{background:#2B3640;border-radius:14px;padding:14px 14px 16px;color:#fff}
+ .geraet .oben{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+ .zeichen{width:46px;height:46px;border:3px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:22px;flex:none}
+ .geraet .name{font-size:17px;font-weight:700}
+ .geraet .objekt{font-size:14px;color:#C9D3DA}
+ .lcd{width:100%;min-width:0;background:var(--lcd);color:#14202A;border-radius:8px;border:3px solid #10181F;padding:10px 12px;min-height:92px;display:flex;align-items:center;justify-content:flex-end;overflow:hidden}
+ .lcd .wert{font-family:inherit;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums;letter-spacing:.01em;transition:opacity .15s}
+ .lcd .wert.leer{color:#6B7A75;font-weight:400}
+ .hinweis{font-size:14px;color:#C9D3DA;margin-top:8px;min-height:20px}
+ .wahl .titel{font-size:14px;font-weight:700;margin:10px 0 5px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px}
+ button{font:inherit;font-size:15px;min-height:46px;padding:8px 13px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer}
+ button.an{background:var(--kupfer);color:#fff}
+ button:disabled{opacity:.4;cursor:not-allowed}
+ #vorsaetze button{min-width:62px;font-weight:700}
+ button.reset{border-color:var(--ink);color:var(--ink)}
+ table{width:100%;border-collapse:collapse;margin-top:14px;font-size:15px}
+ th,td{border:1px solid var(--linie);padding:6px 8px;text-align:left}
+ th{background:var(--hell);font-size:14px}
+ td.z{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+ .leer td{color:var(--grau);font-style:italic}
+ @media(max-width:420px){body{padding:8px 4px 30px}.wrap{padding:12px 10px 18px} #vorsaetze button{min-width:58px;padding:8px 8px} th,td{padding:5px 5px;font-size:14px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E1EG · Lernfeld 1 · Block 03</div><h1>Messplatz Vorsätze</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Messgröße wählen, Messobjekt wählen, dann die Anzeige wählen. Jede Ablesung landet unten im Messprotokoll.</div>
+
+ <div class="buehne">
+  <div class="geraet" aria-live="polite">
+   <div class="oben"><div class="zeichen" id="zz">?</div>
+    <div><div class="name" id="gName">Messgerät</div><div class="objekt" id="gObjekt">kein Messobjekt</div></div></div>
+   <div class="lcd" id="lcd"><span class="wert leer" id="anz">- - -</span></div>
+   <div class="hinweis" id="hinweis">Wählen Sie eine Messgröße.</div>
+  </div>
+  <div class="wahl">
+   <div class="titel">1. Messgröße</div>
+   <div class="knoepfe" id="groessen"></div>
+   <div class="titel">2. Messobjekt</div>
+   <div class="knoepfe" id="objekte"></div>
+   <div class="titel">3. Anzeige in</div>
+   <div class="knoepfe" id="vorsaetze"></div>
+   <div class="titel">&nbsp;</div>
+   <div class="knoepfe"><button class="reset" id="bReset">Zurücksetzen</button></div>
+  </div>
+ </div>
+
+ <table id="protokoll">
+  <tr><th>Nr.</th><th>Messobjekt</th><th>Anzeige</th></tr>
+  <tr class="leer"><td colspan="3">Noch keine Ablesung.</td></tr>
+ </table>
+</div>
+
+<script>
+(function(){
+"use strict";
+// Messwerte nach Europa Fachkunde S. 31 (Stromstärken) und S. 28 (Spannungen); m: Zahlenwert, e: Exponent des Vorsatzes
+var GROESSEN=[
+ {n:"Stromstärke", geraet:"Strommesser", z:"A", e:"A", objekte:[
+   {n:"Taschenrechner", m:"100", e:-6},
+   {n:"10-W-LED-Lampe", m:"43", e:-3},
+   {n:"Bügeleisen", m:"4,35", e:0},
+   {n:"Straßenbahnmotor", m:"300", e:0},
+   {n:"Elektroschmelzofen", m:"100", e:3}]},
+ {n:"Spannung", geraet:"Spannungsmesser", z:"V", e:"V", objekte:[
+   {n:"Monozelle", m:"1,5", e:0},
+   {n:"Autobatterie", m:"12", e:0},
+   {n:"Wechselstromnetz", m:"230", e:0},
+   {n:"Drehstromnetz", m:"400", e:0},
+   {n:"Höchstspannung", m:"380", e:3},
+   {n:"Blitz (Höchstwert)", m:"1000", e:6}]}
+];
+var VORSAETZE=[{s:"p",e:-12},{s:"n",e:-9},{s:"µ",e:-6},{s:"m",e:-3},{s:"",e:0},{s:"k",e:3},{s:"M",e:6},{s:"G",e:9}];
+var NBSP=" ";
+var z={g:null,o:null,v:null,nr:0,letzte:""};
+var $=function(id){return document.getElementById(id);};
+
+// Zahlenwert m (mit Dezimalkomma) mal 10 hoch k, als Zeichenkette: Komma verschieben, exakt
+function verschiebe(m,k){
+  var p=m.split(","), ip=p[0], fp=p[1]||"";
+  var ziffern=ip+fp, komma=ip.length+k;
+  if(komma<1){ ziffern=new Array(2-komma).join("0")+ziffern; komma=1; }
+  if(komma>ziffern.length){ ziffern=ziffern+new Array(komma-ziffern.length+1).join("0"); }
+  var I=ziffern.slice(0,komma).replace(/^0+(?=\d)/,""), F=ziffern.slice(komma).replace(/0+$/,"");
+  return {I:I,F:F};
+}
+// Dreiergruppen erst ab fünf Stellen (vor bzw. nach dem Komma), wie in der Fachkunde: 4350, 43 000, 0,0001, 0,000 23
+function gruppiere(x){
+  var I=x.I, F=x.F, i, a=[], b=[];
+  if(I.length>4){ for(i=I.length;i>0;i-=3) a.unshift(I.slice(Math.max(0,i-3),i)); I=a.join(NBSP); }
+  if(F.length>4){ for(i=0;i<F.length;i+=3) b.push(F.slice(i,i+3)); F=b.join(NBSP); }
+  return I+(F?","+F:"");
+}
+function anzeige(o,v,einheit){ return gruppiere(verschiebe(o.m,o.e-v.e))+" "+v.s+einheit; }
+
+function knopf(text,fn){ var b=document.createElement("button"); b.textContent=text; b.onclick=fn; return b; }
+function aufbauen(){
+  var gd=$("groessen"); GROESSEN.forEach(function(g,i){ gd.appendChild(knopf(g.n,function(){ if(z.g!==i){z.g=i;z.o=null;z.v=null;objekteZeigen();} auffrischen(); })); });
+  objekteZeigen();
+}
+function objekteZeigen(){
+  var od=$("objekte"), vd=$("vorsaetze"); od.innerHTML=""; vd.innerHTML="";
+  if(z.g===null){ od.innerHTML='<span style="color:#5A666F;font-size:14px">zuerst die Messgröße wählen</span>'; return; }
+  var g=GROESSEN[z.g];
+  g.objekte.forEach(function(o,i){ od.appendChild(knopf(o.n,function(){ z.o=i; auffrischen(); })); });
+  VORSAETZE.forEach(function(v,i){ vd.appendChild(knopf(v.s+g.e,function(){ z.v=i; auffrischen(); })); });
+}
+function auffrischen(){
+  Array.prototype.forEach.call($("groessen").children,function(b,i){b.classList.toggle("an",z.g===i);});
+  Array.prototype.forEach.call($("objekte").children,function(b,i){b.classList.toggle("an",z.o===i);});
+  Array.prototype.forEach.call($("vorsaetze").children,function(b,i){b.classList.toggle("an",z.v===i); b.disabled=(z.o===null);});
+  var w=$("anz"), h=$("hinweis");
+  if(z.g===null){ $("zz").textContent="?"; $("gName").textContent="Messgerät"; $("gObjekt").textContent="kein Messobjekt";
+    w.textContent="- - -"; w.className="wert leer"; h.textContent="Wählen Sie eine Messgröße."; passen(); return; }
+  var g=GROESSEN[z.g]; $("zz").textContent=g.z; $("gName").textContent=g.geraet;
+  if(z.o===null){ $("gObjekt").textContent="kein Messobjekt"; w.textContent="- - -"; w.className="wert leer";
+    h.textContent="Wählen Sie ein Messobjekt."; passen(); return; }
+  var o=g.objekte[z.o]; $("gObjekt").textContent="misst: "+o.n;
+  if(z.v===null){ w.textContent="- - -"; w.className="wert leer"; h.textContent="Wählen Sie die Anzeige."; passen(); return; }
+  var t=anzeige(o,VORSAETZE[z.v],g.e);
+  w.textContent=t; w.className="wert"; h.textContent="Anzeige ablesen und eintragen.";
+  passen();
+  var schluessel=z.g+"|"+z.o+"|"+z.v;
+  if(schluessel!==z.letzte){ z.letzte=schluessel; protokoll(o.n,t); }
+}
+// Schriftgröße so wählen, dass die ganze Zahl in die Anzeige passt (am Handy auch lange Zahlen)
+function passen(){
+  var w=$("anz"), box=$("lcd"), gr=44;
+  w.style.fontSize=gr+"px";
+  var platz=box.clientWidth-26;
+  while(w.scrollWidth>platz && gr>12){ gr-=1; w.style.fontSize=gr+"px"; }
+}
+function protokoll(name,text){
+  var tb=$("protokoll"), leer=tb.querySelector("tr.leer"); if(leer) leer.remove();
+  z.nr++;
+  var tr=document.createElement("tr");
+  tr.innerHTML="<td>"+z.nr+"</td><td>"+name+"</td><td class='z'>"+text+"</td>";
+  tb.appendChild(tr);
+}
+function zuruecksetzen(){
+  z={g:null,o:null,v:null,nr:0,letzte:""};
+  var tb=$("protokoll"); while(tb.rows.length>1) tb.deleteRow(1);
+  var tr=tb.insertRow(); tr.className="leer"; tr.innerHTML="<td colspan='3'>Noch keine Ablesung.</td>";
+  objekteZeigen(); auffrischen();
+}
+$("bReset").onclick=zuruecksetzen;
+window.addEventListener("resize",passen);
+// für die Prüfung: alle Anzeigen als Liste
+window.__alleAnzeigen=function(){ var r=[]; GROESSEN.forEach(function(g){ g.objekte.forEach(function(o){ VORSAETZE.forEach(function(v){ r.push(o.n+" in "+v.s+g.e+": "+anzeige(o,v,g.e)); }); }); }); return r; };
+aufbauen(); auffrischen();
+})();
+</script>
+</body></html>
