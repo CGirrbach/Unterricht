@@ -11,7 +11,8 @@
      (Tabellenbuch S. 30). Angezeigt wird Q exakt (ganzzahlig k · 16022, fester Bereich 10^-18 As),
      damit Q durch n genau 0,16022 · 10^-18 As ergibt.
      Begriffe: Ladungsmesser (Europa Fachkunde S. 72), Elektronenüberschuss/Elektronenmangel (S. 27, 28).
-     Startstellung neutral: Kugel ausgeglichen, Q = 0, Protokoll leer. -->
+     Startstellung neutral: Kugel ausgeglichen, Q = 0, Protokoll leer. „Kugel zurücksetzen“ stellt nur die Kugel
+     auf 0, das Protokoll bleibt (Prüfer 12.10.2026); „Protokoll löschen“ leert es. -->
 <html lang="de"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Messplatz Ladung (Block 05)</title>
@@ -55,7 +56,7 @@
 </style></head><body>
 <div class="wrap">
  <div class="kopf"><div class="reihe">E1EG · Lernfeld 1 · Block 05</div><h1>Messplatz Ladung</h1></div>
- <div class="anleitung"><b>So messen Sie:</b> Bringen Sie Elektronen auf die Metallkugel oder nehmen Sie Elektronen von ihr weg. Der Ladungsmesser zeigt die Ladung der Kugel. Mit <b>Messung eintragen</b> landet der Wert im Messprotokoll.</div>
+ <div class="anleitung"><b>Modellversuch:</b> Der Ladungsmesser zählt einzelne Elementarladungen und zeigt die Ladung der Kugel in As (Amperesekunde); 1 As = 1 C. <b>So messen Sie:</b> Bringen Sie Elektronen auf die Metallkugel oder nehmen Sie Elektronen von ihr weg. Mit <b>Messung eintragen</b> landet der Wert im Messprotokoll.</div>
 
  <div class="buehne">
   <canvas id="c" width="560" height="330" data-quelle="Modellversuch: Metallkugel auf isolierendem Ständer mit Ladungsmesser (Begriff Ladungsmesser: Europa Fachkunde S. 72); Ladungsträger nach Fachkunde S. 27 (Elektron negativ, Proton positiv); schematisch, ohne Buchbild-Entsprechung"
@@ -72,7 +73,7 @@
   <div class="titel">Elektronen von der Kugel wegnehmen</div>
   <div class="knoepfe" id="weg"></div>
   <div class="titel">Messen</div>
-  <div class="knoepfe"><button class="eintragen" id="bEin">Messung eintragen</button><button id="bReset">Zurücksetzen</button></div>
+  <div class="knoepfe"><button class="eintragen" id="bEin">Messung eintragen</button><button id="bReset">Kugel zurücksetzen</button><button id="bLoeschen">Protokoll löschen</button></div>
  </div>
 
  <div class="tabelle"><table id="protokoll">
@@ -134,11 +135,13 @@ function eintragen(){
   tr.innerHTML="<td>"+nr+"</td><td>"+art+"</td><td class='z'>"+Math.abs(k)+"</td><td class='z'>"+ladungHTML(k)+"</td>";
   tb.appendChild(tr);
 }
-function zuruecksetzen(){
-  k=0; nr=0;
+function zuruecksetzen(){            // nur die Kugel: das Messprotokoll bleibt stehen
+  k=0; auffrischen();
+}
+function protokollLoeschen(){
+  nr=0;
   var tb=$("protokoll"); while(tb.rows.length>1) tb.deleteRow(1);
   var tr=tb.insertRow(); tr.className="leer"; tr.innerHTML="<td colspan='4'>Noch keine Messung.</td>";
-  auffrischen();
 }
 
 // ---------- Bild: Metallkugel, isolierender Ständer, Ladungsmesser ----------
@@ -193,7 +196,7 @@ function zeichne(){
   g.fillStyle="#5A666F"; g.font="19px 'Noto Sans',sans-serif"; g.fillText("isolierender Ständer",KX+18,285);
 }
 
-$("bEin").onclick=eintragen; $("bReset").onclick=zuruecksetzen;
+$("bEin").onclick=eintragen; $("bReset").onclick=zuruecksetzen; $("bLoeschen").onclick=protokollLoeschen;
 knoepfe(); auffrischen();
 })();
 </script>
