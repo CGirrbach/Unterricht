@@ -17,6 +17,7 @@
      Anzeigen: Spannungsmesser 6,00 V, Strommesser mit vier geltenden Ziffern in mA (1,508 mA; 47,75 mA; 6,000 mA).
        Aus den angezeigten Werten ergibt 6 V durch I beim Kondensator in kΩ, mal f, bei allen zehn Frequenzen
        795,76 kΩ · Hz, gerundet 796 (nachgerechnet, siehe ?pruefen).
+     13.10.2026 nach der Prüfung: Formelzeichen im Schaltbild („L = 0,1 H“, „C = 200 nF“) kursiv.
      Startstellung neutral: Generator aus (0 V, 0 mA), Spule, 100 Hz. Prüfmodus ?pruefen: Anzeigen aller 30
        Einstellungen als JSON in #pruefbericht. -->
 <html lang="de"><head><meta charset="utf-8">
@@ -100,7 +101,7 @@
     <path d="M418 102 Q444 160 422 208" fill="none" stroke="#1F8FD0" stroke-width="3"/><path d="M418 220 l-3 -17 l13 6 z" fill="#1F8FD0"/>
     <text x="430" y="238" font-size="28" fill="#1F8FD0"><tspan font-style="italic" font-family="Cambria, Caladea, Georgia, serif">U</tspan><tspan id="svgUi" font-size="19" dy="6">bC</tspan></text>
     <text id="svgSym" x="462" y="172" text-anchor="end" font-size="28" font-style="italic" font-family="Cambria, Caladea, Georgia, serif" fill="#1A2530">C</text>
-    <text id="svgWert" x="514" y="292" text-anchor="end" font-size="24" font-family="Arial, sans-serif" fill="#5A666F"></text>
+    <text id="svgWert" x="514" y="292" text-anchor="end" font-size="24" font-family="Arial, sans-serif" fill="#5A666F"><tspan id="svgWertSym" font-style="italic" font-family="Cambria, Caladea, Georgia, serif"></tspan><tspan id="svgWertRest"></tspan></text>
     <text id="svgG" x="26" y="292" font-size="24" font-family="Arial, sans-serif" fill="#5A666F"></text>
    </svg>
   </div>
@@ -143,9 +144,9 @@
 "use strict";
 var U=6;                                             // V, Effektivwert, fest (Rechenbuch S. 100 Nr. 6)
 var BAUTEILE=[                                       // Kennung, Knopftext, Zeichen, Index von U und I, Wert im Schaltbild
-  {k:"R", text:"Wirkwiderstand 1 kΩ", sym:"R", idx:"w",  wert:"R = 1 kΩ",    aria:"Wirkwiderstand 1 Kiloohm"},
-  {k:"L", text:"Spule 0,1 H",         sym:"L", idx:"bL", wert:"L = 0,1 H",   aria:"Spule 0,1 Henry"},
-  {k:"C", text:"Kondensator 200 nF",  sym:"C", idx:"bC", wert:"C = 200 nF",  aria:"Kondensator 200 Nanofarad"}];
+  {k:"R", text:"Wirkwiderstand 1 kΩ", sym:"R", idx:"w",  wert:" = 1 kΩ",    aria:"Wirkwiderstand 1 Kiloohm"},
+  {k:"L", text:"Spule 0,1 H",         sym:"L", idx:"bL", wert:" = 0,1 H",   aria:"Spule 0,1 Henry"},
+  {k:"C", text:"Kondensator 200 nF",  sym:"C", idx:"bC", wert:" = 200 nF",  aria:"Kondensator 200 Nanofarad"}];
 var FREQUENZEN=[100,200,300,400,500,600,700,800,900,1000];   // Hz
 var START={b:"L",an:false,f:100};
 var zustand={b:START.b,an:START.an,f:START.f};
@@ -191,7 +192,7 @@ function auffrischen(){
   ["R","L","C"].forEach(function(k){ $("sym"+k).style.display=(k===zustand.b)?"":"none"; });
   $("svgSym").textContent=bt.sym;
   $("svgIi").textContent=bt.idx; $("svgUi").textContent=bt.idx;
-  $("svgWert").textContent=bt.wert;
+  $("svgWertSym").textContent=bt.sym; $("svgWertRest").textContent=bt.wert;   // Formelzeichen kursiv (Prüfer U14)
   $("svgG").textContent=zustand.an ? "6 V, "+zustand.f+" Hz" : "Generator aus";
 }
 function zuruecksetzen(){ zustand={b:START.b,an:START.an,f:START.f}; auffrischen(); }
