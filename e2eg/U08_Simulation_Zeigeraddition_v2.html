@@ -1,0 +1,313 @@
+<!doctype html>
+<!-- E2EG U08 · Messplatz: Zwei Spannungen in Reihe (neu 13.10.2026, Aufgabe IN der Stunde nach dem Muster E1EG Block 07
+     und E2EG U06/U07). Die alte Adresse U08_Simulation_Zeigeraddition.html bleibt unverändert online; sie zeichnete das
+     Parallelogramm und den Summenzeiger fertig, schrieb die Deutung auf Bühne und Fußtext und war kein Messplatz.
+     Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht und zeichnet keinen Zeiger):
+       (1) Der Scheitelwert der Gesamtspannung zweier Wechselspannungen gleicher Frequenz in Reihe ist nur bei
+           Phasenlage 0° gleich der Summe der Scheitelwerte; je größer die Phasenlage bis 180°, desto kleiner.
+       (2) In jedem Augenblick ist u = u₁ + u₂ (Cursor); die Scheitelwerte von u₁ und u₂ liegen zu verschiedenen
+           Zeitpunkten, deshalb ist û kleiner als û₁ + û₂.
+     Rechenmodell: u₁ = û₁ · sin α, u₂ = û₂ · sin (α + Phasenlage), u = u₁ + u₂ (Rechenbuch S. 97, 7.4.2: Summe der
+     Momentanwerte). Scheitelwert der Messung: û = √(û₁² + û₂² + 2 û₁ û₂ cos Phasenlage), gleichwertig zu
+     Rechenbuch S. 96 (cos (180° − φ)); geprüft gegen das Maximum der gezeichneten Kurve (?pruefen).
+     Oszilloskop: 50 Hz, 2 ms je div, also 10 div = 20 ms = 360°, 1 div = 36° (wie Rechenbuch S. 96 Bild 1);
+     getriggert auf den steigenden Nulldurchgang von u₁ am linken Rand; α ist der Winkel von u₁ ab diesem Nulldurchgang.
+     Amplitude stellt sich selbst ein (2, 5, 10 oder 20 V je div), so dass û₁ + û₂ auf den Bildschirm passt.
+     Startstellung neutral: û₁ = 5 V, û₂ = 3 V, Phasenlage 30°, Cursor bei 0° (keine Aufgabeneinstellung). -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz: Zwei Spannungen in Reihe (U08)</title>
+<script type="application/json" id="sim-meta">{"erkenntnis":"Der Scheitelwert der Gesamtspannung zweier in Reihe geschalteter Wechselspannungen gleicher Frequenz ist nur bei Phasenlage 0° gleich der Summe der Scheitelwerte; in jedem Augenblick gilt u = u₁ + u₂, die Scheitelwerte von u₁ und u₂ treten aber zu verschiedenen Zeitpunkten auf.","startwerte":{"scheitel1_V":5,"scheitel2_V":3,"phasenlage_grad":30,"cursor_grad":0},"loesungswerte":{"Aufgabe 1 (8 V, 6 V)":{"0°":"14,0 V","72°":"11,4 V","90°":"10,0 V","180°":"2,0 V"},"Aufgabe 2 (8 V, 6 V, 72°)":{"18°":"2,5 V + 6,0 V = 8,5 V","60°":"6,9 V + 4,5 V = 11,4 V","90°":"8,0 V + 1,9 V = 9,9 V"},"Aufgabe 4 (20 V, 15 V, 60°)":"30,4 V"},"quelle":"Europa-Rechenbuch S. 96 (Beispiel, Bild 1) und S. 97 (7.4.2, Summe der Momentanwerte); Technische Mathematik S. 78 (Schaltung G1, G2 in Reihe); Tabellenbuch S. 43 (geometrische Addition)"}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;
+       --k1:#1F5FA8;--k2:#A34E0E;--k3:#14603F}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:12px 8px 40px}
+ .wrap{max-width:1040px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:14px 14px 20px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:10px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:8px 12px;font-size:15px;margin-bottom:12px}
+ .fz{font-family:Cambria,Caladea,'Noto Serif',Georgia,serif;font-style:italic}
+ /* Handy: Schaltung, Bildschirm, Messung, Generator, Cursor untereinander (die Messung steht direkt über den Reglern);
+    Tafel: Bildschirm, Messung und Cursor links, Schaltung, Generator und Zurücksetzen rechts. */
+ .buehne{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;align-items:start;
+         grid-template-areas:"schaltung" "schirm" "messung" "generator" "cursor" "reset"}
+ @media(min-width:800px){.buehne{grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);
+         grid-template-areas:"schirm schaltung" "schirm generator" "messung generator" "cursor reset"}}
+ .b-schirm{grid-area:schirm}.b-messung{grid-area:messung}.b-cursor{grid-area:cursor}
+ .b-schaltung{grid-area:schaltung}.b-generator{grid-area:generator}.b-reset{grid-area:reset}
+ .schaltung{border:1.4px solid var(--linie);padding:6px 8px;background:#fff}
+ .schaltung svg{width:100%;height:auto;display:block}
+ .generator{border:3px solid var(--ink);background:var(--hell);padding:8px 10px 10px;border-radius:6px}
+ .generator .name{font-size:14px;font-weight:700;color:var(--grau)}
+ .regel{margin-top:8px}
+ .regel .titel{display:flex;justify-content:space-between;align-items:baseline;font-size:15px;font-weight:700}
+ .regel .titel b{font-variant-numeric:tabular-nums;font-size:22px;color:var(--kupfer)}
+ .reihe2{display:flex;align-items:center;gap:8px}
+ input[type=range]{flex:1 1 auto;min-width:0;height:44px;-webkit-appearance:none;appearance:none;background:transparent;cursor:pointer;accent-color:var(--kupfer)}
+ input[type=range]::-webkit-slider-runnable-track{height:8px;background:#C7D2DA;border-radius:4px}
+ input[type=range]::-moz-range-track{height:8px;background:#C7D2DA;border-radius:4px}
+ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:30px;height:30px;margin-top:-11px;border-radius:50%;background:var(--kupfer);border:2px solid #fff;box-shadow:0 0 0 1.4px var(--kupfer)}
+ input[type=range]::-moz-range-thumb{width:30px;height:30px;border-radius:50%;background:var(--kupfer);border:2px solid #fff}
+ input[type=range]:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
+ button{font:inherit;font-size:17px;font-weight:700;min-height:48px;min-width:52px;padding:6px 10px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer;border-radius:4px;transition:background .15s}
+ button:active{background:var(--kupferhell)}
+ button:focus-visible{outline:3px solid var(--kupfer);outline-offset:2px}
+ button.zurueck{border-color:var(--ink);color:var(--ink);width:100%}
+ .schirm{border:3px solid var(--ink);background:#30363c;padding:8px;border-radius:6px}
+ canvas{width:100%;height:auto;display:block;background:#DDE8DC;touch-action:manipulation;cursor:crosshair}
+ .einstellung{display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center;color:#fff;font-size:15px;padding:8px 2px 2px}
+ .einstellung b{color:#FFE66B}
+ .kanal{display:inline-flex;align-items:center;gap:6px}
+ .strich{display:inline-block;width:26px;height:5px;border-radius:2px}
+ .bruch{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;font-size:.78em;line-height:1.05}
+ .bruch>span:first-child{border-bottom:1.3px solid currentColor;padding:0 2px}
+ .bruch>span:last-child{padding:0 2px}
+ .messung{border:3px solid var(--ink);border-radius:6px;padding:8px 10px;background:var(--hell)}
+ .messung .titel{font-size:15px;font-weight:700;color:var(--grau);margin-bottom:4px}
+ .lcds{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+ .lcd{background:#20313a;color:#9BF0B4;font-variant-numeric:tabular-nums;font-size:24px;font-weight:700;padding:4px 8px;border-radius:4px;text-align:right;min-width:0}
+ .lcd small{display:block;font-size:14px;color:#cfe;font-weight:400;text-align:left}
+ .cursorzeile{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px}
+ .cursorzeile .pos{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;min-width:110px}
+ .cursorknoepfe{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;flex:1 1 260px}
+ .hinweis{font-size:14px;color:var(--grau);margin-top:10px}
+ #pruefbericht{display:none}
+ @media(max-width:420px){.lcd{font-size:21px} .lcd small{font-size:13px} .kopf h1{font-size:20px} .einstellung{font-size:14px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E2EG · LF 5 · U08</div><h1>Messplatz: Zwei Spannungen in Reihe</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Am Generator die Scheitelwerte und die Phasenlage von Kanal 2 einstellen.
+  Das Oszilloskop zeigt <span class="fz">u</span>₁, <span class="fz">u</span>₂ und die Gesamtspannung
+  <span class="fz">u</span>. Scheitelwerte lesen Sie unter „Messung“ ab, Augenblickswerte am Cursor.</div>
+
+ <div class="buehne">
+  <div class="schirm b-schirm">
+    <canvas id="c" width="600" height="480" aria-label="Bildschirm des Oszilloskops: Raster aus 10 mal 8 Kästchen, Kurven von u1, u2 und der Gesamtspannung u, senkrechte Cursorlinie."></canvas>
+    <div class="einstellung" aria-live="polite">
+     <span class="kanal"><span class="strich" style="background:#5B9BE6"></span><span>Kanal 1: <span class="fz">u</span>₁</span></span>
+     <span class="kanal"><span class="strich" style="background:#E8894A"></span><span>Kanal 2: <span class="fz">u</span>₂</span></span>
+     <span class="kanal"><span class="strich" style="background:#5FD39A"></span><span>Kanal 3: <span class="fz">u</span></span></span>
+     <span>Amplitude: <b id="aV"></b></span>
+     <span>Zeitbasis: <b>2 <span class="bruch"><span>ms</span><span>div</span></span></b></span>
+    </div>
+   </div>
+
+  <div class="messung b-messung">
+    <div class="titel">Messung: Scheitelwerte</div>
+    <div class="lcds">
+     <div class="lcd" id="mU1"><small>Kanal 1: û₁</small>–</div>
+     <div class="lcd" id="mU2"><small>Kanal 2: û₂</small>–</div>
+     <div class="lcd" id="mU"><small>Kanal 3: û</small>–</div>
+    </div>
+   </div>
+
+  <div class="messung b-cursor">
+    <div class="titel">Cursor: Augenblickswerte (Cursor auch durch Tippen auf den Bildschirm)</div>
+    <div class="lcds">
+     <div class="lcd" id="cU1"><small><span class="fz">u</span>₁</small>–</div>
+     <div class="lcd" id="cU2"><small><span class="fz">u</span>₂</small>–</div>
+     <div class="lcd" id="cU"><small><span class="fz">u</span></small>–</div>
+    </div>
+    <div class="cursorzeile">
+     <div class="pos">Cursor bei <span class="fz">α</span> = <span id="cA">0°</span></div>
+     <div class="cursorknoepfe">
+      <button type="button" id="cMM" aria-label="Cursor 36 Grad nach links">−36°</button>
+      <button type="button" id="cM" aria-label="Cursor 6 Grad nach links">−6°</button>
+      <button type="button" id="cP" aria-label="Cursor 6 Grad nach rechts">+6°</button>
+      <button type="button" id="cPP" aria-label="Cursor 36 Grad nach rechts">+36°</button>
+     </div>
+    </div>
+   </div>
+  <div class="schaltung b-schaltung" data-quelle="Technische Mathematik S. 78 (Generatoren G1 und G2 in Reihe, u1, u2, u); Europa-Rechenbuch S. 96, Beispiel (zwei Wechselstromgeneratoren gleicher Frequenz in Reihe)">
+    <svg viewBox="0 0 360 150" role="img" aria-label="Schaltung: Generator 1 und Generator 2 in Reihe; Kanal 1 misst u1 an Generator 1, Kanal 2 misst u2 an Generator 2, Kanal 3 misst u an beiden zusammen.">
+     <g fill="none" stroke="#1A2530" stroke-width="2">
+      <path d="M30 40 H95 M145 40 H215 M265 40 H330 M30 40 V100 M330 40 V100"/>
+      <circle cx="120" cy="40" r="25"/><circle cx="240" cy="40" r="25"/>
+     </g>
+     <g font-family="Noto Sans, Arial, sans-serif" font-size="15" fill="#1A2530" text-anchor="middle">
+      <text x="120" y="38" font-weight="700">G1</text><text x="120" y="56">~</text>
+      <text x="240" y="38" font-weight="700">G2</text><text x="240" y="56">~</text>
+     </g>
+     <circle cx="30" cy="104" r="4" fill="#fff" stroke="#1A2530" stroke-width="2"/>
+     <circle cx="330" cy="104" r="4" fill="#fff" stroke="#1A2530" stroke-width="2"/>
+     <g stroke-width="2.5" fill="none">
+      <path d="M95 78 H140" stroke="#1F5FA8"/><path d="M215 78 H260" stroke="#A34E0E"/><path d="M40 124 H315" stroke="#14603F"/>
+     </g>
+     <g>
+      <path d="M146 78 l-9 -5 v10 z" fill="#1F5FA8"/><path d="M266 78 l-9 -5 v10 z" fill="#A34E0E"/>
+      <path d="M322 124 l-9 -5 v10 z" fill="#14603F"/>
+     </g>
+     <g font-family="Cambria, Caladea, Noto Serif, Georgia, serif" font-style="italic" font-size="17" text-anchor="middle">
+      <text x="118" y="100" fill="#1F5FA8">u<tspan font-style="normal" font-size="12" dy="4">1</tspan></text>
+      <text x="238" y="100" fill="#A34E0E">u<tspan font-style="normal" font-size="12" dy="4">2</tspan></text>
+      <text x="180" y="145" fill="#14603F">u</text>
+     </g>
+     <g font-family="Noto Sans, Arial, sans-serif" font-size="12" fill="#5A666F" text-anchor="end">
+      <text x="89" y="82">Kanal 1</text><text x="209" y="82">Kanal 2</text>
+      <text x="246" y="145" text-anchor="start">Kanal 3</text>
+     </g>
+    </svg>
+   </div>
+
+  <div class="generator b-generator">
+    <div class="name">Zweikanal-Funktionsgenerator · Sinus · 50 Hz</div>
+    <div class="regel">
+     <div class="titel"><label for="r1">Scheitelwert Kanal 1</label><b id="w1"></b></div>
+     <div class="reihe2"><button type="button" data-ziel="r1" data-schritt="-1" aria-label="Scheitelwert Kanal 1 kleiner">−</button>
+      <input type="range" id="r1" min="1" max="20" step="1"><button type="button" data-ziel="r1" data-schritt="1" aria-label="Scheitelwert Kanal 1 größer">+</button></div>
+    </div>
+    <div class="regel">
+     <div class="titel"><label for="r2">Scheitelwert Kanal 2</label><b id="w2"></b></div>
+     <div class="reihe2"><button type="button" data-ziel="r2" data-schritt="-1" aria-label="Scheitelwert Kanal 2 kleiner">−</button>
+      <input type="range" id="r2" min="1" max="20" step="1"><button type="button" data-ziel="r2" data-schritt="1" aria-label="Scheitelwert Kanal 2 größer">+</button></div>
+    </div>
+    <div class="regel">
+     <div class="titel"><label for="rp">Phasenlage Kanal 2</label><b id="wp"></b></div>
+     <div class="reihe2"><button type="button" data-ziel="rp" data-schritt="-6" aria-label="Phasenlage 6 Grad kleiner">−</button>
+      <input type="range" id="rp" min="0" max="360" step="6"><button type="button" data-ziel="rp" data-schritt="6" aria-label="Phasenlage 6 Grad größer">+</button></div>
+    </div>
+   </div>
+  <button type="button" class="zurueck b-reset" id="bReset">Zurücksetzen</button>
+ </div>
+ <div class="hinweis">Der Bildschirm ist 10 div breit und 8 div hoch. Das Oszilloskop ist auf <span class="fz">u</span>₁
+  getriggert: <span class="fz">u</span>₁ beginnt am linken Rand mit dem Nulldurchgang von Minus nach Plus. Der Winkel
+  <span class="fz">α</span> des Cursors zählt ab diesem Nulldurchgang; 1 div sind 2 ms, also 36°.</div>
+ <pre id="pruefbericht"></pre>
+</div>
+
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id);};
+var meta=JSON.parse($("sim-meta").textContent), S=meta.startwerte;
+var z={u1:S.scheitel1_V, u2:S.scheitel2_V, p:S.phasenlage_grad, c:S.cursor_grad};
+var VDIV=[2,5,10,20];
+var FARBE={k1:"#1F5FA8", k2:"#A34E0E", k3:"#14603F"};
+
+function rad(g){return g*Math.PI/180;}
+/* Zahl mit Dezimalkomma, eine Nachkommastelle, echtes Minuszeichen; −0,0 wird 0,0 */
+function zahl(x){ var r=Math.round(x*10)/10; if(Math.abs(r)<0.05) r=0; return r.toFixed(1).replace(".",",").replace("-","−"); }
+function u1(a){return z.u1*Math.sin(rad(a));}
+function u2(a){return z.u2*Math.sin(rad(a+z.p));}
+/* Scheitelwert der Gesamtspannung (Messfunktion des Oszilloskops) */
+function scheitel(){ var q=z.u1*z.u1+z.u2*z.u2+2*z.u1*z.u2*Math.cos(rad(z.p)); return Math.sqrt(Math.max(0,q)); }
+/* Cursoranzeige u aus den ANGEZEIGTEN Werten von u₁ und u₂ (in Zehnteln addiert): Einzeln gerundet ergäbe sich an
+   12 von 61 Cursorstellungen (8 V, 6 V, 72°) eine Abweichung von 0,1 V, z. B. bei 12°: 1,7 V + 6,0 V, aber u = 7,63 V
+   wird 7,6 V. Die Rechnung der Schüler muss mit der Anzeige übereinstimmen (Muster U07: Winkel aus den angezeigten
+   Lagen). Der Unterschied zum wahren Wert ist höchstens 0,1 V; an den Stellen des Arbeitsblatts ist er null. */
+function summeAngezeigt(a,b){ return (Math.round(a*10)+Math.round(b*10))/10; }
+function vdiv(){ var s=z.u1+z.u2; for(var i=0;i<VDIV.length;i++){ if(s<=3.8*VDIV[i]) return VDIV[i]; } return 20; }
+
+// ---------- Bildschirm ----------
+var c=$("c"), g=c.getContext("2d");
+var DPR=Math.max(1,Math.min(3,window.devicePixelRatio||1));
+var BW=600, BH=480, DIV=60;
+c.width=BW*DPR; c.height=BH*DPR; g.scale(DPR,DPR);
+
+function raster(){
+  g.fillStyle="#DDE8DC"; g.fillRect(0,0,BW,BH);
+  g.strokeStyle="rgba(26,37,48,0.45)"; g.lineWidth=1;
+  for(var i=0;i<=10;i++){ var x=Math.round(i*DIV)+0.5; if(i===10) x-=1; g.beginPath(); g.moveTo(x,0); g.lineTo(x,BH); g.stroke(); }
+  for(var j=0;j<=8;j++){ var y=Math.round(j*DIV)+0.5; if(j===8) y-=1; g.beginPath(); g.moveTo(0,y); g.lineTo(BW,y); g.stroke(); }
+  g.strokeStyle="#1A2530"; g.lineWidth=2;
+  g.beginPath(); g.moveTo(0,BH/2); g.lineTo(BW,BH/2); g.moveTo(BW/2,0); g.lineTo(BW/2,BH); g.stroke();
+  g.lineWidth=1.5;
+  for(var k=0;k<=50;k++){ var xt=k*DIV/5; g.beginPath(); g.moveTo(xt,BH/2-5); g.lineTo(xt,BH/2+5); g.stroke(); }
+  for(var m=0;m<=40;m++){ var yt=m*DIV/5; g.beginPath(); g.moveTo(BW/2-5,yt); g.lineTo(BW/2+5,yt); g.stroke(); }
+}
+function xVon(a){return a/360*BW;}
+function yVon(u,vd){return BH/2-u/vd*DIV;}
+function kurve(f,vd,farbe,breite){
+  g.strokeStyle=farbe; g.lineWidth=breite; g.lineJoin="round"; g.beginPath();
+  for(var i=0;i<=720;i++){ var a=i/2, y=yVon(f(a),vd); if(i===0) g.moveTo(xVon(a),y); else g.lineTo(xVon(a),y); }
+  g.stroke();
+}
+function zeichne(){
+  var vd=vdiv();
+  raster();
+  kurve(u1,vd,FARBE.k1,3);
+  kurve(u2,vd,FARBE.k2,3);
+  kurve(function(a){return u1(a)+u2(a);},vd,FARBE.k3,4.5);
+  // Cursor: senkrechte gestrichelte Linie, Marke oben
+  var xc=Math.min(BW-1,Math.max(1,xVon(z.c)));
+  g.setLineDash([8,6]); g.strokeStyle="#1A2530"; g.lineWidth=2;
+  g.beginPath(); g.moveTo(xc,0); g.lineTo(xc,BH); g.stroke(); g.setLineDash([]);
+  g.fillStyle="#1A2530"; g.beginPath(); g.moveTo(xc-9,0); g.lineTo(xc+9,0); g.lineTo(xc,13); g.closePath(); g.fill();
+  // Punkte der drei Kurven am Cursor
+  [[u1(z.c),FARBE.k1],[u2(z.c),FARBE.k2],[u1(z.c)+u2(z.c),FARBE.k3]].forEach(function(p){
+    g.fillStyle=p[1]; g.beginPath(); g.arc(xc,yVon(p[0],vd),6,0,2*Math.PI); g.fill();
+  });
+}
+
+function bruchHtml(z_,n_){return "<span class='bruch'><span>"+z_+"</span><span>"+n_+"</span></span>";}
+function lcd(id,titel,wert){ $(id).innerHTML="<small>"+titel+"</small>"+wert; }
+function auffrischen(){
+  $("r1").value=z.u1; $("r2").value=z.u2; $("rp").value=z.p;
+  $("w1").textContent=z.u1+" V"; $("w2").textContent=z.u2+" V"; $("wp").textContent=z.p+"°";
+  $("aV").innerHTML=vdiv()+" "+bruchHtml("V","div");
+  lcd("mU1","Kanal 1: û₁",zahl(z.u1)+" V");
+  lcd("mU2","Kanal 2: û₂",zahl(z.u2)+" V");
+  lcd("mU","Kanal 3: û",zahl(scheitel())+" V");
+  var a=z.c, w1=u1(a), w2=u2(a);
+  $("cA").textContent=a+"°";
+  lcd("cU1","<span class='fz'>u</span>₁",zahl(w1)+" V");
+  lcd("cU2","<span class='fz'>u</span>₂",zahl(w2)+" V");
+  lcd("cU","<span class='fz'>u</span>",zahl(summeAngezeigt(w1,w2))+" V");
+  zeichne();
+}
+
+// ---------- Bedienung ----------
+function setze(id,wert){
+  var r=$(id), mi=+r.min, ma=+r.max;
+  wert=Math.max(mi,Math.min(ma,wert));
+  if(id==="r1") z.u1=wert; else if(id==="r2") z.u2=wert; else z.p=wert;
+  auffrischen();
+}
+["r1","r2","rp"].forEach(function(id){ $(id).addEventListener("input",function(e){ setze(id,parseInt(e.target.value,10)); }); });
+Array.prototype.forEach.call(document.querySelectorAll("button[data-ziel]"),function(b){
+  b.addEventListener("click",function(){ var id=b.dataset.ziel; setze(id,parseInt($(id).value,10)+parseInt(b.dataset.schritt,10)); });
+});
+function cursor(a){ z.c=Math.max(0,Math.min(360,a)); auffrischen(); }
+$("cMM").onclick=function(){cursor(z.c-36);}; $("cM").onclick=function(){cursor(z.c-6);};
+$("cP").onclick=function(){cursor(z.c+6);};   $("cPP").onclick=function(){cursor(z.c+36);};
+c.addEventListener("click",function(e){
+  var r=c.getBoundingClientRect(), x=(e.clientX-r.left)/r.width*360;
+  cursor(Math.round(x/6)*6);
+});
+$("bReset").onclick=function(){ z={u1:S.scheitel1_V, u2:S.scheitel2_V, p:S.phasenlage_grad, c:S.cursor_grad}; auffrischen(); };
+
+// ---------- Prüfmodus: Anzeigen und Maximum der gezeichneten Kurve ----------
+if(/[?&]pruefen\b/.test(location.search)){
+  var bericht=[], alt={u1:z.u1,u2:z.u2,p:z.p,c:z.c};
+  function fall(a1,a2,p,cs){
+    z.u1=a1; z.u2=a2; z.p=p;
+    var max=0; for(var i=0;i<=36000;i++){ var a=i/100; max=Math.max(max,Math.abs(u1(a)+u2(a))); }
+    var e={u1:a1,u2:a2,phase:p,vdiv:vdiv(),scheitel:zahl(scheitel()),max_kurve:Math.round(max*1000)/1000,cursor:[]};
+    (cs||[]).forEach(function(a){ e.cursor.push({alpha:a,u1:zahl(u1(a)),u2:zahl(u2(a)),u:zahl(summeAngezeigt(u1(a),u2(a))),u_wahr:zahl(u1(a)+u2(a))}); });
+    bericht.push(e);
+  }
+  [0,72,90,180].forEach(function(p){fall(8,6,p);});
+  fall(8,6,72,[18,60,90]);
+  fall(20,15,60);
+  fall(3,2,90,[30,48,60,198,300]);
+  fall(10,10,60); fall(10,10,90); fall(10,10,120); fall(5,5,180);
+  // Rundung: bei 8 V, 6 V, 72° an jeder Cursorstellung (6°) u₁ + u₂ der Anzeigen gegen die Anzeige u
+  z.u1=8; z.u2=6; z.p=72; var abw=[];
+  for(var a=0;a<=360;a+=6){ var s=(Math.round(u1(a)*10)+Math.round(u2(a)*10))/10, t=Math.round((u1(a)+u2(a))*10)/10;
+    if(Math.abs(s-t)>1e-9) abw.push(a); }
+  bericht.push({rundung_8_6_72_einzeln_gerundet_abweichend_bei:abw});
+  // Anzeige wie auf der Seite: u aus den angezeigten Werten, also immer gleich der Summe der Anzeigen
+  var ok=true; for(var b=0;b<=360;b+=6){ if(zahl(summeAngezeigt(u1(b),u2(b)))!==zahl((Math.round(u1(b)*10)+Math.round(u2(b)*10))/10)) ok=false; }
+  bericht.push({cursoranzeige_gleich_summe_der_anzeigen:ok});
+  $("pruefbericht").textContent=JSON.stringify(bericht);
+  z=alt;
+}
+auffrischen();
+window.addEventListener("resize",zeichne);
+})();
+</script>
+</body></html>
