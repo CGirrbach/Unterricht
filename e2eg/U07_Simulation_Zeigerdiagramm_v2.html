@@ -26,9 +26,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
       border-radius:50%;background:var(--kupfer);border:2px solid #fff;box-shadow:0 0 0 1.4px var(--kupfer)}
 input[type=range]::-moz-range-thumb{width:30px;height:30px;border-radius:50%;background:var(--kupfer);border:2px solid #fff}
 input[type=range]:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
-.wert{flex:0 0 84px;text-align:right;font-variant-numeric:tabular-nums;font-size:clamp(17px,4vw,20px);font-weight:700;
+.wert{flex:0 0 64px;text-align:right;font-variant-numeric:tabular-nums;font-size:clamp(17px,4vw,20px);font-weight:700;
       color:var(--kupfer)}
 .knoepfe{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 4px}
+button.pm{flex:0 0 auto;min-width:56px;padding:8px 10px}
+.zeile input[type=range]{min-width:90px;flex:1 1 90px}
 button{font:inherit;font-weight:700;font-size:clamp(15px,3.6vw,17px);padding:10px 18px;min-height:48px;
       border:1.6px solid var(--ink);background:#fff;color:var(--ink);cursor:pointer;flex:1 1 140px}
 button.haupt{background:var(--kupfer);border-color:var(--kupfer);color:#fff}
@@ -78,12 +80,16 @@ lesen Sie die Anzeigen ab.</div>
 <div class="regler">
   <div class="zeile">
     <label for="lage2">Startlage von û₂</label>
+    <button type="button" class="pm" data-ziel="lage2" data-schritt="-5" aria-label="Startlage 5 Grad weniger">−5°</button>
     <input type="range" id="lage2" min="0" max="355" step="5" value="0">
+    <button type="button" class="pm" data-ziel="lage2" data-schritt="5" aria-label="Startlage 5 Grad mehr">+5°</button>
     <span class="wert" id="lage2w">0°</span>
   </div>
   <div class="zeile">
     <label for="f2">Frequenz von û₂ (û₁: 50 Hz)</label>
+    <button type="button" class="pm" data-ziel="f2" data-schritt="-5" aria-label="Frequenz 5 Hertz weniger">−5</button>
     <input type="range" id="f2" min="30" max="70" step="5" value="50">
+    <button type="button" class="pm" data-ziel="f2" data-schritt="5" aria-label="Frequenz 5 Hertz mehr">+5</button>
     <span class="wert" id="f2w">50 Hz</span>
   </div>
 </div>
@@ -278,6 +284,15 @@ Waagerechten nach rechts. Im Liniendiagramm ist α die Lage von û₁.
   });
   document.getElementById("f2").addEventListener("input", function (e) {
     f2 = parseInt(e.target.value, 10); if (!raf) alles();
+  });
+  /* Plus- und Minus-Knöpfe: am Handy lässt sich der Schieber (72 Stufen) schlecht genau stellen (Prüfer U07) */
+  Array.prototype.forEach.call(document.querySelectorAll("button.pm"), function (k) {
+    k.addEventListener("click", function () {
+      var r = document.getElementById(k.dataset.ziel), st = parseInt(k.dataset.schritt, 10);
+      var neu = Math.min(parseInt(r.max, 10), Math.max(parseInt(r.min, 10), parseInt(r.value, 10) + st));
+      r.value = neu;
+      r.dispatchEvent(new Event("input"));
+    });
   });
   window.addEventListener("resize", function () { if (!raf) alles(); });
   if (ruhig) knopf.textContent = "Weiterdrehen um 15°";
