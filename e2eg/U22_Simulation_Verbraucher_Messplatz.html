@@ -1,0 +1,268 @@
+<!doctype html>
+<!-- E2EG U22 · Messplatz: mehrere Verbraucher an einem Netz (neu 13.10.2026, Aufgabe IN der Stunde nach dem Muster
+     E1EG Block 07). Ersetzt für U22 die alte Seite U22_Simulation_Wirkfaktor.html (bleibt online unverändert): Die alte
+     Seite rechnete aus drei Schiebern (Motorleistung, Wirkfaktor, Heizleistung) Leistungen, Strom und gemeinsamen
+     Wirkfaktor fertig vor, zeichnete das Dreieck, nannte die Formeln im Fuß und deutete selbst („Der Motor allein hätte
+     cos φ = …, gemeinsam sind es …“); sie öffnete mit den Werten der Hausaufgabe. Ein Formelrechner, kein Messplatz.
+     Vorlagen: Rechenbuch S. 121, Bild 2 (Messschaltung: Strommesser und Leistungsmesser in der Zuleitung, Spannungsmesser,
+     Motor 1~); Rechenbuch S. 111, Bild 5 (L und N waagerecht, „50 Hz 230 V“, Verbraucher dazwischen, Heizwiderstand E1);
+     Europa Fachkunde S. 178 (Wirk- und Blindleistungsmessung: Strompfad im Außenleiter, Spannungspfad zwischen L und N)
+     und der Messplatz von U21 (gleiches Aussehen der Messgeräte).
+     Verbraucher (Effektivwerte, U = 230 V):
+       Motor       Wechselstrommotor aus Rechenbuch S. 121, Beispiel: 5,2 A, 820 W; Q = √(1196² − 820²) var = 870,64 var
+       Heizkörper  1000 W, rein wirksam (Q = 0)
+       Leuchten    3 Leuchten mit Leuchtstofflampe 58 W und Vorschaltgerät (Drosselspule), je 69 W bei cos φ = 0,5
+                   (Europa Fachkunde S. 143, Beispiel): P = 207 W, Q = 207 W · tan 60° = 358,53 var
+     Rechenmodell: P = Summe der eingeschalteten P, Q = Summe der eingeschalteten Q (alle induktiv oder rein wirksam),
+       S = √(P² + Q²), I = S / U (Tabellenbuch S. 37, Formel 1 und 11).
+     Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht und zeigt weder S noch cos φ):
+       (1) Wirk- und Blindleistungen der Verbraucher addieren sich (Leistungsmesser, Blindleistungsmesser).
+       (2) Die Ströme addieren sich nicht: Motor und Heizkörper 5,200 A und 4,348 A, zusammen 8,772 A.
+       (3) Der Motor nimmt weniger Wirkleistung auf als der Heizkörper und braucht trotzdem den größeren Strom.
+     Anzeigen mit vier geltenden Ziffern wie U21 (5,200 A; 820,0 W; 870,6 var); null als 0,0.
+     Zeilen des Arbeitsblatts: 1) Motor 5,200 A; 820,0 W; 870,6 var. 2) Heizkörper 4,348 A; 1000 W; 0,0 var.
+       3) Leuchten 1,800 A; 207,0 W; 358,5 var. 4) Motor und Heizkörper 8,772 A; 1820 W; 870,6 var.
+       Prüfung (Aufgabe 4): alle drei 10,31 A; 2027 W; 1229 var.
+     Startstellung neutral: alle Verbraucher aus (Strommesser 0,0 A).
+     Prüfmodus ?pruefen: Anzeigen aller acht Schaltzustände als JSON in #pruefbericht. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Verbraucher am Netz (U22)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"Motor":"aus","Heizkörper":"aus","Leuchten":"aus"},"loesungswerte":{"Zeile 1: Motor":"230,0 V; 5,200 A; 820,0 W; 870,6 var","Zeile 2: Heizkörper":"230,0 V; 4,348 A; 1000 W; 0,0 var","Zeile 3: Leuchten":"230,0 V; 1,800 A; 207,0 W; 358,5 var","Zeile 4: Motor und Heizkörper":"230,0 V; 8,772 A; 1820 W; 870,6 var","Aufgabe 4: alle drei":"230,0 V; 10,31 A; 2027 W; 1229 var","Erkenntnis":"Wirk- und Blindleistungen addieren sich, die Ströme nicht; der Motor braucht für weniger Wirkleistung mehr Strom als der Heizkörper"},"quelle":"Rechenbuch S. 121 Beispiel und Bild 2, S. 111 Bild 5; Europa Fachkunde S. 143 (Leuchtstofflampe 58 W, Vorschaltgerät 11 W, cos φ 0,5), S. 178; Tabellenbuch Elektrotechnik S. 37"}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;
+       --u:#0B7BC0;--i:#C2006B}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:980px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px;align-items:start;
+         grid-template-areas:"geraete" "wahl" "schaltung" "angaben"}
+ .schaltung{grid-area:schaltung} .geraete{grid-area:geraete} .wahl{grid-area:wahl} .angaben{grid-area:angaben}
+ @media(min-width:760px){.buehne{grid-template-columns:1.3fr 1fr;grid-template-areas:"schaltung geraete" "angaben wahl"}}
+ .schaltung{border:3px solid var(--ink);background:#FFFDF4;padding:6px;border-radius:6px}
+ svg{width:100%;height:auto;display:block}
+ .geraete{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+ .geraet{border:3px solid var(--ink);background:var(--hell);padding:8px 10px;border-radius:6px;min-width:0}
+ .geraet .name{font-size:14px;font-weight:700;color:var(--grau);line-height:1.25}
+ .geraet .name b{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:26px;padding:0 3px;border:2px solid var(--ink);border-radius:13px;color:var(--ink);margin-right:6px;font-size:13px;vertical-align:middle}
+ .lcd{background:#20313a;color:#9BF0B4;font-variant-numeric:tabular-nums;font-size:30px;font-weight:700;padding:6px 10px;margin:6px 0 2px;border-radius:4px;text-align:right;white-space:nowrap}
+ .geraet .art{font-size:13px;color:var(--grau)}
+ .wahl{margin:0}
+ .wahl .titel{font-size:15px;font-weight:700;margin:10px 0 5px}
+ .wahl .titel:first-child{margin-top:0}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+ button{font:inherit;font-size:16px;min-height:48px;min-width:64px;padding:6px 12px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+ button.an{background:var(--kupfer);color:#fff}
+ button.zurueck{border-color:var(--ink);color:var(--ink)}
+ .angaben{border:3px solid var(--ink);background:#fff;padding:8px 12px;border-radius:6px;font-size:15px}
+ .angaben .titel{font-weight:700;margin-bottom:4px}
+ .angaben ul{margin:0;padding-left:20px}
+ .angaben li{margin:3px 0}
+ .fz{font-family:Cambria,Caladea,'Noto Serif',Georgia,serif;font-style:italic}
+ .hinweis{font-size:14px;color:var(--grau);margin-top:10px}
+ #pruefbericht{display:none}
+ @media(max-width:420px){.lcd{font-size:23px;padding:6px 7px} button{min-width:54px;padding:6px 10px;font-size:15px} .wrap{padding:14px 12px 20px} .geraet{padding:8px 7px} .geraet .name{font-size:12px} .geraet .name b{min-width:21px;height:21px;font-size:11px;margin-right:3px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E2EG · LF 5 · U22</div><h1>Messplatz: Verbraucher an einem Netz</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Schalten Sie die Verbraucher mit ihren Schaltern ein und aus.
+  Strommesser, Leistungsmesser und Blindleistungsmesser liegen in der gemeinsamen Zuleitung. Alle Messgeräte zeigen
+  Effektivwerte.</div>
+
+ <div class="buehne">
+  <div class="schaltung">
+   <svg viewBox="0 0 560 320" role="img" aria-label="Schaltung: Netz 230 V, 50 Hz mit Außenleiter L und Neutralleiter N. In der Zuleitung L liegen Strommesser, Leistungsmesser und Blindleistungsmesser, der Spannungsmesser liegt zwischen L und N. Dahinter drei Verbraucher parallel, jeder mit eigenem Schalter: Motor, Heizkörper und Leuchten mit Vorschaltgerät.">
+    <g fill="none" stroke="#1A2530" stroke-width="2.6" stroke-linecap="round">
+     <!-- Außenleiter L mit Strommesser, Leistungsmesser, Blindleistungsmesser -->
+     <polyline points="30,50 70,50"/>
+     <polyline points="106,50 132,50"/>
+     <polyline points="168,50 194,50"/>
+     <polyline points="230,50 510,50"/>
+     <!-- Neutralleiter N -->
+     <polyline points="30,272 510,272"/>
+     <!-- Spannungspfade von Leistungsmesser und Blindleistungsmesser zwischen L und N -->
+     <polyline points="150,68 150,272"/>
+     <polyline points="212,68 212,272"/>
+     <!-- Spannungsmesser -->
+     <polyline points="268,50 268,143"/>
+     <polyline points="268,179 268,272"/>
+     <!-- Messgeräte -->
+     <circle cx="88" cy="50" r="18" fill="#fff"/>
+     <circle cx="150" cy="50" r="18" fill="#fff"/>
+     <circle cx="212" cy="50" r="18" fill="#fff"/>
+     <circle cx="268" cy="161" r="18" fill="#fff"/>
+     <!-- Zweig Motor: Leitung, Schalter, Motor -->
+     <polyline points="338,50 338,80"/>
+     <polyline points="338,112 338,150"/>
+     <circle cx="338" cy="176" r="26" fill="#fff"/>
+     <polyline points="338,202 338,272"/>
+     <!-- Zweig Heizkörper: Heizwiderstand wie Rechenbuch S. 111, Bild 5 -->
+     <polyline points="424,50 424,80"/>
+     <polyline points="424,112 424,146"/>
+     <rect x="413" y="146" width="22" height="60" fill="#fff"/>
+     <polyline points="413,161 435,161"/><polyline points="413,176 435,176"/><polyline points="413,191 435,191"/>
+     <polyline points="424,206 424,272"/>
+     <!-- Zweig Leuchten: Drosselspule (Vorschaltgerät) und Leuchte -->
+     <polyline points="510,50 510,80"/>
+     <polyline points="510,112 510,128"/>
+     <path d="M510,128 a8,8 0 0 1 0,16 a8,8 0 0 1 0,16 a8,8 0 0 1 0,16 a8,8 0 0 1 0,16"/>
+     <polyline points="510,192 510,206"/>
+     <circle cx="510" cy="222" r="16" fill="#fff"/>
+     <polyline points="498.7,210.7 521.3,233.3"/><polyline points="521.3,210.7 498.7,233.3"/>
+     <polyline points="510,238 510,272"/>
+    </g>
+    <!-- Schalter (Schließer): fester Kontakt oben bei y = 80, Schaltstück dreht um den unteren Punkt y = 112 -->
+    <g fill="none" stroke="#A34E0E" stroke-width="3" stroke-linecap="round">
+     <line id="sM" x1="338" y1="112" x2="320" y2="84"/>
+     <line id="sH" x1="424" y1="112" x2="406" y2="84"/>
+     <line id="sL" x1="510" y1="112" x2="492" y2="84"/>
+    </g>
+    <g fill="#1A2530">
+     <circle cx="150" cy="272" r="4.5"/><circle cx="212" cy="272" r="4.5"/>
+     <circle cx="268" cy="50" r="4.5"/><circle cx="268" cy="272" r="4.5"/>
+     <circle cx="338" cy="50" r="4.5"/><circle cx="424" cy="50" r="4.5"/>
+     <circle cx="338" cy="272" r="4.5"/><circle cx="424" cy="272" r="4.5"/>
+     <circle cx="338" cy="112" r="3.5"/><circle cx="424" cy="112" r="3.5"/><circle cx="510" cy="112" r="3.5"/>
+    </g>
+    <g font-family="Arial,sans-serif" font-size="21" font-weight="700" fill="#1A2530" text-anchor="middle">
+     <text x="88" y="58">A</text><text x="150" y="58">W</text><text x="212" y="56" font-size="15">var</text>
+     <text x="268" y="169">V</text>
+     <text x="338" y="174">M</text><text x="338" y="194" font-size="15" font-weight="400">1~</text>
+     <text x="16" y="57" font-size="18">L</text><text x="16" y="279" font-size="18">N</text>
+    </g>
+    <g font-family="Arial,sans-serif" font-size="16" fill="#1A2530" text-anchor="middle">
+     <text x="56" y="26" text-anchor="start">50 Hz 230 V</text>
+     <text x="338" y="300">Motor</text><text x="424" y="300">Heizkörper</text><text x="510" y="300">Leuchten</text>
+     <text x="442" y="182" font-size="15" text-anchor="start">E1</text>
+     <text x="489" y="227" font-size="15" text-anchor="end">3 ×</text>
+    </g>
+    <g font-family="Cambria,Caladea,'Noto Serif',Georgia,serif" font-style="italic" font-size="22">
+     <text x="47" y="100" fill="#C2006B" text-anchor="middle">I</text>
+     <text x="232" y="168" fill="#0B7BC0" text-anchor="middle">U</text>
+    </g>
+    <path d="M34,74 L58,74" stroke="#C2006B" stroke-width="2.6"/><path d="M62,74 l-10,-5 l0,10 z" fill="#C2006B"/>
+    <path d="M246,136 L246,186" stroke="#0B7BC0" stroke-width="2.6"/><path d="M246,190 l-5,-10 l10,0 z" fill="#0B7BC0"/>
+   </svg>
+  </div>
+  <div class="wahl">
+   <div class="titel">Motor</div>
+   <div class="knoepfe" id="schalterM"></div>
+   <div class="titel">Heizkörper</div>
+   <div class="knoepfe" id="schalterH"></div>
+   <div class="titel">Leuchten</div>
+   <div class="knoepfe" id="schalterL"></div>
+   <div class="titel">Neu beginnen</div>
+   <div class="knoepfe"><button class="zurueck" id="bReset" type="button">Zurücksetzen</button></div>
+  </div>
+  <div class="geraete">
+   <div class="geraet">
+    <div class="name"><b>A</b>Strommesser <span class="fz">I</span></div>
+    <div class="lcd" id="aI" aria-live="polite">0,0 A</div>
+    <div class="art">in der Zuleitung</div>
+   </div>
+   <div class="geraet">
+    <div class="name"><b>V</b>Spannungsmesser <span class="fz">U</span></div>
+    <div class="lcd" id="aU" aria-live="polite">230,0 V</div>
+    <div class="art">zwischen L und N</div>
+   </div>
+   <div class="geraet">
+    <div class="name"><b>W</b>Leistungsmesser <span class="fz">P</span></div>
+    <div class="lcd" id="aP" aria-live="polite">0,0 W</div>
+    <div class="art">Strompfad in der Zuleitung</div>
+   </div>
+   <div class="geraet">
+    <div class="name"><b>var</b>Blindleistungsmesser <span class="fz">Q</span></div>
+    <div class="lcd" id="aQ" aria-live="polite">0,0 var</div>
+    <div class="art">Strompfad in der Zuleitung</div>
+   </div>
+  </div>
+  <div class="angaben">
+   <div class="titel">Die Verbraucher</div>
+   <ul>
+    <li><b>Motor:</b> Wechselstrommotor 230 V, läuft mit fester Belastung.</li>
+    <li><b>Heizkörper:</b> 230 V, 1000 W.</li>
+    <li><b>Leuchten:</b> 3 Leuchten mit Leuchtstofflampe 58 W und Vorschaltgerät (Drosselspule).</li>
+   </ul>
+  </div>
+ </div>
+
+ <div class="hinweis">Leistungsmesser und Blindleistungsmesser haben ihren Strompfad in der Zuleitung L und ihren
+  Spannungspfad zwischen L und N. Ein Schalter in der Stellung „ein“ ist geschlossen: Der Verbraucher liegt am Netz.</div>
+ <pre id="pruefbericht"></pre>
+</div>
+
+<script>
+(function(){
+"use strict";
+var U0=230;                                               // V, fest
+// Wirkleistung P in W und Blindleistung Q in var je Verbraucher (siehe Kopfkommentar)
+var V={M:{P:820, Q:Math.sqrt(1196*1196-820*820)}, H:{P:1000, Q:0}, L:{P:207, Q:207*Math.tan(Math.PI/3)}};
+var START={M:false,H:false,L:false};
+var zustand={M:START.M,H:START.H,L:START.L};
+var $=function(id){return document.getElementById(id);};
+
+function komma(s){return String(s).replace(".",",");}
+function werte(s){
+  var P=0,Q=0;
+  ["M","H","L"].forEach(function(k){ if(s[k]){ P+=V[k].P; Q+=V[k].Q; } });
+  var S=Math.sqrt(P*P+Q*Q);
+  return {P:P, Q:Q, I:S/U0, U:U0};
+}
+// vier geltende Ziffern wie ein Digitalmessgerät: 5,200 A; 820,0 W; 870,6 var; 1820 W; null als 0,0
+function vier(x){ if(x===0) return "0,0"; var t=x.toPrecision(4); if(t.indexOf("e")>=0) t=String(Math.round(x)); return komma(t); }
+
+function schalterreihe(id, k, name){
+  [false,true].forEach(function(a){
+    var b=document.createElement("button"); b.type="button"; b.textContent=a?"ein":"aus"; b.dataset.wert=String(a);
+    b.setAttribute("aria-label",name+(a?" einschalten":" ausschalten"));
+    b.onclick=function(){zustand[k]=a;auffrischen();}; $(id).appendChild(b);
+  });
+}
+function markiere(id,wert){
+  Array.prototype.forEach.call($(id).children,function(b){b.classList.toggle("an",b.dataset.wert===String(wert));});
+}
+// Schaltstück: offen schräg nach links oben, geschlossen senkrecht auf den festen Kontakt (y = 80)
+var GELENK={M:338,H:424,L:510};
+function schalterbild(k,an){
+  var l=$("s"+k), x=GELENK[k];
+  l.setAttribute("x2", an? x : x-18); l.setAttribute("y2", an? 80 : 84);
+}
+function auffrischen(){
+  ["M","H","L"].forEach(function(k){ markiere("schalter"+k,zustand[k]); schalterbild(k,zustand[k]); });
+  var w=werte(zustand);
+  $("aI").textContent=vier(w.I)+" A"; $("aU").textContent=vier(w.U)+" V";
+  $("aP").textContent=vier(w.P)+" W"; $("aQ").textContent=vier(w.Q)+" var";
+}
+function zuruecksetzen(){ zustand={M:START.M,H:START.H,L:START.L}; auffrischen(); }
+
+schalterreihe("schalterM","M","Motor");
+schalterreihe("schalterH","H","Heizkörper");
+schalterreihe("schalterL","L","Leuchten");
+$("bReset").onclick=zuruecksetzen;
+
+// ---------- Prüfmodus: alle acht Schaltzustände, Probe aus den angezeigten Ziffern ----------
+if (/[?&]pruefen\b/.test(location.search)) {
+  var bericht=[];
+  [false,true].forEach(function(m){ [false,true].forEach(function(h){ [false,true].forEach(function(l){
+    var st={M:m,H:h,L:l}, w=werte(st);
+    function z(s){return parseFloat(s.replace(",","."));}
+    var ia=z(vier(w.I)), pa=z(vier(w.P)), qa=z(vier(w.Q));
+    bericht.push({Motor:m, Heizkoerper:h, Leuchten:l, U:vier(w.U)+" V", I:vier(w.I)+" A", P:vier(w.P)+" W",
+                  Q:vier(w.Q)+" var", UI_aus_Anzeige:Math.round(230*ia*1000)/1000,
+                  Wurzel_aus_Anzeigen:Math.round(Math.sqrt(pa*pa+qa*qa)*1000)/1000,
+                  cos:w.P? Math.round(w.P/Math.sqrt(w.P*w.P+w.Q*w.Q)*10000)/10000 : null});
+  }); }); });
+  $("pruefbericht").textContent=JSON.stringify(bericht);
+}
+zuruecksetzen();
+// Für Bildschirmfotos der Präsentation: window.__stelle({M:true,H:true,L:false})
+window.__stelle=function(s){ zustand={M:!!s.M,H:!!s.H,L:!!s.L}; auffrischen(); };
+})();
+</script>
+</body></html>
