@@ -1,0 +1,269 @@
+<!doctype html>
+<!-- E2EG U19 · Messplatz: Wirkwiderstand und Spule oder Kondensator parallel (neu 13.10.2026, Aufgabe IN der Stunde
+     nach dem Muster E1EG Block 07). Ersetzt für die Stunde die alte U19_Simulation_Parallel.html (bleibt online): Die
+     alte Seite zeichnete das Stromdreieck fertig, rechnete Z, I und φ aus, nannte die Formeln und deutete den Vergleich
+     in einer eigenen Zeile vor ("Z liegt 27 Ω darunter"); die Schüler hatten nichts selbst zu finden.
+     Gegenstück zu den Messplätzen der Reihenschaltung in U15 und U16 (U15_Simulation_RL_Reihe_Messplatz.html,
+     U16_Simulation_RC_Reihe_Messplatz.html): gleiche Bedienung, gleiche Messgeräte, gleiche Farben.
+     Vorlage des Versuchs: Europa Fachkunde S. 146, Versuch und Bild a) (Generator 50 Hz, ein Strommesser in der
+     Zuleitung, je ein Strommesser im Kondensatorzweig und im Zweig des Wirkwiderstands); Schaltzeichen und Anordnung wie
+     dort und wie S. 139, Bild 1 a) (Spulenzweig links, Wirkwiderstand rechts).
+     Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht und rechnet nichts vor):
+       In jeder Einstellung ist I_w + I_b größer als der Gesamtstrom I: Die Zweigströme addieren sich geometrisch.
+       Das Stromdreieck zeichnen die Schüler auf dem Arbeitsblatt selbst; mit der gemeinsamen Spannung U bestimmen sie
+       die Leitwerte G = I_w / U, B = I_b / U, Y = I / U.
+     Rechenmodell (ideale Spule, idealer Kondensator; Fachkunde S. 139 und 146; Tabellenbuch S. 41, Formel 2 und 3):
+       X_L = 2π · 50 Hz · L,  X_C = 1 / (2π · 50 Hz · C),  I_w = U / R,  I_b = U / X,  I = √(I_w² + I_b²)
+       (Effektivwerte), U = 10 V.
+     Anzeigen: Strommesser und Spannungsmesser mit vier geltenden Ziffern (50,00 mA; 53,05 mA; 72,90 mA; 10,00 V).
+       Für alle 24 Einstellungen ergibt √(I_w² + I_b²) aus den angezeigten Ziffern auf vier Ziffern wieder die Anzeige
+       des Gesamtstroms (geprüft, ?pruefen). Deshalb R = 100, 200, 250, 400 Ω: Mit 300 Ω (33,33 mA) wichen zwei
+       Einstellungen in der letzten Ziffer ab.
+       Zeile 1 des Arbeitsblatts (200 Ω, Spule 0,6 H): 50,00 mA; 53,05 mA; 72,90 mA; 10,00 V.
+       Zeile 2 (200 Ω, Kondensator 10 µF): 50,00 mA; 31,42 mA; 59,05 mA; 10,00 V.
+     Startstellung neutral: Generator aus (alle Anzeigen null), Spule, R = 250 Ω, L = 1,2 H, C = 5 µF (keine Zeile des
+     Arbeitsblatts). Prüfmodus ?pruefen: Anzeigen aller Einstellungen als JSON in #pruefbericht. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Wirkwiderstand und Spule oder Kondensator parallel (U19)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"generator":"aus","bauteil":"Spule","R_Ohm":250,"L_H":1.2,"C_uF":5},"loesungswerte":{"Zeile 1: 200 Ohm, Spule 0,6 H":"50,00 mA; 53,05 mA; 72,90 mA; 10,00 V","Zeile 2: 200 Ohm, Kondensator 10 µF":"50,00 mA; 31,42 mA; 59,05 mA; 10,00 V","Erkenntnis":"I_w + I_b ist größer als I; die Zweigströme addieren sich geometrisch"},"quelle":"Europa Fachkunde S. 139 (Bild 1 a), S. 146 (Versuch, Bild a); Tabellenbuch Elektrotechnik S. 41, Formel 2 und 3"}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;
+       --u:#0B7BC0;--i:#C2006B}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:980px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px;align-items:start;
+         grid-template-areas:"geraete" "wahl" "schaltung"}
+ .schaltung{grid-area:schaltung} .geraete{grid-area:geraete} .wahl{grid-area:wahl}
+ @media(min-width:760px){.buehne{grid-template-columns:1.25fr 1fr;grid-template-areas:"schaltung wahl" "geraete wahl"}}
+ .schaltung{border:3px solid var(--ink);background:#FFFDF4;padding:6px;border-radius:6px}
+ svg{width:100%;height:auto;display:block}
+ .geraete{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+ .geraet{border:3px solid var(--ink);background:var(--hell);padding:8px 10px;border-radius:6px}
+ .geraet .name{font-size:14px;font-weight:700;color:var(--grau);line-height:1.25}
+ .geraet .name b{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border:2px solid var(--ink);border-radius:50%;color:var(--ink);margin-right:6px;font-size:14px;vertical-align:middle}
+ .lcd{background:#20313a;color:#9BF0B4;font-variant-numeric:tabular-nums;font-size:30px;font-weight:700;padding:6px 10px;margin:6px 0 2px;border-radius:4px;text-align:right;white-space:nowrap}
+ .geraet .art{font-size:13px;color:var(--grau)}
+ .quelle{grid-column:1/-1;border:3px solid var(--ink);background:#fff;padding:8px 10px;border-radius:6px;font-size:15px}
+ .quelle b{color:var(--kupfer)}
+ .wahl{margin:0}
+ .wahl .titel{font-size:15px;font-weight:700;margin:10px 0 5px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+ button{font:inherit;font-size:16px;min-height:48px;min-width:64px;padding:6px 12px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+ button.an{background:var(--kupfer);color:#fff}
+ button.zurueck{border-color:var(--ink);color:var(--ink)}
+ .fz{font-family:Cambria,Caladea,'Noto Serif',Georgia,serif;font-style:italic}
+ .verborgen{display:none}
+ .hinweis{font-size:14px;color:var(--grau);margin-top:10px}
+ #pruefbericht{display:none}
+ @media(max-width:420px){.lcd{font-size:23px;padding:6px 7px} button{min-width:56px;padding:6px 9px;font-size:15px} .wrap{padding:14px 12px 20px} .geraet{padding:8px 7px} .geraet .name{font-size:12px} .geraet .name b{width:21px;height:21px;font-size:12px;margin-right:3px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E2EG · LF 5 · U19</div><h1>Messplatz: Wirkwiderstand und Spule oder Kondensator parallel</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Generator einschalten, dann das Bauteil wählen und den Wirkwiderstand
+  und die Spule oder den Kondensator einstellen. Die drei Strommesser und der Spannungsmesser zeigen Effektivwerte.</div>
+
+ <div class="buehne">
+  <div class="schaltung">
+   <svg viewBox="0 0 520 300" role="img" aria-label="Schaltung: Generator mit einem Strommesser in der Zuleitung. Zwei Zweige liegen parallel: links ein Strommesser und die Spule oder der Kondensator, rechts ein Strommesser und der Wirkwiderstand R. Ein Spannungsmesser misst die Spannung an beiden Zweigen.">
+    <g fill="none" stroke="#1A2530" stroke-width="2.6" stroke-linecap="round">
+     <!-- Generator -->
+     <rect x="34" y="119" width="52" height="62" fill="#fff"/>
+     <!-- Zuleitung mit Strommesser -->
+     <polyline points="60,119 60,50 107,50"/>
+     <polyline points="143,50 470,50 470,138"/>
+     <circle cx="125" cy="50" r="18" fill="#fff"/>
+     <!-- Blindzweig: Strommesser, dann Spule oder Kondensator -->
+     <polyline points="230,50 230,82"/>
+     <circle cx="230" cy="100" r="18" fill="#fff"/>
+     <polyline points="230,118 230,150"/>
+     <g id="symL">
+      <path d="M230,150 a7.5,7.5 0 0,1 0,15 a7.5,7.5 0 0,1 0,15 a7.5,7.5 0 0,1 0,15 a7.5,7.5 0 0,1 0,15"/>
+     </g>
+     <g id="symC" class="verborgen">
+      <polyline points="230,150 230,175"/>
+      <line x1="212" y1="175" x2="248" y2="175" stroke-width="3.4"/>
+      <line x1="212" y1="185" x2="248" y2="185" stroke-width="3.4"/>
+      <polyline points="230,185 230,210"/>
+     </g>
+     <polyline points="230,210 230,262"/>
+     <!-- Zweig des Wirkwiderstands: Strommesser, dann R -->
+     <polyline points="370,50 370,82"/>
+     <circle cx="370" cy="100" r="18" fill="#fff"/>
+     <polyline points="370,118 370,150"/>
+     <rect x="359" y="150" width="22" height="60" fill="#fff"/>
+     <polyline points="370,210 370,262"/>
+     <!-- Spannungsmesser an beiden Zweigen -->
+     <circle cx="470" cy="156" r="18" fill="#fff"/>
+     <polyline points="470,174 470,262 60,262 60,181"/>
+    </g>
+    <g fill="#1A2530">
+     <circle cx="230" cy="50" r="4.5"/><circle cx="370" cy="50" r="4.5"/>
+     <circle cx="230" cy="262" r="4.5"/><circle cx="370" cy="262" r="4.5"/>
+    </g>
+    <g font-family="Arial,sans-serif" font-size="22" font-weight="700" fill="#1A2530" text-anchor="middle">
+     <text x="125" y="58">A</text><text x="230" y="108">A</text><text x="370" y="108">A</text><text x="470" y="164">V</text>
+     <text x="60" y="147">G</text><text x="60" y="171" font-weight="400">~</text>
+    </g>
+    <g font-family="Cambria,Caladea,'Noto Serif',Georgia,serif" font-style="italic" font-size="22" text-anchor="middle">
+     <text x="340" y="187" fill="#1A2530">R</text>
+     <text id="symName" x="198" y="187" fill="#1A2530">L</text>
+     <text x="84" y="22" fill="#C2006B">I</text>
+     <text x="270" y="140" fill="#C2006B">I<tspan font-size="15" dy="5" font-style="normal" id="symIndex">bL</tspan></text>
+     <text x="406" y="140" fill="#C2006B">I<tspan font-size="15" dy="5" font-style="normal">w</tspan></text>
+     <text x="501" y="70" fill="#0B7BC0">U</text>
+    </g>
+    <g stroke="#0B7BC0" stroke-width="2.6" fill="#0B7BC0">
+     <path d="M501,80 L501,230" fill="none"/><path d="M501,234 l-5,-10 l10,0 z" stroke="none"/>
+    </g>
+    <g stroke="#C2006B" stroke-width="2.6" fill="#C2006B">
+     <path d="M70,32 L96,32" fill="none"/><path d="M98,32 l-10,-5 l0,10 z" stroke="none"/>
+     <path d="M250,124 L250,150" fill="none"/><path d="M250,152 l-5,-10 l10,0 z" stroke="none"/>
+     <path d="M390,124 L390,150" fill="none"/><path d="M390,152 l-5,-10 l10,0 z" stroke="none"/>
+    </g>
+   </svg>
+  </div>
+  <div class="geraete">
+   <div class="geraet">
+    <div class="name"><b>A</b>Gesamtstrom <span class="fz">I</span></div>
+    <div class="lcd" id="aI" aria-live="polite">0,00 mA</div>
+    <div class="art">in der Zuleitung</div>
+   </div>
+   <div class="geraet">
+    <div class="name"><b>V</b>Spannung <span class="fz">U</span></div>
+    <div class="lcd" id="aU" aria-live="polite">0,000 V</div>
+    <div class="art">an beiden Zweigen</div>
+   </div>
+   <div class="geraet">
+    <div class="name"><b>A</b>Wirkstrom <span class="fz">I</span><sub>w</sub></div>
+    <div class="lcd" id="aIw" aria-live="polite">0,00 mA</div>
+    <div class="art">im Zweig des Wirkwiderstands</div>
+   </div>
+   <div class="geraet">
+    <div class="name"><b>A</b>Blindstrom <span class="fz">I</span><sub id="nIndex">bL</sub></div>
+    <div class="lcd" id="aIb" aria-live="polite">0,00 mA</div>
+    <div class="art" id="nArt">im Zweig der Spule</div>
+   </div>
+   <div class="quelle">Funktionsgenerator: Sinus, <b>10 V, 50 Hz</b> (fest), <b id="aG">aus</b><br>
+    <span class="fz">R</span> = <b id="aR"></b>,&nbsp; <span id="aXname"></span> = <b id="aX"></b></div>
+  </div>
+  <div class="wahl">
+   <div class="titel">1. Generator</div>
+   <div class="knoepfe" id="generator"></div>
+   <div class="titel">2. Bauteil im linken Zweig</div>
+   <div class="knoepfe" id="bauteile"></div>
+   <div class="titel">3. Wirkwiderstand <span class="fz">R</span></div>
+   <div class="knoepfe" id="widerstaende"></div>
+   <div id="wahlL">
+    <div class="titel">4. Spule <span class="fz">L</span></div>
+    <div class="knoepfe" id="spulen"></div>
+   </div>
+   <div id="wahlC" class="verborgen">
+    <div class="titel">4. Kondensator <span class="fz">C</span></div>
+    <div class="knoepfe" id="kondensatoren"></div>
+   </div>
+   <div class="titel">5. Neu beginnen</div>
+   <div class="knoepfe"><button class="zurueck" id="bReset" type="button">Zurücksetzen</button></div>
+  </div>
+ </div>
+
+ <div class="hinweis">Ideale Spule und idealer Kondensator: Sie haben keinen Wirkwiderstand. Der Generator hält die
+  Spannung fest auf 10 V.</div>
+ <pre id="pruefbericht"></pre>
+</div>
+
+<script>
+(function(){
+"use strict";
+var F=50, U0=10;                                     // Hz und V, fest
+var WIDERSTAENDE=[100,200,250,400];                  // Ω
+var SPULEN=[0.3,0.6,1.2];                            // H
+var KONDENSATOREN=[5,10,20];                         // µF
+var START={an:false,bauteil:"L",R:250,L:1.2,C:5};
+var zustand={};
+var $=function(id){return document.getElementById(id);};
+
+function komma(s){return String(s).replace(".",",");}
+function xl(L){return 2*Math.PI*F*L;}               // Ω, L in H
+function xc(C){return 1/(2*Math.PI*F*C*1e-6);}      // Ω, C in µF
+function blindwiderstand(s){return s.bauteil==="L" ? xl(s.L) : xc(s.C);}
+function werte(s){
+  if(!s.an) return {I:0,Iw:0,Ib:0,U:0};
+  var Iw=U0/s.R, Ib=U0/blindwiderstand(s);
+  return {I:Math.sqrt(Iw*Iw+Ib*Ib), Iw:Iw, Ib:Ib, U:U0};
+}
+// vier geltende Ziffern wie ein Digitalmessgerät: 50,00 mA; 53,05 mA; 10,00 V
+function vier(x){ var t=x.toPrecision(4); if(t.indexOf("e")>=0) t=String(Math.round(x)); return komma(t); }
+function vText(U){ return U===0 ? "0,000 V" : vier(U)+" V"; }
+function aText(I){ return I===0 ? "0,00 mA" : vier(I*1000)+" mA"; }
+
+function knopfreihe(id, liste, text, aria, setze){
+  liste.forEach(function(w){
+    var b=document.createElement("button"); b.type="button"; b.innerHTML=text(w); b.dataset.wert=String(w);
+    b.setAttribute("aria-label",aria(w));
+    b.onclick=function(){setze(w);auffrischen();}; $(id).appendChild(b);
+  });
+}
+function markiere(id,wert){
+  Array.prototype.forEach.call($(id).children,function(b){b.classList.toggle("an",b.dataset.wert===String(wert));});
+}
+function auffrischen(){
+  var spule=zustand.bauteil==="L";
+  markiere("generator",zustand.an); markiere("bauteile",zustand.bauteil); markiere("widerstaende",zustand.R);
+  markiere("spulen",zustand.L); markiere("kondensatoren",zustand.C);
+  $("wahlL").classList.toggle("verborgen",!spule); $("wahlC").classList.toggle("verborgen",spule);
+  $("symL").classList.toggle("verborgen",!spule); $("symC").classList.toggle("verborgen",spule);
+  $("symName").textContent=spule?"L":"C";
+  $("symIndex").textContent=spule?"bL":"bC"; $("nIndex").textContent=spule?"bL":"bC";
+  $("nArt").textContent=spule?"im Zweig der Spule":"im Zweig des Kondensators";
+  var w=werte(zustand);
+  $("aI").textContent=aText(w.I); $("aIw").textContent=aText(w.Iw);
+  $("aIb").textContent=aText(w.Ib); $("aU").textContent=vText(w.U);
+  $("aG").textContent=zustand.an?"ein":"aus";
+  $("aR").textContent=zustand.R+" Ω";
+  $("aXname").innerHTML=spule?'<span class="fz">L</span>':'<span class="fz">C</span>';
+  $("aX").textContent=spule?komma(zustand.L)+" H":zustand.C+" µF";
+}
+function zuruecksetzen(){
+  zustand={an:START.an,bauteil:START.bauteil,R:START.R,L:START.L,C:START.C}; auffrischen();
+}
+
+knopfreihe("generator",[false,true],function(a){return a?"ein":"aus";},
+           function(a){return a?"Generator ein":"Generator aus";},function(a){zustand.an=a;});
+knopfreihe("bauteile",["L","C"],function(b){return b==="L"?"Spule":"Kondensator";},
+           function(b){return b==="L"?"Spule im linken Zweig":"Kondensator im linken Zweig";},
+           function(b){zustand.bauteil=b;});
+knopfreihe("widerstaende",WIDERSTAENDE,function(R){return R+" Ω";},function(R){return "Wirkwiderstand "+R+" Ohm";},
+           function(R){zustand.R=R;});
+knopfreihe("spulen",SPULEN,function(L){return komma(L)+" H";},function(L){return "Spule "+komma(L)+" Henry";},
+           function(L){zustand.L=L;});
+knopfreihe("kondensatoren",KONDENSATOREN,function(C){return C+" µF";},function(C){return "Kondensator "+C+" Mikrofarad";},
+           function(C){zustand.C=C;});
+$("bReset").onclick=zuruecksetzen;
+
+// ---------- Prüfmodus: alle Einstellungen, Probe aus den angezeigten Ziffern ----------
+if (/[?&]pruefen\b/.test(location.search)) {
+  var bericht=[], zahl=function(s){return parseFloat(s.split(" ")[0].replace(",","."));};
+  ["L","C"].forEach(function(b){ WIDERSTAENDE.forEach(function(R){ (b==="L"?SPULEN:KONDENSATOREN).forEach(function(x){
+    var st={an:true,bauteil:b,R:R,L:b==="L"?x:0.3,C:b==="C"?x:5}, w=werte(st);
+    var iw=zahl(aText(w.Iw)), ib=zahl(aText(w.Ib)), probe=Math.sqrt(iw*iw+ib*ib);
+    bericht.push({bauteil:b, R:R, wert:x, I:aText(w.I), Iw:aText(w.Iw), Ib:aText(w.Ib), U:vText(w.U),
+                  summe:Math.round((iw+ib)*100)/100, probe:Math.round(probe*10000)/10000,
+                  probe_vier:vier(probe), gleich:vier(probe)+" mA"===aText(w.I),
+                  phi:Math.round(Math.atan2(w.Ib,w.Iw)*180/Math.PI*100)/100});
+  }); }); });
+  $("pruefbericht").textContent=JSON.stringify(bericht);
+}
+zuruecksetzen();
+// Für Bildschirmfotos der Präsentation: window.__stelle({an:true,bauteil:"L",R:200,L:0.6,C:5})
+window.__stelle=function(s){ zustand={an:s.an,bauteil:s.bauteil,R:s.R,L:s.L,C:s.C}; auffrischen(); };
+})();
+</script>
+</body></html>
