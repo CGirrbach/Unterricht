@@ -220,12 +220,16 @@ waagerechten Achse. Rechts steht derselbe Wert im Liniendiagramm.</p>
     ctx.font = G.sz + "px system-ui, sans-serif";
     ctx.textBaseline = "middle";
 
+    /* Maßstab: R Bildpunkte entsprechen 50 V (größter Scheitelwert). Zeigerlänge und Kurvenhöhe wachsen mit û
+       (Prüfer U04: „Seine Länge ist der Scheitelwert“ muss sichtbar sein; doppeltes û, doppelter Zeiger). */
+    var r = R * uDach / 50;
+
     /* Zeigerbild: Achsenkreuz, Kreis mit dem Radius û */
     ctx.strokeStyle = "#C7D2DA"; ctx.lineWidth = 1.5 * lw;
     ctx.beginPath(); ctx.moveTo(CX - R - 24, CY); ctx.lineTo(CX + R + 24, CY);
     ctx.moveTo(CX, CY - R - 24); ctx.lineTo(CX, CY + R + 24); ctx.stroke();
     ctx.strokeStyle = "#1A2530"; ctx.lineWidth = 2 * lw;
-    ctx.beginPath(); ctx.arc(CX, CY, R, 0, 2 * Math.PI); ctx.stroke();
+    ctx.beginPath(); ctx.arc(CX, CY, r, 0, 2 * Math.PI); ctx.stroke();
     ctx.textAlign = "center";
     marke("0°", CX + R + 30 * lw, CY - 16 * lw);
     marke("90°", CX + 30 * lw, CY - R - 22 * lw);
@@ -233,29 +237,39 @@ waagerechten Achse. Rechts steht derselbe Wert im Liniendiagramm.</p>
     marke("270°", CX + 34 * lw, CY + R + 22 * lw);
 
     /* Winkelbogen (blau) */
+    var rb = Math.max(16 * lw, Math.min(38 * lw, 0.6 * r));
     var wr = (w.grad % 360 === 0 && w.grad > 0) ? 2 * Math.PI : rad % (2 * Math.PI);
     if (wr > 1e-9) {
       ctx.strokeStyle = "#2557A3"; ctx.lineWidth = 4 * lw;
-      ctx.beginPath(); ctx.arc(CX, CY, 38 * lw, 0, -wr, true); ctx.stroke();
+      ctx.beginPath(); ctx.arc(CX, CY, rb, 0, -wr, true); ctx.stroke();
     }
     ctx.font = "italic " + G.sz + "px system-ui, sans-serif";
     ctx.textAlign = "center";
-    if (wr > 0.6) marke("α", CX + 22 * lw * Math.cos(wr / 2), CY - 22 * lw * Math.sin(wr / 2), "#2557A3");
-    else marke("α", CX + 60 * lw, CY + 18 * lw, "#2557A3");     /* kleiner Winkel: unter der Achse */
+    if (wr > 0.6 && rb > 30 * lw) marke("α", CX + 0.55 * rb * Math.cos(wr / 2), CY - 0.55 * rb * Math.sin(wr / 2), "#2557A3");
+    else marke("α", CX + rb + 16 * lw, CY + 18 * lw, "#2557A3");     /* kleiner Winkel oder kurzer Zeiger: unter der Achse */
 
     /* Zeiger */
-    var tx = CX + R * c, ty = CY - R * s;
+    var tx = CX + r * c, ty = CY - r * s;
     ctx.strokeStyle = "#1A2530"; ctx.fillStyle = "#1A2530"; ctx.lineWidth = 4 * lw;
-    pfeil(CX, CY, tx, ty, 18 * lw);
+    pfeil(CX, CY, tx, ty, Math.min(18 * lw, 0.45 * r));
     /* Augenblickswert: senkrechter Abstand der Zeigerspitze von der Achse */
     ctx.strokeStyle = "#A34E0E"; ctx.lineWidth = 6 * lw;
     if (Math.abs(s) > 1e-9) { ctx.beginPath(); ctx.moveTo(tx, CY); ctx.lineTo(tx, ty); ctx.stroke(); }
+    /* „û = 40 V“: nur das Formelzeichen kursiv */
     ctx.textAlign = "left";
-    marke("û = " + uDach + " V", CX - R, CY - R - 22 * lw, "#1A2530");
+    var xl = CX - R, yl = CY - R - 22 * lw;
+    marke("û", xl, yl, "#1A2530");
+    var bu = ctx.measureText("û").width;
     ctx.font = G.sz + "px system-ui, sans-serif";
+    marke(" = " + uDach + " V", xl + bu, yl, "#1A2530");
 
-    /* Liniendiagramm: eine Periode */
-    var X0 = G.X0, BW = G.BW, Y0 = G.Y0, A = G.A;
+    /* Liniendiagramm: eine Periode, senkrechte Achse in Volt (Teilung 10 V) */
+    var X0 = G.X0, BW = G.BW, Y0 = G.Y0, A = G.A, a = A * uDach / 50;
+    ctx.strokeStyle = "#E3E8EC"; ctx.lineWidth = 1 * lw;
+    for (var v = 10; v <= 50; v += 10) {
+      ctx.beginPath(); ctx.moveTo(X0, Y0 - A * v / 50); ctx.lineTo(X0 + BW, Y0 - A * v / 50);
+      ctx.moveTo(X0, Y0 + A * v / 50); ctx.lineTo(X0 + BW, Y0 + A * v / 50); ctx.stroke();
+    }
     ctx.strokeStyle = "#1A2530"; ctx.fillStyle = "#1A2530"; ctx.lineWidth = 1.5 * lw;
     pfeil(X0, Y0, X0 + BW + 34 * lw, Y0, 12 * lw);
     pfeil(X0, Y0 + A + 14 * lw, X0, Y0 - A - 26 * lw, 12 * lw);
@@ -263,13 +277,17 @@ waagerechten Achse. Rechts steht derselbe Wert im Liniendiagramm.</p>
       var xs = X0 + BW * k / 4;
       ctx.beginPath(); ctx.moveTo(xs, Y0 - 5 * lw); ctx.lineTo(xs, Y0 + 5 * lw); ctx.stroke();
     }
-    ctx.strokeStyle = "#C7D2DA"; ctx.lineWidth = 1.2 * lw; ctx.setLineDash([5 * lw, 5 * lw]);
-    ctx.beginPath(); ctx.moveTo(X0, Y0 - A); ctx.lineTo(X0 + BW, Y0 - A); ctx.moveTo(X0, Y0 + A); ctx.lineTo(X0 + BW, Y0 + A);
+    for (var v2 = -50; v2 <= 50; v2 += 10) {
+      if (v2 === 0) continue;
+      ctx.beginPath(); ctx.moveTo(X0 - 5 * lw, Y0 - A * v2 / 50); ctx.lineTo(X0, Y0 - A * v2 / 50); ctx.stroke();
+    }
+    ctx.strokeStyle = "#9AA5AE"; ctx.lineWidth = 1.2 * lw; ctx.setLineDash([5 * lw, 5 * lw]);
+    ctx.beginPath(); ctx.moveTo(X0, Y0 - a); ctx.lineTo(X0 + BW, Y0 - a); ctx.moveTo(X0, Y0 + a); ctx.lineTo(X0 + BW, Y0 + a);
     ctx.stroke(); ctx.setLineDash([]);
     /* ganze Periode mittelgrau, der durchlaufene Teil dunkel */
     ctx.strokeStyle = "#8A959D"; ctx.lineWidth = 2.5 * lw; ctx.beginPath();
     for (var i = 0; i <= 360; i += 2) {
-      var x = X0 + BW * i / 360, y = Y0 - A * Math.sin(i * Math.PI / 180);
+      var x = X0 + BW * i / 360, y = Y0 - a * Math.sin(i * Math.PI / 180);
       if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
     }
     ctx.stroke();
@@ -278,12 +296,12 @@ waagerechten Achse. Rechts steht derselbe Wert im Liniendiagramm.</p>
       ctx.strokeStyle = "#1A2530"; ctx.lineWidth = 3.5 * lw; ctx.beginPath();
       var n = Math.max(2, Math.ceil(bis));
       for (var j = 0; j <= n; j++) {
-        var g = bis * j / n, xx = X0 + BW * g / 360, yy = Y0 - A * Math.sin(g * Math.PI / 180);
+        var g = bis * j / n, xx = X0 + BW * g / 360, yy = Y0 - a * Math.sin(g * Math.PI / 180);
         if (j === 0) ctx.moveTo(xx, yy); else ctx.lineTo(xx, yy);
       }
       ctx.stroke();
     }
-    var xe = X0 + BW * Math.min(360, w.grad) / 360, ye = Y0 - A * s;
+    var xe = X0 + BW * Math.min(360, w.grad) / 360, ye = Y0 - a * s;
     ctx.strokeStyle = "#A34E0E"; ctx.lineWidth = 6 * lw;
     if (Math.abs(s) > 1e-9) { ctx.beginPath(); ctx.moveTo(xe, Y0); ctx.lineTo(xe, ye); ctx.stroke(); }
     ctx.fillStyle = "#A34E0E"; ctx.beginPath(); ctx.arc(xe, ye, 6 * lw, 0, 2 * Math.PI); ctx.fill();
@@ -291,14 +309,21 @@ waagerechten Achse. Rechts steht derselbe Wert im Liniendiagramm.</p>
       ctx.strokeStyle = "#9AA5AE"; ctx.lineWidth = 1.2; ctx.setLineDash([5, 5]);
       ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(xe, ye); ctx.stroke(); ctx.setLineDash([]);
     }
-    /* Beschriftung */
+    /* Beschriftung: Achse u in V mit Teilung 10 V */
     ctx.textAlign = "left";
     ctx.font = "italic " + G.sz + "px system-ui, sans-serif";
     marke("u", X0 + 14 * lw, Y0 - A - 24 * lw, "#1A2530");
+    var bu2 = ctx.measureText("u").width;
     ctx.font = G.sz + "px system-ui, sans-serif";
+    marke(" in V", X0 + 14 * lw + bu2, Y0 - A - 24 * lw, "#1A2530");
+    ctx.font = Math.round(G.sz * 0.8) + "px system-ui, sans-serif";
     ctx.textAlign = "right";
-    marke("+û", X0 - 8 * lw, Y0 - A);
-    marke("−û", X0 - 8 * lw, Y0 + A);
+    var schritt = G === SCHMAL ? 20 : 10;                 /* Handy: Zahlen nur alle 20 V, sonst zu eng */
+    for (var v3 = -50; v3 <= 50; v3 += 10) {
+      if (v3 === 0 || v3 % schritt !== 0) continue;
+      marke(String(v3).replace("-", "\u2212"), X0 - 8 * lw, Y0 - A * v3 / 50);
+    }
+    ctx.font = G.sz + "px system-ui, sans-serif";
     ctx.textAlign = "center";
     for (var m = 1; m <= 4; m++) {
       var text = modus === "zeit" ? String(5 * m) : (90 * m) + "°";
