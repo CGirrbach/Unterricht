@@ -1,0 +1,347 @@
+<!doctype html>
+<!-- E2EG U25 · Messplatz: Siebschaltungen (neu 13.10.2026, Aufgabe IN der Stunde nach dem Muster E1EG Block 07 und der
+     Messplätze U15/U16). Ersetzt für den Neubau die alte Seite U25_Simulation_Siebschaltungen.html: Die zeigte die
+     Grenzfrequenz, den Anteil und den Winkel fertig gerechnet an, öffnete genau bei der Grenzfrequenz (70,7 %, 45°)
+     und nannte die Formeln (Eignungsprüfung 13.10.2026). Die alte Adresse bleibt unverändert.
+     Vorlage des Versuchs: Europa Fachkunde S. 154, Versuch („Legen Sie eine Spule, z. B. mit L = 40 mH, in Reihe mit
+     einem Widerstand, z. B. R = 100 Ω, an eine Sinusspannung mit veränderlicher Frequenz … Verändern Sie die Frequenz
+     … von 50 Hz bis 5 kHz. Messen Sie die Spannung U2.“); Schaltungen nach Fachkunde S. 154 Bild 1a und Bild 3a
+     (Spule) und S. 155 Bild 1a und Bild 3a (Kondensator); Phasenmessung am Oszilloskop nach Fachkunde S. 185
+     („Bestimmen der Phasenverschiebung“: φ = Δx · 360° durch x_T, Beispiel 1 div · 360° durch 8 div = 45°) und
+     S. 184 (Taste AUTOSET).
+     Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht und rechnet nichts vor):
+       (1) Schaltung 1 lässt tiefe Frequenzen durch, Schaltung 2 hohe; ihre Kurven schneiden sich bei etwa 400 Hz und
+           etwa 7,07 V (0,707 · U1). (2) An dieser Frequenz (Grenzfrequenz) eilt u2 bei Schaltung 1 um 1 div = 45° nach,
+           bei Schaltung 2 um 45° vor; dort ist X_L = R. (3) Mit Kondensator ist es umgekehrt: Kondensator am Ausgang
+           sperrt hohe Frequenzen.
+     Rechenmodell (ideale Bauteile, Ausgang unbelastet; Tabellenbuch S. 47, Formel 1 bis 3; Rechenbuch S. 122, 123:
+       U2 durch U1 = Z2 durch Z1): komplexe Teilerformel H = Z_aus / (Z_reihe + Z_aus) mit R → R, L → j·2πfL,
+       C → −j / (2πfC); U2 = U1 · |H|, Phasenlage von u2 gegen u1 = arg H (positiv: u2 eilt vor).
+       R = 100 Ω, L = 40 mH, C = 10 µF, U1 = 10 V. Grenzfrequenzen 397,89 Hz (Spule) und 159,15 Hz (Kondensator).
+     Anzeigen: Spannungsmesser mit vier geltenden Ziffern (7,052 V; 0,4967 V). Bei 398 Hz: Schaltung 1 7,070 V,
+       Schaltung 2 7,072 V, u2 1,000 div nach bzw. vor u1.
+     Oszilloskop: AUTOSET hält eine Periode von u1 auf 8 div (1 div ≙ 45°), getriggert auf den Nulldurchgang von u1 von
+       Minus nach Plus am linken Rand; Kanal 1 (u1) und Kanal 2 (u2) je 5 V je div; Bildschirm 10 div × 8 div,
+       Teilstriche 0,2 div.
+     Startstellung neutral: Generator aus (alle Anzeigen null, Nulllinien), Schaltung 1, 1000 Hz (keine Stelle des
+     Arbeitsblatts). Prüfmodus ?pruefen: Anzeigen und Nulldurchgänge aller Einstellungen als JSON in #pruefbericht. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Siebschaltungen (U25)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"generator":"aus","schaltung":1,"f_Hz":1000},"loesungswerte":{"Aufgabe 1, Schaltung 1 (50 bis 3200 Hz)":"9,922; 9,698; 8,935; 7,052; 4,453; 2,413; 1,234 V","Aufgabe 1, Schaltung 2 (50 bis 3200 Hz)":"1,247; 2,437; 4,491; 7,090; 8,954; 9,704; 9,924 V","Aufgabe 3":"f_c = 398 Hz: Schaltung 1 7,070 V, Schaltung 2 7,072 V; u2 1 div nach bzw. vor u1, 45°","Aufgabe 4":"Schaltung 3: 9,540 V und 0,4967 V; Schaltung 4: 2,997 V und 9,988 V","Erkenntnis":"Tiefpass lässt tiefe, Hochpass hohe Frequenzen durch; bei f_c ist U2 = 0,707 · U1, φ = 45°, X = R"},"quelle":"Europa Fachkunde S. 154 (Versuch, Bild 1a, 3a), S. 155 (Bild 1a, 3a), S. 184, S. 185; Tabellenbuch Elektrotechnik S. 47"}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;
+       --u:#0B7BC0;--u2:#C2006B}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:980px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px;align-items:start;
+         grid-template-areas:"geraete" "wahl" "schaltung" "schirm"}
+ .schaltung{grid-area:schaltung} .geraete{grid-area:geraete} .wahl{grid-area:wahl} .schirm{grid-area:schirm}
+ @media(min-width:760px){.buehne{grid-template-columns:1.2fr 1fr;grid-template-areas:"schaltung geraete" "schirm wahl"}}
+ .schaltung{border:3px solid var(--ink);background:#FFFDF4;padding:6px;border-radius:6px}
+ .schaltung .name{font-size:15px;font-weight:700;padding:2px 4px 0}
+ svg{width:100%;height:auto;display:block}
+ .geraete{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+ .geraet{border:3px solid var(--ink);background:var(--hell);padding:8px 10px;border-radius:6px}
+ .geraet.gen{grid-column:1/-1}
+ .geraet .name{font-size:14px;font-weight:700;color:var(--grau);line-height:1.25}
+ .geraet .name b{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:26px;border:2px solid var(--ink);border-radius:50%;color:var(--ink);margin-right:6px;font-size:13px;vertical-align:middle;padding:0 3px}
+ .lcd{background:#20313a;color:#9BF0B4;font-variant-numeric:tabular-nums;font-size:30px;font-weight:700;padding:6px 10px;margin:6px 0 2px;border-radius:4px;text-align:right;white-space:nowrap}
+ .geraet .art{font-size:13px;color:var(--grau)}
+ .schirm{border:3px solid var(--ink);background:#30363c;padding:8px;border-radius:6px}
+ .schirm .titel{color:#fff;font-size:14px;font-weight:700;padding:0 2px 6px}
+ canvas{width:100%;height:auto;display:block;background:#DDE8DC;touch-action:manipulation}
+ .einstellung{display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center;color:#fff;font-size:15px;padding:8px 2px 2px}
+ .einstellung b{color:#FFE66B}
+ .kanal{display:inline-flex;align-items:center;gap:6px}
+ .strich{display:inline-block;width:26px;height:4px;border-radius:2px}
+ .bruch{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;font-size:.78em;line-height:1.05}
+ .bruch>span:first-child{border-bottom:1.3px solid currentColor;padding:0 2px}
+ .bruch>span:last-child{padding:0 2px}
+ .wahl{margin:0}
+ .wahl .titel{font-size:15px;font-weight:700;margin:10px 0 5px}
+ .wahl .titel:first-child{margin-top:0}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+ button{font:inherit;font-size:16px;min-height:48px;min-width:60px;padding:6px 10px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+ button.an{background:var(--kupfer);color:#fff}
+ button.fein{border-color:var(--ink);color:var(--ink)}
+ button.zurueck{border-color:var(--ink);color:var(--ink)}
+ .fz{font-family:Cambria,Caladea,'Noto Serif',Georgia,serif;font-style:italic}
+ .hinweis{font-size:14px;color:var(--grau);margin-top:10px}
+ #pruefbericht{display:none}
+ @media(max-width:420px){.lcd{font-size:23px;padding:6px 7px} button{min-width:54px;padding:6px 8px;font-size:15px} .wrap{padding:14px 12px 20px} .geraet{padding:8px 7px} .geraet .name{font-size:12px} .geraet .name b{min-width:21px;height:21px;font-size:11px;margin-right:3px} .einstellung{font-size:14px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E2EG · LF 5 · U25</div><h1>Messplatz: Siebschaltungen</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Generator einschalten, Schaltung wählen, Frequenz einstellen. Der
+  Spannungsmesser V1 zeigt die Eingangsspannung <span class="fz">U</span><sub>1</sub>, V2 die Ausgangsspannung
+  <span class="fz">U</span><sub>2</sub> (Effektivwerte). Das Zweikanal-Oszilloskop zeigt auf Kanal 1
+  <span class="fz">u</span><sub>1</sub> und auf Kanal 2 <span class="fz">u</span><sub>2</sub>.</div>
+
+ <div class="buehne">
+  <div class="schaltung">
+   <div class="name" id="sName">Schaltung 1</div>
+   <svg viewBox="0 0 520 250" role="img" id="plan" aria-label="Schaltplan der gewählten Schaltung">
+    <g fill="none" stroke="#1A2530" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+     <!-- Generator mit veränderlicher Frequenz (Fachkunde S. 154, Bild 1a) -->
+     <rect x="24" y="98" width="62" height="66" fill="#fff"/>
+     <path d="M18,172 L88,92" stroke-width="2"/><path d="M92,88 l-11,3 l6,7 z" fill="#1A2530" stroke-width="1.5"/>
+     <!-- Leitungen links -->
+     <polyline points="55,98 55,50 200,50"/>
+     <polyline points="55,164 55,212 470,212"/>
+     <!-- Spannungsmesser V1 am Eingang -->
+     <polyline points="155,50 155,111"/><polyline points="155,151 155,212"/>
+     <circle cx="155" cy="131" r="20" fill="#fff"/>
+     <!-- Spannungsmesser V2 am Ausgang -->
+     <polyline points="425,50 425,111"/><polyline points="425,151 425,212"/>
+     <circle cx="425" cy="131" r="20" fill="#fff"/>
+     <!-- Bauteil in Reihe (oben), drei Formen -->
+     <g id="rR"><rect x="200" y="39" width="60" height="22" fill="#fff"/><polyline points="260,50 470,50"/></g>
+     <g id="rL"><path d="M200,50 a7.5,7.5 0 0 1 15,0 a7.5,7.5 0 0 1 15,0 a7.5,7.5 0 0 1 15,0 a7.5,7.5 0 0 1 15,0"/><polyline points="260,50 470,50"/></g>
+     <g id="rC"><polyline points="200,50 224,50"/><line x1="224" y1="32" x2="224" y2="68" stroke-width="3.4"/><line x1="236" y1="32" x2="236" y2="68" stroke-width="3.4"/><polyline points="236,50 470,50"/></g>
+     <!-- Bauteil am Ausgang (senkrecht) -->
+     <g id="aR"><polyline points="340,50 340,100"/><rect x="329" y="100" width="22" height="60" fill="#fff"/><polyline points="340,160 340,212"/></g>
+     <g id="aL"><polyline points="340,50 340,100"/><path d="M340,100 a7.5,7.5 0 0 1 0,15 a7.5,7.5 0 0 1 0,15 a7.5,7.5 0 0 1 0,15 a7.5,7.5 0 0 1 0,15"/><polyline points="340,160 340,212"/></g>
+     <g id="aC"><polyline points="340,50 340,124"/><line x1="322" y1="124" x2="358" y2="124" stroke-width="3.4"/><line x1="322" y1="136" x2="358" y2="136" stroke-width="3.4"/><polyline points="340,136 340,212"/></g>
+    </g>
+    <g fill="#1A2530">
+     <circle cx="155" cy="50" r="4.5"/><circle cx="155" cy="212" r="4.5"/><circle cx="340" cy="50" r="4.5"/>
+     <circle cx="340" cy="212" r="4.5"/><circle cx="425" cy="50" r="4.5"/><circle cx="425" cy="212" r="4.5"/>
+     <circle cx="470" cy="50" r="5" fill="#fff" stroke="#1A2530" stroke-width="2"/>
+     <circle cx="470" cy="212" r="5" fill="#fff" stroke="#1A2530" stroke-width="2"/>
+    </g>
+    <g font-family="Arial,sans-serif" font-weight="700" fill="#1A2530" text-anchor="middle">
+     <text x="155" y="138" font-size="19">V1</text><text x="425" y="138" font-size="19">V2</text>
+     <text x="43" y="126" font-size="22">G</text><text x="68" y="157" font-size="24" font-weight="400">~</text>
+    </g>
+    <g font-family="Cambria,Caladea,'Noto Serif',Georgia,serif" font-size="25" fill="#1A2530">
+     <text x="230" y="25" text-anchor="middle" id="tReihe">L = 40 mH</text>
+     <text x="310" y="139" text-anchor="end" id="tAus">R = 100 Ω</text>
+    </g>
+    <g font-family="Cambria,Caladea,'Noto Serif',Georgia,serif" font-style="italic" font-size="25" fill="#0B7BC0">
+     <text x="92" y="204">U<tspan font-size="17" dy="5" font-style="normal">1</tspan></text>
+     <text x="484" y="140">U<tspan font-size="17" dy="5" font-style="normal">2</tspan></text>
+    </g>
+    <path d="M120,70 L120,178" stroke="#0B7BC0" stroke-width="2.4"/><path d="M120,188 l-6,-12 l12,0 z" fill="#0B7BC0"/>
+    <path d="M495,66 L495,104" stroke="#0B7BC0" stroke-width="2.4"/><path d="M495,114 l-6,-12 l12,0 z" fill="#0B7BC0"/>
+   </svg>
+  </div>
+  <div class="wahl">
+   <div class="titel">1. Generator</div>
+   <div class="knoepfe" id="generator"></div>
+   <div class="titel">2. Schaltung</div>
+   <div class="knoepfe" id="schaltungen"></div>
+   <div class="titel">3. Frequenz <span class="fz">f</span></div>
+   <div class="knoepfe" id="frequenzen"></div>
+   <div class="knoepfe" id="fein" style="margin-top:8px"></div>
+   <div class="titel">4. Neu beginnen</div>
+   <div class="knoepfe"><button class="zurueck" id="bReset" type="button">Zurücksetzen</button></div>
+  </div>
+  <div class="geraete">
+   <div class="geraet gen">
+    <div class="name"><b>G</b>Funktionsgenerator: Sinus, <span id="aG">aus</span></div>
+    <div class="lcd" id="aF" aria-live="polite">1000 Hz</div>
+    <div class="art">Frequenz <span class="fz">f</span></div>
+   </div>
+   <div class="geraet">
+    <div class="name"><b>V1</b>Eingangsspannung <span class="fz">U</span><sub>1</sub></div>
+    <div class="lcd" id="aU1" aria-live="polite">0,000 V</div>
+    <div class="art">am Eingang</div>
+   </div>
+   <div class="geraet">
+    <div class="name"><b>V2</b>Ausgangsspannung <span class="fz">U</span><sub>2</sub></div>
+    <div class="lcd" id="aU2" aria-live="polite">0,000 V</div>
+    <div class="art">am Ausgang</div>
+   </div>
+  </div>
+  <div class="schirm">
+   <div class="titel">Zweikanal-Oszilloskop</div>
+   <canvas id="c" width="600" height="480" aria-label="Bildschirm des Zweikanal-Oszilloskops mit Raster aus 10 mal 8 Kästchen und den Kurven der Eingangsspannung u1 und der Ausgangsspannung u2."></canvas>
+   <div class="einstellung">
+    <span class="kanal"><span class="strich" style="background:#1F5FA8"></span><span>Kanal 1: <span class="fz">u</span><sub>1</sub>, <b>5 <span class="bruch"><span>V</span><span>div</span></span></b></span></span>
+    <span class="kanal"><span class="strich" style="background:#C2006B"></span><span>Kanal 2: <span class="fz">u</span><sub>2</sub>, <b>5 <span class="bruch"><span>V</span><span>div</span></span></b></span></span>
+    <span>Zeitbasis: <b>AUTOSET</b>, eine Periode = <b>8 div</b></span>
+   </div>
+  </div>
+ </div>
+
+ <div class="hinweis">Ideale Bauteile; der Spannungsmesser V2 belastet den Ausgang nicht. Der Funktionsgenerator gibt
+  immer 10 V. Das Oszilloskop ist auf <span class="fz">u</span><sub>1</sub> getriggert: <span class="fz">u</span><sub>1</sub>
+  beginnt am linken Rand mit dem Nulldurchgang von Minus nach Plus. AUTOSET stellt die Zeitbasis bei jeder Frequenz so
+  ein, dass eine Periode genau 8 div lang ist. Der Bildschirm ist 10 div breit und 8 div hoch; die Mittellinien tragen
+  Teilstriche im Abstand von 0,2 div.</div>
+ <pre id="pruefbericht"></pre>
+</div>
+
+<script>
+(function(){
+"use strict";
+var U0=10, R=100, L=0.040, C=10e-6;                  // V, Ω, H, F (fest)
+var SCHALTUNGEN={1:{reihe:"L",aus:"R"}, 2:{reihe:"R",aus:"L"}, 3:{reihe:"R",aus:"C"}, 4:{reihe:"C",aus:"R"}};
+var TEXT={R:["R","100 Ω"], L:["L","40 mH"], C:["C","10 µF"]};
+var FREQUENZEN=[50,100,200,400,800,1600,3200];       // Hz
+var FEIN=[-10,-1,1,10];                              // Hz
+var FMIN=10, FMAX=10000;
+var K=5;                                             // V je div, beide Kanäle
+var START={an:false,nr:1,f:1000};
+var zustand={an:START.an,nr:START.nr,f:START.f};
+var $=function(id){return document.getElementById(id);};
+var bewegung=!(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+
+function komma(s){return String(s).replace(".",",");}
+// komplexe Impedanz [Re, Im] eines Bauteils bei f
+function imp(bt,f){
+  if(bt==="R") return [R,0];
+  if(bt==="L") return [0,2*Math.PI*f*L];
+  return [0,-1/(2*Math.PI*f*C)];
+}
+function werte(s){
+  if(!s.an) return {U1:0,U2:0,phase:0};
+  var sc=SCHALTUNGEN[s.nr], zr=imp(sc.reihe,s.f), za=imp(sc.aus,s.f);
+  var nr=zr[0]+za[0], ni=zr[1]+za[1], nn=nr*nr+ni*ni;           // H = za / (zr + za)
+  var hr=(za[0]*nr+za[1]*ni)/nn, hi=(za[1]*nr-za[0]*ni)/nn;
+  return {U1:U0, U2:U0*Math.sqrt(hr*hr+hi*hi), phase:Math.atan2(hi,hr)*180/Math.PI};   // Grad, + = u2 eilt vor
+}
+// vier geltende Ziffern wie ein Digitalmessgerät: 7,052 V; 10,00 V; 0,4967 V
+function vier(x){ var t=x.toPrecision(4); if(t.indexOf("e")>=0) t=String(Math.round(x)); return komma(t); }
+function vText(U){ return U===0 ? "0,000 V" : vier(U)+" V"; }
+
+function knopfreihe(id, liste, text, aria, setze, klasse){
+  liste.forEach(function(w){
+    var b=document.createElement("button"); b.type="button"; b.innerHTML=text(w); b.dataset.wert=String(w);
+    if(klasse) b.className=klasse;
+    b.setAttribute("aria-label",aria(w));
+    b.onclick=function(){setze(w);auffrischen(true);}; $(id).appendChild(b);
+  });
+}
+function markiere(id,wert){
+  Array.prototype.forEach.call($(id).children,function(b){b.classList.toggle("an",b.dataset.wert===String(wert));});
+}
+function plan(nr){
+  var sc=SCHALTUNGEN[nr];
+  ["R","L","C"].forEach(function(b){
+    $("r"+b).style.display = sc.reihe===b ? "" : "none";
+    $("a"+b).style.display = sc.aus===b ? "" : "none";
+  });
+  [["tReihe",sc.reihe],["tAus",sc.aus]].forEach(function(e){        // Formelzeichen kursiv, Wert aufrecht
+    var t=$(e[0]), z=TEXT[e[1]];
+    t.innerHTML='<tspan font-style="italic">'+z[0]+'</tspan> = '+z[1];
+  });
+  $("sName").textContent="Schaltung "+nr;
+}
+function auffrischen(animiert){
+  markiere("generator",zustand.an); markiere("schaltungen",zustand.nr); markiere("frequenzen",zustand.f);
+  plan(zustand.nr);
+  var w=werte(zustand);
+  $("aG").textContent=zustand.an?"ein":"aus";
+  $("aF").textContent=zustand.f+" Hz";
+  $("aU1").textContent=vText(w.U1); $("aU2").textContent=vText(w.U2);
+  zeichne(animiert&&bewegung);
+}
+
+// ---------- Bildschirm (wie die Messplätze U13 und U16) ----------
+var c=$("c"), g=c.getContext("2d");
+var DPR=Math.max(1,Math.min(3,window.devicePixelRatio||1));
+var BW=600, BH=480, DIV=60;                          // 10 × 8 div zu je 60 Bildpunkten
+var XT=8;                                            // AUTOSET: eine Periode = 8 div
+c.width=BW*DPR; c.height=BH*DPR; g.scale(DPR,DPR);
+var lauf=null;
+
+function raster(){
+  g.fillStyle="#DDE8DC"; g.fillRect(0,0,BW,BH);
+  g.strokeStyle="rgba(26,37,48,0.45)"; g.lineWidth=1;
+  for(var i=0;i<=10;i++){ var x=Math.round(i*DIV)+0.5; if(i===10) x-=1; g.beginPath(); g.moveTo(x,0); g.lineTo(x,BH); g.stroke(); }
+  for(var j=0;j<=8;j++){ var y=Math.round(j*DIV)+0.5; if(j===8) y-=1; g.beginPath(); g.moveTo(0,y); g.lineTo(BW,y); g.stroke(); }
+  g.strokeStyle="#1A2530"; g.lineWidth=2;
+  g.beginPath(); g.moveTo(0,BH/2); g.lineTo(BW,BH/2); g.moveTo(BW/2,0); g.lineTo(BW/2,BH); g.stroke();
+  g.lineWidth=1.5;
+  for(var k=0;k<=50;k++){ var xt=k*DIV/5; g.beginPath(); g.moveTo(xt,BH/2-5); g.lineTo(xt,BH/2+5); g.stroke(); }
+  for(var m=0;m<=40;m++){ var yt=m*DIV/5; g.beginPath(); g.moveTo(BW/2-5,yt); g.lineTo(BW/2+5,yt); g.stroke(); }
+}
+// Punkte einer Kurve über 10 div: Scheitelwert a in div, Phasenlage in Grad (+ = eilt u1 vor)
+function punkte(a, phase){
+  var n=BW*2, p=[];
+  for(var i=0;i<=n;i++){
+    var xd=10*i/n, y=a*Math.sin(2*Math.PI*xd/XT + phase*Math.PI/180);
+    p.push([BW*i/n, BH/2-y*DIV]);
+  }
+  return p;
+}
+function kurve(p,bis,farbe){
+  g.save(); g.beginPath(); g.rect(0,0,BW,BH); g.clip();
+  g.strokeStyle=farbe; g.lineWidth=3; g.lineJoin="round";
+  g.beginPath(); g.moveTo(p[0][0],p[0][1]);
+  for(var i=1;i<=bis;i++) g.lineTo(p[i][0],p[i][1]);
+  g.stroke(); g.restore();
+}
+function scheitel(s){
+  var w=werte(s);
+  return {u1: Math.SQRT2*w.U1/K, u2: Math.SQRT2*w.U2/K, phase: w.phase};   // in div, Grad
+}
+function zeichne(animiert){
+  if(lauf){ cancelAnimationFrame(lauf); lauf=null; }
+  var s=scheitel(zustand), p1=punkte(s.u1,0), p2=punkte(s.u2,s.phase);
+  function bild(anteil){
+    raster();
+    kurve(p1,Math.max(1,Math.round(anteil*(p1.length-1))),"#1F5FA8");
+    kurve(p2,Math.max(1,Math.round(anteil*(p2.length-1))),"#C2006B");
+  }
+  if(!animiert){ bild(1); return; }
+  var start=null, dauer=350;
+  function schritt(ts){
+    if(start===null) start=ts;
+    var a=Math.min(1,(ts-start)/dauer);
+    bild(a);
+    if(a<1) lauf=requestAnimationFrame(schritt); else lauf=null;
+  }
+  lauf=requestAnimationFrame(schritt);
+}
+function zuruecksetzen(){ zustand={an:START.an,nr:START.nr,f:START.f}; auffrischen(false); }
+
+knopfreihe("generator",[false,true],function(a){return a?"ein":"aus";},
+           function(a){return a?"Generator ein":"Generator aus";},function(a){zustand.an=a;});
+knopfreihe("schaltungen",[1,2,3,4],function(n){return String(n);},function(n){return "Schaltung "+n;},
+           function(n){zustand.nr=n;});
+knopfreihe("frequenzen",FREQUENZEN,function(f){return f+" Hz";},function(f){return "Frequenz "+f+" Hertz";},
+           function(f){zustand.f=f;});
+knopfreihe("fein",FEIN,function(d){return (d>0?"+":"−")+Math.abs(d)+" Hz";},
+           function(d){return (d>0?"Frequenz um ":"Frequenz um minus ")+Math.abs(d)+" Hertz ändern";},
+           function(d){zustand.f=Math.max(FMIN,Math.min(FMAX,zustand.f+d));},"fein");
+$("bReset").onclick=zuruecksetzen;
+
+// ---------- Prüfmodus: alle Einstellungen, Nulldurchgänge aus den gezeichneten Punkten ----------
+function nulldurchgaenge(p){
+  var erg=[];
+  function h(k){ return BH/2-p[k][1]; }
+  for(var i=1;i<p.length;i++){
+    var y0=h(i-1), y1=h(i);
+    if(y0===0) continue;
+    if(y1===0||(y0<0&&y1>0)||(y0>0&&y1<0)){
+      var x=y1===0?p[i][0]:p[i-1][0]+(p[i][0]-p[i-1][0])*(0-y0)/(y1-y0);
+      erg.push({div:Math.round(x/DIV*1000)/1000, richtung:(y1>y0?"steigend":"fallend")});
+    }
+  }
+  return erg;
+}
+if (/[?&]pruefen\b/.test(location.search)) {
+  var bericht=[];
+  [1,2,3,4].forEach(function(nr){ FREQUENZEN.concat([159,160,397,398,399]).forEach(function(f){
+    var st={an:true,nr:nr,f:f}, w=werte(st), s=scheitel(st);
+    bericht.push({nr:nr, f:f, U1:vText(w.U1), U2:vText(w.U2), phase:Math.round(w.phase*100)/100,
+                  u2_div:Math.round(s.u2*1000)/1000, u2_null:nulldurchgaenge(punkte(s.u2,s.phase))});
+  }); });
+  $("pruefbericht").textContent=JSON.stringify(bericht);
+}
+zuruecksetzen();
+// Für Bildschirmfotos der Präsentation: window.__stelle({an:true,nr:1,f:398})
+window.__stelle=function(s){ zustand={an:s.an,nr:s.nr,f:s.f}; auffrischen(false); };
+})();
+</script>
+</body></html>
