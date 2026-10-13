@@ -1,0 +1,198 @@
+<!doctype html>
+<!-- E2EG U12 · Messplatz: Spule am Frequenzgenerator (neu 13.10.2026, Aufgabe IN der Stunde nach dem Muster E1EG Block 07
+     und E2EG U11). Ersetzt für den neuen Block U12 die Seite U12_Simulation_XL_Frequenz.html; deren Adresse steht auf
+     alten Blättern und bleibt unverändert.
+     Warum neu: Die alte Seite zeigte den Blindwiderstand X_L fertig in einer Kachel und zeichnete die Kennlinie X_L über f
+     selbst (die Schüler lasen nur ab), nannte im Fußtext die Formeln X_L = 2 · π · f · L und I = U / X_L und zeigte
+     daneben Kreisfrequenz und Liniendiagramm (Thema von U11). Sie war ein Formelrechner, kein Messplatz.
+     Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht und rechnet nichts vor):
+       (1) Doppelte Frequenz: doppelter Blindwiderstand X_L = U durch I, halbe Stromstärke.
+       (2) X_L durch f ist bei einer Spule für jede Frequenz gleich (0,1 H: 0,628 Ω je Hz), also X_L ~ f.
+       (3) Doppelte Induktivität: X_L durch f doppelt; Spule 0,2 H bei 200 Hz nimmt denselben Strom auf wie
+           Spule 0,1 H bei 400 Hz.
+     Abgrenzung gegen U11 (dort fest 50 Hz, Spule und Spannung wählbar, Oszilloskop): hier fest 10 V, Frequenz wählbar.
+     Rechenmodell (ideale Spule, Wirkwiderstand R = 0 Ω; Fachkunde S. 135, Bild 1; Rechenbuch S. 99 Nr. 6: Spule
+       100 mH an einem Frequenzgenerator mit 10 V, 50 Hz bis 500 Hz in 50-Hz-Schritten):
+       X_L = 2π · f · L,  I = U / X_L (Effektivwerte).
+     Anzeigen: Spannungsmesser mit zwei Nachkommastellen (10,00 V), Strommesser mit vier geltenden Ziffern in mA
+       (318,3 mA; 79,58 mA; 15,92 mA). Aus den angezeigten Werten ergibt 10 V durch I, geteilt durch f, bei 0,1 H an allen
+       zehn Frequenzen gerundet 0,628 Ω je Hz, bei 0,2 H überall 1,26 Ω je Hz (nachgerechnet, siehe ?pruefen).
+     Startstellung neutral: Generator aus (0 V, 0 mA), Spule 0,2 H, 500 Hz. Prüfmodus ?pruefen: Anzeigen aller 20
+       Einstellungen als JSON in #pruefbericht. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Spule am Frequenzgenerator (U12)</title>
+<script type="application/json" id="sim-meta">{"erkenntnis":"Doppelte Frequenz ergibt doppelten Blindwiderstand und halbe Stromstärke; X_L durch f ist bei einer Spule für jede Frequenz gleich (X_L ~ f), bei doppelter Induktivität doppelt so groß.","startwerte":{"spule_H":0.2,"generator":"aus","frequenz_Hz":500},"loesungswerte":{"0,1 H, 50 Hz":"318,3 mA","0,1 H, 100 Hz":"159,2 mA","0,1 H, 200 Hz":"79,58 mA","0,1 H, 400 Hz":"39,79 mA","0,2 H, 200 Hz":"39,79 mA","Spannungsmesser":"10,00 V"},"quelle":"Europa Fachkunde S. 135, Bild 1 (Schaltung); Europa-Rechenbuch S. 99, Nr. 6 (Spule 100 mH, Frequenzgenerator 10 V, 50 Hz bis 500 Hz)"}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;
+       --u:#1F8FD0;--i:#D6127A}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:980px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px;align-items:start}
+ @media(min-width:760px){.buehne{grid-template-columns:1.35fr 1fr}}
+ .schaltung{border:1.4px solid var(--linie);background:#FFFDF0;padding:6px;border-radius:6px}
+ .schaltung svg{width:100%;height:auto;display:block}
+ .geraete{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+ .geraet{border:3px solid var(--ink);background:var(--hell);padding:8px 10px;border-radius:6px;min-width:0}
+ .geraet.gen{grid-column:1/-1}
+ .geraet .name{font-size:14px;font-weight:700;color:var(--grau)}
+ .geraet .name b{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border:2px solid var(--ink);border-radius:50%;color:var(--ink);margin-right:6px;font-size:14px}
+ .lcd{background:#20313a;color:#9BF0B4;font-variant-numeric:tabular-nums;font-size:30px;font-weight:700;padding:6px 10px;margin:6px 0 2px;border-radius:4px;text-align:right;white-space:nowrap}
+ .geraet .art{font-size:13px;color:var(--grau)}
+ .wahl{margin:14px 0 4px}
+ .wahl .titel{font-size:15px;font-weight:700;margin:12px 0 5px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+ .frequenzen{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+ button{font:inherit;font-size:16px;min-height:48px;min-width:58px;padding:6px 12px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+ .frequenzen button{min-width:0;padding:6px 2px;font-size:15px;white-space:nowrap}
+ button.an{background:var(--kupfer);color:#fff}
+ button.zurueck{border-color:var(--ink);color:var(--ink)}
+ button:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
+ .fz{font-family:Cambria,Caladea,'Noto Serif',Georgia,serif;font-style:italic}
+ .hinweis{font-size:14px;color:var(--grau);margin-top:12px}
+ #pruefbericht{display:none}
+ @media(max-width:420px){.lcd{font-size:24px;padding:6px 8px} .wrap{padding:14px 12px 20px} .geraet{padding:8px 7px}
+   .geraet .name{font-size:12px;white-space:nowrap} .geraet .name b{width:21px;height:21px;font-size:12px;margin-right:3px}
+   .frequenzen button{font-size:14px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E2EG · LF 5 · U12</div><h1>Messplatz: Spule am Frequenzgenerator</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Spule wählen, Generator einschalten, Frequenz wählen. Spannungsmesser und
+  Strommesser zeigen Effektivwerte.</div>
+
+ <div class="buehne">
+  <div class="schaltung">
+   <svg id="schaltbild" viewBox="0 0 540 300" role="img" data-quelle="Europa Fachkunde S. 135, Bild 1: Spule als ideales Bauelement an Wechselspannung (Generator, Strommesser in Reihe, Spannungsmesser parallel zur Spule)"
+        aria-label="Schaltung: Frequenzgenerator G, Strommesser A in Reihe, Spannungsmesser V parallel zur Spule L.">
+    <g fill="none" stroke="#1A2530" stroke-width="3">
+     <path d="M66 108 V78 H200 M272 78 H496 V112 M496 212 V256 H66 V208"/>
+     <path d="M370 78 V122 M370 194 V256"/>
+     <path d="M496 112 a14 12.5 0 0 1 0 25 a14 12.5 0 0 1 0 25 a14 12.5 0 0 1 0 25 a14 12.5 0 0 1 0 25"/>
+    </g>
+    <rect x="26" y="108" width="80" height="100" fill="#fff" stroke="#1A2530" stroke-width="3"/>
+    <text x="66" y="148" text-anchor="middle" font-size="34" font-family="Arial, sans-serif" fill="#1A2530">G</text>
+    <path d="M50 182 q8 -12 16 0 t16 0" fill="none" stroke="#1A2530" stroke-width="3"/>
+    <circle cx="236" cy="78" r="36" fill="#fff" stroke="#1A2530" stroke-width="3"/>
+    <text x="236" y="90" text-anchor="middle" font-size="32" font-family="Arial, sans-serif" fill="#1A2530">A</text>
+    <circle cx="370" cy="158" r="36" fill="#fff" stroke="#1A2530" stroke-width="3"/>
+    <text x="370" y="170" text-anchor="middle" font-size="32" font-family="Arial, sans-serif" fill="#1A2530">V</text>
+    <circle cx="370" cy="78" r="6" fill="#1A2530"/><circle cx="370" cy="256" r="6" fill="#1A2530"/>
+    <path d="M186 124 H286" stroke="#D6127A" stroke-width="3"/><path d="M298 124 l-16 -7 v14 z" fill="#D6127A"/>
+    <text x="196" y="160" font-size="28" fill="#D6127A"><tspan class="fz" font-style="italic" font-family="Cambria, Caladea, Georgia, serif">I</tspan><tspan font-size="19" dy="6">bL</tspan></text>
+    <path d="M418 102 Q444 160 422 208" fill="none" stroke="#1F8FD0" stroke-width="3"/><path d="M418 220 l-3 -17 l13 6 z" fill="#1F8FD0"/>
+    <text x="436" y="234" font-size="28" fill="#1F8FD0"><tspan font-style="italic" font-family="Cambria, Caladea, Georgia, serif">U</tspan><tspan font-size="19" dy="6">bL</tspan></text>
+    <text x="482" y="172" text-anchor="end" font-size="28" font-style="italic" font-family="Cambria, Caladea, Georgia, serif" fill="#1A2530">L</text>
+    <text id="svgL" x="514" y="292" text-anchor="end" font-size="24" font-family="Arial, sans-serif" fill="#5A666F"></text>
+    <text id="svgG" x="26" y="292" font-size="24" font-family="Arial, sans-serif" fill="#5A666F"></text>
+   </svg>
+  </div>
+  <div class="geraete">
+   <div class="geraet gen">
+    <div class="name"><b>G</b>Frequenzgenerator, 10 V Sinus</div>
+    <div class="lcd" id="aF" aria-live="polite">aus</div>
+    <div class="art">Frequenz <span class="fz">f</span></div>
+   </div>
+   <div class="geraet">
+    <div class="name"><b>A</b>Strommesser</div>
+    <div class="lcd" id="aI" aria-live="polite">0,0 mA</div>
+    <div class="art">in Reihe mit der Spule</div>
+   </div>
+   <div class="geraet">
+    <div class="name"><b>V</b>Spannungsmesser</div>
+    <div class="lcd" id="aU" aria-live="polite">0,00 V</div>
+    <div class="art">parallel zur Spule</div>
+   </div>
+  </div>
+ </div>
+
+ <div class="wahl">
+  <div class="titel">1. Spule</div>
+  <div class="knoepfe" id="spulen"></div>
+  <div class="titel">2. Generator</div>
+  <div class="knoepfe" id="schalter"></div>
+  <div class="titel">3. Frequenz <span class="fz">f</span></div>
+  <div class="frequenzen" id="frequenzen"></div>
+  <div class="titel">4. Neu beginnen</div>
+  <div class="knoepfe"><button class="zurueck" id="bReset" type="button">Zurücksetzen</button></div>
+ </div>
+ <div class="hinweis">Ideale Spulen: Wirkwiderstand <span class="fz">R</span> = 0 Ω. Der Generator hält die Spannung auf
+  10 V; die Frequenz lässt sich von 50 Hz bis 500 Hz in Schritten von 50 Hz einstellen.</div>
+ <pre id="pruefbericht"></pre>
+</div>
+
+<script>
+(function(){
+"use strict";
+var U=10;                                            // V, Effektivwert, fest (Rechenbuch S. 99 Nr. 6)
+var SPULEN=[0.1,0.2];                                // H
+var FREQUENZEN=[50,100,150,200,250,300,350,400,450,500];   // Hz
+var START={L:0.2,an:false,f:500};
+var zustand={L:START.L,an:START.an,f:START.f};
+var $=function(id){return document.getElementById(id);};
+
+function komma(s){return String(s).replace(".",",");}
+function xl(f,L){return 2*Math.PI*f*L;}              // Ω
+function strom(z){return z.an ? U/xl(z.f,z.L) : 0;}  // A, Effektivwert
+// Strommesser: mA mit vier geltenden Ziffern (318,3 mA; 79,58 mA; 15,92 mA), aus: „0,0 mA“
+function stromText(I){
+  if(I===0) return "0,0 mA";
+  var mA=I*1000, s=mA.toPrecision(4);
+  if(s.indexOf("e")>=0) s=String(Math.round(mA));
+  return komma(s)+" mA";
+}
+function spannungText(z){return z.an ? "10,00 V" : "0,00 V";}
+function frequenzText(z){return z.an ? z.f+" Hz" : "aus";}
+
+function knopfreihe(id, werte, text, aria, setze){
+  werte.forEach(function(w){
+    var b=document.createElement("button"); b.type="button"; b.textContent=text(w); b.dataset.wert=String(w);
+    b.setAttribute("aria-label",aria(w));
+    b.onclick=function(){setze(w);auffrischen();}; $(id).appendChild(b);
+  });
+}
+function markiere(id,wert){
+  Array.prototype.forEach.call($(id).children,function(b){
+    var an=(b.dataset.wert===String(wert)); b.classList.toggle("an",an); b.setAttribute("aria-pressed",String(an));
+  });
+}
+function auffrischen(){
+  markiere("spulen",zustand.L); markiere("schalter",zustand.an); markiere("frequenzen",zustand.f);
+  $("aI").textContent=stromText(strom(zustand));
+  $("aU").textContent=spannungText(zustand);
+  $("aF").textContent=frequenzText(zustand);
+  $("svgL").textContent="L = "+komma(zustand.L)+" H";
+  $("svgG").textContent=zustand.an ? "10 V, "+zustand.f+" Hz" : "Generator aus";
+}
+function zuruecksetzen(){ zustand={L:START.L,an:START.an,f:START.f}; auffrischen(); }
+
+knopfreihe("spulen",SPULEN,function(L){return komma(L)+" H";},function(L){return "Spule "+komma(L)+" Henry";},
+           function(L){zustand.L=L;});
+knopfreihe("schalter",[false,true],function(a){return a?"Ein":"Aus";},function(a){return a?"Generator ein":"Generator aus";},
+           function(a){zustand.an=a;});
+knopfreihe("frequenzen",FREQUENZEN,function(f){return f+" Hz";},function(f){return "Frequenz "+f+" Hertz";},
+           function(f){zustand.f=f;});
+$("bReset").onclick=zuruecksetzen;
+
+// Prüfmodus: Anzeigen aller Einstellungen (Generator ein), dazu U durch I und (U durch I) durch f aus den Anzeigen
+if (/[?&]pruefen\b/.test(location.search)) {
+  var bericht=[];
+  SPULEN.forEach(function(L){ FREQUENZEN.forEach(function(f){
+    var z={L:L,an:true,f:f}, t=stromText(strom(z)), I=parseFloat(t.replace(",","."))/1000;
+    bericht.push({L:L, f:f, I:t, U:spannungText(z), X:+(U/I).toFixed(3), X_durch_f:+((U/I)/f).toFixed(4)});
+  }); });
+  $("pruefbericht").textContent=JSON.stringify(bericht);
+}
+// Für Bildschirmfotos und Prüfung: window.__stelle({L:0.1,an:true,f:200}) gibt die Anzeigen zurück
+window.__stelle=function(s){ zustand={L:s.L,an:s.an,f:s.f}; auffrischen();
+  return [$("aF").textContent,$("aU").textContent,$("aI").textContent]; };
+zuruecksetzen();
+})();
+</script>
+</body></html>
