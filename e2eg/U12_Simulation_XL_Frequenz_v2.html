@@ -89,7 +89,7 @@
     <path d="M418 102 Q444 160 422 208" fill="none" stroke="#1F8FD0" stroke-width="3"/><path d="M418 220 l-3 -17 l13 6 z" fill="#1F8FD0"/>
     <text x="436" y="234" font-size="28" fill="#1F8FD0"><tspan font-style="italic" font-family="Cambria, Caladea, Georgia, serif">U</tspan><tspan font-size="19" dy="6">bL</tspan></text>
     <text x="482" y="172" text-anchor="end" font-size="28" font-style="italic" font-family="Cambria, Caladea, Georgia, serif" fill="#1A2530">L</text>
-    <text id="svgL" x="514" y="292" text-anchor="end" font-size="24" font-family="Arial, sans-serif" fill="#5A666F"></text>
+    <text x="514" y="292" text-anchor="end" font-size="24" font-family="Arial, sans-serif" fill="#5A666F"><tspan font-style="italic" font-family="Cambria, Caladea, Georgia, serif">L</tspan> = <tspan id="svgL"></tspan></text>
     <text id="svgG" x="26" y="292" font-size="24" font-family="Arial, sans-serif" fill="#5A666F"></text>
    </svg>
   </div>
@@ -167,7 +167,7 @@ function auffrischen(){
   $("aI").textContent=stromText(strom(zustand));
   $("aU").textContent=spannungText(zustand);
   $("aF").textContent=frequenzText(zustand);
-  $("svgL").textContent="L = "+komma(zustand.L)+" H";
+  $("svgL").textContent=komma(zustand.L)+" H";             // L kursiv im Schaltbild (Prüfer U12)
   $("svgG").textContent=zustand.an ? "10 V, "+zustand.f+" Hz" : "Generator aus";
 }
 function zuruecksetzen(){ zustand={L:START.L,an:START.an,f:START.f}; auffrischen(); }
