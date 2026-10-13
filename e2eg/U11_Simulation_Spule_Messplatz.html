@@ -1,0 +1,276 @@
+<!doctype html>
+<!-- E2EG U11 · Messplatz: Spule an Wechselspannung (neu 13.10.2026, Aufgabe IN der Stunde nach dem Muster E1EG Block 07
+     und E2EG U06). U11 hatte bisher keine Simulation; der alte Block sah einen Lehrerversuch vor (Spule an Gleich- und
+     Wechselspannung), es gibt aber keine reale Laborausstattung (Carlo 15.07.2026).
+     Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht und rechnet nichts vor):
+       (1) Bei derselben Spule ist U durch I bei jeder Spannung gleich: der induktive Blindwiderstand X_L ist eine
+           Eigenschaft der Spule. Doppelte Induktivität ergibt doppelten Blindwiderstand; X_L durch L ist bei 50 Hz
+           immer 314 1/s, die Kreisfrequenz ω aus U03. Daraus X_L = ω · L.
+       (2) Am Oszilloskop erreicht der Strom den Nulldurchgang (und den Scheitelwert) eine Viertelperiode später als
+           die Spannung: der Strom eilt um 90° nach, bei jeder Spule und jeder Spannung.
+     Abgrenzung gegen U12 (X_L und die Frequenz, eigene Simulation): Die Frequenz ist hier fest 50 Hz und nicht
+     einstellbar. Verändert werden nur die Spule (Induktivität) und die Spannung.
+     Rechenmodell (ideale Spule, Wirkwiderstand R = 0 Ω; Fachkunde S. 135, Bild 1 und Bild 3; Rechenbuch S. 99):
+       X_L = 2π · 50 Hz · L,  I = U / X_L (Effektivwerte),  û = √2 · U,  î = √2 · I,
+       u = û · sin(360° · f · t),  i = î · sin(360° · f · t − 90°); getriggert auf den Nulldurchgang von u von Minus
+       nach Plus am linken Rand. Kanal 1 (Spannung) 10 V je div fest, Kanal 2 (Strom über eine Strommesszange)
+       wählbar. Bildschirm 10 div × 8 div, Teilstriche 0,2 div.
+     Anzeigen: Spannungsmesser mit zwei Nachkommastellen, Strommesser mit vier geltenden Ziffern (318,3 mA; 79,58 mA):
+       10 V durch 318,3 mA = 31,42 Ω, durch 0,1 H = 314,2 1/s; alle Aufgabenzeilen ergeben gerundet 314 1/s.
+     Exaktheit am Schirm: Bei 5 ms je div ist eine Periode (20 ms) genau 4 div, 90° genau 1 div; alle Nulldurchgänge
+       liegen auf Rasterlinien. Prüfmodus ?pruefen: Anzeigen aller Einstellungen und Nulldurchgänge aus genau den
+       gezeichneten Punkten als JSON in #pruefbericht.
+     Startstellung neutral: Generator aus (0 V), Spule 0,8 H, 10 ms je div, Kanal 2 500 mA je div. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Spule an Wechselspannung (U11)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"spule_H":0.8,"spannung_V":0,"zeitbasis_ms_je_div":10,"kanal2_mA_je_div":500},"loesungswerte":{"0,1 H, 10 V":"318,3 mA","0,1 H, 20 V":"636,6 mA","0,2 H, 10 V":"159,2 mA","0,4 H, 10 V":"79,58 mA","5 ms je div":"Periode 4 div = 20 ms; i geht 1 div nach u von Minus nach Plus durch null","X_L durch L":"314 1/s bei jeder Spule"},"quelle":"Europa Fachkunde S. 135 (Bild 1, Bild 3); Europa-Rechenbuch S. 99; Tabellenbuch Elektrotechnik S. 40, Formel 1 und 2"}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;
+       --u:#1F5FA8;--i:#C2006B}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:980px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px;align-items:start}
+ @media(min-width:760px){.buehne{grid-template-columns:1.6fr 1fr}}
+ .geraete{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+ @media(min-width:760px){.geraete{grid-template-columns:1fr}}
+ .geraet{border:3px solid var(--ink);background:var(--hell);padding:8px 10px;border-radius:6px}
+ .geraet .name{font-size:14px;font-weight:700;color:var(--grau)}
+ .geraet .name b{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border:2px solid var(--ink);border-radius:50%;color:var(--ink);margin-right:6px;font-size:14px}
+ .lcd{background:#20313a;color:#9BF0B4;font-variant-numeric:tabular-nums;font-size:30px;font-weight:700;padding:6px 10px;margin:6px 0 2px;border-radius:4px;text-align:right;white-space:nowrap}
+ .geraet .art{font-size:13px;color:var(--grau)}
+ .quelle{grid-column:1/-1;border:3px solid var(--ink);background:#fff;padding:8px 10px;border-radius:6px;font-size:15px}
+ .quelle b{color:var(--kupfer)}
+ .schirm{border:3px solid var(--ink);background:#30363c;padding:8px;border-radius:6px}
+ canvas{width:100%;height:auto;display:block;background:#DDE8DC;touch-action:manipulation}
+ .einstellung{display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center;color:#fff;font-size:15px;padding:8px 2px 2px}
+ .einstellung b{color:#FFE66B}
+ .kanal{display:inline-flex;align-items:center;gap:6px}
+ .strich{display:inline-block;width:26px;height:4px;border-radius:2px}
+ .wahl{margin:14px 0 4px}
+ .wahl .titel{font-size:15px;font-weight:700;margin:10px 0 5px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+ button{font:inherit;font-size:16px;min-height:48px;min-width:58px;padding:6px 12px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+ button.an{background:var(--kupfer);color:#fff}
+ button.zurueck{border-color:var(--ink);color:var(--ink)}
+ .bruch{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;font-size:.78em;line-height:1.05}
+ .bruch>span:first-child{border-bottom:1.3px solid currentColor;padding:0 2px}
+ .bruch>span:last-child{padding:0 2px}
+ .fz{font-family:Cambria,Caladea,'Noto Serif',Georgia,serif;font-style:italic}
+ .hinweis{font-size:14px;color:var(--grau);margin-top:10px}
+ #pruefbericht{display:none}
+ @media(max-width:420px){.lcd{font-size:24px;padding:6px 8px} button{min-width:52px;padding:6px 9px;font-size:15px} .einstellung{font-size:14px} .wrap{padding:14px 12px 20px} .geraet{padding:8px 7px} .geraet .name{font-size:12px;white-space:nowrap} .geraet .name b{width:21px;height:21px;font-size:12px;margin-right:3px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E2EG · LF 5 · U11</div><h1>Messplatz: Spule an Wechselspannung</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Spule und Spannung wählen. Strommesser und Spannungsmesser zeigen
+  Effektivwerte. Das Zweikanal-Oszilloskop zeigt auf Kanal 1 die Spannung <span class="fz">u</span> und auf Kanal 2
+  den Strom <span class="fz">i</span>. Zählen Sie Kästchen (div) zwischen Nulldurchgängen <b>gleicher Richtung</b>.</div>
+
+ <div class="buehne">
+  <div class="schirm">
+   <canvas id="c" width="600" height="480" aria-label="Bildschirm des Zweikanal-Oszilloskops mit Raster aus 10 mal 8 Kästchen und den Kurven der Spannung u und des Stromes i."></canvas>
+   <div class="einstellung" aria-live="polite">
+    <span class="kanal"><span class="strich" style="background:#1F5FA8"></span><span>Kanal 1: <span class="fz">u</span>, <b>10 <span class="bruch"><span>V</span><span>div</span></span></b></span></span>
+    <span class="kanal"><span class="strich" style="background:#C2006B"></span><span>Kanal 2: <span class="fz">i</span>, <b id="aK"></b></span></span>
+    <span>Zeitbasis: <b id="aZ"></b></span>
+   </div>
+  </div>
+  <div class="geraete">
+   <div class="geraet">
+    <div class="name"><b>A</b>Strommesser</div>
+    <div class="lcd" id="aI" aria-live="polite">0,0 mA</div>
+    <div class="art">in Reihe mit der Spule</div>
+   </div>
+   <div class="geraet">
+    <div class="name"><b>V</b>Spannungsmesser</div>
+    <div class="lcd" id="aU" aria-live="polite">0,00 V</div>
+    <div class="art">parallel zur Spule</div>
+   </div>
+   <div class="quelle">Funktionsgenerator: Sinus, <b>50 Hz</b> (fest)<br>Spule: <b id="aL"></b></div>
+  </div>
+ </div>
+
+ <div class="wahl">
+  <div class="titel">1. Spule</div>
+  <div class="knoepfe" id="spulen"></div>
+  <div class="titel">2. Spannung am Generator</div>
+  <div class="knoepfe" id="spannungen"></div>
+  <div class="titel">3. Zeitbasis am Oszilloskop</div>
+  <div class="knoepfe" id="zeitbasen"></div>
+  <div class="titel">4. Kanal 2 (Strom) am Oszilloskop</div>
+  <div class="knoepfe" id="kanal2"></div>
+  <div class="titel">5. Neu beginnen</div>
+  <div class="knoepfe"><button class="zurueck" id="bReset" type="button">Zurücksetzen</button></div>
+ </div>
+ <div class="hinweis">Ideale Spule: Wirkwiderstand <span class="fz">R</span> = 0 Ω. Der Bildschirm ist 10 div breit und
+  8 div hoch; die Mittellinien tragen Teilstriche im Abstand von 0,2 div. Das Oszilloskop ist auf die Spannung
+  getriggert: <span class="fz">u</span> beginnt am linken Rand mit dem Nulldurchgang von Minus nach Plus.</div>
+ <pre id="pruefbericht"></pre>
+</div>
+
+<script>
+(function(){
+"use strict";
+var F=50;                                            // Hz, fest (die Frequenz ist Thema von U12)
+var SPULEN=[0.1,0.2,0.4,0.8];                        // H
+var SPANNUNGEN=[0,5,10,20];                          // V, Effektivwert
+var ZEITBASEN=[1,2,5,10];                            // ms je div
+var KANAL2=[50,100,200,500];                         // mA je div
+var K1=10;                                           // V je div, Kanal 1 fest
+var START={L:0.8,U:0,z:10,k:500};
+var zustand={L:START.L,U:START.U,z:START.z,k:START.k};
+var $=function(id){return document.getElementById(id);};
+var bewegung=!(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+
+function komma(s){return String(s).replace(".",",");}
+function bruch(z,n){return "<span class='bruch'><span>"+z+"</span><span>"+n+"</span></span>";}
+function xl(L){return 2*Math.PI*F*L;}                // Ω
+function strom(L,U){return U/xl(L);}                 // A, Effektivwert
+// Strommesser: mA mit vier geltenden Ziffern (318,3 mA; 79,58 mA), bei 0 V „0,0 mA“
+function stromText(I){
+  if(I===0) return "0,0 mA";
+  var mA=I*1000, s=mA.toPrecision(4);
+  if(s.indexOf("e")>=0) s=String(Math.round(mA));
+  return komma(s)+" mA";
+}
+function spannungText(U){return komma(U.toFixed(2))+" V";}
+
+function knopfreihe(id, werte, text, aria, setze){
+  werte.forEach(function(w){
+    var b=document.createElement("button"); b.type="button"; b.innerHTML=text(w); b.dataset.wert=w;
+    b.setAttribute("aria-label",aria(w));
+    b.onclick=function(){setze(w);auffrischen(true);}; $(id).appendChild(b);
+  });
+}
+function markiere(id,wert){
+  Array.prototype.forEach.call($(id).children,function(b){b.classList.toggle("an",parseFloat(b.dataset.wert)===wert);});
+}
+function auffrischen(animiert){
+  markiere("spulen",zustand.L); markiere("spannungen",zustand.U); markiere("zeitbasen",zustand.z);
+  markiere("kanal2",zustand.k);
+  $("aI").textContent=stromText(strom(zustand.L,zustand.U));
+  $("aU").textContent=spannungText(zustand.U);
+  $("aL").innerHTML="<span class='fz'>L</span> = "+komma(zustand.L)+" H";
+  $("aZ").innerHTML=komma(zustand.z)+" "+bruch("ms","div");
+  $("aK").innerHTML=zustand.k+" "+bruch("mA","div");
+  zeichne(animiert&&bewegung);
+}
+
+// ---------- Bildschirm ----------
+var c=$("c"), g=c.getContext("2d");
+var DPR=Math.max(1,Math.min(3,window.devicePixelRatio||1));
+var BW=600, BH=480, DIV=60;                          // 10 × 8 div zu je 60 Bildpunkten
+c.width=BW*DPR; c.height=BH*DPR; g.scale(DPR,DPR);
+var lauf=null;
+
+function raster(){
+  g.fillStyle="#DDE8DC"; g.fillRect(0,0,BW,BH);
+  g.strokeStyle="rgba(26,37,48,0.45)"; g.lineWidth=1;
+  for(var i=0;i<=10;i++){ var x=Math.round(i*DIV)+0.5; if(i===10) x-=1; g.beginPath(); g.moveTo(x,0); g.lineTo(x,BH); g.stroke(); }
+  for(var j=0;j<=8;j++){ var y=Math.round(j*DIV)+0.5; if(j===8) y-=1; g.beginPath(); g.moveTo(0,y); g.lineTo(BW,y); g.stroke(); }
+  g.strokeStyle="#1A2530"; g.lineWidth=2;
+  g.beginPath(); g.moveTo(0,BH/2); g.lineTo(BW,BH/2); g.moveTo(BW/2,0); g.lineTo(BW/2,BH); g.stroke();
+  g.lineWidth=1.5;
+  for(var k=0;k<=50;k++){ var xt=k*DIV/5; g.beginPath(); g.moveTo(xt,BH/2-5); g.lineTo(xt,BH/2+5); g.stroke(); }
+  for(var m=0;m<=40;m++){ var yt=m*DIV/5; g.beginPath(); g.moveTo(BW/2-5,yt); g.lineTo(BW/2+5,yt); g.stroke(); }
+}
+// Punkte einer Kurve über 10 div: Scheitelwert a in div, Phasenlage in Grad (i: −90°)
+function punkte(a, phase){
+  var tGes=10*zustand.z/1000, perioden=F*tGes;
+  var n=Math.max(BW*2, Math.ceil(perioden*48));
+  var p=[];
+  for(var i=0;i<=n;i++){
+    var t=tGes*i/n, y=a*Math.sin(2*Math.PI*F*t + phase*Math.PI/180);
+    p.push([BW*i/n, BH/2-y*DIV]);
+  }
+  return p;
+}
+function kurve(p,bis,farbe){
+  g.save(); g.beginPath(); g.rect(0,0,BW,BH); g.clip();
+  g.strokeStyle=farbe; g.lineWidth=3; g.lineJoin="round";
+  g.beginPath(); g.moveTo(p[0][0],p[0][1]);
+  for(var i=1;i<=bis;i++) g.lineTo(p[i][0],p[i][1]);
+  g.stroke(); g.restore();
+}
+function scheitel(){
+  var U=zustand.U, I=strom(zustand.L,U);
+  return {u: Math.SQRT2*U/K1, i: Math.SQRT2*I*1000/zustand.k};   // in div
+}
+function zeichne(animiert){
+  if(lauf){ cancelAnimationFrame(lauf); lauf=null; }
+  var s=scheitel(), pu=punkte(s.u,0), pi=punkte(s.i,-90);
+  function bild(anteil){
+    raster();
+    kurve(pu,Math.max(1,Math.round(anteil*(pu.length-1))),"#1F5FA8");
+    kurve(pi,Math.max(1,Math.round(anteil*(pi.length-1))),"#C2006B");
+  }
+  if(!animiert){ bild(1); return; }
+  var start=null, dauer=350;
+  function schritt(ts){
+    if(start===null) start=ts;
+    var a=Math.min(1,(ts-start)/dauer);
+    bild(a);
+    if(a<1) lauf=requestAnimationFrame(schritt); else lauf=null;
+  }
+  lauf=requestAnimationFrame(schritt);
+}
+function zuruecksetzen(){ zustand={L:START.L,U:START.U,z:START.z,k:START.k}; auffrischen(false); }
+
+// ---------- Prüfmodus: Anzeigen aller Einstellungen, Nulldurchgänge aus genau den gezeichneten Punkten ----------
+function nulldurchgaenge(p){
+  var erg=[], EPS=1e-6;
+  function h(k){ return BH/2-p[k][1]; }                       // Höhe über der Mittellinie, positiv oben
+  if(Math.abs(h(0))<EPS && p.length>1) erg.push({div:0, richtung: h(1)>0?"steigend":"fallend"});
+  for(var i=1;i<p.length;i++){
+    var y0=h(i-1), y1=h(i);
+    if(Math.abs(y0)<EPS) continue;                            // Punkt auf der Mittellinie: schon gezählt
+    if(Math.abs(y1)<EPS){                                     // Durchgang genau auf einem Punkt
+      if(i===p.length-1){ erg.push({div:Math.round(p[i][0]/DIV*1000)/1000, richtung: y0<0?"steigend":"fallend"}); continue; }
+      var y2=h(i+1);
+      if((y0<0&&y2>0)||(y0>0&&y2<0)) erg.push({div:Math.round(p[i][0]/DIV*1000)/1000, richtung: y2>y0?"steigend":"fallend"});
+      continue;
+    }
+    if((y0<0&&y1>0)||(y0>0&&y1<0)){
+      var x=p[i-1][0]+(p[i][0]-p[i-1][0])*(0-y0)/(y1-y0);
+      erg.push({div:Math.round(x/DIV*1000)/1000, richtung: y1>y0?"steigend":"fallend"});
+    }
+  }
+  return erg;
+}
+if (/[?&]pruefen\b/.test(location.search)) {
+  var bericht={anzeigen:[], schirm:[]};
+  SPULEN.forEach(function(L){ SPANNUNGEN.forEach(function(U){
+    bericht.anzeigen.push({L:L, U:U, I:stromText(strom(L,U)), Uanz:spannungText(U)});
+  }); });
+  SPULEN.forEach(function(L){
+    zustand={L:L,U:10,z:5,k:100};
+    var s=scheitel();
+    bericht.schirm.push({L:L, z:5, u:nulldurchgaenge(punkte(s.u,0)), i:nulldurchgaenge(punkte(s.i,-90))});
+  });
+  $("pruefbericht").textContent=JSON.stringify(bericht);
+}
+
+knopfreihe("spulen",SPULEN,function(L){return komma(L)+" H";},function(L){return "Spule "+komma(L)+" Henry";},
+           function(L){zustand.L=L;});
+knopfreihe("spannungen",SPANNUNGEN,function(U){return U===0?"0 V (aus)":U+" V";},
+           function(U){return U===0?"Generator aus":"Spannung "+U+" Volt";},function(U){zustand.U=U;});
+knopfreihe("zeitbasen",ZEITBASEN,function(z){return z+" "+bruch("ms","div");},
+           function(z){return "Zeitbasis "+z+" Millisekunden je div";},function(z){zustand.z=z;});
+knopfreihe("kanal2",KANAL2,function(k){return k+" "+bruch("mA","div");},
+           function(k){return "Kanal 2: "+k+" Milliampere je div";},function(k){zustand.k=k;});
+$("bReset").onclick=zuruecksetzen;
+zustand={L:START.L,U:START.U,z:START.z,k:START.k};
+auffrischen(false);
+// Für Bildschirmfotos der Präsentation: window.__stelle({L:0.1,U:10,z:5,k:200})
+window.__stelle=function(s){ zustand={L:s.L,U:s.U,z:s.z,k:s.k}; auffrischen(false); };
+})();
+</script>
+</body></html>
