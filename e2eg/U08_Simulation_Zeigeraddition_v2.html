@@ -195,11 +195,12 @@ function u1(a){return z.u1*Math.sin(rad(a));}
 function u2(a){return z.u2*Math.sin(rad(a+z.p));}
 /* Scheitelwert der Gesamtspannung (Messfunktion des Oszilloskops) */
 function scheitel(){ var q=z.u1*z.u1+z.u2*z.u2+2*z.u1*z.u2*Math.cos(rad(z.p)); return Math.sqrt(Math.max(0,q)); }
-/* Cursoranzeige u aus den ANGEZEIGTEN Werten von u₁ und u₂ (in Zehnteln addiert): Einzeln gerundet ergäbe sich an
-   12 von 61 Cursorstellungen (8 V, 6 V, 72°) eine Abweichung von 0,1 V, z. B. bei 12°: 1,7 V + 6,0 V, aber u = 7,63 V
-   wird 7,6 V. Die Rechnung der Schüler muss mit der Anzeige übereinstimmen (Muster U07: Winkel aus den angezeigten
-   Lagen). Der Unterschied zum wahren Wert ist höchstens 0,1 V; an den Stellen des Arbeitsblatts ist er null. */
-function summeAngezeigt(a,b){ return (Math.round(a*10)+Math.round(b*10))/10; }
+/* Cursoranzeige u: der gerundete Augenblickswert u₁ + u₂ (13.10.2026, Prüfer U08). Die erste Fassung bildete u aus
+   den ANGEZEIGTEN u₁ und u₂; dann lag u an einzelnen Stellungen über dem gemessenen Scheitelwert (10 V, 10 V, 60°,
+   Cursor 60°: 8,7 V + 8,7 V = 17,4 V bei û = 17,3 V). Gerundet ist u nie größer als û. Dafür ergibt die Summe der
+   angezeigten u₁ und u₂ an einzelnen Stellungen 0,1 V mehr oder weniger als u (Rundung, z. B. 8 V, 6 V, 72°, Cursor
+   12°: 1,7 V + 6,0 V, u = 7,6 V); an den Stellungen des Arbeitsblatts (18°, 60°, 90°) nicht. */
+function summeAngezeigt(a,b){ return a+b; }
 function vdiv(){ var s=z.u1+z.u2; for(var i=0;i<VDIV.length;i++){ if(s<=3.8*VDIV[i]) return VDIV[i]; } return 20; }
 
 // ---------- Bildschirm ----------
@@ -299,10 +300,14 @@ if(/[?&]pruefen\b/.test(location.search)){
   z.u1=8; z.u2=6; z.p=72; var abw=[];
   for(var a=0;a<=360;a+=6){ var s=(Math.round(u1(a)*10)+Math.round(u2(a)*10))/10, t=Math.round((u1(a)+u2(a))*10)/10;
     if(Math.abs(s-t)>1e-9) abw.push(a); }
-  bericht.push({rundung_8_6_72_einzeln_gerundet_abweichend_bei:abw});
-  // Anzeige wie auf der Seite: u aus den angezeigten Werten, also immer gleich der Summe der Anzeigen
-  var ok=true; for(var b=0;b<=360;b+=6){ if(zahl(summeAngezeigt(u1(b),u2(b)))!==zahl((Math.round(u1(b)*10)+Math.round(u2(b)*10))/10)) ok=false; }
-  bericht.push({cursoranzeige_gleich_summe_der_anzeigen:ok});
+  bericht.push({rundung_8_6_72_summe_der_anzeigen_weicht_ab_bei:abw});
+  // Nie größer als der Scheitelwert: alle Einstellungen 1 bis 20 V, Phasenlage in 6°-Schritten, Cursor in 6°-Schritten
+  var ueber=[];
+  for(var s1=1;s1<=20;s1++) for(var s2=1;s2<=20;s2++) for(var ph=0;ph<=360;ph+=6){
+    z.u1=s1; z.u2=s2; z.p=ph; var uh=Math.round(scheitel()*10);
+    for(var c2=0;c2<=360;c2+=6){ if(Math.abs(Math.round(summeAngezeigt(u1(c2),u2(c2))*10))>uh) ueber.push([s1,s2,ph,c2]); }
+  }
+  bericht.push({cursor_ueber_scheitelwert:ueber.length, beispiele:ueber.slice(0,5)});
   $("pruefbericht").textContent=JSON.stringify(bericht);
   z=alt;
 }
