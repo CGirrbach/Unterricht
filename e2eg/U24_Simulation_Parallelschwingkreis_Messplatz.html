@@ -1,0 +1,260 @@
+<!doctype html>
+<!-- E2EG U24 · Messplatz: Parallelschwingkreis (neu 13.10.2026, Aufgabe IN der Stunde nach dem Muster E1EG Block 07).
+     Ersetzt für den Neubau die alte Seite U24_Simulation_Parallelresonanz.html (die bleibt unter ihrer Adresse
+     unverändert). Warum neu: Die alte Seite zeigte fertig die Resonanzfrequenz, die Güte und eine Z-Kurve mit Bandbreite,
+     nannte im Fuß alle Formeln und schrieb die Deutung („Das ist eine Stromüberhöhung“, „Der Kreisstrom hängt gar nicht an
+     R“) dazu; sie war ein Formelrechner, kein Messplatz, und die Schüler mussten nichts selbst finden.
+     Gleiche Bauweise wie der RLC-Parallel-Messplatz von U20 (der I_bL = I_bC bewusst vermeidet): Generator 10 V, jetzt
+     mit einstellbarer Frequenz; Wirkwiderstand wählbar; Spule und Kondensator fest; Messgeräte mit vier geltenden Ziffern.
+     Vorlage: Europa Fachkunde S. 152, Bild 3 (Messungen im Parallelschwingkreis: Strommesser in der Zuleitung, im
+     Kondensator- und im Spulenzweig) und Tabellenbuch S. 41 (RLC-Schaltung, Parallelschwingkreis: Zweige R, L, C mit
+     Zählpfeilen I, I_w, I_bL, I_bC, U).
+     Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht und rechnet nichts vor):
+       (1) Es gibt eine Frequenz, bei der der Gesamtstrom am kleinsten ist. Dort sind I_bL und I_bC gleich groß, und der
+           Gesamtstrom ist so groß wie der Wirkstrom (Resonanz; Z = R, am größten). Unterhalb ist I_bL größer, oberhalb I_bC.
+       (2) Bei Resonanz können die Ströme in Spule und Kondensator größer sein als der Gesamtstrom (Stromüberhöhung); das
+           Verhältnis I_bL durch I ist die Güte Q. Mit großem R (1 kΩ) ist sie größer als 1, mit kleinem R (100 Ω) kleiner.
+     Rechenmodell (ideale Spule, idealer Kondensator, Effektivwerte; Tabellenbuch S. 41, Formel 15):
+       X_L = 2π · f · L,  X_C = 1 / (2π · f · C),  I_w = U / R,  I_bL = U / X_L,  I_bC = U / X_C,
+       I = √(I_w² + (I_bL − I_bC)²),  U = 10 V,  L = 0,39 H,  C = 8,2 µF (E12-Werte).
+     Resonanzfrequenz f_r = 1 / (2π √(L · C)) = 88,998 Hz; die Frequenz lässt sich in Schritten von 1 Hz einstellen, bei
+       89 Hz zeigen beide Blindstrommesser 45,85 mA, der Gesamtstrom ist gleich dem Wirkstrom (1 kΩ: 10,00 mA), bei 88 Hz
+       und 90 Hz zeigt er 10,05 mA. Kein anderer Messpunkt hat I_bL = I_bC.
+     Arbeitsblatt (R = 1 kΩ): 50 Hz: 56,74 mA; 81,62 mA; 25,76 mA · 70 Hz: 24,38 mA; 58,30 mA; 36,07 mA ·
+       110 Hz: 21,98 mA; 37,10 mA; 56,67 mA · 89 Hz: 10,00 mA; 45,85 mA; 45,85 mA. 100 Ω bei 89 Hz: 100,0 mA; 45,85 mA.
+       220 Ω bei 89 Hz: 45,45 mA gegen 45,85 mA (Güte fast genau 1, Grenzfall).
+     Startstellung neutral: Generator aus (alle Anzeigen null), f = 30 Hz, R = 220 Ω (keine Einstellung des Arbeitsblatts).
+     Prüfmodus ?pruefen: Anzeigen aller 724 Einstellungen als JSON in #pruefbericht. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Parallelschwingkreis (U24)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"generator":"aus","f_Hz":30,"R_Ohm":220},"loesungswerte":{"1 kOhm, 50 Hz":"56,74 mA; 81,62 mA; 25,76 mA","1 kOhm, 70 Hz":"24,38 mA; 58,30 mA; 36,07 mA","1 kOhm, 110 Hz":"21,98 mA; 37,10 mA; 56,67 mA","kleinster Gesamtstrom (1 kOhm)":"89 Hz: 10,00 mA = I_w; I_bL = I_bC = 45,85 mA","100 Ohm, 89 Hz":"100,0 mA; 45,85 mA","Erkenntnis":"Bei der Resonanzfrequenz heben sich I_bL und I_bC in der Zuleitung auf, der Gesamtstrom ist am kleinsten und gleich I_w; die Zweigströme können größer sein als der Gesamtstrom (Güte I_bL durch I)"},"quelle":"Europa Fachkunde S. 152, Bild 3 (Messungen im Parallelschwingkreis); Tabellenbuch Elektrotechnik S. 41, RLC-Schaltung (Parallelschwingkreis) und Formel 15"}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;
+       --u:#0B7BC0;--i:#C2006B}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:1000px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px;align-items:start;
+         grid-template-areas:"geraete" "wahl" "schaltung"}
+ .schaltung{grid-area:schaltung} .geraete{grid-area:geraete} .wahl{grid-area:wahl}
+ @media(min-width:760px){.buehne{grid-template-columns:1.2fr 1fr;grid-template-areas:"schaltung geraete" "wahl geraete"}}
+ .schaltung{border:3px solid var(--ink);background:#FFFDF4;padding:6px;border-radius:6px}
+ svg{width:100%;height:auto;display:block}
+ .geraete{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+ .geraet{border:3px solid var(--ink);background:var(--hell);padding:8px 10px;border-radius:6px}
+ .geraet.breit{grid-column:1 / -1}
+ .geraet .name{font-size:14px;font-weight:700;color:var(--grau);line-height:1.25}
+ .geraet .name b{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border:2px solid var(--ink);border-radius:50%;color:var(--ink);margin-right:6px;font-size:14px;vertical-align:middle}
+ .lcd{background:#20313a;color:#9BF0B4;font-variant-numeric:tabular-nums;font-size:30px;font-weight:700;padding:6px 10px;margin:6px 0 2px;border-radius:4px;text-align:right;white-space:nowrap}
+ .geraet .art{font-size:13px;color:var(--grau)}
+ .geraet .stufen{margin:8px 0 4px}
+ .bauteile{border:3px solid var(--ink);background:#fff;padding:8px 10px;border-radius:6px;font-size:15px}
+ .bauteile b{color:var(--kupfer)}
+ .wahl{margin:0}
+ .wahl .titel{font-size:15px;font-weight:700;margin:10px 0 5px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+ .stufen{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+ button{font:inherit;font-size:16px;min-height:48px;min-width:64px;padding:6px 12px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap}
+ .stufen button{min-width:0;padding:6px 4px;font-weight:700}
+ button.an{background:var(--kupfer);color:#fff}
+ button.zurueck{border-color:var(--ink);color:var(--ink)}
+ button:disabled{opacity:.4;cursor:default}
+ button:focus-visible{outline:3px solid var(--kupfer);outline-offset:3px}
+ .fz{font-family:Cambria,Caladea,'Noto Serif',Georgia,serif;font-style:italic}
+ .hinweis{font-size:14px;color:var(--grau);margin-top:10px}
+ #pruefbericht{display:none}
+ @media(max-width:420px){.lcd{font-size:23px;padding:6px 7px} button{min-width:56px;padding:6px 9px;font-size:15px} .wrap{padding:14px 12px 20px} .geraet{padding:8px 7px} .geraet .name{font-size:12px} .geraet .name b{width:21px;height:21px;font-size:12px;margin-right:3px} .bauteile{font-size:13px;padding:8px 7px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E2EG · LF 5 · U24</div><h1>Messplatz: Parallelschwingkreis</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Generator einschalten, Wirkwiderstand wählen, Frequenz am Generator verstellen. Die vier
+  Strommesser und der Spannungsmesser zeigen Effektivwerte.</div>
+
+ <div class="buehne">
+  <div class="schaltung">
+   <svg viewBox="0 0 560 330" role="img" aria-label="Schaltung: Funktionsgenerator mit einstellbarer Frequenz, Strommesser in der Zuleitung und Spannungsmesser. Drei Zweige parallel: Wirkwiderstand R, Spule L und Kondensator C, jeder Zweig mit eigenem Strommesser.">
+    <g fill="none" stroke="#1A2530" stroke-width="2.6" stroke-linecap="round">
+     <!-- Generator -->
+     <rect x="30" y="140" width="52" height="62" fill="#fff"/>
+     <!-- Zuleitung oben mit Strommesser, unten zurück -->
+     <polyline points="56,140 56,60 112,60"/>
+     <polyline points="148,60 490,60"/>
+     <polyline points="56,202 56,300 490,300"/>
+     <circle cx="130" cy="60" r="18" fill="#fff"/>
+     <!-- Spannungsmesser an der Schaltung -->
+     <polyline points="190,60 190,153"/>
+     <polyline points="190,189 190,300"/>
+     <circle cx="190" cy="171" r="18" fill="#fff"/>
+     <!-- Zweig R -->
+     <polyline points="290,60 290,92"/><polyline points="290,128 290,175"/><polyline points="290,235 290,300"/>
+     <rect x="279" y="175" width="22" height="60" fill="#fff"/>
+     <circle cx="290" cy="110" r="18" fill="#fff"/>
+     <!-- Zweig L -->
+     <polyline points="390,60 390,92"/><polyline points="390,128 390,170"/><polyline points="390,240 390,300"/>
+     <path d="M390,170 a9,8.75 0 0 1 0,17.5 a9,8.75 0 0 1 0,17.5 a9,8.75 0 0 1 0,17.5 a9,8.75 0 0 1 0,17.5"/>
+     <circle cx="390" cy="110" r="18" fill="#fff"/>
+     <!-- Zweig C -->
+     <polyline points="490,60 490,92"/><polyline points="490,128 490,201"/><polyline points="490,213 490,300"/>
+     <line x1="470" y1="201" x2="510" y2="201" stroke-width="3.4"/>
+     <line x1="470" y1="213" x2="510" y2="213" stroke-width="3.4"/>
+     <circle cx="490" cy="110" r="18" fill="#fff"/>
+    </g>
+    <g fill="#1A2530">
+     <circle cx="190" cy="60" r="4.5"/><circle cx="290" cy="60" r="4.5"/><circle cx="390" cy="60" r="4.5"/>
+     <circle cx="190" cy="300" r="4.5"/><circle cx="290" cy="300" r="4.5"/><circle cx="390" cy="300" r="4.5"/>
+    </g>
+    <g font-family="Arial,sans-serif" font-size="22" font-weight="700" fill="#1A2530" text-anchor="middle">
+     <text x="130" y="68">A</text><text x="290" y="118">A</text><text x="390" y="118">A</text><text x="490" y="118">A</text>
+     <text x="190" y="179">V</text>
+     <text x="56" y="168">G</text><text x="56" y="192" font-weight="400">~</text>
+    </g>
+    <g font-family="Cambria,Caladea,'Noto Serif',Georgia,serif" font-style="italic" font-size="22">
+     <text x="262" y="212" fill="#1A2530" text-anchor="middle">R</text>
+     <text x="365" y="212" fill="#1A2530" text-anchor="middle">L</text>
+     <text x="526" y="212" fill="#1A2530" text-anchor="middle">C</text>
+     <text x="108" y="30" fill="#C2006B">I</text>
+     <text x="312" y="160" fill="#C2006B">I<tspan font-size="15" dy="5" font-style="normal">w</tspan></text>
+     <text x="412" y="160" fill="#C2006B">I<tspan font-size="15" dy="5" font-style="normal">bL</tspan></text>
+     <text x="512" y="160" fill="#C2006B">I<tspan font-size="15" dy="5" font-style="normal">bC</tspan></text>
+     <text x="216" y="248" fill="#0B7BC0">U</text>
+     <text x="80" y="236" fill="#1A2530" font-size="20">f</text>
+    </g>
+    <text x="90" y="236" font-family="Arial,sans-serif" font-size="17" fill="#1A2530"> = <tspan id="svgF">30</tspan> Hz</text>
+    <path d="M96,40 L122,40" stroke="#C2006B" stroke-width="2.6"/><path d="M124,40 l-10,-5 l0,10 z" fill="#C2006B"/>
+    <g stroke="#C2006B" stroke-width="2.4"><path d="M302,136 L302,160"/><path d="M402,136 L402,160"/><path d="M502,136 L502,160"/></g>
+    <g fill="#C2006B"><path d="M302,164 l-5,-10 l10,0 z"/><path d="M402,164 l-5,-10 l10,0 z"/><path d="M502,164 l-5,-10 l10,0 z"/></g>
+    <path d="M216,200 L216,226" stroke="#0B7BC0" stroke-width="2.6"/><path d="M216,228 l-5,-10 l10,0 z" fill="#0B7BC0"/>
+   </svg>
+  </div>
+  <div class="wahl">
+   <div class="titel">1. Generator</div>
+   <div class="knoepfe" id="generator"></div>
+   <div class="titel">2. Wirkwiderstand <span class="fz">R</span></div>
+   <div class="stufen" id="widerstaende"></div>
+   <div class="titel">3. Neu beginnen</div>
+   <div class="knoepfe"><button class="zurueck" id="bReset" type="button">Zurücksetzen</button></div>
+  </div>
+  <div class="geraete">
+   <div class="geraet breit">
+    <div class="name"><b>G</b>Funktionsgenerator, Sinus 10 V: Frequenz <span class="fz">f</span></div>
+    <div class="lcd" id="aF" aria-live="polite">aus</div>
+    <div class="stufen" id="frequenz"></div>
+    <div class="art">Frequenz verstellen: 20 Hz bis 200 Hz, in Schritten von 1 Hz oder 10 Hz</div>
+   </div>
+   <div class="geraet">
+    <div class="name"><b>A</b>Gesamtstrom <span class="fz">I</span></div>
+    <div class="lcd" id="aI" aria-live="polite">0,00 mA</div>
+    <div class="art">in der Zuleitung</div>
+   </div>
+   <div class="geraet">
+    <div class="name"><b>V</b>Spannung <span class="fz">U</span></div>
+    <div class="lcd" id="aU" aria-live="polite">0,000 V</div>
+    <div class="art">an der Schaltung</div>
+   </div>
+   <div class="geraet">
+    <div class="name"><b>A</b>Wirkstrom <span class="fz">I</span><sub>w</sub></div>
+    <div class="lcd" id="aIw" aria-live="polite">0,00 mA</div>
+    <div class="art">im Zweig des Wirkwiderstands</div>
+   </div>
+   <div class="geraet">
+    <div class="name"><b>A</b>Blindstrom <span class="fz">I</span><sub>bL</sub></div>
+    <div class="lcd" id="aIbL" aria-live="polite">0,00 mA</div>
+    <div class="art">im Zweig der Spule</div>
+   </div>
+   <div class="geraet">
+    <div class="name"><b>A</b>Blindstrom <span class="fz">I</span><sub>bC</sub></div>
+    <div class="lcd" id="aIbC" aria-live="polite">0,00 mA</div>
+    <div class="art">im Zweig des Kondensators</div>
+   </div>
+   <div class="bauteile"><span class="fz">R</span> = <b id="aR"></b><br>Spule: <span class="fz">L</span> = <b>0,39 H</b><br>
+    Kondensator: <span class="fz">C</span> = <b>8,2 µF</b></div>
+  </div>
+ </div>
+
+ <div class="hinweis">Ideale Spule und idealer Kondensator: Sie haben keinen Wirkwiderstand. An Wirkwiderstand, Spule
+  und Kondensator liegt dieselbe Spannung <span class="fz">U</span>.</div>
+ <pre id="pruefbericht"></pre>
+</div>
+
+<script>
+(function(){
+"use strict";
+var U0=10, L=0.39, C=8.2e-6;                         // V, H, F (fest)
+var FMIN=20, FMAX=200;                               // Hz
+var SCHRITTE=[-10,-1,1,10];                          // Hz
+var WIDERSTAENDE=[100,220,470,1000];                 // Ω
+var START={an:false,f:30,R:220};
+var zustand={an:START.an,f:START.f,R:START.R};
+var $=function(id){return document.getElementById(id);};
+
+function komma(s){return String(s).replace(".",",");}
+function werte(s){
+  if(!s.an) return {Iw:0,IbL:0,IbC:0,I:0,U:0};
+  var xl=2*Math.PI*s.f*L, xc=1/(2*Math.PI*s.f*C);
+  var Iw=U0/s.R, IbL=U0/xl, IbC=U0/xc;
+  return {Iw:Iw, IbL:IbL, IbC:IbC, I:Math.sqrt(Iw*Iw+(IbL-IbC)*(IbL-IbC)), U:U0};
+}
+// vier geltende Ziffern wie ein Digitalmessgerät: 10,00 mA; 45,85 mA; 100,0 mA; 10,00 V
+function vier(x){ var t=x.toPrecision(4); if(t.indexOf("e")>=0) t=String(Math.round(x)); return komma(t); }
+function aText(I){ return I===0 ? "0,00 mA" : vier(I*1000)+" mA"; }
+function vText(U){ return U===0 ? "0,000 V" : vier(U)+" V"; }
+function rText(R){ return R>=1000 ? komma(R/1000)+" kΩ" : R+" Ω"; }
+
+function knopf(ziel, text, aria, wert, tun){
+  var b=document.createElement("button"); b.type="button"; b.textContent=text; b.dataset.wert=String(wert);
+  b.setAttribute("aria-label",aria); b.onclick=function(){tun();auffrischen();}; $(ziel).appendChild(b); return b;
+}
+function markiere(id,wert){
+  Array.prototype.forEach.call($(id).children,function(b){b.classList.toggle("an",b.dataset.wert===String(wert));});
+}
+function auffrischen(){
+  markiere("generator",zustand.an); markiere("widerstaende",zustand.R);
+  Array.prototype.forEach.call($("frequenz").children,function(b){
+    var d=+b.dataset.wert, neu=zustand.f+d; b.disabled=(neu<FMIN||neu>FMAX);
+  });
+  var w=werte(zustand);
+  $("aI").textContent=aText(w.I); $("aIw").textContent=aText(w.Iw);
+  $("aIbL").textContent=aText(w.IbL); $("aIbC").textContent=aText(w.IbC); $("aU").textContent=vText(w.U);
+  $("aF").textContent=zustand.an ? zustand.f+" Hz" : "aus ("+zustand.f+" Hz)";
+  $("svgF").textContent=zustand.f;
+  $("aR").textContent=rText(zustand.R);
+}
+function zuruecksetzen(){ zustand={an:START.an,f:START.f,R:START.R}; auffrischen(); }
+
+[false,true].forEach(function(a){
+  knopf("generator", a?"ein":"aus", a?"Generator ein":"Generator aus", a, function(){zustand.an=a;});
+});
+SCHRITTE.forEach(function(d){
+  knopf("frequenz", (d>0?"+":"−")+Math.abs(d)+" Hz", "Frequenz "+(d>0?"um ":"um minus ")+Math.abs(d)+" Hertz verstellen", d,
+        function(){ var neu=zustand.f+d; if(neu>=FMIN&&neu<=FMAX) zustand.f=neu; });
+});
+WIDERSTAENDE.forEach(function(R){
+  knopf("widerstaende", rText(R), "Wirkwiderstand "+(R>=1000?R/1000+" Kiloohm":R+" Ohm"), R, function(){zustand.R=R;});
+});
+$("bReset").onclick=zuruecksetzen;
+
+// ---------- Prüfmodus: alle Einstellungen, Probe aus den angezeigten Ziffern ----------
+if (/[?&]pruefen\b/.test(location.search)) {
+  var bericht=[];
+  WIDERSTAENDE.forEach(function(R){ for(var f=FMIN; f<=FMAX; f++){
+    var st={an:true,f:f,R:R}, w=werte(st);
+    var z=function(s){return parseFloat(s.replace(" mA","").replace(",","."));};
+    var iw=z(aText(w.Iw)), il=z(aText(w.IbL)), ic=z(aText(w.IbC));
+    bericht.push({R:R, f:f, I:aText(w.I), Iw:aText(w.Iw), IbL:aText(w.IbL), IbC:aText(w.IbC), U:vText(w.U),
+                  probe:Math.round(Math.sqrt(iw*iw+(il-ic)*(il-ic))*10000)/10000});
+  } });
+  $("pruefbericht").textContent=JSON.stringify(bericht);
+}
+zuruecksetzen();
+// Für Bildschirmfotos der Präsentation: window.__stelle({an:true,f:89,R:1000})
+window.__stelle=function(s){ zustand={an:s.an,f:s.f,R:s.R}; auffrischen(); };
+})();
+</script>
+</body></html>
