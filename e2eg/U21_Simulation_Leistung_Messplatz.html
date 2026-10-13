@@ -1,0 +1,360 @@
+<!doctype html>
+<!-- E2EG U21 · Messplatz: Leistung im Wechselstromkreis (neu 13.10.2026, Aufgabe IN der Stunde nach dem Muster E1EG
+     Block 07). Ersetzt für U21 die alte Seite U21_Simulation_Leistungsdreieck.html (bleibt online unverändert): Die alte
+     Seite rechnete P, Q, S und cos φ aus zwei Schiebern fertig vor, nannte die Formeln und deutete das Ergebnis selbst
+     („Eine Hypotenuse ist nie so lang wie beide Katheten zusammen“); sie war ein Formelrechner, kein Messplatz.
+     Vorlagen: Europa Fachkunde S. 141, Versuch und Bild 2 (Spule an Wechselspannung, Strommesser, Spannungsmesser und
+     Leistungsmesser; das Produkt aus Spannung und Stromstärke mit der Anzeige des Leistungsmessers vergleichen);
+     Fachkunde S. 178 (Blindleistungsmessung mit elektrodynamischem Messwerk); Rechenbuch S. 121, Bild 2 (Messschaltung
+     mit A, W, V); Rechenbuch S. 100 Nr. 5 („Mit einem Blindleistungsmesser wird … gemessen“); Liniendiagramm von u, i und
+     p wie Fachkunde S. 141, Bild 1 und 3 (p schwarz, Flächen grau).
+     Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht und zeigt S nicht an):
+       (1) Nur am Wirkwiderstand zeigt der Leistungsmesser so viel wie U · I; an der idealen Spule zeigt er null, dafür
+           zeigt der Blindleistungsmesser so viel wie U · I.
+       (2) Mit Wirkwiderstand und Spule ist P + Q größer als U · I, aber √(P² + Q²) ist genau U · I.
+       (3) Die Leistungskurve p = u · i (Rechenkanal) ist am Wirkwiderstand nie negativ, an der Spule zur Hälfte negativ
+           (Mittelwert null); der Leistungsmesser zeigt den Mittelwert von p.
+     Rechenmodell (ideale Spule; Fachkunde S. 136, 141, 142; Tabellenbuch S. 40, Formel 2, 4, 6 und S. 37):
+       X_L = 2π · 50 Hz · L,  Z = √(R² + X_L²),  I = U / Z,  P = I² · R,  Q = I² · X_L  (Effektivwerte), U = 230 V;
+       φ = arctan(X_L / R);  u = û · sin(ωt),  i = î · sin(ωt − φ) (der Strom eilt nach),  p = u · i.
+       „überbrückt“ heißt R = 0 bzw. L = 0. Beide überbrückt: Kurzschluss, der Generator schaltet ab (keine Anzeige).
+     Anzeigen mit vier geltenden Ziffern (230,0 V; 0,8369 A; 140,1 W; 132,0 var); null als 0,0. Für alle 15 Einstellungen
+       weicht 230,0 V · I (aus der Anzeige) von √(P² + Q²) (aus den Anzeigen) um höchstens 0,1 V · A ab (?pruefen).
+     Zeilen des Arbeitsblatts: 1) R = 200 Ω, L überbrückt: 1,150 A; 264,5 W; 0,0 var. 2) R überbrückt, L = 0,6 H:
+       1,220 A; 0,0 W; 280,6 var. 3) R = 200 Ω, L = 0,6 H: 0,8369 A; 140,1 W; 132,0 var (φ = 43,30°).
+     Oszilloskop fest: Zeitbasis 2 ms je div (eine Periode = 10 div), Kanal 1 (u) 100 V je div, Kanal 2 (i über eine
+       Strommesszange) 1 A je div, Rechenkanal (p = u · i) 200 W je div; Bildschirm 10 div × 8 div; getriggert auf den
+       Nulldurchgang von u von Minus nach Plus am linken Rand. Größter Ausschlag aller Einstellungen 3,45 div (i bei
+       0,3 H allein), p höchstens 2,81 div: nichts läuft aus dem Bild.
+     Startstellung neutral: Generator aus, R = 300 Ω, L = 1,2 H (keine Zeile des Arbeitsblatts).
+     Prüfmodus ?pruefen: Anzeigen aller Einstellungen als JSON in #pruefbericht. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Leistung im Wechselstromkreis (U21)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"generator":"aus","R_Ohm":300,"L_H":1.2},"loesungswerte":{"Zeile 1: 200 Ohm, L überbrückt":"230,0 V; 1,150 A; 264,5 W; 0,0 var; U · I = 264,5 VA","Zeile 2: R überbrückt, 0,6 H":"230,0 V; 1,220 A; 0,0 W; 280,6 var; U · I = 280,6 VA","Zeile 3: 200 Ohm, 0,6 H":"230,0 V; 0,8369 A; 140,1 W; 132,0 var; U · I = 192,5 VA; P + Q = 272,1; Wurzel aus P² + Q² = 192,5","Oszilloskop":"Zeile 1 p nie negativ; Zeile 2 p zur Hälfte negativ, Mittelwert null; Zeile 3 p kurz negativ, Mittelwert über null","Erkenntnis":"P = U · I nur am Wirkwiderstand; P + Q größer als U · I; Wurzel aus P² + Q² gleich U · I"},"quelle":"Europa Fachkunde S. 141 (Versuch, Bild 1 bis 3), S. 142, S. 178; Rechenbuch S. 121 Bild 2, S. 100 Nr. 5; Tabellenbuch Elektrotechnik S. 37 und S. 40"}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;
+       --u:#0B7BC0;--i:#C2006B}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:980px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px;align-items:start;
+         grid-template-areas:"geraete" "wahl" "schirm" "schaltung"}
+ .schaltung{grid-area:schaltung} .geraete{grid-area:geraete} .wahl{grid-area:wahl} .schirm{grid-area:schirm}
+ @media(min-width:760px){.buehne{grid-template-columns:1.25fr 1fr;grid-template-areas:"schaltung geraete" "schirm wahl"}}
+ .schaltung{border:3px solid var(--ink);background:#FFFDF4;padding:6px;border-radius:6px}
+ svg{width:100%;height:auto;display:block}
+ .geraete{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+ .geraet{border:3px solid var(--ink);background:var(--hell);padding:8px 10px;border-radius:6px;min-width:0}
+ .geraet .name{font-size:14px;font-weight:700;color:var(--grau);line-height:1.25}
+ .geraet .name b{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:26px;padding:0 3px;border:2px solid var(--ink);border-radius:13px;color:var(--ink);margin-right:6px;font-size:13px;vertical-align:middle}
+ .lcd{background:#20313a;color:#9BF0B4;font-variant-numeric:tabular-nums;font-size:30px;font-weight:700;padding:6px 10px;margin:6px 0 2px;border-radius:4px;text-align:right;white-space:nowrap}
+ .geraet .art{font-size:13px;color:var(--grau)}
+ .quelle{grid-column:1/-1;border:3px solid var(--ink);background:#fff;padding:8px 10px;border-radius:6px;font-size:15px}
+ .quelle b{color:var(--kupfer)}
+ .status{grid-column:1/-1;font-size:15px;font-weight:700;color:#B00020;min-height:0}
+ .status:empty{display:none}
+ .schirm{border:3px solid var(--ink);background:#30363c;padding:8px;border-radius:6px}
+ .schirm .titel{color:#fff;font-size:14px;font-weight:700;padding:0 2px 6px}
+ canvas{width:100%;height:auto;display:block;background:#DDE8DC;touch-action:manipulation}
+ .einstellung{display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center;color:#fff;font-size:15px;padding:8px 2px 2px}
+ .einstellung b{color:#FFE66B}
+ .kanal{display:inline-flex;align-items:center;gap:6px}
+ .strich{display:inline-block;width:26px;height:4px;border-radius:2px}
+ .bruch{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;font-size:.78em;line-height:1.05}
+ .bruch>span:first-child{border-bottom:1.3px solid currentColor;padding:0 2px}
+ .bruch>span:last-child{padding:0 2px}
+ .wahl{margin:0}
+ .wahl .titel{font-size:15px;font-weight:700;margin:10px 0 5px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+ button{font:inherit;font-size:16px;min-height:48px;min-width:64px;padding:6px 12px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+ button.an{background:var(--kupfer);color:#fff}
+ button.zurueck{border-color:var(--ink);color:var(--ink)}
+ .fz{font-family:Cambria,Caladea,'Noto Serif',Georgia,serif;font-style:italic}
+ .hinweis{font-size:14px;color:var(--grau);margin-top:10px}
+ #pruefbericht{display:none}
+ @media(max-width:420px){.lcd{font-size:23px;padding:6px 7px} button{min-width:54px;padding:6px 8px;font-size:15px} .wrap{padding:14px 12px 20px} .geraet{padding:8px 7px} .geraet .name{font-size:12px} .geraet .name b{min-width:21px;height:21px;font-size:11px;margin-right:3px} .einstellung{font-size:14px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E2EG · LF 5 · U21</div><h1>Messplatz: Leistung im Wechselstromkreis</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Generator einschalten, dann Wirkwiderstand und Spule wählen.
+  „Überbrückt“ heißt: Das Bauteil ist kurzgeschlossen und wirkt nicht. Strommesser und Spannungsmesser zeigen
+  Effektivwerte. Das Oszilloskop zeigt die Spannung <span class="fz">u</span>, den Strom <span class="fz">i</span> und im
+  Rechenkanal die Leistung <span class="fz">p</span>.</div>
+
+ <div class="buehne">
+  <div class="schaltung">
+   <svg viewBox="0 0 520 300" role="img" aria-label="Schaltung: Generator, Strommesser, Leistungsmesser und Blindleistungsmesser in der Zuleitung, Spannungsmesser parallel, Wirkwiderstand R und Spule L in Reihe.">
+    <g fill="none" stroke="#1A2530" stroke-width="2.6" stroke-linecap="round">
+     <!-- Generator -->
+     <rect x="34" y="124" width="52" height="62" fill="#fff"/>
+     <!-- Zuleitung oben mit Strommesser, Leistungsmesser, Blindleistungsmesser -->
+     <polyline points="60,124 60,60 102,60"/>
+     <polyline points="138,60 182,60"/>
+     <polyline points="218,60 262,60"/>
+     <polyline points="298,60 450,60 450,88"/>
+     <!-- Rückleitung unten -->
+     <polyline points="450,250 450,272 60,272 60,186"/>
+     <!-- Spannungspfade von Leistungsmesser und Blindleistungsmesser -->
+     <polyline points="200,78 200,272"/>
+     <polyline points="280,78 280,272"/>
+     <!-- Spannungsmesser -->
+     <polyline points="360,60 360,148"/>
+     <polyline points="360,184 360,272"/>
+     <!-- Messgeräte -->
+     <circle cx="120" cy="60" r="18" fill="#fff"/>
+     <circle cx="200" cy="60" r="18" fill="#fff"/>
+     <circle cx="280" cy="60" r="18" fill="#fff"/>
+     <circle cx="360" cy="166" r="18" fill="#fff"/>
+     <!-- Wirkwiderstand senkrecht -->
+     <rect x="439" y="88" width="22" height="56" fill="#fff"/>
+     <polyline points="450,144 450,170"/>
+     <!-- Spule senkrecht: vier Bögen -->
+     <path d="M450,170 a10,10 0 0 1 0,20 a10,10 0 0 1 0,20 a10,10 0 0 1 0,20 a10,10 0 0 1 0,20"/>
+    </g>
+    <!-- Überbrückungen (nur sichtbar, wenn gewählt) -->
+    <g id="brueckeR" fill="none" stroke="#A34E0E" stroke-width="3" stroke-linecap="round" visibility="hidden">
+     <polyline points="450,76 492,76 492,158 450,158"/>
+    </g>
+    <g id="brueckeL" fill="none" stroke="#A34E0E" stroke-width="3" stroke-linecap="round" visibility="hidden">
+     <polyline points="450,163 492,163 492,252 450,252"/>
+    </g>
+    <g fill="#1A2530">
+     <circle cx="200" cy="272" r="4.5"/><circle cx="280" cy="272" r="4.5"/><circle cx="360" cy="60" r="4.5"/>
+     <circle cx="360" cy="272" r="4.5"/>
+    </g>
+    <g font-family="Arial,sans-serif" font-size="21" font-weight="700" fill="#1A2530" text-anchor="middle">
+     <text x="120" y="68">A</text><text x="200" y="68">W</text><text x="280" y="66" font-size="15">var</text>
+     <text x="360" y="174">V</text>
+     <text x="60" y="152">G</text><text x="60" y="176" font-weight="400">~</text>
+    </g>
+    <g font-family="Cambria,Caladea,'Noto Serif',Georgia,serif" font-style="italic" font-size="22">
+     <text x="418" y="132" fill="#1A2530" text-anchor="middle">R</text>
+     <text x="418" y="226" fill="#1A2530" text-anchor="middle">L</text>
+     <text x="84" y="30" fill="#C2006B" text-anchor="middle">I</text>
+     <text x="316" y="174" fill="#0B7BC0" text-anchor="middle">U</text>
+    </g>
+    <path d="M70,40 L96,40" stroke="#C2006B" stroke-width="2.6"/><path d="M98,40 l-10,-5 l0,10 z" fill="#C2006B"/>
+    <path d="M332,140 L332,192" stroke="#0B7BC0" stroke-width="2.6"/><path d="M332,196 l-5,-10 l10,0 z" fill="#0B7BC0"/>
+    <g font-family="Arial,sans-serif" font-size="13" fill="#A34E0E" text-anchor="end">
+     <text id="tBrueckeR" x="434" y="106" visibility="hidden">überbrückt</text>
+     <text id="tBrueckeL" x="434" y="200" visibility="hidden">überbrückt</text>
+    </g>
+   </svg>
+  </div>
+  <div class="wahl">
+   <div class="titel">1. Generator</div>
+   <div class="knoepfe" id="generator"></div>
+   <div class="titel">2. Wirkwiderstand <span class="fz">R</span></div>
+   <div class="knoepfe" id="widerstaende"></div>
+   <div class="titel">3. Spule <span class="fz">L</span></div>
+   <div class="knoepfe" id="spulen"></div>
+   <div class="titel">4. Neu beginnen</div>
+   <div class="knoepfe"><button class="zurueck" id="bReset" type="button">Zurücksetzen</button></div>
+  </div>
+  <div class="geraete">
+   <div class="geraet">
+    <div class="name"><b>A</b>Strommesser <span class="fz">I</span></div>
+    <div class="lcd" id="aI" aria-live="polite">0,0 A</div>
+    <div class="art">in der Zuleitung</div>
+   </div>
+   <div class="geraet">
+    <div class="name"><b>V</b>Spannungsmesser <span class="fz">U</span></div>
+    <div class="lcd" id="aU" aria-live="polite">0,0 V</div>
+    <div class="art">an Wirkwiderstand und Spule</div>
+   </div>
+   <div class="geraet">
+    <div class="name"><b>W</b>Leistungsmesser <span class="fz">P</span></div>
+    <div class="lcd" id="aP" aria-live="polite">0,0 W</div>
+    <div class="art">Strompfad in der Zuleitung</div>
+   </div>
+   <div class="geraet">
+    <div class="name"><b>var</b>Blindleistungsmesser <span class="fz">Q</span></div>
+    <div class="lcd" id="aQ" aria-live="polite">0,0 var</div>
+    <div class="art">Strompfad in der Zuleitung</div>
+   </div>
+   <div class="quelle">Generator: Sinus, <b>230 V, 50 Hz</b> (fest), <b id="aG">aus</b><br>
+    <span class="fz">R</span> = <b id="aR"></b>,&nbsp; <span class="fz">L</span> = <b id="aL"></b></div>
+   <div class="status" id="status" role="status"></div>
+  </div>
+  <div class="schirm">
+   <div class="titel">Oszilloskop mit Rechenkanal</div>
+   <canvas id="c" width="600" height="480" aria-label="Bildschirm des Oszilloskops mit Raster aus 10 mal 8 Kästchen und den Kurven der Spannung u, des Stromes i und der Leistung p."></canvas>
+   <div class="einstellung">
+    <span class="kanal"><span class="strich" style="background:#1F5FA8"></span><span>Kanal 1: <span class="fz">u</span>, <b>100 <span class="bruch"><span>V</span><span>div</span></span></b></span></span>
+    <span class="kanal"><span class="strich" style="background:#C2006B"></span><span>Kanal 2: <span class="fz">i</span>, <b>1 <span class="bruch"><span>A</span><span>div</span></span></b></span></span>
+    <span class="kanal"><span class="strich" style="background:#fff"></span><span>Rechenkanal: <span class="fz">p</span> = <span class="fz">u</span> · <span class="fz">i</span>, <b>200 <span class="bruch"><span>W</span><span>div</span></span></b></span></span>
+    <span>Zeitbasis: <b>2 <span class="bruch"><span>ms</span><span>div</span></span></b></span>
+   </div>
+  </div>
+ </div>
+
+ <div class="hinweis">Ideale Spule: Ihr Draht hat keinen Wirkwiderstand. Leistungsmesser und Blindleistungsmesser
+  haben einen Strompfad in der Zuleitung und einen Spannungspfad parallel zur Schaltung. Der Rechenkanal multipliziert
+  in jedem Augenblick <span class="fz">u</span> und <span class="fz">i</span>; die grauen Flächen liegen zwischen der
+  Kurve <span class="fz">p</span> und der Nulllinie. Der Bildschirm ist 10 div breit und 8 div hoch; das Oszilloskop ist
+  auf die Spannung getriggert: <span class="fz">u</span> beginnt am linken Rand mit dem Nulldurchgang von Minus nach
+  Plus. Die Einstellungen des Oszilloskops sind fest.</div>
+ <pre id="pruefbericht"></pre>
+</div>
+
+<script>
+(function(){
+"use strict";
+var F=50, U0=230;                                     // Hz und V, fest
+var WIDERSTAENDE=[0,200,300,400];                     // Ω; 0 = überbrückt
+var SPULEN=[0,0.3,0.6,1.2];                           // H; 0 = überbrückt
+var ZB=2, K1=100, K2=1, K3=200;                       // ms je div, V je div, A je div, W je div (fest)
+var START={an:false,R:300,L:1.2};
+var zustand={an:START.an,R:START.R,L:START.L};
+var $=function(id){return document.getElementById(id);};
+var bewegung=!(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+
+function komma(s){return String(s).replace(".",",");}
+function xl(L){return 2*Math.PI*F*L;}
+function kurzschluss(s){return s.R===0&&s.L===0;}
+function werte(s){
+  if(!s.an||kurzschluss(s)) return {I:0,U:0,P:0,Q:0,phi:0,aus:true};
+  var X=xl(s.L), Z=Math.sqrt(s.R*s.R+X*X), I=U0/Z;
+  return {I:I, U:U0, P:I*I*s.R, Q:I*I*X, phi:Math.atan2(X,s.R)*180/Math.PI, aus:false};
+}
+// vier geltende Ziffern wie ein Digitalmessgerät: 230,0 V; 0,8369 A; 140,1 W; 132,0 var; null als 0,0
+function vier(x){ if(x===0) return "0,0"; var t=x.toPrecision(4); if(t.indexOf("e")>=0) t=String(Math.round(x)); return komma(t); }
+function rText(R){ return R===0 ? "überbrückt" : R+" Ω"; }
+function lText(L){ return L===0 ? "überbrückt" : komma(L)+" H"; }
+
+function knopfreihe(id, liste, text, aria, setze){
+  liste.forEach(function(w){
+    var b=document.createElement("button"); b.type="button"; b.innerHTML=text(w); b.dataset.wert=String(w);
+    b.setAttribute("aria-label",aria(w));
+    b.onclick=function(){setze(w);auffrischen(true);}; $(id).appendChild(b);
+  });
+}
+function markiere(id,wert){
+  Array.prototype.forEach.call($(id).children,function(b){b.classList.toggle("an",b.dataset.wert===String(wert));});
+}
+function auffrischen(animiert){
+  markiere("generator",zustand.an); markiere("widerstaende",zustand.R); markiere("spulen",zustand.L);
+  var w=werte(zustand);
+  $("aI").textContent=vier(w.I)+" A"; $("aU").textContent=vier(w.U)+" V";
+  $("aP").textContent=vier(w.P)+" W"; $("aQ").textContent=vier(w.Q)+" var";
+  $("aG").textContent=(zustand.an&&!kurzschluss(zustand))?"ein":"aus";
+  $("aR").textContent=rText(zustand.R); $("aL").textContent=lText(zustand.L);
+  $("status").textContent=(zustand.an&&kurzschluss(zustand))?
+    "Kurzschluss: Der Generator hat abgeschaltet. Wählen Sie einen Wirkwiderstand oder eine Spule.":"";
+  ["R","L"].forEach(function(k){
+    var sicht=(k==="R"?zustand.R:zustand.L)===0?"visible":"hidden";
+    $("bruecke"+k).setAttribute("visibility",sicht); $("tBruecke"+k).setAttribute("visibility",sicht);
+  });
+  zeichne(animiert&&bewegung);
+}
+
+// ---------- Bildschirm (Aussehen wie die Messplätze U13, U16) ----------
+var c=$("c"), g=c.getContext("2d");
+var DPR=Math.max(1,Math.min(3,window.devicePixelRatio||1));
+var BW=600, BH=480, DIV=60;                          // 10 × 8 div zu je 60 Bildpunkten
+c.width=BW*DPR; c.height=BH*DPR; g.scale(DPR,DPR);
+var lauf=null;
+
+function raster(){
+  g.fillStyle="#DDE8DC"; g.fillRect(0,0,BW,BH);
+  g.strokeStyle="rgba(26,37,48,0.45)"; g.lineWidth=1;
+  for(var i=0;i<=10;i++){ var x=Math.round(i*DIV)+0.5; if(i===10) x-=1; g.beginPath(); g.moveTo(x,0); g.lineTo(x,BH); g.stroke(); }
+  for(var j=0;j<=8;j++){ var y=Math.round(j*DIV)+0.5; if(j===8) y-=1; g.beginPath(); g.moveTo(0,y); g.lineTo(BW,y); g.stroke(); }
+  g.strokeStyle="#1A2530"; g.lineWidth=2;
+  g.beginPath(); g.moveTo(0,BH/2); g.lineTo(BW,BH/2); g.moveTo(BW/2,0); g.lineTo(BW/2,BH); g.stroke();
+  g.lineWidth=1.5;
+  for(var k=0;k<=50;k++){ var xt=k*DIV/5; g.beginPath(); g.moveTo(xt,BH/2-5); g.lineTo(xt,BH/2+5); g.stroke(); }
+  for(var m=0;m<=40;m++){ var yt=m*DIV/5; g.beginPath(); g.moveTo(BW/2-5,yt); g.lineTo(BW/2+5,yt); g.stroke(); }
+}
+// Augenblickswerte über 10 div (eine Periode von u): Höhe in div
+function verlaeufe(s){
+  var w=werte(s), n=BW*2, tGes=10*ZB/1000;
+  var uh=Math.SQRT2*w.U, ih=Math.SQRT2*w.I, ph=w.phi*Math.PI/180;
+  var pu=[], pi=[], pp=[];
+  for(var k=0;k<=n;k++){
+    var t=tGes*k/n, wt=2*Math.PI*F*t;
+    var u=uh*Math.sin(wt), i=ih*Math.sin(wt-ph), x=BW*k/n;
+    pu.push([x, BH/2-u/K1*DIV]); pi.push([x, BH/2-i/K2*DIV]); pp.push([x, BH/2-u*i/K3*DIV]);
+  }
+  return {u:pu, i:pi, p:pp, aus:w.aus};
+}
+function kurve(p,bis,farbe,dicke){
+  g.save(); g.beginPath(); g.rect(0,0,BW,BH); g.clip();
+  g.strokeStyle=farbe; g.lineWidth=dicke; g.lineJoin="round";
+  g.beginPath(); g.moveTo(p[0][0],p[0][1]);
+  for(var i=1;i<=bis;i++) g.lineTo(p[i][0],p[i][1]);
+  g.stroke(); g.restore();
+}
+function flaeche(p,bis){                              // Fläche zwischen p und der Nulllinie, grau wie Fachkunde S. 141
+  g.save(); g.beginPath(); g.rect(0,0,BW,BH); g.clip();
+  g.fillStyle="rgba(26,37,48,0.22)";
+  g.beginPath(); g.moveTo(p[0][0],BH/2);
+  for(var i=0;i<=bis;i++) g.lineTo(p[i][0],p[i][1]);
+  g.lineTo(p[bis][0],BH/2); g.closePath(); g.fill(); g.restore();
+}
+function zeichne(animiert){
+  if(lauf){ cancelAnimationFrame(lauf); lauf=null; }
+  var v=verlaeufe(zustand);
+  function bild(anteil){
+    raster();
+    if(v.aus) return;
+    var bis=Math.max(1,Math.round(anteil*(v.u.length-1)));
+    flaeche(v.p,bis);
+    kurve(v.u,bis,"#1F5FA8",3);
+    kurve(v.i,bis,"#C2006B",3);
+    kurve(v.p,bis,"#111111",3.6);
+    g.font="italic bold 22px Cambria, Caladea, Georgia, serif"; g.textBaseline="middle";
+    g.fillStyle="#1F5FA8"; g.fillText("u",10,20); g.fillStyle="#C2006B"; g.fillText("i",34,20);
+    g.fillStyle="#111111"; g.fillText("p",52,20);
+  }
+  if(!animiert){ bild(1); return; }
+  var start=null, dauer=350;
+  function schritt(ts){
+    if(start===null) start=ts;
+    var a=Math.min(1,(ts-start)/dauer);
+    bild(a);
+    if(a<1) lauf=requestAnimationFrame(schritt); else lauf=null;
+  }
+  lauf=requestAnimationFrame(schritt);
+}
+function zuruecksetzen(){ zustand={an:START.an,R:START.R,L:START.L}; auffrischen(false); }
+
+knopfreihe("generator",[false,true],function(a){return a?"ein":"aus";},
+           function(a){return a?"Generator ein":"Generator aus";},function(a){zustand.an=a;});
+knopfreihe("widerstaende",WIDERSTAENDE,rText,function(R){return R===0?"Wirkwiderstand überbrückt":"Wirkwiderstand "+R+" Ohm";},
+           function(R){zustand.R=R;});
+knopfreihe("spulen",SPULEN,lText,function(L){return L===0?"Spule überbrückt":"Spule "+komma(L)+" Henry";},
+           function(L){zustand.L=L;});
+$("bReset").onclick=zuruecksetzen;
+
+// ---------- Prüfmodus: alle Einstellungen, Probe aus den angezeigten Ziffern, Ausschläge in div ----------
+if (/[?&]pruefen\b/.test(location.search)) {
+  var bericht=[];
+  WIDERSTAENDE.forEach(function(R){ SPULEN.forEach(function(L){
+    var st={an:true,R:R,L:L}, w=werte(st);
+    function z(s){return parseFloat(s.replace(",","."));}
+    var ia=z(vier(w.I)), pa=z(vier(w.P)), qa=z(vier(w.Q)), ua=z(vier(w.U));
+    var v=verlaeufe(st), maxdiv=0, mindivp=0, maxdivp=0;
+    if(!v.aus){ ["u","i","p"].forEach(function(k){ v[k].forEach(function(q){ var d=(BH/2-q[1])/DIV;
+      maxdiv=Math.max(maxdiv,Math.abs(d)); if(k==="p"){ mindivp=Math.min(mindivp,d); maxdivp=Math.max(maxdivp,d);} }); }); }
+    bericht.push({R:R, L:L, U:vier(w.U)+" V", I:vier(w.I)+" A", P:vier(w.P)+" W", Q:vier(w.Q)+" var",
+                  UI:Math.round(ua*ia*1000)/1000, summe:Math.round((pa+qa)*1000)/1000,
+                  probe:Math.round(Math.sqrt(pa*pa+qa*qa)*1000)/1000, phi:Math.round(w.phi*100)/100,
+                  max_div:Math.round(maxdiv*100)/100, p_min_div:Math.round(mindivp*100)/100,
+                  p_max_div:Math.round(maxdivp*100)/100, kurzschluss:w.aus});
+  }); });
+  $("pruefbericht").textContent=JSON.stringify(bericht);
+}
+zuruecksetzen();
+// Für Bildschirmfotos der Präsentation: window.__stelle({an:true,R:200,L:0.6})
+window.__stelle=function(s){ zustand={an:s.an,R:s.R,L:s.L}; auffrischen(false); };
+})();
+</script>
+</body></html>
