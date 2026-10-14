@@ -7,8 +7,9 @@
      einem Widerstand, z. B. R = 100 Ω, an eine Sinusspannung mit veränderlicher Frequenz … Verändern Sie die Frequenz
      … von 50 Hz bis 5 kHz. Messen Sie die Spannung U2.“); Schaltungen nach Fachkunde S. 154 Bild 1a und Bild 3a
      (Spule) und S. 155 Bild 1a und Bild 3a (Kondensator); Phasenmessung am Oszilloskop nach Fachkunde S. 185
-     („Bestimmen der Phasenverschiebung“: φ = Δx · 360° durch x_T, Beispiel 1 div · 360° durch 8 div = 45°) und
-     S. 184 (Taste AUTOSET).
+     („Bestimmen der Phasenverschiebung“: φ = Δx · 360° durch x_T, Beispiel 1 div · 360° durch 8 div = 45°).
+     Berichtigt 14.10.2026 (Prüfer): Die Zeitbasis heißt nicht mehr AUTOSET (Fachkunde S. 184 verspricht nur eine
+     „brauchbare Anzeige“), sondern ist fein verstellt, sodass eine Periode 8 div lang ist.
      Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht und rechnet nichts vor):
        (1) Schaltung 1 lässt tiefe Frequenzen durch, Schaltung 2 hohe; ihre Kurven schneiden sich bei etwa 400 Hz und
            etwa 7,07 V (0,707 · U1). (2) An dieser Frequenz (Grenzfrequenz) eilt u2 bei Schaltung 1 um 1 div = 45° nach,
@@ -20,7 +21,7 @@
        R = 100 Ω, L = 40 mH, C = 10 µF, U1 = 10 V. Grenzfrequenzen 397,89 Hz (Spule) und 159,15 Hz (Kondensator).
      Anzeigen: Spannungsmesser mit vier geltenden Ziffern (7,052 V; 0,4967 V). Bei 398 Hz: Schaltung 1 7,070 V,
        Schaltung 2 7,072 V, u2 1,000 div nach bzw. vor u1.
-     Oszilloskop: AUTOSET hält eine Periode von u1 auf 8 div (1 div ≙ 45°), getriggert auf den Nulldurchgang von u1 von
+     Oszilloskop: Zeitbasis fein verstellt, eine Periode von u1 = 8 div (1 div ≙ 45°), getriggert auf den Nulldurchgang von u1 von
        Minus nach Plus am linken Rand; Kanal 1 (u1) und Kanal 2 (u2) je 5 V je div; Bildschirm 10 div × 8 div,
        Teilstriche 0,2 div.
      Startstellung neutral: Generator aus (alle Anzeigen null, Nulllinien), Schaltung 1, 1000 Hz (keine Stelle des
@@ -28,7 +29,7 @@
 <html lang="de"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Messplatz Siebschaltungen (U25)</title>
-<script type="application/json" id="sim-meta">{"startwerte":{"generator":"aus","schaltung":1,"f_Hz":1000},"loesungswerte":{"Aufgabe 1, Schaltung 1 (50 bis 3200 Hz)":"9,922; 9,698; 8,935; 7,052; 4,453; 2,413; 1,234 V","Aufgabe 1, Schaltung 2 (50 bis 3200 Hz)":"1,247; 2,437; 4,491; 7,090; 8,954; 9,704; 9,924 V","Aufgabe 3":"f_c = 398 Hz: Schaltung 1 7,070 V, Schaltung 2 7,072 V; u2 1 div nach bzw. vor u1, 45°","Aufgabe 4":"Schaltung 3: 9,540 V und 0,4967 V; Schaltung 4: 2,997 V und 9,988 V","Erkenntnis":"Tiefpass lässt tiefe, Hochpass hohe Frequenzen durch; bei f_c ist U2 = 0,707 · U1, φ = 45°, X = R"},"quelle":"Europa Fachkunde S. 154 (Versuch, Bild 1a, 3a), S. 155 (Bild 1a, 3a), S. 184, S. 185; Tabellenbuch Elektrotechnik S. 47"}</script>
+<script type="application/json" id="sim-meta">{"startwerte":{"generator":"aus","schaltung":1,"f_Hz":1000},"loesungswerte":{"Aufgabe 1, Schaltung 1 (50 bis 3200 Hz)":"9,922; 9,698; 8,935; 7,052; 4,453; 2,413; 1,234 V","Aufgabe 1, Schaltung 2 (50 bis 3200 Hz)":"1,247; 2,437; 4,491; 7,090; 8,954; 9,704; 9,924 V","Aufgabe 3":"f_c = 398 Hz: Schaltung 1 7,070 V, Schaltung 2 7,072 V; u2 1 div nach bzw. vor u1, 45°","Aufgabe 4":"Schaltung 3: 9,540 V und 0,4967 V; Schaltung 4: 2,997 V und 9,988 V","Erkenntnis":"Tiefpass lässt tiefe, Hochpass hohe Frequenzen durch; bei f_c ist U2 = 0,707 · U1, φ = 45°, X = R"},"quelle":"Europa Fachkunde S. 154 (Versuch, Bild 1a, 3a), S. 155 (Bild 1a, 3a), S. 185; Tabellenbuch Elektrotechnik S. 47"}</script>
 <style>
  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
  :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;
@@ -167,15 +168,15 @@
    <div class="einstellung">
     <span class="kanal"><span class="strich" style="background:#1F5FA8"></span><span>Kanal 1: <span class="fz">u</span><sub>1</sub>, <b>5 <span class="bruch"><span>V</span><span>div</span></span></b></span></span>
     <span class="kanal"><span class="strich" style="background:#C2006B"></span><span>Kanal 2: <span class="fz">u</span><sub>2</sub>, <b>5 <span class="bruch"><span>V</span><span>div</span></span></b></span></span>
-    <span>Zeitbasis: <b>AUTOSET</b>, eine Periode = <b>8 div</b></span>
+    <span>Zeitbasis: <b>fein verstellt</b>, eine Periode = <b>8 div</b></span>
    </div>
   </div>
  </div>
 
  <div class="hinweis">Ideale Bauteile; der Spannungsmesser V2 belastet den Ausgang nicht. Der Funktionsgenerator gibt
   immer 10 V. Das Oszilloskop ist auf <span class="fz">u</span><sub>1</sub> getriggert: <span class="fz">u</span><sub>1</sub>
-  beginnt am linken Rand mit dem Nulldurchgang von Minus nach Plus. AUTOSET stellt die Zeitbasis bei jeder Frequenz so
-  ein, dass eine Periode genau 8 div lang ist. Der Bildschirm ist 10 div breit und 8 div hoch; die Mittellinien tragen
+  beginnt am linken Rand mit dem Nulldurchgang von Minus nach Plus. Die Zeitbasis ist bei jeder Frequenz fein so
+  verstellt, dass eine Periode genau 8 div lang ist. Der Bildschirm ist 10 div breit und 8 div hoch; die Mittellinien tragen
   Teilstriche im Abstand von 0,2 div.</div>
  <pre id="pruefbericht"></pre>
 </div>
@@ -250,7 +251,7 @@ function auffrischen(animiert){
 var c=$("c"), g=c.getContext("2d");
 var DPR=Math.max(1,Math.min(3,window.devicePixelRatio||1));
 var BW=600, BH=480, DIV=60;                          // 10 × 8 div zu je 60 Bildpunkten
-var XT=8;                                            // AUTOSET: eine Periode = 8 div
+var XT=8;                                            // Zeitbasis fein verstellt: eine Periode = 8 div
 c.width=BW*DPR; c.height=BH*DPR; g.scale(DPR,DPR);
 var lauf=null;
 
