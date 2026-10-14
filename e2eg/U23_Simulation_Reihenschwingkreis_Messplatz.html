@@ -23,6 +23,8 @@
        20,10 V; 10,18 V. Größter Strom bei 71,2 Hz: 1,000 A; 10,00 V; 111,8 V; 111,8 V (f_r = 71,18 Hz).
        Aufgabe 2: 20 Ω: 71,1 Hz und 71,2 Hz zeigen beide 0,5000 A (U_bL 55,84 V bzw. 55,92 V); 40 µF: 50,3 Hz, 1,000 A,
        79,01 V, 79,10 V (f_r = 50,33 Hz).
+     Am Handy steht die Frequenzwahl direkt über den Messgeräten (14.10.2026, Prüfer: Knöpfe und Strommesser zugleich
+     sichtbar, auch bei 360 × 640 px); die Anzeigen sind unverändert.
      Startstellung neutral: Generator aus (alle Anzeigen null), f = 20,0 Hz, R = 50 Ω, L = 0,5 H, C = 10 µF (keine Zeile des
      Arbeitsblatts). Prüfmodus ?pruefen: für alle 18 Bauteil-Einstellungen die Frequenz (Raster 0,1 Hz) mit dem größten
      angezeigten Strom und die Anzeigen dort, als JSON in #pruefbericht. -->
@@ -41,10 +43,12 @@
  .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
  .kopf h1{font-size:22px;margin:3px 0 0}
  .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ /* Am Handy steht die Frequenzwahl direkt über den Messgeräten: Beim Suchen des größten Stroms sind die Knöpfe, der
+    Strommesser und die Blindspannungen zugleich zu sehen (Prüfer U23, 14.10.2026: vorher 650 px auseinander). */
  .buehne{display:grid;grid-template-columns:1fr;gap:12px;align-items:start;
-         grid-template-areas:"geraete" "wahl" "schaltung"}
- .schaltung{grid-area:schaltung} .geraete{grid-area:geraete} .wahl{grid-area:wahl}
- @media(min-width:760px){.buehne{grid-template-columns:1.2fr 1fr;grid-template-areas:"schaltung geraete" "wahl geraete"}}
+         grid-template-areas:"fwahl" "geraete" "bwahl" "schaltung"}
+ .schaltung{grid-area:schaltung} .geraete{grid-area:geraete} .fwahl{grid-area:fwahl} .bwahl{grid-area:bwahl}
+ @media(min-width:760px){.buehne{grid-template-columns:1.2fr 1fr;grid-template-areas:"schaltung geraete" "fwahl geraete" "bwahl geraete"}}
  .schaltung{border:3px solid var(--ink);background:#FFFDF4;padding:6px;border-radius:6px}
  svg{width:100%;height:auto;display:block}
  .geraete{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -57,6 +61,7 @@
  .quelle b{color:var(--kupfer)}
  .wahl{margin:0}
  .wahl .titel{font-size:15px;font-weight:700;margin:10px 0 5px}
+ .fwahl .titel:first-child{margin-top:0}
  .knoepfe{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
  .frequenz{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:420px}
  .flcd{background:#20313a;color:#FFD48A;font-variant-numeric:tabular-nums;font-size:30px;font-weight:700;padding:6px 12px;border-radius:4px;text-align:right;white-space:nowrap;max-width:420px;margin-bottom:8px}
@@ -72,7 +77,7 @@
 </style></head><body>
 <div class="wrap">
  <div class="kopf"><div class="reihe">E2EG · LF 5 · U23</div><h1>Messplatz: Wirkwiderstand, Spule und Kondensator in Reihe, Frequenz einstellbar</h1></div>
- <div class="anleitung"><b>So messen Sie:</b> Generator einschalten, Wirkwiderstand, Spule und Kondensator wählen, dann die
+ <div class="anleitung"><b>So messen Sie:</b> Wirkwiderstand, Spule und Kondensator wählen, Generator einschalten, dann die
   Frequenz verstellen. Der Strommesser und die vier Spannungsmesser zeigen Effektivwerte.</div>
 
  <div class="buehne">
@@ -135,19 +140,21 @@
     <path d="M70,40 L96,40" stroke="#C2006B" stroke-width="2.6"/><path d="M98,40 l-10,-5 l0,10 z" fill="#C2006B"/>
    </svg>
   </div>
-  <div class="wahl">
-   <div class="titel">1. Generator</div>
+  <div class="wahl fwahl">
+   <div class="titel">Generator</div>
    <div class="knoepfe" id="generator"></div>
-   <div class="titel">2. Frequenz <span class="fz">f</span></div>
+   <div class="titel">Frequenz <span class="fz">f</span></div>
    <div class="flcd" id="aF" aria-live="polite">20,0 Hz</div>
    <div class="frequenz" id="frequenz"></div>
-   <div class="titel">3. Wirkwiderstand <span class="fz">R</span></div>
+  </div>
+  <div class="wahl bwahl">
+   <div class="titel">Wirkwiderstand <span class="fz">R</span></div>
    <div class="knoepfe" id="widerstaende"></div>
-   <div class="titel">4. Spule <span class="fz">L</span></div>
+   <div class="titel">Spule <span class="fz">L</span></div>
    <div class="knoepfe" id="spulen"></div>
-   <div class="titel">5. Kondensator <span class="fz">C</span></div>
+   <div class="titel">Kondensator <span class="fz">C</span></div>
    <div class="knoepfe" id="kondensatoren"></div>
-   <div class="titel">6. Neu beginnen</div>
+   <div class="titel">Neu beginnen</div>
    <div class="knoepfe"><button class="zurueck" id="bReset" type="button">Zurücksetzen</button></div>
   </div>
   <div class="geraete">
