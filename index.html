@@ -1,114 +1,612 @@
 <!DOCTYPE html>
-<html lang="de"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Unterricht · Simulationen</title>
-<style>
-:root{--tinte:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--linie:#9AA5AE}
-*{box-sizing:border-box}
-body{margin:0;background:#fff;color:var(--tinte);font-family:'Noto Sans',system-ui,sans-serif;line-height:1.5}
-header{border-top:3.5px solid var(--kupfer);padding:20px 16px 8px;max-width:720px;margin:0 auto}
-.unter{color:var(--kupfer);font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;font-weight:600}
-h1{margin:.2rem 0 0;font-size:1.5rem}
-main{max-width:720px;margin:0 auto;padding:8px 16px 32px}
-h2{font-size:1rem;margin:1.4rem 0 .5rem;padding-bottom:4px;border-bottom:1.2px solid var(--linie)}
-a.karte{display:block;border:1.2px solid var(--tinte);padding:12px 14px;margin:8px 0;color:var(--tinte);text-decoration:none;background:var(--kupferhell)}
-</style></head>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Unterricht · Simulationen</title>
+
+  <style>
+    :root {
+      --tinte: #1A2530;
+      --kupfer: #A34E0E;
+      --kupferhell: #F5EBDF;
+      --linie: #9AA5AE;
+      --grau: #5B6670;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #fff;
+      color: var(--tinte);
+      font-family: 'Noto Sans', system-ui, sans-serif;
+      line-height: 1.5;
+    }
+
+    header {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 20px 16px 8px;
+      border-top: 3.5px solid var(--kupfer);
+    }
+
+    .unter {
+      color: var(--kupfer);
+      font-size: .8rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: .2rem 0 0;
+      font-size: 1.5rem;
+    }
+
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 8px 16px 32px;
+    }
+
+    h2 {
+      margin: 1.4rem 0 .5rem;
+      padding-bottom: 4px;
+      font-size: 1rem;
+      border-bottom: 1.2px solid var(--linie);
+    }
+
+    /* Karten */
+    a.karte {
+      display: block;
+      margin: 8px 0;
+      padding: 12px 14px;
+      border: 1.2px solid var(--tinte);
+      background: var(--kupferhell);
+      color: var(--tinte);
+      text-decoration: none;
+    }
+
+    a.karte:hover,
+    a.karte:focus-visible {
+      background: #EEDCC6;
+      outline: none;
+    }
+
+    a.karte .dateiname {
+      display: block;
+      margin-top: 2px;
+      font-size: .75rem;
+      color: var(--grau);
+      word-break: break-all;
+    }
+
+    a.karte .typ {
+      float: right;
+      margin-left: 10px;
+      font-size: .7rem;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--kupfer);
+    }
+
+    /* Unterordner */
+    details {
+      margin: .8rem 0;
+      padding-left: 12px;
+      border-left: 2px solid var(--linie);
+    }
+
+    summary {
+      padding: 2px 0;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .anzahl {
+      margin-left: .5rem;
+      font-size: .85rem;
+      font-weight: 400;
+      color: var(--grau);
+    }
+
+    /* Suche, Status, Hinweise */
+    #suche {
+      width: 100%;
+      margin: 12px 0 4px;
+      padding: 10px 12px;
+      border: 1.2px solid var(--tinte);
+      background: #fff;
+      color: var(--tinte);
+      font: inherit;
+    }
+
+    #status {
+      margin: 4px 0 0;
+      font-size: .85rem;
+      color: var(--grau);
+    }
+
+    .hinweis {
+      margin: 16px 0;
+      padding: 10px 14px;
+      border-left: 3.5px solid var(--kupfer);
+      background: var(--kupferhell);
+    }
+
+    [hidden] { display: none !important; }
+  </style>
+</head>
+
 <body>
-<header><div class="unter">Heinrich-Schickhardt-Schule · Elektrotechnik</div><h1>Simulationen</h1></header>
-<main>
-<h2>1BK1T</h2>
-<a class="karte" href="1bk1t/B02_Simulation_Compiler_Interpreter.html"><b>Compiler oder Interpreter? Simulation 1BK1T B02</b></a>
-<a class="karte" href="1bk1t/B10_Trainer_Sequenz.html"><b>Klassenarbeitstrainer 1: Sequenz (1BK1T Block 10)</b></a>
-<h2>E1EG</h2>
-<a class="karte" href="e1eg/010_simulation_eg1_b03_messplatz_vorsaetze.html"><b>Messplatz Vorsätze (Block 03)</b></a>
-<a class="karte" href="e1eg/010_simulation_eg1_b04_der_geschlossene_stromkreis.html"><b>Simulation Block 04: Der geschlossene Stromkreis</b></a>
-<a class="karte" href="e1eg/010_simulation_eg1_b04_messplatz_stromkreis.html"><b>Messplatz Stromkreis (Block 04)</b></a>
-<a class="karte" href="e1eg/010_simulation_eg1_b05_ladung_ist_gezaehlte_elementarladung.html"><b>Simulation Block 05: Ladung ist gezählte Elementarladung</b></a>
-<a class="karte" href="e1eg/010_simulation_eg1_b05_messplatz_ladung.html"><b>Messplatz Ladung (Block 05)</b></a>
-<a class="karte" href="e1eg/010_simulation_eg1_b06_messplatz_spannung.html"><b>Messplatz Spannung (Block 06)</b></a>
-<a class="karte" href="e1eg/010_simulation_eg1_b06_potenzial_und_spannung.html"><b>Simulation Block 06: Potenzial und Spannung</b></a>
-<a class="karte" href="e1eg/010_simulation_eg1_b07_messplatz_stromstaerke.html"><b>Messplatz Stromstärke (Block 07)</b></a>
-<a class="karte" href="e1eg/010_simulation_eg1_b07_stromstaerke_ladung_pro_zeit.html"><b>Simulation Block 07: Stromstärke ist Ladung je Zeit</b></a>
-<a class="karte" href="e1eg/010_simulation_eg1_b10_messplatz_leitungserwaermung.html"><b>Messplatz Leitungserwärmung (Block 10)</b></a>
-<a class="karte" href="e1eg/010_simulation_eg1_b11_messplatz_leitwert.html"><b>Messplatz Widerstand und Leitwert (Block 11)</b></a>
-<a class="karte" href="e1eg/010_simulation_eg1_b12_messplatz_ohmsches_gesetz.html"><b>Messen von Strom und Spannung (Block 12)</b></a>
-<a class="karte" href="e1eg/010_simulation_eg1_b13_leiterwiderstand_werkstoff_laenge_querschnitt.html"><b>Simulation Block 13: Leiterwiderstand messen: Werkstoff, Länge, Querschnitt</b></a>
-<a class="karte" href="e1eg/010_simulation_eg1_b13_messplatz_leiterwiderstand.html"><b>Messplatz Leiterwiderstand (Block 13)</b></a>
-<a class="karte" href="e1eg/010_simulation_eg1_b14_messplatz_widerstand_temperatur.html"><b>Messplatz Widerstand und Temperatur (Block 14)</b></a>
-<a class="karte" href="e1eg/010_simulation_eg1_b14_temperaturabhaengigkeit_des_widerstandes.html"><b>Simulation Block 14: Widerstand und Temperatur messen</b></a>
-<a class="karte" href="e1eg/010_simulation_eg1_b15_dieselbe_energie_drei_zahlen.html"><b>Simulation Block 15: Elektrische Arbeit messen</b></a>
-<a class="karte" href="e1eg/010_simulation_eg1_b15_messplatz_elektrische_arbeit.html"><b>Messplatz elektrische Arbeit (Block 15)</b></a>
-<a class="karte" href="e1eg/010_simulation_eg1_b16_leistung_messplatz.html"><b>Simulation Block 16: Elektrische Leistung messen</b></a>
-<a class="karte" href="e1eg/010_simulation_eg1_b17_messplatz_wirkungsgrad.html"><b>Messplatz Wirkungsgrad (Block 17)</b></a>
-<a class="karte" href="e1eg/010_simulation_eg1_b17_wirkungsgrad_messplatz.html"><b>Simulation Block 17: Wirkungsgrad messen</b></a>
-<a class="karte" href="e1eg/010_simulation_eg1_b22_reihenschaltung_messplatz.html"><b>Simulation Block 22: Messplatz Reihenschaltung</b></a>
-<a class="karte" href="e1eg/011_simulation_eg1_b08_messplatz_stromarten.html"><b>Messplatz Stromarten (Block 08)</b></a>
-<a class="karte" href="e1eg/011_simulation_eg1_b08_stromrichtung_und_bezugspfeil.html"><b>Simulation Block 08: Stromrichtung und Bezugspfeil</b></a>
-<a class="karte" href="e1eg/011_simulation_eg1_b10_stromdichte_und_strombelastbarkeit.html"><b>Simulation Block 10: Stromdichte und Strombelastbarkeit</b></a>
-<a class="karte" href="e1eg/011_simulation_eg1_b16_messplatz_leistung.html"><b>Messplatz Leistung (Block 16)</b></a>
-<a class="karte" href="e1eg/012_simulation_vorsatz_umrechner_kommaverschiebung.html"><b>Simulation Block 03: Vorsatz-Umrechner und Kommaverschiebung (p…G)</b></a>
-<a class="karte" href="e1eg/013_simulation_eg1_b18_messplatz_elektrowaerme.html"><b>Messplatz Elektrowärme (Block 18)</b></a>
-<a class="karte" href="e1eg/013_simulation_eg1_b18_wasser_erwaermen.html"><b>Simulation Block 18: Wasser erwärmen</b></a>
-<a class="karte" href="e1eg/019_klassenarbeitstrainer_1_eg1_b19.html"><b>Klassenarbeitstrainer 1: Grundgrößen, Leitungen und Widerstand, Arbeit, Leistung, Wärme</b></a>
-<a class="karte" href="e1eg/08_klassenarbeitstrainer_1.html"><b>Klassenarbeitstrainer 1: Grundgrößen, Widerstand, Energie und Leistung</b></a>
-<a class="karte" href="e1eg/09_sim_eg1_b12_kennlinien_aufnahme_ohmsches_gesetz_.html"><b>Simulation Block 12: Kennlinien-Aufnahme: Ohm&#x27;sches Gesetz zum Ausprobieren</b></a>
-<a class="karte" href="e1eg/09_simulation_eg1_b11_widerstand_leitwert.html"><b>Simulation Block 11: Widerstand und Leitwert</b></a>
-<h2>E2EG</h2>
-<a class="karte" href="e2eg/U01_Simulation_Generator.html"><b>Messplatz Generator (U01)</b></a>
-<a class="karte" href="e2eg/U02_Simulation_Oszilloskop.html"><b>Messplatz Oszilloskop (U02)</b></a>
-<a class="karte" href="e2eg/U03_Simulation_Zeiger.html"><b>U03 Simulation: der rotierende Zeiger und die Kreisfrequenz</b></a>
-<a class="karte" href="e2eg/U03_Simulation_Zeiger_v2.html"><b>U03 Messplatz: Der umlaufende Zeiger</b></a>
-<a class="karte" href="e2eg/U04_Simulation_Augenblickswert.html"><b>U04 Simulation: der Augenblickswert am Zeigerbild und am Liniendiagramm</b></a>
-<a class="karte" href="e2eg/U04_Simulation_Augenblickswert_v2.html"><b>U04 Messplatz: Zeiger und Augenblickswert</b></a>
-<a class="karte" href="e2eg/U05_Simulation_Effektivwert.html"><b>U05 Simulation: zwei Lampen, Gleichspannung gegen Wechselspannung</b></a>
-<a class="karte" href="e2eg/U05_Simulation_Effektivwert_v2.html"><b>U05 Messplatz: Zwei gleiche Lampen</b></a>
-<a class="karte" href="e2eg/U06_Simulation_Phasenverschiebung.html"><b>U06 Simulation: zwei Sinuskurven mit verstellbarer Phasenlage</b></a>
-<a class="karte" href="e2eg/U06_Simulation_Phasenverschiebung_v2.html"><b>Messplatz Zweikanal-Oszilloskop (U06)</b></a>
-<a class="karte" href="e2eg/U07_Simulation_Zeigerdiagramm.html"><b>U07 Simulation: vom drehenden Zeiger zum stehenden Zeigerdiagramm</b></a>
-<a class="karte" href="e2eg/U07_Simulation_Zeigerdiagramm_v2.html"><b>U07 Messplatz: Zwei Zeiger anhalten</b></a>
-<a class="karte" href="e2eg/U08_Simulation_Zeigeraddition.html"><b>U08 Simulation: Zeigeraddition, zwei Zeiger und eine Summe</b></a>
-<a class="karte" href="e2eg/U08_Simulation_Zeigeraddition_v2.html"><b>Messplatz: Zwei Spannungen in Reihe (U08)</b></a>
-<a class="karte" href="e2eg/U10_Simulation_Wirkwiderstand.html"><b>U10 Messplatz: Signallampe an Gleich- und Wechselspannung</b></a>
-<a class="karte" href="e2eg/U11_Simulation_Spule_Messplatz.html"><b>Messplatz Spule an Wechselspannung (U11)</b></a>
-<a class="karte" href="e2eg/U12_Simulation_XL_Frequenz.html"><b>U12 Simulation: der Blindwiderstand über der Frequenz</b></a>
-<a class="karte" href="e2eg/U12_Simulation_XL_Frequenz_v2.html"><b>Messplatz Spule am Frequenzgenerator (U12)</b></a>
-<a class="karte" href="e2eg/U13_Simulation_Kondensator_Messplatz.html"><b>Messplatz Kondensator an Wechselspannung (U13)</b></a>
-<a class="karte" href="e2eg/U14_Simulation_RLC_Frequenz.html"><b>U14 Simulation: R, X_L und X_C über der Frequenz</b></a>
-<a class="karte" href="e2eg/U14_Simulation_RLC_Frequenz_v2.html"><b>Messplatz R, L und C am Frequenzgenerator (U14)</b></a>
-<a class="karte" href="e2eg/U15_Simulation_RL_Reihe_Messplatz.html"><b>Messplatz Wirkwiderstand und Spule in Reihe (U15)</b></a>
-<a class="karte" href="e2eg/U16_Simulation_RC_Reihe_Messplatz.html"><b>Messplatz Wirkwiderstand und Kondensator in Reihe (U16)</b></a>
-<a class="karte" href="e2eg/U17_Simulation_Reale_Spule_Messplatz.html"><b>Messplatz reale Spule (U17)</b></a>
-<a class="karte" href="e2eg/U18_Simulation_RLC_Reihe.html"><b>U18 Simulation: Zeigerbild und Scheinwiderstand der RLC-Reihe</b></a>
-<a class="karte" href="e2eg/U18_Simulation_RLC_Reihe_Messplatz.html"><b>Messplatz Wirkwiderstand, Spule und Kondensator in Reihe (U18)</b></a>
-<a class="karte" href="e2eg/U19_Simulation_Parallel.html"><b>U19 Simulation: Stromdreieck und Scheinwiderstand der Parallelschaltung</b></a>
-<a class="karte" href="e2eg/U19_Simulation_RL_RC_Parallel_Messplatz.html"><b>Messplatz Wirkwiderstand und Spule oder Kondensator parallel (U19)</b></a>
-<a class="karte" href="e2eg/U20_Simulation_RLC_Parallel.html"><b>U20 Simulation: drei Zweige, ein Stromdreieck</b></a>
-<a class="karte" href="e2eg/U20_Simulation_RLC_Parallel_Messplatz.html"><b>Messplatz Wirkwiderstand, Spule und Kondensator parallel (U20)</b></a>
-<a class="karte" href="e2eg/U21_Simulation_Leistung_Messplatz.html"><b>Messplatz Leistung im Wechselstromkreis (U21)</b></a>
-<a class="karte" href="e2eg/U21_Simulation_Leistungsdreieck.html"><b>U21 Simulation: Zwei Dreiecke, ein Winkel</b></a>
-<a class="karte" href="e2eg/U22_Simulation_Verbraucher_Messplatz.html"><b>Messplatz Verbraucher am Netz (U22)</b></a>
-<a class="karte" href="e2eg/U22_Simulation_Wirkfaktor.html"><b>U22 Simulation: Zwei Verbraucher, ein Netz</b></a>
-<a class="karte" href="e2eg/U23_Simulation_Reihenschwingkreis_Messplatz.html"><b>Messplatz Reihenschaltung aus R, L und C bei einstellbarer Frequenz (U23)</b></a>
-<a class="karte" href="e2eg/U23_Simulation_Resonanz.html"><b>U23 Simulation: Die Resonanzkurve</b></a>
-<a class="karte" href="e2eg/U24_Simulation_Parallelresonanz.html"><b>U24 Simulation: Der Kreisstrom</b></a>
-<a class="karte" href="e2eg/U24_Simulation_Parallelschwingkreis_Messplatz.html"><b>Messplatz Parallelschwingkreis (U24)</b></a>
-<a class="karte" href="e2eg/U25_Simulation_Siebschaltungen.html"><b>U25 Simulation: Vier Siebschaltungen</b></a>
-<a class="karte" href="e2eg/U25_Simulation_Siebschaltungen_Messplatz.html"><b>Messplatz Siebschaltungen (U25)</b></a>
-<a class="karte" href="e2eg/U26_Simulation_Drehstrom.html"><b>U26 Simulation: Drei Zeiger, ein Netz</b></a>
-<a class="karte" href="e2eg/U27_Simulation_Sternschaltung.html"><b>U27 Simulation: Der Stern unter Last</b></a>
-<a class="karte" href="e2eg/U28_Simulation_Unsymmetrie.html"><b>U28 Simulation: Der schiefe Stern</b></a>
-<a class="karte" href="e2eg/U29_Simulation_Stern_Dreieck.html"><b>U29 Simulation: Stern oder Dreieck</b></a>
-<a class="karte" href="e2eg/U30_Simulation_Leistung.html"><b>U30 Simulation: Das Leistungsdreieck bei Drehstrom</b></a>
-<a class="karte" href="e2eg/U31_Simulation_Kompensation.html"><b>U31 Simulation: Kompensieren</b></a>
-<a class="karte" href="e2eg/U32_Simulation_Drehfeld.html"><b>U32 Simulation: Das Drehfeld</b></a>
-<a class="karte" href="e2eg/U33_Simulation_Schlupf.html"><b>U33 Simulation: Drehfeld und Läufer, der Schlupf</b></a>
-<a class="karte" href="e2eg/U34_Simulation_Kennlinie.html"><b>U34 Simulation: Der Arbeitspunkt auf der Kennlinie</b></a>
-<a class="karte" href="e2eg/U35_Simulation_Anlassen.html"><b>U35 Simulation: Direkt oder Stern-Dreieck?</b></a>
-<h2>E3EG</h2>
-<a class="karte" href="e3eg/B01_Simulation_Messplatz.html"><b>B01 Simulation: Messplatz Beleuchtungsstromkreis</b></a>
-<a class="karte" href="e3eg/B02_Simulation_Leistungsdreieck.html"><b>B02 Simulation: Leistungsdreieck zweier Verbraucher</b></a>
-<a class="karte" href="e3eg/B03_Simulation_Spule.html"><b>B03 Simulation: Spule an Wechselspannung</b></a>
-<a class="karte" href="e3eg/B04_Simulation_Kompensation.html"><b>B04 Simulation: Kompensation eines Motors</b></a>
-<a class="karte" href="e3eg/B07_Simulation_Regler.html"><b>B07 Simulation: der Blindleistungsregler einer Zentralkompensation</b></a>
-</main>
-</body></html>
+  <header>
+    <div class="unter">Heinrich-Schickhardt-Schule · Elektrotechnik</div>
+    <h1>Simulationen</h1>
+  </header>
+
+  <main>
+    <input id="suche" type="search" placeholder="Suchen …" aria-label="Suchen" hidden>
+    <p id="status">Inhalte werden geladen …</p>
+    <div id="liste"></div>
+  </main>
+
+  <script>
+    // ------------------------------------------------------------
+    // Einstellungen
+    // ------------------------------------------------------------
+
+    // Das GitHub-Repo mit den Simulationen
+    const GITHUB_REPO = 'CGirrbach/Unterricht';
+    const GITHUB_ZWEIG = 'main';
+
+    // Unter dieser Adresse veröffentlicht GitHub Pages das Repo.
+    // Alle Links zeigen dorthin – so klappt die Seite auch, wenn sie woanders liegt
+    // oder einfach lokal als Datei geöffnet wird.
+    const SEITEN_ADRESSE = 'https://cgirrbach.github.io/Unterricht/';
+
+    // Diese Dateitypen bekommen eine Karte
+    const ANGEZEIGTE_TYPEN = ['html', 'htm', 'pdf', 'doc', 'docx', 'ppt', 'pptx',
+                              'xls', 'xlsx', 'odt', 'ods', 'odp', 'txt', 'md', 'zip', 'mp4', 'ggb'];
+
+    // Diese Ordner werden übersprungen (zusätzlich alles, was mit . oder _ beginnt)
+    const IGNORIERTE_ORDNER = ['assets', 'css', 'js', 'img', 'bilder', 'lib', 'node_modules'];
+
+    // Diese Dateien werden nie angezeigt (egal in welchem Ordner)
+    const IGNORIERTE_DATEIEN = ['readme.md', 'license', 'license.md', 'cname', '404.html'];
+
+    // Ordner der obersten Ebene in Großbuchstaben anzeigen (e1eg → E1EG)
+    const OBERSTE_EBENE_GROSS = true;
+
+    // So lange merkt sich jedes Gerät die Dateiliste (in Minuten).
+    // Strg+Umschalt+R lädt trotzdem sofort alles frisch.
+    const CACHE_MINUTEN = 90;
+
+    // Nach so vielen Sekunden gibt eine einzelne Anfrage auf
+    const ZEITLIMIT_SEKUNDEN = 8;
+
+
+    // ------------------------------------------------------------
+    // Hilfsfunktionen
+    // ------------------------------------------------------------
+
+    const liste = document.getElementById('liste');
+    const statuszeile = document.getElementById('status');
+    const suchfeld = document.getElementById('suche');
+
+    // Ordner, auf den sich alle Pfade beziehen – wird in start() festgelegt
+    let basisAdresse = '';
+
+
+    // ------------------------------------------------------------
+    // Hartes Neuladen (Strg+Umschalt+R) erkennen
+    // ------------------------------------------------------------
+
+    // Der Browser verrät nicht, ob „hart“ neu geladen wurde. Deshalb merken wir uns
+    // den Tastendruck kurz vor dem Neuladen und schauen danach nach.
+    document.addEventListener('keydown', ereignis => {
+      const taste = ereignis.key.toLowerCase();
+      const strgOderCmd = ereignis.ctrlKey || ereignis.metaKey;
+      const hartesNeuladen = (strgOderCmd && ereignis.shiftKey && taste === 'r')
+                          || ((strgOderCmd || ereignis.shiftKey) && taste === 'f5');
+
+      if (hartesNeuladen) {
+        try {
+          sessionStorage.setItem('ordner-frisch-laden', '1');
+        } catch {}
+      }
+    });
+
+    function sollFrischLaden() {
+      try {
+        const gesetzt = sessionStorage.getItem('ordner-frisch-laden') === '1';
+        sessionStorage.removeItem('ordner-frisch-laden');
+        return gesetzt;
+      } catch {
+        return false;
+      }
+    }
+
+    const frischLaden = sollFrischLaden();
+
+    // decodeURIComponent wirft bei kaputten Zeichen – dann den Text einfach so lassen
+    function dekodieren(text) {
+      try {
+        return decodeURIComponent(text);
+      } catch {
+        return text;
+      }
+    }
+
+    // fetch mit Zeitlimit, damit nichts ewig hängen bleibt
+    async function holen(url, optionen = {}) {
+      const abbruch = new AbortController();
+      const timer = setTimeout(() => abbruch.abort(), ZEITLIMIT_SEKUNDEN * 1000);
+      try {
+        return await fetch(url, { ...optionen, signal: abbruch.signal });
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    function ausSpeicherLesen(schluessel) {
+      try {
+        return JSON.parse(localStorage.getItem(schluessel));
+      } catch {
+        return null;
+      }
+    }
+
+    function inSpeicherSchreiben(schluessel, wert) {
+      try {
+        localStorage.setItem(schluessel, JSON.stringify(wert));
+      } catch {
+        // z. B. privates Fenster – dann eben ohne Zwischenspeicher
+      }
+    }
+
+    // "e2eg/Datei mit Ä.html" → vollständige, korrekt maskierte Adresse
+    function adresseVon(pfad) {
+      const maskiert = pfad.split('/').map(encodeURIComponent).join('/');
+      return new URL(maskiert, basisAdresse).href;
+    }
+
+    // Sortiert so, dass U2 vor U10 kommt
+    function natuerlichSortieren(a, b) {
+      return a.localeCompare(b, 'de', { numeric: true, sensitivity: 'base' });
+    }
+
+    function endung(dateiname) {
+      const treffer = dateiname.match(/\.([^.]+)$/);
+      return treffer ? treffer[1].toLowerCase() : '';
+    }
+
+    // "U03_Simulation_Zeiger.html" → "U03 Simulation Zeiger"
+    function lesbarerName(dateiname) {
+      return dateiname
+        .replace(/\/$/, '')
+        .replace(/\.[^.]+$/, '')
+        .replace(/_+/g, ' ')
+        .trim();
+    }
+
+    function sollAngezeigtWerden(pfad) {
+      // Die Übersichtsseite selbst nicht noch einmal auflisten
+      if (pfad === 'index.html') return false;
+
+      const teile = pfad.replace(/\/$/, '').split('/');
+      const ordner = teile.slice(0, -1);
+      const dateiname = teile[teile.length - 1];
+
+      if (teile.some(teil => teil.startsWith('.') || teil.startsWith('_'))) return false;
+      if (ordner.some(name => IGNORIERTE_ORDNER.includes(name.toLowerCase()))) return false;
+      if (IGNORIERTE_DATEIEN.includes(dateiname.toLowerCase())) return false;
+
+      // Unterordner mit eigener Startseite (Pfad endet auf /) immer zeigen
+      if (pfad.endsWith('/')) return true;
+
+      return ANGEZEIGTE_TYPEN.includes(endung(pfad));
+    }
+
+    function hinweisAnzeigen(html) {
+      statuszeile.hidden = true;
+      liste.innerHTML = `<div class="hinweis">${html}</div>`;
+    }
+
+
+    // ------------------------------------------------------------
+    // Dateiliste besorgen
+    // ------------------------------------------------------------
+
+    // Merkt sich, woran es gehakt hat – für die Meldung am Ende
+    let problem = '';
+
+    // Dateibaum direkt von der GitHub-API
+    async function dateienVonGithub() {
+      const cacheSchluessel = 'ordner-gh:' + GITHUB_REPO + '@' + GITHUB_ZWEIG;
+      const gemerkt = ausSpeicherLesen(cacheSchluessel);
+      const nochFrisch = gemerkt && Date.now() - gemerkt.zeit < CACHE_MINUTEN * 60 * 1000;
+      if (nochFrisch && !frischLaden) return gemerkt.pfade;
+
+      const api = `https://api.github.com/repos/${GITHUB_REPO}/git/trees/${encodeURIComponent(GITHUB_ZWEIG)}?recursive=1`;
+
+      try {
+        const antwort = await holen(api, { cache: frischLaden ? 'no-store' : 'default' });
+
+        if (antwort.status === 403 || antwort.status === 429) {
+          problem = 'Die GitHub-API hat gerade zu viele Anfragen aus diesem Netz bekommen (Limit: 60 pro Stunde). Bitte in ein paar Minuten neu laden.';
+        } else if (antwort.status === 404) {
+          problem = `Das Repo <code>${GITHUB_REPO}</code> bzw. der Zweig <code>${GITHUB_ZWEIG}</code> wurde nicht gefunden.`;
+        }
+
+        if (antwort.ok) {
+          const baum = await antwort.json();
+          const pfade = baum.tree
+            .filter(eintrag => eintrag.type === 'blob')
+            .map(eintrag => eintrag.path);
+
+          inSpeicherSchreiben(cacheSchluessel, { zeit: Date.now(), pfade });
+          return pfade;
+        }
+      } catch {
+        problem = 'GitHub war nicht erreichbar. Besteht eine Internetverbindung?';
+      }
+
+      // Lieber eine ältere Liste als gar keine
+      return gemerkt ? gemerkt.pfade : null;
+    }
+
+
+    // ------------------------------------------------------------
+    // Aus der flachen Pfadliste einen Ordnerbaum machen
+    // ------------------------------------------------------------
+
+    function neuerOrdner() {
+      return { unterordner: new Map(), dateien: [] };
+    }
+
+    function baumAufbauen(pfade) {
+      const wurzel = neuerOrdner();
+
+      for (const pfad of pfade) {
+        const teile = pfad.replace(/\/$/, '').split('/');
+        const dateiname = teile.pop() + (pfad.endsWith('/') ? '/' : '');
+
+        let ordner = wurzel;
+        for (const name of teile) {
+          if (!ordner.unterordner.has(name)) {
+            ordner.unterordner.set(name, neuerOrdner());
+          }
+          ordner = ordner.unterordner.get(name);
+        }
+
+        ordner.dateien.push({ pfad, name: dateiname });
+      }
+
+      return wurzel;
+    }
+
+    function anzahlEintraege(ordner) {
+      let summe = ordner.dateien.length;
+      for (const unter of ordner.unterordner.values()) {
+        summe += anzahlEintraege(unter);
+      }
+      return summe;
+    }
+
+
+    // ------------------------------------------------------------
+    // Darstellung
+    // ------------------------------------------------------------
+
+    // Karten, deren Titel noch aus der HTML-Datei gelesen werden soll
+    const offeneTitel = [];
+
+    function karteErstellen(datei) {
+      const link = document.createElement('a');
+      link.className = 'karte';
+      link.href = adresseVon(datei.pfad);
+
+      const istOrdnerseite = datei.name.endsWith('/');
+      const typ = istOrdnerseite ? 'Ordner' : endung(datei.name);
+      const istHtml = typ === 'html' || typ === 'htm';
+
+      if (!istHtml) {
+        const kennzeichen = document.createElement('span');
+        kennzeichen.className = 'typ';
+        kennzeichen.textContent = typ;
+        link.append(kennzeichen);
+      }
+
+      link.addEventListener('click', linkOeffnen);
+
+      const titel = document.createElement('b');
+      let gemerkterTitel = ausSpeicherLesen('ordner-titel:' + datei.pfad);
+      if (!gemerkterTitel || !gemerkterTitel.titel) gemerkterTitel = null;   // alter oder kaputter Eintrag
+      titel.textContent = gemerkterTitel ? gemerkterTitel.titel : lesbarerName(datei.name);
+
+      const dateiname = document.createElement('span');
+      dateiname.className = 'dateiname';
+      dateiname.textContent = datei.name;
+
+      link.append(titel, dateiname);
+
+      // Titel nur neu holen, wenn er unbekannt oder älter als die Cache-Zeit ist
+      const titelNochFrisch = gemerkterTitel
+                           && Date.now() - gemerkterTitel.zeit < CACHE_MINUTEN * 60 * 1000;
+      if ((istHtml || istOrdnerseite) && (!titelNochFrisch || frischLaden)) {
+        offeneTitel.push({ element: titel, pfad: datei.pfad });
+      }
+
+      return link;
+    }
+
+    // Normalerweise öffnet ein Link einfach im selben Tab.
+    // Läuft die Seite aber eingebettet (z. B. in einer Vorschau), klappt das oft nicht –
+    // dann versuchen wir einen neuen Tab und öffnen sie sonst direkt hier im Rahmen.
+    function linkOeffnen(ereignis) {
+      const istEingebettet = window.self !== window.top;
+      if (!istEingebettet) return;   // normaler Browser: Link macht seinen Job
+
+      ereignis.preventDefault();
+      const adresse = ereignis.currentTarget.href;
+
+      const neuerTab = window.open(adresse, '_blank');
+      if (neuerTab) {
+        neuerTab.opener = null;
+      } else {
+        location.href = adresse;
+      }
+    }
+
+    function ordnerInhaltAnzeigen(ordner, tiefe, ziel) {
+      const dateien = [...ordner.dateien].sort((a, b) => natuerlichSortieren(a.name, b.name));
+      for (const datei of dateien) {
+        ziel.append(karteErstellen(datei));
+      }
+
+      const namen = [...ordner.unterordner.keys()].sort(natuerlichSortieren);
+      for (const name of namen) {
+        abschnittAnzeigen(name, ordner.unterordner.get(name), tiefe + 1, ziel);
+      }
+    }
+
+    function abschnittAnzeigen(name, ordner, tiefe, ziel) {
+      let abschnitt, ueberschrift;
+
+      if (tiefe === 1) {
+        // Oberste Ebene: normaler Abschnitt mit Überschrift
+        abschnitt = document.createElement('section');
+        ueberschrift = document.createElement('h2');
+        ueberschrift.textContent = OBERSTE_EBENE_GROSS ? name.toUpperCase() : name;
+      } else {
+        // Tiefere Ebenen: aufklappbar
+        abschnitt = document.createElement('details');
+        abschnitt.open = true;
+        ueberschrift = document.createElement('summary');
+        ueberschrift.textContent = name;
+      }
+
+      const anzahl = document.createElement('span');
+      anzahl.className = 'anzahl';
+      anzahl.textContent = anzahlEintraege(ordner);
+      ueberschrift.append(anzahl);
+
+      abschnitt.append(ueberschrift);
+      ziel.append(abschnitt);
+
+      ordnerInhaltAnzeigen(ordner, tiefe, abschnitt);
+    }
+
+
+    // ------------------------------------------------------------
+    // Suche
+    // ------------------------------------------------------------
+
+    function filtern() {
+      const suchbegriff = suchfeld.value.trim().toLowerCase();
+
+      for (const karte of liste.querySelectorAll('a.karte')) {
+        const passt = karte.textContent.toLowerCase().includes(suchbegriff);
+        karte.hidden = !passt;
+      }
+
+      // Abschnitte ausblenden, in denen nichts mehr übrig ist
+      for (const abschnitt of liste.querySelectorAll('section, details')) {
+        abschnitt.hidden = !abschnitt.querySelector('a.karte:not([hidden])');
+        if (suchbegriff && abschnitt.tagName === 'DETAILS') abschnitt.open = true;
+      }
+    }
+
+
+    // ------------------------------------------------------------
+    // Echte Titel aus den HTML-Dateien holen
+    // ------------------------------------------------------------
+
+    // Liest nur so weit, bis </title> gefunden ist – nicht die ganze Datei
+    async function titelAuslesen(pfad) {
+      const antwort = await holen(adresseVon(pfad));
+      if (!antwort.ok || !antwort.body) return null;
+
+      const leser = antwort.body.getReader();
+      const decoder = new TextDecoder();
+      let text = '';
+
+      while (text.length < 300000) {
+        const { done, value } = await leser.read();
+        if (done) break;
+        text += decoder.decode(value, { stream: true });
+        if (/<\/title>/i.test(text)) break;
+      }
+      leser.cancel().catch(() => {});
+
+      const treffer = text.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+      if (!treffer) return null;
+
+      // HTML-Entities wie &#x27; in normale Zeichen umwandeln
+      const hilfe = document.createElement('textarea');
+      hilfe.innerHTML = treffer[1];
+      return hilfe.value.replace(/\s+/g, ' ').trim() || null;
+    }
+
+    async function alleTitelLaden() {
+      const GLEICHZEITIG = 6;
+      let naechster = 0;
+
+      async function arbeiter() {
+        while (naechster < offeneTitel.length) {
+          const { element, pfad } = offeneTitel[naechster++];
+          try {
+            const titel = await titelAuslesen(pfad);
+            if (titel) {
+              element.textContent = titel;
+              inSpeicherSchreiben('ordner-titel:' + pfad, { titel, zeit: Date.now() });
+            }
+          } catch {
+            // Dateiname bleibt stehen
+          }
+        }
+      }
+
+      const arbeiterListe = [];
+      for (let i = 0; i < GLEICHZEITIG; i++) arbeiterListe.push(arbeiter());
+      await Promise.all(arbeiterListe);
+    }
+
+
+    // ------------------------------------------------------------
+    // Los geht's
+    // ------------------------------------------------------------
+
+    async function start() {
+      basisAdresse = SEITEN_ADRESSE.endsWith('/') ? SEITEN_ADRESSE : SEITEN_ADRESSE + '/';
+
+      const allePfade = await dateienVonGithub();
+
+      if (!allePfade) {
+        hinweisAnzeigen(problem || 'Die Dateiliste konnte nicht geladen werden.');
+        return;
+      }
+
+      const pfade = [...new Set(allePfade)].filter(sollAngezeigtWerden);
+      const wurzel = baumAufbauen(pfade);
+      const gesamt = anzahlEintraege(wurzel);
+
+      ordnerInhaltAnzeigen(wurzel, 0, liste);
+
+      statuszeile.textContent = gesamt ? `${gesamt} Einträge` : 'Keine Inhalte gefunden.';
+      suchfeld.hidden = gesamt === 0;
+      suchfeld.addEventListener('input', filtern);
+
+      await alleTitelLaden();
+    }
+
+    // Egal was schiefgeht: lieber eine Meldung als ewiges „wird geladen“
+    start().catch(fehler => {
+      console.error(fehler);
+      hinweisAnzeigen('Beim Laden ist ein Fehler aufgetreten: <code>' + String(fehler.message || fehler).replace(/</g, '&lt;') + '</code>');
+    });
+  </script>
+</body>
+</html>
