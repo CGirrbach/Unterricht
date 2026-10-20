@@ -1,0 +1,257 @@
+<!doctype html>
+<!-- E2EG U34 · Messplatz Motorprüfstand (Neubau 20.10.2026, Aufgabe IN der Stunde nach dem Muster E1EG B07 und
+     E2EG U30). Ersetzt für die neuen Blätter U34_Simulation_Kennlinie.html: Die alte Seite zeichnete die fertige
+     Kennlinie mit eingetragenem Kippmoment („Kippmoment 102 Nm“), zeigte beim Öffnen schon einen Arbeitspunkt, nannte
+     die Leistungsformel P = M · 2π · n / 60 s und deutete jede Einstellung in einem fertigen Satz („Arbeitsbereich …“,
+     „Überlast …“, „kein Arbeitspunkt, der Motor kippt“). Die alte Adresse bleibt für die alten Blätter unverändert.
+     Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht):
+       (1) Der Motor stellt sich auf die Drehzahl ein, bei der sein Moment gleich dem Lastmoment ist (stabiler
+           Arbeitspunkt); die Drehzahl sinkt dabei nur wenig (hartes Betriebsverhalten). Die Messpunkte ergeben den
+           rechten Ast der M-n-Kennlinie.
+       (2) Über dem Kippmoment findet der Motor keinen Arbeitspunkt mehr: Er wird langsamer und bleibt stehen.
+       (3) Im Stillstand zieht er den Anzugsstrom (rund das Siebenfache des Bemessungsstroms) und gibt nur das
+           Anzugsmoment ab (rund das 2,2-Fache des Bemessungsmoments); er läuft erst wieder an, wenn das Lastmoment
+           kleiner ist als das Anzugsmoment.
+     Vorlagen: Motor nach Rechenbuch S. 248, Bild 2 (Leistungsschild 5,5 kW, 400 V, 11 A, 1450 min⁻¹, 50 Hz) und Bild 3
+       (Drehmoment und Strom über der Drehzahl); Begriffe nach Tabellenbuch S. 534 (Anzugsmoment, Kippmoment,
+       Bemessungsmoment) und S. 535 (Lastmoment M_L); Hochlaufkennlinie Fachkunde S. 495, Bild 2.
+     Rechenmodell: Kennlinien M(n) und I(n) als monotone kubische Interpolation (Fritsch-Carlson) durch Stützstellen
+       aus Bild 3; Stützstellen und Steigungen kommen aus u34_gemeinsam.py (dort mit Abweichungen vom Buchbild
+       beschrieben). Bewegung: dω durch dt = (M(n) − M_L) durch J mit J = 0,2 kg·m². Die Bremse bremst nur: Steht die
+       Welle und ist M(0) ≤ M_L, bleibt sie stehen. Motor aus: kein Moment, die Welle läuft mit Lastmoment und Reibung aus.
+     Anzeigen: Drehzahl ganz, Drehmoment und Strom mit einer Nachkommastelle. Der Drehmomentmesser zeigt das Moment des
+       Motors an seiner Welle; im Beharrungszustand ist es das Lastmoment.
+     Startstellung neutral: Motor aus, Lastmoment 0 Nm, alle Anzeigen 0. Prüfmodus ?pruefen: Werte als JSON. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Motorprüfstand (U34)</title>
+<script type="application/json" id="sim-meta">{"startwerte": {"motor": "aus", "lastmoment_Nm": 0}, "loesungswerte": {"Lastmoment 0 Nm": "1492 min⁻¹, 0,0 Nm", "Lastmoment 20 Nm": "1472 min⁻¹, 20,0 Nm", "Lastmoment 40 Nm": "1444 min⁻¹, 40,0 Nm", "Lastmoment 60 Nm": "1410 min⁻¹, 60,0 Nm", "Lastmoment 80 Nm": "1373 min⁻¹, 80,0 Nm", "Lastmoment 100 Nm": "1282 min⁻¹, 100,0 Nm", "Lastmoment 102 Nm": "1256 min⁻¹", "Lastmoment 103 Nm": "1230 min⁻¹", "Lastmoment 104 Nm": "Motor bleibt stehen: 0 min⁻¹, 79,0 Nm, 77,0 A", "Stillstand, 85 Nm": "läuft nicht an", "Stillstand, 75 Nm": "läuft an bis 1383 min⁻¹", "Lastmoment 36 Nm": "1450 min⁻¹, 11,0 A"}, "quelle": "Europa-Rechenbuch Elektrotechnik S. 248, Bild 2 (Leistungsschild) und Bild 3 (Betriebsverhalten eines 5,5-kW-Motors); Europa Fachkunde S. 495, Bild 2 (Hochlaufkennlinie); Tabellenbuch S. 534 und 535 (Begriffe, Lastmoment)"}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:1000px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .fz{font-family:Cambria,Caladea,'Noto Serif',Georgia,serif;font-style:italic}
+ .messwerte{position:sticky;top:0;z-index:5;background:#fff;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:6px 0 8px;border-bottom:1px solid var(--linie);margin-bottom:10px}
+ .kachel{border:1.4px solid var(--ink);background:var(--hell);padding:5px 6px;text-align:center}
+ .kachel .name{display:block;font-size:14px;font-weight:700;color:var(--grau);line-height:1.2}
+ .kachel .ort{display:block;font-size:12px;color:var(--grau);line-height:1.2}
+ .kachel .zahl{display:block;font-variant-numeric:tabular-nums;font-size:26px;font-weight:700;white-space:nowrap}
+ .buehne{display:grid;grid-template-columns:1fr;gap:14px;align-items:start}
+ @media(min-width:760px){.buehne{grid-template-columns:1fr 1.1fr}}
+ canvas{width:100%;height:auto;display:block;border:1px solid var(--linie);background:#fff}
+ .legende{font-size:13.5px;color:var(--grau);margin-top:4px}
+ .titel{font-size:15px;font-weight:700;margin:4px 0 5px}
+ .lcd{background:#20313a;color:#9BF0B4;font-variant-numeric:tabular-nums;font-size:28px;font-weight:700;padding:6px 12px;border-radius:4px;text-align:right}
+ .lcd small{font-size:16px;color:#cfe;font-weight:400;float:left;margin-top:8px}
+ input[type=range]{width:100%;height:44px;accent-color:var(--kupfer);margin:8px 0 2px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+ button{font:inherit;font-size:16px;min-height:48px;min-width:58px;padding:6px 12px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+ button.an{background:var(--kupfer);color:#fff}
+ button.zurueck{border-color:var(--ink);color:var(--ink)}
+ .schritte button{flex:1 1 60px;font-weight:700}
+ #bQ{width:100%;font-weight:700;font-size:18px;margin-bottom:12px}
+ .hinweis{font-size:14px;color:var(--grau);margin-top:12px}
+ #pruefbericht{display:none}
+ @media(max-width:420px){.kachel .zahl{font-size:21px} .kachel .name{font-size:13px} .lcd{font-size:24px}
+   button{min-width:52px;padding:6px 8px;font-size:15px} .wrap{padding:12px 10px 18px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E2EG · LF 5 · U34</div><h1>Messplatz Motorprüfstand</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Ein Drehstrom-Asynchronmotor (Leistungsschild: 5,5 kW, 400 V, 11 A,
+  1450 min<sup>−1</sup>, 50 Hz) treibt über eine Messwelle eine Bremse an. Die Bremse bremst die Welle mit dem
+  eingestellten Lastmoment <span class="fz">M</span><sub>L</sub>. Schalten Sie den Motor bei
+  <span class="fz">M</span><sub>L</sub> = 0 Nm ein. Stellen Sie dann das Lastmoment ein und lesen Sie ab, wenn sich die
+  Anzeigen nicht mehr ändern.</div>
+
+ <div class="messwerte" aria-live="polite">
+  <div class="kachel"><span class="name">Drehzahl <span class="fz">n</span></span><span class="ort">Drehzahlmesser</span><span class="zahl" id="mN"></span></div>
+  <div class="kachel"><span class="name">Drehmoment <span class="fz">M</span></span><span class="ort">Messwelle</span><span class="zahl" id="mM"></span></div>
+  <div class="kachel"><span class="name">Strom <span class="fz">I</span></span><span class="ort">Strommesser in L1</span><span class="zahl" id="mI"></span></div>
+ </div>
+
+ <div class="buehne">
+  <div>
+   <div class="titel">Motor</div>
+   <button type="button" id="bQ" aria-pressed="false">Motor ist AUS: einschalten</button>
+   <div class="titel">Lastmoment der Bremse</div>
+   <div class="lcd" id="aL" aria-live="polite"></div>
+   <input type="range" id="rl" min="0" max="120" step="1" value="0" aria-label="Lastmoment der Bremse in Newtonmeter">
+   <div class="knoepfe schritte">
+    <button type="button" id="l10m" aria-label="10 Newtonmeter weniger">◀ 10</button>
+    <button type="button" id="l1m" aria-label="1 Newtonmeter weniger">◀ 1</button>
+    <button type="button" id="l1p" aria-label="1 Newtonmeter mehr">1 ▶</button>
+    <button type="button" id="l10p" aria-label="10 Newtonmeter mehr">10 ▶</button>
+   </div>
+  </div>
+  <div>
+   <canvas id="ps" width="560" height="300" data-quelle="Schema des Prüfstands (Motor, Messwelle, Bremse); Motorschaltzeichen nach Tabellenbuch S. 534; Motordaten Rechenbuch S. 248, Bild 2 und 3"
+    aria-label="Prüfstand: Drehstromnetz L1, L2, L3, Schalter Q1, Strommesser in L1, Drehstrommotor, Welle mit Drehzahlmesser und Messwelle für das Drehmoment, Bremse."></canvas>
+   <div class="legende">Die Streifen auf der Welle wandern, solange die Welle dreht.</div>
+  </div>
+ </div>
+ <div class="titel" style="margin-top:12px">Neu beginnen</div>
+ <div class="knoepfe"><button class="zurueck" id="bReset" type="button">Zurücksetzen</button></div>
+ <div class="hinweis">Die Bremse bremst nur, sie treibt die Welle nicht an. Die Messwelle zeigt das Moment, das der
+  Motor an seiner Welle abgibt. Strommesser: Effektivwert des Stroms in der Zuleitung L1.</div>
+ <pre id="pruefbericht"></pre>
+</div>
+
+<script>
+(function(){
+"use strict";
+var TM=[[0.0, 79.0, 0.0005], [100.0, 79.3, 0.004363636364], [200.0, 80.1, 0.009904761905], [300.0, 81.4, 0.0154375], [400.0, 83.3, 0.02080952381], [500.0, 85.6, 0.023489361702], [600.0, 88.0, 0.024489795918], [700.0, 90.5, 0.025490196078], [800.0, 93.1, 0.027418181818], [900.0, 96.0, 0.02849122807], [1000.0, 98.8, 0.028], [1100.0, 101.6, 0.025627118644], [1150.0, 102.8, 0.016], [1200.0, 103.4, 0.0], [1225.0, 103.1, -0.017454545455], [1250.0, 102.3, -0.04352], [1275.0, 100.6, -0.079609756098], [1300.0, 98.2, -0.116459016393], [1325.0, 94.5, -0.183092783505], [1350.0, 88.5, -0.294193548387], [1375.0, 79.0, -0.446086956522], [1400.0, 65.5, -0.559285714286], [1425.0, 51.0, -0.585938566553], [1450.0, 36.2, -0.660919402985], [1475.0, 17.5, -0.875226588668], [1492.0, 0.0, -1.143316526611]];                       // [n in min⁻¹, M in Nm, Steigung] (u34_gemeinsam.py, Rechenbuch S. 248, Bild 3)
+var TI=[[0.0, 77.0, -0.0155], [200.0, 73.4, -0.020195121951], [400.0, 68.8, -0.024626262626], [600.0, 63.5, -0.029194915254], [800.0, 57.0, -0.036644295302], [1000.0, 48.6, -0.047473933649], [1100.0, 43.3, -0.057568965517], [1200.0, 37.0, -0.067701492537], [1250.0, 33.4, -0.077538461538], [1300.0, 29.2, -0.090461538462], [1350.0, 24.3, -0.105396226415], [1400.0, 18.6, -0.128921465969], [1425.0, 15.0, -0.151578947368], [1450.0, 11.0, -0.151578947368], [1475.0, 7.4, -0.142484686666], [1492.0, 5.0, -0.140033613445]];                       // [n in min⁻¹, I in A, Steigung]
+var J=0.2, START={ein:false, ml:0};
+var z={ein:START.ein, ml:START.ml, w:0, phi:0};
+var $=function(id){return document.getElementById(id);};
+var ruhig=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function hermite(tab,x){
+  if(x<=tab[0][0]) return tab[0][1];
+  var L=tab.length-1;
+  if(x>=tab[L][0]) return tab[L][1]+tab[L][2]*(x-tab[L][0]);
+  for(var i=0;i<L;i++){
+    if(tab[i][0]<=x && x<=tab[i+1][0]){
+      var h=tab[i+1][0]-tab[i][0], t=(x-tab[i][0])/h, t2=t*t, t3=t2*t;
+      return (2*t3-3*t2+1)*tab[i][1]+(t3-2*t2+t)*h*tab[i][2]+(-2*t3+3*t2)*tab[i+1][1]+(t3-t2)*h*tab[i+1][2];
+    }
+  }
+  return null;
+}
+function drehzahl(){ return z.w*60/(2*Math.PI); }
+function schritt(dt){                 // explizites Euler-Verfahren, dt in s
+  var n=drehzahl();
+  if(z.ein){
+    var m=hermite(TM,n);
+    if(n<=1e-9 && m<=z.ml){ z.w=0; return; }
+    z.w=Math.max(0, z.w+(m-z.ml)/J*dt);
+  } else {
+    z.w=Math.max(0, z.w-(z.ml+1.5)/J*dt);       // ausgeschaltet: Bremse und Lagerreibung
+  }
+}
+function zahl(x,st){
+  var s=(Math.round(x*Math.pow(10,st)+1e-9)/Math.pow(10,st)).toFixed(st);
+  if(/^-0[.,]?0*$/.test(s)) s=s.slice(1);
+  return s.replace("-","−").replace(".",",");
+}
+function anzeigen(){
+  var n=drehzahl();
+  var m=z.ein?hermite(TM,n):0, i=z.ein?hermite(TI,n):0;
+  $("mN").innerHTML=zahl(n,0)+" min<sup>−1</sup>";
+  $("mM").textContent=zahl(m,1)+" Nm";
+  $("mI").textContent=zahl(i,1)+" A";
+  $("aL").innerHTML="<small><span class='fz'>M</span><sub>L</sub></small>"+z.ml+" Nm"; $("rl").value=z.ml;
+  $("bQ").textContent=z.ein?"Motor ist EIN: ausschalten":"Motor ist AUS: einschalten";
+  $("bQ").classList.toggle("an",z.ein); $("bQ").setAttribute("aria-pressed",z.ein?"true":"false");
+}
+
+// ---------------- Prüfstand (Schema) ----------------
+var cv=$("ps"), g=cv.getContext("2d");
+var DPR=Math.max(1,Math.min(3,window.devicePixelRatio||1)), BW=560, BH=300;
+cv.width=BW*DPR; cv.height=BH*DPR; g.scale(DPR,DPR);
+var TINTE="#1A2530", GRAU="#5A666F", KUPFER="#A34E0E";
+function linie(pts,farbe,b){ g.strokeStyle=farbe||TINTE; g.lineWidth=b||2.2; g.beginPath(); g.moveTo(pts[0][0],pts[0][1]);
+  for(var i=1;i<pts.length;i++) g.lineTo(pts[i][0],pts[i][1]); g.stroke(); }
+function text(t,x,y,gr,farbe,ausr,kursiv){ g.fillStyle=farbe||TINTE;
+  g.font=(kursiv?"italic bold "+gr+"px Cambria,Caladea,Georgia,serif":"bold "+gr+"px 'Noto Sans',system-ui,sans-serif");
+  g.textAlign=ausr||"left"; g.textBaseline="middle"; g.fillText(t,x,y); }
+function punkt(x,y){ g.fillStyle=TINTE; g.beginPath(); g.arc(x,y,4,0,2*Math.PI); g.fill(); }
+function zeichne(){
+  g.clearRect(0,0,BW,BH);
+  var YL=[40,70,100], XM=170, YM=180, RM=34, YW=YM;
+  text("L1",8,YL[0],18); text("L2",8,YL[1],18); text("L3",8,YL[2],18);
+  for(var k=0;k<3;k++){
+    linie([[34,YL[k]],[60,YL[k]]]);
+    if(z.ein) linie([[60,YL[k]],[84,YL[k]]],TINTE,2.8); else linie([[60,YL[k]],[82,YL[k]-14]],TINTE,2.8);
+    punkt(60,YL[k]); punkt(84,YL[k]);
+  }
+  g.setLineDash([5,4]); linie(z.ein?[[72,YL[0]],[72,YL[2]]]:[[71,YL[0]-7],[71,YL[2]-7]],GRAU,1.5); g.setLineDash([]);
+  text("Q1",54,YL[2]+22,15,GRAU);
+  // Strommesser in L1
+  linie([[84,YL[0]],[110,YL[0]]]);
+  g.fillStyle="#fff"; g.strokeStyle=TINTE; g.lineWidth=2.2; g.beginPath(); g.arc(126,YL[0],15,0,2*Math.PI); g.fill(); g.stroke();
+  text("A",126,YL[0]+1,17,TINTE,"center"); text("I",146,YL[0]-20,18,KUPFER,"left",true);
+  // drei Leitungen zum Motor
+  linie([[141,YL[0]],[XM+12,YL[0]],[XM+12,YM-RM+1]]);
+  linie([[84,YL[1]],[XM,YL[1]],[XM,YM-RM]]);
+  linie([[84,YL[2]],[XM-12,YL[2]],[XM-12,YM-RM+1]]);
+  // Motor: Kreis mit M und 3~
+  g.fillStyle="#fff"; g.strokeStyle=TINTE; g.lineWidth=2.6; g.beginPath(); g.arc(XM,YM,RM,0,2*Math.PI); g.fill(); g.stroke();
+  text("M",XM,YM-8,24,TINTE,"center"); text("3~",XM,YM+15,17,TINTE,"center");
+  // Welle
+  linie([[XM+RM,YW],[540,YW]],TINTE,5);
+  // Drehzahlmesser an der Welle
+  var XD=262;
+  g.fillStyle="#fff"; g.strokeStyle=TINTE; g.lineWidth=2.2; g.beginPath(); g.arc(XD,YW+60,15,0,2*Math.PI); g.fill(); g.stroke();
+  text("n",XD,YW+60,18,TINTE,"center",true); g.setLineDash([4,3]); linie([[XD,YW+5],[XD,YW+45]],GRAU,1.6); g.setLineDash([]);
+  text("Drehzahlmesser",XD,YW+92,13,GRAU,"center");
+  // Wellenstück mit Streifen (wandern mit der Drehung)
+  var X0=XM+RM+70, X1=360, H=16;
+  g.fillStyle="#E6EBEF"; g.strokeStyle=TINTE; g.lineWidth=1.8; g.fillRect(X0,YW-H/2,X1-X0,H); g.strokeRect(X0,YW-H/2,X1-X0,H);
+  g.save(); g.beginPath(); g.rect(X0,YW-H/2,X1-X0,H); g.clip();
+  var ab=14, vers=(z.phi/(2*Math.PI))*ab;
+  g.strokeStyle=KUPFER; g.lineWidth=3;
+  for(var xs=X0-ab+vers; xs<X1+ab; xs+=ab){ g.beginPath(); g.moveTo(xs,YW+H/2); g.lineTo(xs+8,YW-H/2); g.stroke(); }
+  g.restore();
+  // Messwelle (Drehmomentmesser)
+  var XW=390;
+  g.fillStyle="#fff"; g.strokeStyle=TINTE; g.lineWidth=2.2; g.fillRect(XW-26,YW-18,52,36); g.strokeRect(XW-26,YW-18,52,36);
+  text("Nm",XW,YW+1,16,TINTE,"center"); text("M",XW,YW-32,18,KUPFER,"center",true);
+  text("Messwelle",XW,YW+34,13,GRAU,"center");
+  // Bremse
+  var XB=490;
+  g.fillStyle="#F5EBDF"; g.strokeStyle=KUPFER; g.lineWidth=2.6; g.fillRect(XB-36,YW-40,72,80); g.strokeRect(XB-36,YW-40,72,80);
+  text("Bremse",XB,YW-2,15,KUPFER,"center");
+  g.fillStyle=KUPFER; g.font="italic bold 16px Cambria,Caladea,Georgia,serif"; g.textAlign="center"; g.fillText("M",XB-6,YW+26);
+  g.font="bold 11px 'Noto Sans',system-ui,sans-serif"; g.fillText("L",XB+5,YW+30);
+  text("Drehstromnetz 400 V, 50 Hz",200,18,13,GRAU);
+}
+
+// ---------------- Bedienung und Ablauf ----------------
+function setzeL(x){ z.ml=Math.max(0,Math.min(120,Math.round(x))); anzeigen(); }
+$("bQ").onclick=function(){ z.ein=!z.ein; anzeigen(); };
+$("rl").addEventListener("input",function(){ setzeL(+this.value); });
+$("l10m").onclick=function(){ setzeL(z.ml-10); }; $("l1m").onclick=function(){ setzeL(z.ml-1); };
+$("l1p").onclick=function(){ setzeL(z.ml+1); };  $("l10p").onclick=function(){ setzeL(z.ml+10); };
+$("bReset").onclick=function(){ z={ein:START.ein, ml:START.ml, w:0, phi:0}; anzeigen(); zeichne(); };
+var vorher=null;
+function takt(t){
+  var dt=vorher===null?0:Math.min(0.1,(t-vorher)/1000); vorher=t;
+  var schritte=Math.ceil(dt/0.0005);
+  for(var i=0;i<schritte;i++) schritt(dt/schritte);
+  if(!ruhig) z.phi=(z.phi+drehzahl()/1500*1.5*2*Math.PI*dt)%(2*Math.PI);
+  anzeigen(); zeichne();
+  requestAnimationFrame(takt);
+}
+// Prüfhilfe: Zustand setzen und t Sekunden rechnen (ohne Bild), Anzeigen zurückgeben
+window.__stelle=function(ml,ein,t,vonStillstand){
+  if(vonStillstand) z.w=0;
+  z.ein=(ein===undefined)?true:!!ein; z.ml=ml;
+  var n=Math.round((t||15)/0.0005); for(var i=0;i<n;i++) schritt(0.0005);
+  anzeigen();
+  return [$("mN").textContent,$("mM").textContent,$("mI").textContent].join(" | ");
+};
+if(/[?&]pruefen\b/.test(location.search)){
+  var b={};
+  z={ein:true, ml:0, w:0, phi:0};
+  [0,10,20,30,36,40,50,60,70,80,90,100,101,102,103].forEach(function(ml){ b["M_L "+ml]=window.__stelle(ml,true,15); });
+  b["M_L 104"]=window.__stelle(104,true,15);
+  b["Stillstand, M_L 85"]=window.__stelle(85,true,10);
+  b["Stillstand, M_L 79"]=window.__stelle(79,true,10);
+  b["Stillstand, M_L 78"]=window.__stelle(78,true,15);
+  b["aus, M_L 0"]=window.__stelle(0,false,30);
+  b["ein aus dem Stillstand, M_L 120"]=window.__stelle(120,true,5,true);
+  $("pruefbericht").textContent=JSON.stringify(b);
+  z={ein:START.ein, ml:START.ml, w:0, phi:0};
+}
+anzeigen(); zeichne(); requestAnimationFrame(takt);
+})();
+</script>
+</body></html>
