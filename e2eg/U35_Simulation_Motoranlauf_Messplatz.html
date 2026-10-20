@@ -1,0 +1,323 @@
+<!doctype html>
+<!-- E2EG U35 · Messplatz Motoranlauf (Neubau 20.10.2026, Aufgabe IN der Stunde nach dem Muster E1EG B07 und E2EG U30).
+     Ersetzt für die neuen Blätter U35_Simulation_Anlassen.html: Die alte Seite stellte nur ein Widerstandsmoment ein,
+     zeigte Anlaufstrom und Anlaufmoment beider Schaltungen fest an, nannte im Einleitungstext schon das Ergebnis
+     („senkt den Anlaufstrom auf ein Drittel“) und erklärte im Fußtext die Formel. Die alte Adresse bleibt unverändert.
+     Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht und rechnet nichts vor):
+       Beim Stern-Dreieck-Anlauf ist der Strom in der Zuleitung beim Einschalten ein Drittel des Stroms beim direkten
+       Einschalten in Dreieck; nach dem Hochlauf nimmt der Motor in beiden Fällen denselben Strom auf. Der Anlaufstrom
+       ist ein Vielfaches dieses Stroms (Vergleich mit den Grenzen 60 A und 30 A auf dem Arbeitsblatt).
+     Vorlagen: Schaltung nach Europa Fachkunde S. 497, Bild 1 a) (Stern-Dreieck-Anlassverfahren: F1, Q1 Netzschütz,
+       Q2 Dreieckschütz, Q3 Sternschütz mit Sternpunkt, F2 Überlastrelais, M1), Strommesser in der Zuleitung ergänzt.
+       Motor nach Europa-Rechenbuch S. 274, Tabelle 1, n_s = 1500 1/min, Baugröße 132 M: P_N = 7,5 kW,
+       n = 1445 1/min, I_N = 15 A, I_A/I_N = 7,5, M_A/M_N = 2,6, M_K/M_N = 3,2; Bemessungsspannung 400 V in Dreieck.
+       Form der Drehmomentkennlinie wie Rechenbuch S. 248, Bild 3 (Anzugsmoment, Sattel nach oben, Kippmoment bei etwa
+       1250 1/min, steiler Abfall bis zur Drehfelddrehzahl), auf die Werte der Tabelle gebracht.
+     Rechenmodell: Moment M(n) = M_N · m(n), m stückweise kubisch (monoton) durch die Stützstellen unten, m(0) = 2,6,
+       Höchstwert 3,2, m(1445) = 1, m(1500) = 0. Strom I(n) = I_N · √(a + b · m(n) · s) mit Schlupf s = (1500 − n)/1500
+       (Läuferstrom wächst mit √(M · s), dazu der Magnetisierungsstrom); a und b so, dass I(0) = 7,5 · I_N und
+       I(1445) = I_N (a = 0,2097, Magnetisierungsstrom 0,46 · I_N). Stern: Strangspannung U durch √3, Strom in der
+       Zuleitung und Moment je ein Drittel (Fachkunde S. 497; Tabellenbuch S. 532, Formel 12). Last: Lüfter,
+       M_L = M_N · (n / 1445)²; Trägheitsmoment 0,8 kg · m². Zeitrelais: Umschalten auf Dreieck nach 5 s.
+       Bewegungsgleichung J · dω/dt = M − M_L, Schritt 0,5 ms. Nach dem Ausschalten bremst eine Bremse (60 Nm).
+       Nachgerechnet in Python (u35_gemeinsam.py, 20.10.2026): direkt Höchstwert 112,5 A, nach dem Hochlauf 15,0 A und
+       1445 1/min; Stern-Dreieck Höchstwert 37,5 A, im Stern 1366 1/min und 11,6 A, nach dem Umschalten 35,0 A,
+       danach 15,0 A und 1445 1/min.
+     Anzeigen: Strom mit einer Nachkommastelle (Effektivwert), Drehzahl ganzzahlig. Prüfmodus ?pruefen: Werte als JSON.
+     Startstellung neutral: kein Anlassverfahren gewählt, Schalter aus, alle Anzeigen 0 bzw. leer. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Motoranlauf (U35)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"schalter":"aus","anlassverfahren":"keins"},"loesungswerte":{"direkt in Dreieck":{"Hoechstwert":"112,5 A","nach dem Hochlauf":"15,0 A","Drehzahl":"1445 1/min"},"Stern-Dreieck":{"Hoechstwert":"37,5 A","nach dem Hochlauf":"15,0 A","Drehzahl":"1445 1/min"}},"quelle":"Europa Fachkunde S. 497, Bild 1 a); Europa-Rechenbuch S. 274, Tabelle 1 (132 M, 7,5 kW); Rechenbuch S. 248, Bild 3 (Form der Kennlinie); Tabellenbuch S. 532, Formel 12"}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:1000px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .fz{font-family:Cambria,Caladea,'Noto Serif',Georgia,serif;font-style:italic}
+ .messwerte{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;background:#fff;padding:6px 0;
+   position:sticky;top:0;z-index:5}
+ .kachel{border:1.4px solid var(--ink);background:var(--hell);padding:6px 8px;text-align:center}
+ .kachel .name{display:block;font-size:14.5px;font-weight:700;color:var(--grau)}
+ .kachel .zahl{display:block;font-variant-numeric:tabular-nums;font-size:26px;font-weight:700;white-space:nowrap}
+ .buehne{display:grid;grid-template-columns:1fr;gap:14px;align-items:start}
+ @media(min-width:760px){.buehne{grid-template-columns:1fr 1.15fr}}
+ canvas{width:100%;height:auto;display:block;touch-action:manipulation;border:1px solid var(--linie);background:#fff}
+ .legende{font-size:13.5px;color:var(--grau);margin-top:4px}
+ .titel{font-size:15px;font-weight:700;margin:12px 0 5px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+ button{font:inherit;font-size:16px;min-height:48px;min-width:58px;padding:6px 12px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+ button.an{background:var(--kupfer);color:#fff}
+ button:disabled{opacity:.45;cursor:default}
+ button.zurueck{border-color:var(--ink);color:var(--ink)}
+ .wahl button{flex:1 1 140px;font-weight:700;font-size:17px}
+ .schalten button{flex:1 1 140px;font-weight:700;font-size:17px}
+ .hinweis{font-size:14px;color:var(--grau);margin-top:12px}
+ #pruefbericht{display:none}
+ @media(max-width:760px){.messwerte{grid-template-columns:repeat(2,1fr)}}
+ @media(max-width:420px){.kachel .zahl{font-size:22px} .kachel .name{font-size:13.5px}
+   button{min-width:52px;padding:6px 8px;font-size:15px} .wahl button,.schalten button{font-size:16px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E2EG · LF 5 · U35</div><h1>Messplatz Motoranlauf</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Ein Käfigläufermotor mit 7,5 kW (Bemessungsspannung 400 V in
+  Dreieckschaltung, 1445 1/min) treibt einen Lüfter an. Wählen Sie das Anlassverfahren und schalten Sie ein. Der
+  Strommesser in der Zuleitung (Außenleiter L1) zeigt den Strom; der Höchstwert seit dem Einschalten bleibt stehen.
+  Die Aufzeichnung zeigt den Strom der ersten 10 Sekunden.</div>
+
+ <div class="messwerte" aria-live="polite">
+  <div class="kachel"><span class="name">Strom <span class="fz">I</span> in L1</span><span class="zahl" id="mI"></span></div>
+  <div class="kachel"><span class="name">Höchstwert seit dem Einschalten</span><span class="zahl" id="mH"></span></div>
+  <div class="kachel"><span class="name">Drehzahl <span class="fz">n</span></span><span class="zahl" id="mN"></span></div>
+  <div class="kachel"><span class="name">Wicklung geschaltet in</span><span class="zahl" id="mS"></span></div>
+ </div>
+
+ <div class="buehne">
+  <div>
+   <div class="titel">Anlassverfahren</div>
+   <div class="knoepfe wahl">
+    <button type="button" id="bD" aria-pressed="false">direkt in Dreieck</button>
+    <button type="button" id="bYD" aria-pressed="false">Stern-Dreieck</button>
+   </div>
+   <div class="titel">Schalter</div>
+   <div class="knoepfe schalten">
+    <button type="button" id="bEin">Einschalten</button>
+    <button type="button" id="bAus">Ausschalten</button>
+   </div>
+   <div class="titel">Aufzeichnung: Strom in L1 nach dem Einschalten</div>
+   <canvas id="auf" width="560" height="380" data-quelle="Strom nach dem Rechenmodell (siehe Kopf der Datei)"
+    aria-label="Diagramm: Strom in L1 in Ampere über der Zeit in Sekunden, 0 bis 10 s."></canvas>
+   <div class="legende">Senkrecht: Strom <span class="fz">I</span> in A, waagerecht: Zeit <span class="fz">t</span> in s
+    nach dem Einschalten. Beim Stern-Dreieck-Anlauf schaltet ein Zeitrelais nach 5 s von Stern auf Dreieck um.</div>
+  </div>
+  <div>
+   <div class="titel">Schaltung</div>
+   <canvas id="sch" width="480" height="470" data-quelle="Europa Fachkunde S. 497, Bild 1 a) (Stern-Dreieck-Anlassverfahren), Strommesser in der Zuleitung ergänzt"
+    aria-label="Schaltplan in einpoliger Darstellung: Netz 3/N/PE 50 Hz 400 V, Sicherung F1, Strommesser, Netzschütz Q1, Dreieckschütz Q2, Sternschütz Q3, Überlastrelais F2, Motor M1, Lüfter."></canvas>
+   <div class="legende">Einpolige Darstellung (eine Linie steht für drei Außenleiter). Q1 Netzschütz, Q2 Dreieckschütz,
+    Q3 Sternschütz (bildet den Sternpunkt), F2 Überlastrelais. Kupferfarben: Schütz eingeschaltet.</div>
+   <div class="titel">Neu beginnen</div>
+   <div class="knoepfe"><button class="zurueck" id="bReset" type="button">Zurücksetzen</button></div>
+  </div>
+ </div>
+ <div class="hinweis">Der Strommesser zeigt Effektivwerte. Nach dem Ausschalten bremst eine Bremse den Lüfter bis zum
+  Stillstand; eingeschaltet wird nur aus dem Stillstand.</div>
+ <pre id="pruefbericht"></pre>
+</div>
+
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id);};
+// ---------------- Rechenmodell ----------------
+var PN=7500, NN=1445, NS=1500, IN=15, IA_IN=7.5, J=0.8, TUM=5.0, MBREMS=60, DT=0.0005;
+var MN=PN/(2*Math.PI*NN/60);
+var NP=[0,300,600,900,1100,1250,1350,1400,1445,1500];
+var MP=[2.60,2.66,2.76,2.92,3.08,3.20,2.85,2.05,1.00,0.0];
+var STEIG=(function(){                                   // monotone kubische Steigungen (Fritsch-Carlson)
+  var h=[],d=[],m=[],k;
+  for(k=0;k<NP.length-1;k++){ h.push(NP[k+1]-NP[k]); d.push((MP[k+1]-MP[k])/h[k]); }
+  m[0]=d[0]; m[NP.length-1]=d[d.length-1];
+  for(k=1;k<NP.length-1;k++){
+    if(d[k-1]*d[k]<=0) m[k]=0;
+    else { var w1=2*h[k]+h[k-1], w2=h[k]+2*h[k-1]; m[k]=(w1+w2)/(w1/d[k-1]+w2/d[k]); }
+  }
+  return m;
+})();
+function mrel(n){
+  n=Math.max(0,Math.min(NS,n));
+  var k=0; while(k<NP.length-2 && n>=NP[k+1]) k++;
+  var h=NP[k+1]-NP[k], t=(n-NP[k])/h;
+  var h00=2*t*t*t-3*t*t+1, h10=t*t*t-2*t*t+t, h01=-2*t*t*t+3*t*t, h11=t*t*t-t*t;
+  return h00*MP[k]+h10*h*STEIG[k]+h01*MP[k+1]+h11*h*STEIG[k+1];
+}
+var SN=(NS-NN)/NS, KB=(IA_IN*IA_IN-1)/(MP[0]-SN), KA=1-KB*SN;
+function irel(n){ var s=(NS-n)/NS; return Math.sqrt(Math.max(0,KA+KB*mrel(n)*s)); }
+function mlast(n){ return MN*(n/NN)*(n/NN); }
+
+// Zustand
+var START={verfahren:null};
+var z={verfahren:null, ein:false, t:0, w:0, imax:null, kurve:[], stern:false, laeuft:false};
+function stromJetzt(){ if(!z.ein) return 0; return (z.stern?1/3:1)*irel(z.w*60/(2*Math.PI))*IN; }
+function schritt(){                                         // DT Sekunden weiter
+  var n=z.w*60/(2*Math.PI);
+  if(z.ein){
+    if(z.verfahren==="YD") z.stern = z.t<TUM;
+    var f=z.stern?1/3:1;
+    var M=f*mrel(n)*MN, I=f*irel(n)*IN;
+    if(z.imax===null || I>z.imax) z.imax=I;
+    z.w+=(M-mlast(n))/J*DT;
+    z.t+=DT;
+    if(z.t<=10.0001 && Math.round(z.t/DT)%20===0) z.kurve.push([z.t, f*irel(z.w*60/(2*Math.PI))*IN]);
+  } else if(z.w>0){
+    z.w-= (mlast(n)+MBREMS)/J*DT; if(z.w<0) z.w=0;
+  }
+}
+function einschalten(still){
+  if(!z.verfahren || z.ein || z.w>0) return;
+  z.ein=true; z.t=0; z.imax=null; z.stern=(z.verfahren==="YD");
+  var I0=(z.stern?1/3:1)*irel(0)*IN; z.imax=I0; z.kurve=[[0,I0]];
+  if(!still) starte();
+}
+function ausschalten(){ if(!z.ein) return; z.ein=false; starte(); }
+
+// ---------------- Anzeige ----------------
+function zahl(x,st){ var s=(Math.round(x*Math.pow(10,st)+1e-9)/Math.pow(10,st)).toFixed(st); return s.replace(".",","); }
+var cs=$("sch"), gs=cs.getContext("2d"), ca=$("auf"), ga=ca.getContext("2d");
+var DPR=Math.max(1,Math.min(3,window.devicePixelRatio||1));
+var SW=480, SH=470, SKS=1, AW=560, AH=370, MINPX=14;      // Schaltung: Zeichenmaß 480 × 470, skaliert auf die Breite
+function groessen(){
+  var bs=Math.round(cs.clientWidth||SW); SKS=Math.max(0.55,Math.min(1.4,bs/SW));
+  cs.width=Math.round(SW*SKS*DPR); cs.height=Math.round(SH*SKS*DPR); gs.setTransform(DPR*SKS,0,0,DPR*SKS,0,0);
+  AW=Math.max(300,Math.round(ca.clientWidth||560)); AH=Math.round(Math.max(270,Math.min(420,AW*0.68)));
+  ca.width=Math.round(AW*DPR); ca.height=Math.round(AH*DPR); ga.setTransform(DPR,0,0,DPR,0,0);
+}
+var TINTE="#1A2530", KUPFER="#A34E0E", GRAU="#5A666F", LINIE="#C7D2DA";
+function gross(g,gr){ return g===gs ? Math.max(gr, MINPX/SKS) : gr; }   // Schrift mindestens 14 px auf dem Bildschirm
+function linie(g,pts,farbe,b){ g.strokeStyle=farbe||TINTE; g.lineWidth=b||2.2; g.beginPath(); g.moveTo(pts[0][0],pts[0][1]);
+  for(var i=1;i<pts.length;i++) g.lineTo(pts[i][0],pts[i][1]); g.stroke(); }
+function punkt(g,x,y){ g.fillStyle=TINTE; g.beginPath(); g.arc(x,y,4.5,0,2*Math.PI); g.fill(); }
+function text(g,t,x,y,gr,farbe,ausr,fett){ g.fillStyle=farbe||TINTE;
+  g.font=(fett===false?"":"bold ")+gross(g,gr)+"px 'Noto Sans',system-ui,sans-serif";
+  g.textAlign=ausr||"left"; g.textBaseline="middle"; g.fillText(t,x,y); }
+function kursiv(g,t,x,y,gr,farbe){ g.fillStyle=farbe||TINTE; g.font="italic bold "+gross(g,gr)+"px Cambria,Caladea,Georgia,serif";
+  g.textAlign="left"; g.textBaseline="middle"; g.fillText(t,x,y); return g.measureText(t).width; }
+function kontakt(g,x,y0,y1,zu){                    // Schließer senkrecht von y0 bis y1
+  var m1=y0+(y1-y0)*0.35, m2=y0+(y1-y0)*0.70;
+  linie(g,[[x,y0],[x,m1]]); linie(g,[[x,m2],[x,y1]]);
+  if(zu) linie(g,[[x,m1],[x,m2]],KUPFER,4.5); else linie(g,[[x,m2],[x-15,m1+2]],TINTE,2.4);
+}
+function zeichneSchaltung(){
+  var g=gs; g.clearRect(0,0,SW,SH);
+  var q1=z.ein, q2=z.ein && !z.stern, q3=z.ein && z.stern;
+  text(g,"3/N/PE ~ 50 Hz 400 V",16,18,18);
+  linie(g,[[10,40],[470,40]]);
+  var X1=130, X2=225, X3=320;
+  punkt(g,X1,40);
+  // F1 Sicherung
+  linie(g,[[X1,40],[X1,62]]); g.strokeStyle=TINTE; g.lineWidth=2.2; g.strokeRect(X1-9,62,18,40); linie(g,[[X1,62],[X1,102]]);
+  text(g,"F1",X1-56,82,20);
+  // Strommesser in der Zuleitung
+  linie(g,[[X1,102],[X1,122]]);
+  g.fillStyle="#fff"; g.beginPath(); g.arc(X1,140,18,0,2*Math.PI); g.fill(); g.stroke();
+  text(g,"A",X1,141,19,TINTE,"center"); kursiv(g,"I",X1+26,140,24,KUPFER);
+  linie(g,[[X1,158],[X1,184]]); punkt(g,X1,184);
+  linie(g,[[X1,184],[X2,184],[X2,206]]);
+  // Q1, Q2 (Dreieck), Q3 (Stern) wie Fachkunde S. 497, Bild 1 a)
+  kontakt(g,X1,184,262,q1); text(g,"Q1",X1-56,224,20);
+  kontakt(g,X2,206,262,q2); text(g,"Q2",X2-52,224,20);
+  linie(g,[[X3-22,196],[X3+22,196]]); linie(g,[[X3,196],[X3,206]]); punkt(g,X3,196);
+  kontakt(g,X3,206,262,q3); text(g,"Q3",X3+14,224,20);
+  text(g,"Dreieck",X2+10,282,16,q2?KUPFER:GRAU,"left");
+  text(g,"Stern",X3+10,282,16,q3?KUPFER:GRAU,"left");
+  linie(g,[[X2,262],[X2,304]]); linie(g,[[X3,262],[X3,304],[X2,304]]); punkt(g,X2,304);
+  linie(g,[[X2,304],[X2,446],[X1,446],[X1,428]]);
+  // F2 Überlastrelais
+  linie(g,[[X1,262],[X1,312]]);
+  g.strokeStyle=TINTE; g.lineWidth=2.2; g.strokeRect(X1-16,312,32,30);
+  linie(g,[[X1-6,322],[X1+6,322],[X1+6,332],[X1-6,332]],TINTE,2);
+  text(g,"F2",X1-60,327,20);
+  linie(g,[[X1,342],[X1,356]]);
+  // M1
+  g.fillStyle="#fff"; g.beginPath(); g.arc(X1,392,36,0,2*Math.PI); g.fill(); g.strokeStyle=TINTE; g.lineWidth=2.4; g.stroke();
+  text(g,"M",X1,380,24,TINTE,"center"); text(g,"3~",X1,406,18,TINTE,"center");
+  text(g,"M1",X1-90,392,20);
+  // Welle und Lüfter
+  linie(g,[[X1+36,392],[X1+238,392]],TINTE,3);
+  var xl=X1+262, dreh=z.w*0.02;
+  g.save(); g.translate(xl,392); g.rotate(dreh);
+  g.fillStyle="#DCE5EC"; g.strokeStyle=TINTE; g.lineWidth=1.8;
+  for(var b=0;b<4;b++){ g.rotate(Math.PI/2); g.beginPath(); g.ellipse(0,-22,9,22,0,0,2*Math.PI); g.fill(); g.stroke(); }
+  g.restore();
+  text(g,"Lüfter",xl,446,18,GRAU,"center");
+  text(g,"Wicklung:",X3+28,116,16,GRAU,"left",false);
+  text(g,z.ein?(z.stern?"Stern":"Dreieck"):"aus",X3+28,144,21,z.ein?KUPFER:GRAU,"left");
+}
+function zeichneAufzeichnung(){
+  var g=ga; g.clearRect(0,0,AW,AH);
+  var schmal=AW<460, fs=schmal?14:15;
+  var X0=schmal?44:56, X1=AW-14, Y0=AH-(schmal?46:50), Y1=36, TM=10, IM=120;
+  function px(t){ return X0+t/TM*(X1-X0); } function py(i){ return Y0-i/IM*(Y0-Y1); }
+  g.strokeStyle=LINIE; g.lineWidth=1;
+  for(var t=0;t<=TM;t++){ g.beginPath(); g.moveTo(px(t),Y0); g.lineTo(px(t),Y1); g.stroke(); }
+  for(var i=0;i<=IM;i+=10){ g.beginPath(); g.moveTo(X0,py(i)); g.lineTo(X1,py(i)); g.stroke(); }
+  g.strokeStyle=TINTE; g.lineWidth=2; g.beginPath(); g.moveTo(X0,Y1-10); g.lineTo(X0,Y0); g.lineTo(X1+4,Y0); g.stroke();
+  for(var tt=0;tt<=TM;tt+=(schmal?2:1)) text(g,String(tt),px(tt),Y0+14,fs,TINTE,"center",false);
+  for(var ii=0;ii<=IM;ii+=20) text(g,String(ii),X0-6,py(ii),fs,TINTE,"right",false);
+  var w=kursiv(g,"t",X1-48,Y0+34,18); text(g," in s",X1-48+w,Y0+34,fs,TINTE,"left",false);
+  w=kursiv(g,"I",X0-16,14,18); text(g," in A",X0-16+w,14,fs,TINTE,"left",false);
+  if(z.kurve.length>1){
+    g.strokeStyle=KUPFER; g.lineWidth=2.8; g.beginPath();
+    for(var k=0;k<z.kurve.length;k++){
+      var p=z.kurve[k], x=px(p[0]), y=py(p[1]);
+      if(k===0){ g.moveTo(x,Y0); g.lineTo(x,y); } else g.lineTo(x,y);
+    }
+    g.stroke();
+  }
+}
+window.addEventListener("resize",function(){ groessen(); auffrischen(); });
+groessen();
+function auffrischen(){
+  $("mI").textContent=zahl(stromJetzt(),1)+" A";
+  $("mH").textContent=zahl(z.imax===null?0:z.imax,1)+" A";
+  $("mN").textContent=Math.round(z.w*60/(2*Math.PI))+" 1/min";
+  $("mS").textContent=z.ein?(z.stern?"Stern":"Dreieck"):"aus";
+  $("bD").classList.toggle("an",z.verfahren==="D"); $("bD").setAttribute("aria-pressed",z.verfahren==="D"?"true":"false");
+  $("bYD").classList.toggle("an",z.verfahren==="YD"); $("bYD").setAttribute("aria-pressed",z.verfahren==="YD"?"true":"false");
+  var steht = z.w===0 && !z.ein;
+  $("bD").disabled=!steht; $("bYD").disabled=!steht;
+  $("bEin").disabled=!(steht && z.verfahren); $("bAus").disabled=!z.ein;
+  $("bEin").textContent = !z.verfahren ? "Erst Verfahren wählen" : (z.ein ? "Eingeschaltet" : (z.w>0 ? "Lüfter wird gebremst" : "Einschalten"));
+  $("bEin").classList.toggle("an",z.ein);
+  zeichneSchaltung(); zeichneAufzeichnung();
+}
+// ---------------- Ablauf in Echtzeit ----------------
+var ruhig = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+var letzte=null, laeuft=false;
+function rechne(sek){ var nschritt=Math.round(sek/DT); for(var k=0;k<nschritt;k++) schritt(); }
+function bild(ts){
+  if(letzte===null) letzte=ts;
+  var dt=Math.min(0.1,(ts-letzte)/1000); letzte=ts;
+  rechne(dt);
+  auffrischen();
+  if(z.ein || z.w>0){ requestAnimationFrame(bild); } else { laeuft=false; letzte=null; }
+}
+function starte(){
+  if(ruhig){                                             // ohne Bewegung: sofort bis zum Ende rechnen
+    if(z.ein){ rechne(10.0); } else { while(z.w>0) schritt(); }
+    auffrischen(); return;
+  }
+  if(!laeuft){ laeuft=true; letzte=null; requestAnimationFrame(bild); }
+}
+$("bD").onclick=function(){ if(z.w===0 && !z.ein){ z.verfahren="D"; auffrischen(); } };
+$("bYD").onclick=function(){ if(z.w===0 && !z.ein){ z.verfahren="YD"; auffrischen(); } };
+$("bEin").onclick=function(){ einschalten(); auffrischen(); };
+$("bAus").onclick=function(){ ausschalten(); auffrischen(); };
+$("bReset").onclick=function(){ z={verfahren:START.verfahren, ein:false, t:0, w:0, imax:null, kurve:[], stern:false}; auffrischen(); };
+
+// Prüfhilfe: Verfahren ohne Wartezeit durchrechnen und die Anzeigen zurückgeben
+window.__stelle=function(verfahren,sek){
+  z={verfahren:verfahren, ein:false, t:0, w:0, imax:null, kurve:[], stern:false};
+  einschalten(true); rechne(sek===undefined?10:sek); auffrischen();
+  return ["mI","mH","mN","mS"].map(function(id){return $(id).textContent;}).join(" | ");
+};
+if(/[?&]pruefen\b/.test(location.search)){
+  var b={};
+  b["direkt, 10 s"]=window.__stelle("D",10);
+  b["direkt, 0,2 s"]=window.__stelle("D",0.2);
+  b["Stern-Dreieck, 4,99 s"]=window.__stelle("YD",4.99);
+  b["Stern-Dreieck, 5,002 s"]=window.__stelle("YD",5.002);
+  b["Stern-Dreieck, 10 s"]=window.__stelle("YD",10);
+  z={verfahren:START.verfahren, ein:false, t:0, w:0, imax:null, kurve:[], stern:false};
+  $("pruefbericht").textContent=JSON.stringify(b);
+}
+auffrischen();
+})();
+</script>
+</body></html>
