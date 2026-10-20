@@ -17,7 +17,8 @@
        bei 20 ms je div 3 div; die Nulldurchgänge liegen dann auf Rasterlinien. Die gestrichelte Linie zeigt den
        Augenblick des Standbilds (Zeit α durch 360° mal 60 ms).
      Anzeige mit zwei Nachkommastellen, kein „−0,00“. Prüfmodus ?pruefen: Werte und Nulldurchgänge als JSON.
-     Startstellung neutral: α = 0°, Zeitbasis 5 ms je div (keine Aufgabeneinstellung). -->
+     Startstellung neutral: α = 0°, Zeitbasis 5 ms je div (keine Aufgabeneinstellung).
+     20.10.2026 nach der Prüfung: Drehzahl und Frequenz sichtbar, Index in der Kanallegende tiefgestellt. -->
 <html lang="de"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Messplatz Drehstromgenerator (U26)</title>
@@ -60,6 +61,7 @@
  .einstellung b{color:#FFE66B}
  .kanal{display:inline-flex;align-items:center;gap:6px}
  .strich{display:inline-block;width:28px;height:6px;border-radius:2px;border:1.5px solid #fff}
+ sub{font-size:.72em;line-height:0;vertical-align:-0.3em}
  .bruch{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;font-size:.78em;line-height:1.05}
  .bruch>span:first-child{border-bottom:1.3px solid currentColor;padding:0 2px}
  .bruch>span:last-child{padding:0 2px}
@@ -79,9 +81,10 @@
   <div>
    <canvas id="gen" width="480" height="450" data-quelle="Anordnung nach Europa Fachkunde S. 156, Bild 1 (Ständer mit drei um 120° versetzten Strängen U, V, W und Polrad)"
     aria-label="Querschnitt eines Generators: Ständer mit drei Spulen, oben Strang U, rechts unten Strang V, links unten Strang W, in der Mitte das Polrad mit Nord- und Südpol."></canvas>
-   <div class="legende">Blick in Richtung der Drehachse. Das Polrad dreht sich gleichmäßig im Uhrzeigersinn; das Bild
-    hält den Augenblick beim Drehwinkel <span class="fz">α</span> fest. <span class="fz">α</span> zählt ab der Achse
-    von Strang U.</div>
+   <div class="legende"><b>Modellgenerator mit einem Polpaar: 1000 Umdrehungen je Minute, Frequenz
+    <span class="fz">f</span> = 16,7 Hz.</b> Blick in Richtung der Drehachse. Das Polrad dreht sich gleichmäßig im
+    Uhrzeigersinn; das Bild hält den Augenblick beim Drehwinkel <span class="fz">α</span> fest.
+    <span class="fz">α</span> zählt ab der Achse von Strang U.</div>
   </div>
   <div>
    <div class="lcd" id="aA" aria-live="polite"><small>Drehwinkel α</small>0°</div>
@@ -111,9 +114,9 @@
   <div class="schirm">
    <canvas id="osz" width="600" height="480" aria-label="Bildschirm des Oszilloskops mit 10 mal 8 Kästchen und den Kurven der drei Strangspannungen"></canvas>
    <div class="einstellung" aria-live="polite">
-    <span class="kanal"><span class="strich" style="background:#1A2530"></span>Kanal 1: <span class="fz">u</span><sub>1N</sub></span>
-    <span class="kanal"><span class="strich" style="background:#C2185B"></span>Kanal 2: <span class="fz">u</span><sub>2N</sub></span>
-    <span class="kanal"><span class="strich" style="background:#1F78C1"></span>Kanal 3: <span class="fz">u</span><sub>3N</sub></span>
+    <span class="kanal"><span class="strich" style="background:#1A2530"></span><span>Kanal 1: <span class="fz">u</span><sub>1N</sub></span></span>
+    <span class="kanal"><span class="strich" style="background:#C2185B"></span><span>Kanal 2: <span class="fz">u</span><sub>2N</sub></span></span>
+    <span class="kanal"><span class="strich" style="background:#1F78C1"></span><span>Kanal 3: <span class="fz">u</span><sub>3N</sub></span></span>
     <span>Amplitude: <b>5 <span class="bruch"><span>V</span><span>div</span></span></b></span>
     <span>Zeitbasis: <b id="aZ"></b></span>
    </div>
