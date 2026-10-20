@@ -18,7 +18,9 @@
        Neutralleiterstrom = Betrag der Zeigersumme der drei Leiterströme (gerechnet, nicht vorgegeben).
        Spannungsmesser liegen am Verbraucher hinter dem Schalter: ausgeschaltet zeigen sie 0 V.
      Anzeigen: Ströme mit zwei, Spannungen mit einer Nachkommastelle, kein „−0,00“. Prüfmodus ?pruefen: Werte als JSON.
-     Startstellung neutral: alle Verbraucher aus (alle Anzeigen 0), je 100 Ω, Neutralleiter angeschlossen. -->
+     Startstellung neutral: alle Verbraucher aus (alle Anzeigen 0), je 100 Ω, Neutralleiter angeschlossen.
+     20.10.2026 nach Prüfer U28: am Handy (unter 800 px) läuft oben eine kompakte Anzeigeleiste mit allen sieben
+     Messwerten mit, damit die Werte beim Einstellen von Verbraucher 3 sichtbar bleiben. -->
 <html lang="de"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Messplatz Sternschaltung unsymmetrisch (U28)</title>
@@ -61,6 +63,16 @@
  #bN{width:100%;font-weight:700;font-size:17px}
  .hinweis{font-size:14px;color:var(--grau);margin-top:12px}
  #pruefbericht{display:none}
+ .leiste{display:none}
+ @media(max-width:799px){
+   .leiste{display:block;position:sticky;top:0;z-index:5;background:#20313a;color:#9BF0B4;font-variant-numeric:tabular-nums;
+     font-size:14px;font-weight:700;padding:4px 6px;margin:0 -6px 8px;border-radius:0 0 4px 4px;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+   .leiste .r4{display:grid;grid-template-columns:repeat(4,1fr);gap:0 4px}
+   .leiste .r3{display:grid;grid-template-columns:repeat(3,1fr);gap:0 4px;margin-top:1px}
+   .leiste span{white-space:nowrap}
+   .leiste i{font-family:Cambria,Caladea,Georgia,serif;color:#cfe;font-weight:400}
+   .leiste sub{color:#cfe;font-weight:400;font-size:10px}
+ }
  @media(max-width:520px){.messwerte{grid-template-columns:repeat(2,1fr)} .messwerte.u{grid-template-columns:repeat(3,1fr)}
    .kachel .zahl{font-size:20px} .kachel .name{font-size:14px} button{min-width:50px;padding:6px 8px;font-size:15px}
    .rwert{font-size:21px;min-width:100px}}
@@ -73,6 +85,12 @@
   einstellen. Den Neutralleiter anschließen oder unterbrechen. Dann die Strommesser und die Spannungsmesser
   ablesen.</div>
 
+ <div class="leiste" id="leiste" aria-hidden="true">
+  <div class="r4"><span><i>I</i><sub>1</sub> <b id="lI1"></b></span><span><i>I</i><sub>2</sub> <b id="lI2"></b></span>
+   <span><i>I</i><sub>3</sub> <b id="lI3"></b></span><span><i>I</i><sub>N</sub> <b id="lIN"></b></span></div>
+  <div class="r3"><span><i>U</i><sub>Str1</sub> <b id="lU1"></b></span><span><i>U</i><sub>Str2</sub> <b id="lU2"></b></span>
+   <span><i>U</i><sub>Str3</sub> <b id="lU3"></b></span></div>
+ </div>
  <div class="buehne">
   <div>
    <canvas id="sch" width="480" height="410" data-quelle="Messschaltung nach Europa Fachkunde S. 159, Bild 1 (Strommesser in L1, L2, L3 und N); Anordnung der Verbraucher nach Europa-Rechenbuch S. 126, Bild 3"
@@ -247,6 +265,9 @@ function auffrischen(){
     $("mU"+(k+1)).textContent=zahl(e.U[k],1,"V");
   }
   $("mIN").textContent=zahl(e.IN,2,"A");
+  // mitlaufende Anzeigeleiste am Handy: dieselben Werte wie die Messgeräte, beim Einstellen immer sichtbar
+  for(var j=0;j<3;j++){ $("lI"+(j+1)).textContent=$("mI"+(j+1)).textContent; $("lU"+(j+1)).textContent=$("mU"+(j+1)).textContent; }
+  $("lIN").textContent=$("mIN").textContent;
   $("bN").textContent=z.n?"angeschlossen: unterbrechen":"unterbrochen: anschließen";
   $("bN").classList.toggle("an",!z.n); $("bN").setAttribute("aria-pressed",z.n?"true":"false");
   zeichneSchaltung();
