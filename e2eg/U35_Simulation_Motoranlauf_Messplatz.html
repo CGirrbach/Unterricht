@@ -9,10 +9,10 @@
        ist ein Vielfaches dieses Stroms (Vergleich mit den Grenzen 60 A und 30 A auf dem Arbeitsblatt).
      Vorlagen: Schaltung nach Europa Fachkunde S. 497, Bild 1 a) (Stern-Dreieck-Anlassverfahren: F1, Q1 Netzschütz,
        Q2 Dreieckschütz, Q3 Sternschütz mit Sternpunkt, F2 Überlastrelais, M1), Strommesser in der Zuleitung ergänzt.
-       Motor nach Europa-Rechenbuch S. 274, Tabelle 1, n_s = 1500 1/min, Baugröße 132 M: P_N = 7,5 kW,
-       n = 1445 1/min, I_N = 15 A, I_A/I_N = 7,5, M_A/M_N = 2,6, M_K/M_N = 3,2; Bemessungsspannung 400 V in Dreieck.
+       Motor nach Europa-Rechenbuch S. 274, Tabelle 1, n_s = 1500 min⁻¹, Baugröße 132 M: P_N = 7,5 kW,
+       n = 1445 min⁻¹, I_N = 15 A, I_A/I_N = 7,5, M_A/M_N = 2,6, M_K/M_N = 3,2; Bemessungsspannung 400 V in Dreieck.
        Form der Drehmomentkennlinie wie Rechenbuch S. 248, Bild 3 (Anzugsmoment, Sattel nach oben, Kippmoment bei etwa
-       1250 1/min, steiler Abfall bis zur Drehfelddrehzahl), auf die Werte der Tabelle gebracht.
+       1250 min⁻¹, steiler Abfall bis zur Drehfelddrehzahl), auf die Werte der Tabelle gebracht.
      Rechenmodell: Moment M(n) = M_N · m(n), m stückweise kubisch (monoton) durch die Stützstellen unten, m(0) = 2,6,
        Höchstwert 3,2, m(1445) = 1, m(1500) = 0. Strom I(n) = I_N · √(a + b · m(n) · s) mit Schlupf s = (1500 − n)/1500
        (Läuferstrom wächst mit √(M · s), dazu der Magnetisierungsstrom); a und b so, dass I(0) = 7,5 · I_N und
@@ -21,14 +21,14 @@
        M_L = M_N · (n / 1445)²; Trägheitsmoment 0,8 kg · m². Zeitrelais: Umschalten auf Dreieck nach 5 s.
        Bewegungsgleichung J · dω/dt = M − M_L, Schritt 0,5 ms. Nach dem Ausschalten bremst eine Bremse (60 Nm).
        Nachgerechnet in Python (u35_gemeinsam.py, 20.10.2026): direkt Höchstwert 112,5 A, nach dem Hochlauf 15,0 A und
-       1445 1/min; Stern-Dreieck Höchstwert 37,5 A, im Stern 1366 1/min und 11,6 A, nach dem Umschalten 35,0 A,
-       danach 15,0 A und 1445 1/min.
+       1445 min⁻¹; Stern-Dreieck Höchstwert 37,5 A, im Stern 1366 min⁻¹ und 11,6 A, nach dem Umschalten 35,0 A,
+       danach 15,0 A und 1445 min⁻¹.
      Anzeigen: Strom mit einer Nachkommastelle (Effektivwert), Drehzahl ganzzahlig. Prüfmodus ?pruefen: Werte als JSON.
      Startstellung neutral: kein Anlassverfahren gewählt, Schalter aus, alle Anzeigen 0 bzw. leer. -->
 <html lang="de"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Messplatz Motoranlauf (U35)</title>
-<script type="application/json" id="sim-meta">{"startwerte":{"schalter":"aus","anlassverfahren":"keins"},"loesungswerte":{"direkt in Dreieck":{"Hoechstwert":"112,5 A","nach dem Hochlauf":"15,0 A","Drehzahl":"1445 1/min"},"Stern-Dreieck":{"Hoechstwert":"37,5 A","nach dem Hochlauf":"15,0 A","Drehzahl":"1445 1/min"}},"quelle":"Europa Fachkunde S. 497, Bild 1 a); Europa-Rechenbuch S. 274, Tabelle 1 (132 M, 7,5 kW); Rechenbuch S. 248, Bild 3 (Form der Kennlinie); Tabellenbuch S. 532, Formel 12"}</script>
+<script type="application/json" id="sim-meta">{"startwerte":{"schalter":"aus","anlassverfahren":"keins"},"loesungswerte":{"direkt in Dreieck":{"Hoechstwert":"112,5 A","nach dem Hochlauf":"15,0 A","Drehzahl":"1445 min⁻¹"},"Stern-Dreieck":{"Hoechstwert":"37,5 A","nach dem Hochlauf":"15,0 A","Drehzahl":"1445 min⁻¹"}},"quelle":"Europa Fachkunde S. 497, Bild 1 a); Europa-Rechenbuch S. 274, Tabelle 1 (132 M, 7,5 kW); Rechenbuch S. 248, Bild 3 (Form der Kennlinie); Tabellenbuch S. 532, Formel 12"}</script>
 <style>
  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
  :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62}
@@ -67,7 +67,7 @@
 <div class="wrap">
  <div class="kopf"><div class="reihe">E2EG · LF 5 · U35</div><h1>Messplatz Motoranlauf</h1></div>
  <div class="anleitung"><b>So messen Sie:</b> Ein Käfigläufermotor mit 7,5 kW (Bemessungsspannung 400 V in
-  Dreieckschaltung, 1445 1/min) treibt einen Lüfter an. Wählen Sie das Anlassverfahren und schalten Sie ein. Der
+  Dreieckschaltung, 1445 min⁻¹) treibt einen Lüfter an. Wählen Sie das Anlassverfahren und schalten Sie ein. Der
   Strommesser in der Zuleitung (Außenleiter L1) zeigt den Strom; der Höchstwert seit dem Einschalten bleibt stehen.
   Die Aufzeichnung zeigt den Strom der ersten 10 Sekunden.</div>
 
@@ -266,7 +266,7 @@ groessen();
 function auffrischen(){
   $("mI").textContent=zahl(stromJetzt(),1)+" A";
   $("mH").textContent=zahl(z.imax===null?0:z.imax,1)+" A";
-  $("mN").textContent=Math.round(z.w*60/(2*Math.PI))+" 1/min";
+  $("mN").textContent=Math.round(z.w*60/(2*Math.PI))+" min⁻¹";
   $("mS").textContent=z.ein?(z.stern?"Stern":"Dreieck"):"aus";
   $("bD").classList.toggle("an",z.verfahren==="D"); $("bD").setAttribute("aria-pressed",z.verfahren==="D"?"true":"false");
   $("bYD").classList.toggle("an",z.verfahren==="YD"); $("bYD").setAttribute("aria-pressed",z.verfahren==="YD"?"true":"false");
