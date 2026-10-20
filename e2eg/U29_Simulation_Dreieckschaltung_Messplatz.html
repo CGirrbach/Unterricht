@@ -1,0 +1,247 @@
+<!doctype html>
+<!-- E2EG U29 · Messplatz Dreieckschaltung (Neubau 20.10.2026, Aufgabe IN der Stunde nach dem Muster E1EG B07 und
+     E2EG U26, U27). Ersetzt für die neuen Blätter U29_Simulation_Stern_Dreieck.html: Die alte Seite zeigte beim Öffnen
+     schon alle Werte der Dreieckschaltung, nannte im Fußtext die Formeln (I = √3 · I_Str), deutete die Messung in
+     einem fertigen Satz („Das Verhältnis ist 3 …“), zeigte die Wirkleistung (Thema von U30) und hatte keine
+     Messgeräte. Die alte Adresse bleibt für die alten Blätter unverändert.
+     Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht und rechnet nichts vor):
+       (1) In der Dreieckschaltung liegt jeder Strang an der Leiterspannung: Der Spannungsmesser am Strang zeigt
+           dasselbe wie der Spannungsmesser zwischen zwei Außenleitern.
+       (2) Bei drei gleichen Strängen sind die drei Leiterströme gleich groß, und ein Leiterstrom ist 1,73-mal so groß
+           wie der Strangstrom, bei jedem Widerstandswert.
+     Rechenmodell (Europa Fachkunde S. 160, Versuch 6 und Bild 1; Tabellenbuch S. 48): ideales Dreileiternetz,
+       Leiterspannung U = 400 V, 50 Hz. Zeiger der Leiterspannungen wie in U26 (Lage bei α = 0°, Ausgangsrichtung
+       waagerecht): U12 unter 30°, U23 unter −90°, U31 unter 150°. Heizwiderstände sind Wirkwiderstände, jeder
+       Strangstrom ist in Phase mit seiner Strangspannung: I12 = U12 / R usw. Die Leiterströme werden als geometrische
+       Differenz gerechnet (Knotenregel an den Ecken: I1 = I12 − I31, I2 = I23 − I12, I3 = I31 − I23), nicht mit
+       einem vorgegebenen Faktor.
+     Messgeräte wie Fachkunde S. 160, Bild 1 (Reihenfolge der Leiter L1, L3, L2 wie dort): Strommesser in L1, L2, L3,
+       Strommesser und Spannungsmesser am Strang V1 V2 (zwischen L2 und L3), Spannungsmesser zwischen L2 und L3.
+     Anzeigen: Spannungen mit einer, Ströme mit zwei Nachkommastellen, kein „−0,00“. Prüfmodus ?pruefen: Werte als JSON.
+     Startstellung neutral: Schalter aus (alle Ströme 0), R_Str = 60 Ω (keine Aufgabeneinstellung). -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Dreieckschaltung (U29)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"schalter":"aus","r_str_ohm":60},"loesungswerte":{"50 Ω":{"U23":"400,0 V","UStr":"400,0 V","I1":"13,86 A","I2":"13,86 A","I3":"13,86 A","IStr":"8,00 A"},"125 Ω":{"U23":"400,0 V","UStr":"400,0 V","I1":"5,54 A","IStr":"3,20 A"},"200 Ω":{"U23":"400,0 V","UStr":"400,0 V","I1":"3,46 A","IStr":"2,00 A"}},"quelle":"Europa Fachkunde S. 160, Versuch 6 und Bild 1; Tabellenbuch Elektrotechnik S. 48"}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;
+       --k1:#1A2530;--k2:#C2185B;--k3:#1F78C1}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:1000px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .fz{font-family:Cambria,Caladea,'Noto Serif',Georgia,serif;font-style:italic}
+ .buehne{display:grid;grid-template-columns:1fr;gap:14px;align-items:start}
+ @media(min-width:760px){.buehne{grid-template-columns:1.25fr 1fr}}
+ canvas{width:100%;height:auto;display:block;touch-action:manipulation}
+ #sch{border:1px solid var(--linie);background:#fff}
+ .legende{font-size:13.5px;color:var(--grau);margin-top:4px}
+ .lcd{background:#20313a;color:#9BF0B4;font-variant-numeric:tabular-nums;font-size:28px;font-weight:700;padding:6px 12px;border-radius:4px;text-align:right}
+ .lcd small{font-size:15px;color:#cfe;font-weight:400;float:left;margin-top:9px}
+ input[type=range]{width:100%;height:44px;accent-color:var(--kupfer);margin:8px 0 2px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+ button{font:inherit;font-size:16px;min-height:48px;min-width:58px;padding:6px 12px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+ button.an{background:var(--kupfer);color:#fff}
+ button.zurueck{border-color:var(--ink);color:var(--ink)}
+ .schritte button{flex:1 1 60px;font-weight:700}
+ #bQ{width:100%;font-weight:700;font-size:18px}
+ .titel{font-size:15px;font-weight:700;margin:12px 0 5px}
+ .messwerte{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+ .kachel{border:1.4px solid var(--ink);background:var(--hell);padding:6px 8px;text-align:center}
+ .kachel .name{display:block;font-size:14px;font-weight:700;color:var(--grau)}
+ .kachel .ort{display:block;font-size:12.5px;color:var(--grau)}
+ .kachel .zahl{display:block;font-variant-numeric:tabular-nums;font-size:24px;font-weight:700;white-space:nowrap}
+ .hinweis{font-size:14px;color:var(--grau);margin-top:12px}
+ #pruefbericht{display:none}
+ @media(max-width:420px){.lcd{font-size:24px} .kachel .zahl{font-size:20px} .messwerte{grid-template-columns:repeat(2,1fr)}
+   button{min-width:52px;padding:6px 8px;font-size:15px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E2EG · LF 5 · U29</div><h1>Messplatz Dreieckschaltung</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Drei gleiche Heizwiderstände sind in Dreieck an das Drehstromnetz
+  angeschlossen. Einen Neutralleiter gibt es nicht. Den Widerstandswert <span class="fz">R</span><sub>Str</sub> eines
+  Strangs einstellen (die beiden anderen Stränge folgen), dann den Schalter einschalten und die Messgeräte ablesen.</div>
+
+ <div class="buehne">
+  <div>
+   <canvas id="sch" width="560" height="430" data-quelle="Messschaltung nach Europa Fachkunde S. 160, Bild 1 (Dreieckschaltung mit Strommessern in L1, L3, L2; Leiter in dieser Reihenfolge wie dort), ergänzt um Strommesser und Spannungsmesser am Strang V1 V2"
+    aria-label="Schaltplan: Drehstromnetz mit den Außenleitern L1, L3 und L2, Spannungsmesser zwischen L3 und L2, dreipoliger Schalter, Strommesser in L1, L3 und L2, drei Heizwiderstände in Dreieckschaltung, im Strang V1 V2 ein Strommesser und ein Spannungsmesser."></canvas>
+   <div class="legende">Das Ende jedes Strangs ist mit dem Anfang des nächsten verbunden: U2 mit V1, V2 mit W1, W2 mit U1.
+    Strommesser und Spannungsmesser zeigen Effektivwerte. Die Leitungen gelten als widerstandsfrei.</div>
+  </div>
+  <div>
+   <div class="titel">Schalter</div>
+   <button type="button" id="bQ" aria-pressed="false">Schalter ist AUS: einschalten</button>
+   <div class="titel">Widerstandswert eines Strangs</div>
+   <div class="lcd" id="aR" aria-live="polite"><small>R Str</small>60 Ω</div>
+   <input type="range" id="rr" min="10" max="250" step="1" value="60" aria-label="Widerstandswert eines Strangs in Ohm">
+   <div class="knoepfe schritte">
+    <button type="button" id="r10m" aria-label="10 Ohm weniger">◀ 10</button>
+    <button type="button" id="r1m" aria-label="1 Ohm weniger">◀ 1</button>
+    <button type="button" id="r1p" aria-label="1 Ohm mehr">1 ▶</button>
+    <button type="button" id="r10p" aria-label="10 Ohm mehr">10 ▶</button>
+   </div>
+   <div class="titel">Neu beginnen</div>
+   <div class="knoepfe"><button class="zurueck" id="bReset" type="button">Zurücksetzen</button></div>
+  </div>
+ </div>
+
+ <div class="messwerte" aria-live="polite">
+  <div class="kachel"><span class="name"><span class="fz">U</span><sub>23</sub></span><span class="ort">zwischen L2 und L3</span><span class="zahl" id="mU23"></span></div>
+  <div class="kachel"><span class="name"><span class="fz">U</span><sub>Str</sub></span><span class="ort">am Strang V1 V2</span><span class="zahl" id="mUS"></span></div>
+  <div class="kachel"><span class="name"><span class="fz">I</span><sub>Str</sub></span><span class="ort">im Strang V1 V2</span><span class="zahl" id="mIS"></span></div>
+  <div class="kachel"><span class="name"><span class="fz">I</span><sub>1</sub></span><span class="ort">in L1</span><span class="zahl" id="mI1"></span></div>
+  <div class="kachel"><span class="name"><span class="fz">I</span><sub>2</sub></span><span class="ort">in L2</span><span class="zahl" id="mI2"></span></div>
+  <div class="kachel"><span class="name"><span class="fz">I</span><sub>3</sub></span><span class="ort">in L3</span><span class="zahl" id="mI3"></span></div>
+ </div>
+ <div class="hinweis">Die Leiter sind von oben nach unten L1, L3, L2 gezeichnet, wie im Bild der Fachkunde. Der
+  Spannungsmesser links liegt vor dem Schalter und zeigt die Netzspannung auch bei offenem Schalter.</div>
+ <pre id="pruefbericht"></pre>
+</div>
+
+<script>
+(function(){
+"use strict";
+var U=400;                              // Leiterspannung in V (ideales Dreileiternetz, 50 Hz)
+var START={ein:false,r:60};
+var FARBE={1:"#1A2530",2:"#C2185B",3:"#1F78C1"};
+var z={ein:START.ein,r:START.r};
+var $=function(id){return document.getElementById(id);};
+
+// ---------------- Rechenmodell ----------------
+function pol(betrag,grad){ var w=grad*Math.PI/180; return [betrag*Math.cos(w), betrag*Math.sin(w)]; }
+function minus(a,b){ return [a[0]-b[0], a[1]-b[1]]; }
+function betrag(a){ return Math.sqrt(a[0]*a[0]+a[1]*a[1]); }
+var LAGE={"12":30,"23":-90,"31":150};    // Lage der Leiterspannungen bei α = 0° (wie U26)
+function strang(k){ return z.ein ? pol(U/z.r, LAGE[k]) : [0,0]; }  // Wirkwiderstand: in Phase mit der Spannung
+function leiter(n){                      // Knotenregel an der Ecke: geometrische Differenz zweier Strangströme
+  if(n===1) return betrag(minus(strang("12"),strang("31")));
+  if(n===2) return betrag(minus(strang("23"),strang("12")));
+  return betrag(minus(strang("31"),strang("23")));
+}
+function zahl(x,st,einheit){
+  var s=(Math.round(x*Math.pow(10,st))/Math.pow(10,st)).toFixed(st);
+  if(/^-0[.,]?0*$/.test(s)) s=s.slice(1);
+  return s.replace("-","−").replace(".",",")+" "+einheit;
+}
+
+// ---------------- Schaltplan ----------------
+var cs=$("sch"), gs=cs.getContext("2d");
+var DPR=Math.max(1,Math.min(3,window.devicePixelRatio||1));
+var SBW=560, SBH=430;
+cs.width=SBW*DPR; cs.height=SBH*DPR; gs.scale(DPR,DPR);
+function linie(g,pts,farbe,b){ g.strokeStyle=farbe||"#1A2530"; g.lineWidth=b||2.2; g.beginPath(); g.moveTo(pts[0][0],pts[0][1]);
+  for(var i=1;i<pts.length;i++) g.lineTo(pts[i][0],pts[i][1]); g.stroke(); }
+function punkt(g,x,y){ g.fillStyle="#1A2530"; g.beginPath(); g.arc(x,y,4.5,0,2*Math.PI); g.fill(); }
+function klemme(g,x,y){ g.fillStyle="#fff"; g.strokeStyle="#1A2530"; g.lineWidth=2; g.beginPath(); g.arc(x,y,4.5,0,2*Math.PI); g.fill(); g.stroke(); }
+function geraet(g,x,y,buchst){                                     // Messgerät: Kreis mit Buchstabe (DIN EN 60617)
+  g.fillStyle="#fff"; g.strokeStyle="#1A2530"; g.lineWidth=2.2;
+  g.beginPath(); g.arc(x,y,17,0,2*Math.PI); g.fill(); g.stroke();
+  g.fillStyle="#1A2530"; g.font="bold 19px 'Noto Sans',system-ui,sans-serif"; g.textAlign="center"; g.textBaseline="middle";
+  g.fillText(buchst,x,y+1);
+}
+function formelzeichen(g,txt,idx,x,y,gr,farbe){                    // kursives Formelzeichen, aufrechter Index
+  g.fillStyle=farbe||"#1A2530"; g.textBaseline="alphabetic"; g.textAlign="left";
+  g.font="italic bold "+gr+"px Cambria,Caladea,Georgia,serif";
+  var b=g.measureText(txt).width; g.fillText(txt,x,y);
+  g.font="bold "+Math.round(gr*0.68)+"px 'Noto Sans',system-ui,sans-serif";
+  g.fillText(idx,x+b+1,y+Math.round(gr*0.28));
+}
+function text(g,t,x,y,gr,farbe,ausr){ g.fillStyle=farbe||"#1A2530"; g.font="bold "+gr+"px 'Noto Sans',system-ui,sans-serif";
+  g.textAlign=ausr||"left"; g.textBaseline="middle"; g.fillText(t,x,y); }
+function widerstand(g,x1,y1,x2,y2){                                // Rechteck zwischen zwei Punkten (Länge 52, Breite 20)
+  var dx=x2-x1, dy=y2-y1, l=Math.sqrt(dx*dx+dy*dy), ux=dx/l, uy=dy/l, mx=(x1+x2)/2, my=(y1+y2)/2;
+  linie(g,[[x1,y1],[mx-26*ux,my-26*uy]]); linie(g,[[mx+26*ux,my+26*uy],[x2,y2]]);
+  g.save(); g.translate(mx,my); g.rotate(Math.atan2(dy,dx));
+  g.fillStyle="#fff"; g.strokeStyle="#1A2530"; g.lineWidth=2.2; g.fillRect(-26,-10,52,20); g.strokeRect(-26,-10,52,20);
+  g.restore();
+}
+// Leiter in der Reihenfolge der Fachkunde S. 160, Bild 1: L1 oben, L3 in der Mitte, L2 unten
+var Y1=60, Y3=232, Y2=392, XS=150, XA=232;
+var T=[420,Y1], LC=[314,Y3], RE=[526,Y3];                            // Ecken: oben (L1), links (L3), rechts (L2)
+var XTA=366, XTV1=392, XTV2=508, YV=302;                            // Strangmesser am Strang V1 V2 (unten)
+function zeichneSchaltung(){
+  var g=gs; g.clearRect(0,0,SBW,SBH);
+  text(g,"Drehstromnetz 400 V, 50 Hz",8,16,16,"#5A666F");
+  var lei=[["L1",Y1],["L3",Y3],["L2",Y2]];
+  for(var k=0;k<3;k++){ text(g,lei[k][0],6,lei[k][1],22); klemme(g,46,lei[k][1]); }
+  // Spannungsmesser zwischen L3 und L2 (vor dem Schalter)
+  var ym=(Y3+Y2)/2;
+  linie(g,[[84,Y3],[84,ym-17]]); linie(g,[[84,ym+17],[84,Y2]]); punkt(g,84,Y3); punkt(g,84,Y2);
+  geraet(g,84,ym,"V"); formelzeichen(g,"U","23",104,ym+8,22,"#A34E0E");
+  // Schalter Q1 in L1, L3, L2 (gemeinsam betätigt)
+  [Y1,Y3,Y2].forEach(function(y){
+    linie(g,[[51,y],[XS-14,y]]);
+    if(z.ein) linie(g,[[XS-14,y],[XS+14,y]],"#1A2530",2.8);
+    else linie(g,[[XS-14,y],[XS+11,y-16]],"#1A2530",2.8);
+    punkt(g,XS-14,y); punkt(g,XS+14,y);
+  });
+  g.setLineDash([5,4]);
+  linie(g,z.ein?[[XS,Y1],[XS,Y2]]:[[XS-1,Y1-9],[XS-1,Y2-9]],"#5A666F",1.6);
+  g.setLineDash([]);
+  text(g,"Q1",XS+8,Y1+44,18,"#5A666F"); text(g,z.ein?"ein":"aus",XS+8,Y1+68,18,z.ein?"#2F7D62":"#A34E0E");
+  // Strommesser in L1, L3, L2
+  [[Y1,1],[Y3,3],[Y2,2]].forEach(function(e){
+    linie(g,[[XS+14,e[0]],[XA-15,e[0]]]);
+    geraet(g,XA,e[0],"A"); formelzeichen(g,"I",String(e[1]),XA+22,e[0]-9,22,FARBE[e[1]]);
+  });
+  // Zuleitungen zu den Ecken: L1 zur oberen Ecke, L3 zur linken, L2 unten herum zur rechten
+  linie(g,[[XA+15,Y1],[T[0],T[1]]]);
+  linie(g,[[XA+15,Y3],[LC[0],LC[1]]]);
+  linie(g,[[XA+15,Y2],[RE[0],Y2],[RE[0],RE[1]]]);
+  // Stränge: links W1 W2 (L3 bis L1), rechts U1 U2 (L1 bis L2), unten V1 V2 (L2 bis L3)
+  widerstand(g,LC[0],LC[1],T[0],T[1]);
+  widerstand(g,T[0],T[1],RE[0],RE[1]);
+  // unten: Strommesser, dann Widerstand
+  linie(g,[[LC[0],Y3],[XTA-17,Y3]]); geraet(g,XTA,Y3,"A"); formelzeichen(g,"I","Str",XTA-26,Y3+46,22,"#A34E0E");
+  widerstand(g,XTA+17,Y3,RE[0],Y3);
+  // Spannungsmesser am Strang V1 V2
+  linie(g,[[XTV1,Y3],[XTV1,YV],[(XTV1+XTV2)/2-17,YV]]); linie(g,[[(XTV1+XTV2)/2+17,YV],[XTV2,YV],[XTV2,Y3]]);
+  punkt(g,XTV1,Y3); punkt(g,XTV2,Y3);
+  geraet(g,(XTV1+XTV2)/2,YV,"V"); formelzeichen(g,"U","Str",(XTV1+XTV2)/2+24,YV+30,22,"#A34E0E");
+  punkt(g,T[0],T[1]); punkt(g,LC[0],LC[1]); punkt(g,RE[0],RE[1]);
+  text(g,"U1",T[0]+12,T[1]-14,17); text(g,"W2",T[0]-48,T[1]-14,17);
+  text(g,"W1",LC[0]-22,LC[1]-20,17); text(g,"V2",LC[0]-30,LC[1]+20,17);
+  text(g,"U2",RE[0]+8,RE[1]-18,17); text(g,"V1",RE[0]+8,RE[1]+20,17);
+  formelzeichen(g,"R","Str",(LC[0]+T[0])/2-76,(LC[1]+T[1])/2+8,20,"#5A666F");
+}
+
+// ---------------- Bedienung ----------------
+function auffrischen(){
+  $("bQ").textContent=z.ein?"Schalter ist EIN: ausschalten":"Schalter ist AUS: einschalten";
+  $("bQ").classList.toggle("an",z.ein); $("bQ").setAttribute("aria-pressed",z.ein?"true":"false");
+  $("aR").innerHTML="<small><span class='fz'>R</span><sub>Str</sub></small>"+z.r+" Ω"; $("rr").value=z.r;
+  $("mU23").textContent=zahl(U,1,"V");
+  $("mUS").textContent=zahl(z.ein?betrag(pol(U,LAGE["23"])):0,1,"V");
+  $("mIS").textContent=zahl(betrag(strang("23")),2,"A");
+  $("mI1").textContent=zahl(leiter(1),2,"A");
+  $("mI2").textContent=zahl(leiter(2),2,"A");
+  $("mI3").textContent=zahl(leiter(3),2,"A");
+  zeichneSchaltung();
+}
+function setzeR(r){ z.r=Math.max(10,Math.min(250,Math.round(r))); auffrischen(); }
+$("bQ").onclick=function(){ z.ein=!z.ein; auffrischen(); };
+$("rr").addEventListener("input",function(){ setzeR(+this.value); });
+$("r10m").onclick=function(){ setzeR(z.r-10); }; $("r1m").onclick=function(){ setzeR(z.r-1); };
+$("r1p").onclick=function(){ setzeR(z.r+1); };  $("r10p").onclick=function(){ setzeR(z.r+10); };
+$("bReset").onclick=function(){ z={ein:START.ein,r:START.r}; auffrischen(); };
+window.__stelle=function(r,ein){ z.r=r; z.ein=!!ein; auffrischen();
+  return ["mU23","mUS","mIS","mI1","mI2","mI3"].map(function(id){return $(id).textContent;}).join(" | "); };
+
+// ---------------- Prüfmodus ----------------
+if(/[?&]pruefen\b/.test(location.search)){
+  var bericht={};
+  [50,125,200,60,10,250,100].forEach(function(r){ bericht[r+" Ω"]=window.__stelle(r,true); });
+  bericht["aus"]=window.__stelle(60,false);
+  z={ein:START.ein,r:START.r};
+  $("pruefbericht").textContent=JSON.stringify(bericht);
+}
+auffrischen();
+})();
+</script>
+</body></html>
