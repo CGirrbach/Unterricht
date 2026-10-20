@@ -1,0 +1,329 @@
+<!doctype html>
+<!-- E2EG U27 · Messplatz Sternschaltung (Neubau 20.10.2026, Aufgabe IN der Stunde nach dem Muster E1EG B07 und
+     E2EG U26). Ersetzt für die neuen Blätter U27_Simulation_Sternschaltung.html: Die alte Seite zeigte „I_N = 0 A“
+     schon beim Öffnen, deutete die Messung in einem fertigen Satz, nannte die Formeln im Fußtext und zeigte die
+     Wirkleistung (Thema von U30). Die alte Adresse bleibt für die alten Blätter unverändert.
+     Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht und rechnet nichts vor):
+       (1) Bei drei gleichen Heizwiderständen in Stern sind die drei Leiterströme gleich groß, und der Strommesser im
+           Neutralleiter zeigt 0 A, bei jedem Widerstandswert.
+       (2) Strangspannung geteilt durch Strangwiderstand (Strangstrom, Ohm'sches Gesetz) ist so groß wie der Strom im
+           Außenleiter (Leiterstrom).
+       (3) Die Augenblickswerte der drei Leiterströme ergeben zusammen in jedem Augenblick null.
+     Rechenmodell (Europa Fachkunde S. 158, Versuch 3 und Bild 1; Tabellenbuch S. 48): ideales Vierleiternetz,
+       Außenleiterspannung U = 400 V, 50 Hz; Strangspannung U / √3 = 230,94 V; Heizwiderstände sind Wirkwiderstände,
+       der Strom ist in Phase mit seiner Strangspannung. Zeiger I_k = U_Str / R_Str unter 0°, −120°, −240°;
+       Neutralleiterstrom = Betrag der Zeigersumme (gerechnet, nicht vorgegeben). Augenblickswerte
+       i_k = √2 · I_k · sin(α − 120° · (k − 1)), α = Winkel ab dem Nulldurchgang von u_1N wie in U26.
+     Anzeigen: Spannungen mit einer, Ströme mit zwei Nachkommastellen, kein „−0,00“. Prüfmodus ?pruefen: Werte als JSON.
+     Startstellung neutral: Schalter aus (alle Ströme 0), R_Str = 60 Ω, Cursor bei 0° (keine Aufgabeneinstellung). -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Sternschaltung (U27)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"schalter":"aus","r_str_ohm":60,"cursor_alpha_grad":0},"loesungswerte":{"100 Ω":{"U12":"400,0 V","U1N":"230,9 V","I1":"2,31 A","I2":"2,31 A","I3":"2,31 A","IN":"0,00 A"},"46 Ω":{"U12":"400,0 V","U1N":"230,9 V","I1":"5,02 A","I2":"5,02 A","I3":"5,02 A","IN":"0,00 A"},"46 Ω, Cursor 40°":["4,56 A","−6,99 A","2,43 A"]},"quelle":"Europa Fachkunde S. 158, Versuch 3, Bild 1 und Bild 2; Tabellenbuch Elektrotechnik S. 48"}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;
+       --k1:#1A2530;--k2:#C2185B;--k3:#1F78C1}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:1000px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .fz{font-family:Cambria,Caladea,'Noto Serif',Georgia,serif;font-style:italic}
+ .buehne{display:grid;grid-template-columns:1fr;gap:14px;align-items:start}
+ @media(min-width:760px){.buehne{grid-template-columns:1.15fr 1fr}}
+ canvas{width:100%;height:auto;display:block;touch-action:manipulation}
+ #sch{border:1px solid var(--linie);background:#fff}
+ .legende{font-size:13.5px;color:var(--grau);margin-top:4px}
+ .lcd{background:#20313a;color:#9BF0B4;font-variant-numeric:tabular-nums;font-size:28px;font-weight:700;padding:6px 12px;border-radius:4px;text-align:right}
+ .lcd small{font-size:15px;color:#cfe;font-weight:400;float:left;margin-top:9px}
+ input[type=range]{width:100%;height:44px;accent-color:var(--kupfer);margin:8px 0 2px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+ button{font:inherit;font-size:16px;min-height:48px;min-width:58px;padding:6px 12px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+ button.an{background:var(--kupfer);color:#fff}
+ button.zurueck{border-color:var(--ink);color:var(--ink)}
+ .schritte button{flex:1 1 60px;font-weight:700}
+ #bQ{width:100%;font-weight:700;font-size:18px}
+ .titel{font-size:15px;font-weight:700;margin:12px 0 5px}
+ .messwerte{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+ .kachel{border:1.4px solid var(--ink);background:var(--hell);padding:6px 8px;text-align:center}
+ .kachel .name{display:block;font-size:14px;font-weight:700;color:var(--grau)}
+ .kachel .ort{display:block;font-size:12.5px;color:var(--grau)}
+ .kachel .zahl{display:block;font-variant-numeric:tabular-nums;font-size:24px;font-weight:700;white-space:nowrap}
+ .oszi{margin-top:18px}
+ .oszi h2{font-size:17px;margin:0 0 6px}
+ .schirm{border:3px solid var(--ink);background:#30363c;padding:8px;border-radius:6px;max-width:680px}
+ #osz{background:#DDE8DC}
+ .einstellung{display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center;color:#fff;font-size:15px;padding:8px 2px 2px}
+ .einstellung b{color:#FFE66B}
+ .kanal{display:inline-flex;align-items:center;gap:6px}
+ .strich{display:inline-block;width:28px;height:6px;border-radius:2px;border:1.5px solid #fff}
+ .bruch{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;font-size:.78em;line-height:1.05}
+ .bruch>span:first-child{border-bottom:1.3px solid currentColor;padding:0 2px}
+ .bruch>span:last-child{padding:0 2px}
+ .cursorwerte{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px;max-width:680px}
+ .hinweis{font-size:14px;color:var(--grau);margin-top:12px}
+ #pruefbericht{display:none}
+ @media(max-width:420px){.lcd{font-size:24px} .kachel .zahl{font-size:20px} .messwerte{grid-template-columns:repeat(2,1fr)}
+   button{min-width:52px;padding:6px 8px;font-size:15px} .einstellung{font-size:14px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E2EG · LF 5 · U27</div><h1>Messplatz Sternschaltung</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Drei gleiche Heizwiderstände sind in Stern an das Drehstromnetz
+  angeschlossen, der Sternpunkt am Neutralleiter N. Den Widerstandswert <span class="fz">R</span><sub>Str</sub> eines
+  Strangs einstellen (die beiden anderen Stränge folgen), dann den Schalter einschalten und die Messgeräte ablesen.
+  Am Oszilloskop den Cursor auf einen Winkel stellen und die Augenblickswerte ablesen.</div>
+
+ <div class="buehne">
+  <div>
+   <canvas id="sch" width="560" height="500" data-quelle="Messschaltung nach Europa Fachkunde S. 158, Bild 1 (Sternschaltung mit Strommessern in L1, L2, L3 und N); Anordnung der Stränge nach S. 156, Bild 2c"
+    aria-label="Schaltplan: Drehstromnetz mit L1, L2, L3 und N, Spannungsmesser zwischen L1 und L2, dreipoliger Schalter, Strommesser in L1, L2, L3 und N, drei Heizwiderstände in Sternschaltung, Spannungsmesser am Strang U1 U2."></canvas>
+   <div class="legende">Die Strangenden U2, V2 und W2 sind im Sternpunkt verbunden; er liegt am Neutralleiter N. Strommesser und Spannungsmesser zeigen Effektivwerte. Die Leitungen gelten als widerstandsfrei.</div>
+  </div>
+  <div>
+   <div class="titel">Schalter</div>
+   <button type="button" id="bQ" aria-pressed="false">Schalter ist AUS: einschalten</button>
+   <div class="titel">Widerstandswert eines Strangs</div>
+   <div class="lcd" id="aR" aria-live="polite"><small>R Str</small>60 Ω</div>
+   <input type="range" id="rr" min="10" max="200" step="1" value="60" aria-label="Widerstandswert eines Strangs in Ohm">
+   <div class="knoepfe schritte">
+    <button type="button" id="r10m" aria-label="10 Ohm weniger">◀ 10</button>
+    <button type="button" id="r1m" aria-label="1 Ohm weniger">◀ 1</button>
+    <button type="button" id="r1p" aria-label="1 Ohm mehr">1 ▶</button>
+    <button type="button" id="r10p" aria-label="10 Ohm mehr">10 ▶</button>
+   </div>
+  </div>
+ </div>
+
+ <div class="messwerte" aria-live="polite">
+  <div class="kachel"><span class="name"><span class="fz">U</span><sub>12</sub></span><span class="ort">zwischen L1 und L2</span><span class="zahl" id="mU12"></span></div>
+  <div class="kachel"><span class="name"><span class="fz">U</span><sub>1N</sub></span><span class="ort">am Strang U1 U2</span><span class="zahl" id="mU1N"></span></div>
+  <div class="kachel"><span class="name"><span class="fz">I</span><sub>1</sub></span><span class="ort">in L1</span><span class="zahl" id="mI1"></span></div>
+  <div class="kachel"><span class="name"><span class="fz">I</span><sub>2</sub></span><span class="ort">in L2</span><span class="zahl" id="mI2"></span></div>
+  <div class="kachel"><span class="name"><span class="fz">I</span><sub>3</sub></span><span class="ort">in L3</span><span class="zahl" id="mI3"></span></div>
+  <div class="kachel"><span class="name"><span class="fz">I</span><sub>N</sub></span><span class="ort">in N</span><span class="zahl" id="mIN"></span></div>
+ </div>
+
+ <div class="oszi">
+  <h2>Dreikanal-Oszilloskop: Ströme in L1, L2 und L3</h2>
+  <div class="schirm">
+   <canvas id="osz" width="600" height="420" aria-label="Bildschirm des Oszilloskops mit 10 mal 6 Kästchen, den Kurven der drei Leiterströme und einem Cursor"></canvas>
+   <div class="einstellung" aria-live="polite">
+    <span class="kanal"><span class="strich" style="background:#1A2530"></span>Kanal 1: <span class="fz">i</span><sub>1</sub></span>
+    <span class="kanal"><span class="strich" style="background:#C2185B"></span>Kanal 2: <span class="fz">i</span><sub>2</sub></span>
+    <span class="kanal"><span class="strich" style="background:#1F78C1"></span>Kanal 3: <span class="fz">i</span><sub>3</sub></span>
+    <span>Amplitude: <b id="aY"></b></span>
+    <span>Zeitbasis: <b>2 <span class="bruch"><span>ms</span><span>div</span></span></b></span>
+   </div>
+  </div>
+  <div class="titel">Cursor einstellen</div>
+  <div class="lcd" id="aA" aria-live="polite" style="max-width:680px"><small>Cursor bei α</small>0°</div>
+  <input type="range" id="ww" min="0" max="360" step="1" value="0" aria-label="Cursor bei Winkel in Grad" style="max-width:680px">
+  <div class="knoepfe schritte" style="max-width:680px">
+   <button type="button" id="a10m" aria-label="10 Grad zurück">◀ 10°</button>
+   <button type="button" id="a1m" aria-label="1 Grad zurück">◀ 1°</button>
+   <button type="button" id="a1p" aria-label="1 Grad weiter">1° ▶</button>
+   <button type="button" id="a10p" aria-label="10 Grad weiter">10° ▶</button>
+  </div>
+  <div class="cursorwerte" aria-live="polite">
+   <div class="kachel"><span class="name" style="color:#1A2530"><span class="fz">i</span><sub>1</sub></span><span class="zahl" id="c1"></span></div>
+   <div class="kachel"><span class="name" style="color:#C2185B"><span class="fz">i</span><sub>2</sub></span><span class="zahl" id="c2"></span></div>
+   <div class="kachel"><span class="name" style="color:#1F78C1"><span class="fz">i</span><sub>3</sub></span><span class="zahl" id="c3"></span></div>
+  </div>
+  <div class="titel">Neu beginnen</div>
+  <div class="knoepfe"><button class="zurueck" id="bReset" type="button">Zurücksetzen</button></div>
+  <div class="hinweis">Das Oszilloskop zeigt eine Periode (20 ms, 10 div). Unter dem Schirm steht der Winkel
+   <span class="fz">α</span>: 0° ist der Nulldurchgang der Strangspannung <span class="fz">u</span><sub>1N</sub> von
+   Minus nach Plus. Die drei Felder unter dem Cursor zeigen die Augenblickswerte an der Stelle des Cursors.</div>
+ </div>
+ <pre id="pruefbericht"></pre>
+</div>
+
+<script>
+(function(){
+"use strict";
+var U=400;                              // Außenleiterspannung in V (ideales Netz, 50 Hz)
+var USTR=U/Math.sqrt(3);                // Spannung an einem Strang bei angeschlossenem Neutralleiter
+var START={ein:false,r:60,a:0};
+var FARBE=["#1A2530","#C2185B","#1F78C1"];
+var STUFEN=[1,2,5,10];                  // A je div
+var z={ein:START.ein,r:START.r,a:START.a};
+var $=function(id){return document.getElementById(id);};
+
+// ---------------- Rechenmodell ----------------
+function strangstrom(){ return z.ein ? USTR/z.r : 0; }               // Effektivwert je Strang
+function zeiger(k){ var I=strangstrom(), w=-120*k*Math.PI/180; return [I*Math.cos(w), I*Math.sin(w)]; }
+function neutralleiter(){                                         // Betrag der Zeigersumme, nicht vorgegeben
+  var s=[0,0]; for(var k=0;k<3;k++){ var p=zeiger(k); s[0]+=p[0]; s[1]+=p[1]; }
+  return Math.sqrt(s[0]*s[0]+s[1]*s[1]);
+}
+function augenblick(k,a){ return Math.SQRT2*strangstrom()*Math.sin((a-120*k)*Math.PI/180); }
+function zahl(x,st,einheit){
+  var s=(Math.round(x*Math.pow(10,st))/Math.pow(10,st)).toFixed(st);
+  if(/^-0[.,]?0*$/.test(s)) s=s.slice(1);
+  return s.replace("-","−").replace(".",",")+" "+einheit;
+}
+function bruch(zz,nn){return "<span class='bruch'><span>"+zz+"</span><span>"+nn+"</span></span>";}
+
+// ---------------- Schaltplan ----------------
+var cs=$("sch"), gs=cs.getContext("2d");
+var DPR=Math.max(1,Math.min(3,window.devicePixelRatio||1));
+var SBW=560, SBH=500;
+cs.width=SBW*DPR; cs.height=SBH*DPR; gs.scale(DPR,DPR);
+function linie(g,pts,farbe,b){ g.strokeStyle=farbe||"#1A2530"; g.lineWidth=b||2.2; g.beginPath(); g.moveTo(pts[0][0],pts[0][1]);
+  for(var i=1;i<pts.length;i++) g.lineTo(pts[i][0],pts[i][1]); g.stroke(); }
+function punkt(g,x,y){ g.fillStyle="#1A2530"; g.beginPath(); g.arc(x,y,4.5,0,2*Math.PI); g.fill(); }
+function klemme(g,x,y){ g.fillStyle="#fff"; g.strokeStyle="#1A2530"; g.lineWidth=2; g.beginPath(); g.arc(x,y,4.5,0,2*Math.PI); g.fill(); g.stroke(); }
+function geraet(g,x,y,buchst){                                     // Messgerät: Kreis mit Buchstabe (DIN EN 60617)
+  g.fillStyle="#fff"; g.strokeStyle="#1A2530"; g.lineWidth=2.2;
+  g.beginPath(); g.arc(x,y,17,0,2*Math.PI); g.fill(); g.stroke();
+  g.fillStyle="#1A2530"; g.font="bold 19px 'Noto Sans',system-ui,sans-serif"; g.textAlign="center"; g.textBaseline="middle";
+  g.fillText(buchst,x,y+1);
+}
+function formelzeichen(g,txt,idx,x,y,gr,farbe){                    // kursives Formelzeichen, aufrechter Index
+  g.fillStyle=farbe||"#1A2530"; g.textBaseline="alphabetic"; g.textAlign="left";
+  g.font="italic bold "+gr+"px Cambria,Caladea,Georgia,serif";
+  var b=g.measureText(txt).width; g.fillText(txt,x,y);
+  g.font="bold "+Math.round(gr*0.68)+"px 'Noto Sans',system-ui,sans-serif";
+  g.fillText(idx,x+b+1,y+Math.round(gr*0.28));
+}
+function text(g,t,x,y,gr,farbe,ausr){ g.fillStyle=farbe||"#1A2530"; g.font="bold "+gr+"px 'Noto Sans',system-ui,sans-serif";
+  g.textAlign=ausr||"left"; g.textBaseline="middle"; g.fillText(t,x,y); }
+function widerstand(g,x1,y1,x2,y2){                                // Rechteck zwischen zwei Punkten (Länge 56, Breite 22)
+  var dx=x2-x1, dy=y2-y1, l=Math.sqrt(dx*dx+dy*dy), ux=dx/l, uy=dy/l, mx=(x1+x2)/2, my=(y1+y2)/2;
+  linie(g,[[x1,y1],[mx-28*ux,my-28*uy]]); linie(g,[[mx+28*ux,my+28*uy],[x2,y2]]);
+  g.save(); g.translate(mx,my); g.rotate(Math.atan2(dy,dx));
+  g.fillStyle="#fff"; g.strokeStyle="#1A2530"; g.lineWidth=2.2; g.fillRect(-28,-11,56,22); g.strokeRect(-28,-11,56,22);
+  g.restore();
+}
+var YL=[60,104,148], YN=192, XS=182, XA=256;                       // Leitungen L1, L2, L3, N; Schalter; Strommesser
+var XD=[520,430,340], XN=300;                                       // Abzweige zu den Strängen und zum Sternpunkt
+var STERN=[430,340], U1=[520,410], V1=[430,250], W1=[340,410], YU=470;
+function zeichneSchaltung(){
+  var g=gs; g.clearRect(0,0,SBW,SBH);
+  text(g,"Drehstromnetz 400 V, 50 Hz",8,16,16,"#5A666F");
+  var namen=["L1","L2","L3"];
+  for(var k=0;k<3;k++){ text(g,namen[k],6,YL[k],22); klemme(g,46,YL[k]); }
+  text(g,"N",10,YN,22); klemme(g,46,YN);
+  // Spannungsmesser zwischen L1 und L2
+  var ym=(YL[0]+YL[1])/2;
+  linie(g,[[84,YL[0]],[84,ym-15]]); linie(g,[[84,ym+15],[84,YL[1]]]); punkt(g,84,YL[0]); punkt(g,84,YL[1]);
+  geraet(g,84,ym,"V"); formelzeichen(g,"U","12",104,ym+8,22,"#A34E0E");
+  // Schalter Q1 in L1, L2, L3 (gemeinsam betätigt); N wird nicht geschaltet
+  for(var j=0;j<3;j++){
+    linie(g,[[51,YL[j]],[XS-14,YL[j]]]);
+    if(z.ein) linie(g,[[XS-14,YL[j]],[XS+14,YL[j]]],"#1A2530",2.8);
+    else linie(g,[[XS-14,YL[j]],[XS+11,YL[j]-16]],"#1A2530",2.8);
+    punkt(g,XS-14,YL[j]); punkt(g,XS+14,YL[j]);
+  }
+  g.setLineDash([5,4]);
+  linie(g,z.ein?[[XS,YL[0]],[XS,YL[2]]]:[[XS-1,YL[0]-9],[XS-1,YL[2]-9]],"#5A666F",1.6);
+  g.setLineDash([]);
+  text(g,"Q1",XS-26,170,18,"#5A666F"); text(g,z.ein?"ein":"aus",XS+6,170,18,z.ein?"#2F7D62":"#A34E0E");
+  linie(g,[[51,YN],[XA-15,YN]]);
+  // Strommesser in L1, L2, L3 und N, Leitungen bis zu den Abzweigen
+  for(var m=0;m<3;m++){
+    linie(g,[[XS+14,YL[m]],[XA-15,YL[m]]]);
+    geraet(g,XA,YL[m],"A"); formelzeichen(g,"I",String(m+1),XA+22,YL[m]-8,22,FARBE[m]);
+    linie(g,[[XA+15,YL[m]],[XD[m],YL[m]]]);
+  }
+  geraet(g,XA,YN,"A"); formelzeichen(g,"I","N",XA+22,YN-8,22,"#A34E0E");
+  linie(g,[[XA+15,YN],[XN,YN]]);
+  // Abzweige: L1 zu U1, L2 zu V1, L3 zu W1; N über den Sternpunkt
+  linie(g,[[XD[0],YL[0]],[U1[0],U1[1]]]);
+  linie(g,[[XD[1],YL[1]],[V1[0],V1[1]]]);
+  linie(g,[[XD[2],YL[2]],[W1[0],W1[1]]]);
+  linie(g,[[XN,YN],[XN,YU],[STERN[0],YU],[STERN[0],STERN[1]]]);
+  // Stränge: Anfang 1 außen, Ende 2 im Sternpunkt
+  widerstand(g,V1[0],V1[1],STERN[0],STERN[1]);
+  widerstand(g,U1[0],U1[1],STERN[0],STERN[1]);
+  widerstand(g,W1[0],W1[1],STERN[0],STERN[1]);
+  klemme(g,U1[0],U1[1]); klemme(g,V1[0],V1[1]); klemme(g,W1[0],W1[1]);
+  punkt(g,STERN[0],STERN[1]);
+  text(g,"V1",V1[0]+10,V1[1]-8,18); text(g,"U1",U1[0]+10,U1[1]-8,18); text(g,"W1",W1[0]-36,W1[1]+4,18);
+  formelzeichen(g,"R","Str",V1[0]-62,(V1[1]+STERN[1])/2+7,20,"#5A666F");
+  // Spannungsmesser zwischen U1 und Sternpunkt (Strang U1 U2)
+  linie(g,[[U1[0],U1[1]],[U1[0],438]]); linie(g,[[U1[0],468],[U1[0],YU],[STERN[0],YU]]);
+  punkt(g,STERN[0],YU);
+  geraet(g,U1[0],453,"V"); formelzeichen(g,"U","1N",U1[0]-70,461,22,"#A34E0E");
+}
+
+// ---------------- Oszilloskop ----------------
+var co=$("osz"), go=co.getContext("2d");
+var BW=600, BH=420, DIV=60, NY=6, HS=BH-60;                         // Schirm 10 × 6 div, darunter die Winkelachse
+co.width=BW*DPR; co.height=BH*DPR; go.scale(DPR,DPR);
+function adiv(){ var ih=Math.SQRT2*strangstrom(); for(var i=0;i<STUFEN.length;i++){ if(ih<=2.8*STUFEN[i]) return STUFEN[i]; } return STUFEN[STUFEN.length-1]; }
+function raster(){
+  var g=go; g.fillStyle="#30363c"; g.fillRect(0,0,BW,BH);
+  g.fillStyle="#DDE8DC"; g.fillRect(0,0,BW,HS);
+  g.strokeStyle="rgba(26,37,48,0.42)"; g.lineWidth=1;
+  for(var i=0;i<=10;i++){ var x=Math.round(i*DIV)+0.5; if(i===10) x-=1; g.beginPath(); g.moveTo(x,0); g.lineTo(x,HS); g.stroke(); }
+  for(var j=0;j<=NY;j++){ var y=Math.round(j*DIV)+0.5; if(j===NY) y-=1; g.beginPath(); g.moveTo(0,y); g.lineTo(BW,y); g.stroke(); }
+  g.strokeStyle="#1A2530"; g.lineWidth=2;
+  g.beginPath(); g.moveTo(0,HS/2); g.lineTo(BW,HS/2); g.stroke();
+  // Winkelachse unter dem Schirm
+  g.fillStyle="#fff"; g.font="bold 22px 'Noto Sans',system-ui,sans-serif"; g.textBaseline="middle";
+  [0,90,180,270,360].forEach(function(w){ var x=w/360*BW; g.textAlign=w===0?"left":(w===360?"right":"center");
+    g.fillText(w+"°",x,HS+20); });
+  g.textAlign="center"; g.font="italic bold 24px Cambria,Caladea,Georgia,serif"; g.fillText("α",BW/2+64,HS+46);
+  g.font="bold 22px 'Noto Sans',system-ui,sans-serif"; g.fillText("→",BW/2+92,HS+46);
+}
+function zeichneOszi(){
+  var g=go; raster(); var s=adiv();
+  for(var k=0;k<3;k++){
+    g.strokeStyle=FARBE[k]; g.lineWidth=3; g.lineJoin="round"; g.beginPath();
+    for(var i=0;i<=720;i++){ var a=i/2, x=a/360*BW, y=HS/2-augenblick(k,a)/s*DIV;
+      if(i===0) g.moveTo(x,y); else g.lineTo(x,y); }
+    g.stroke();
+  }
+  var xa=z.a/360*BW; if(xa>=BW) xa=BW-1.5; if(xa<1.5) xa=1.5;
+  g.strokeStyle="#A34E0E"; g.lineWidth=2; g.setLineDash([7,5]);
+  g.beginPath(); g.moveTo(xa,0); g.lineTo(xa,HS); g.stroke(); g.setLineDash([]);
+  for(var k2=0;k2<3;k2++){ g.fillStyle=FARBE[k2]; g.beginPath(); g.arc(xa,HS/2-augenblick(k2,z.a)/s*DIV,6,0,2*Math.PI); g.fill(); }
+}
+
+// ---------------- Bedienung ----------------
+function auffrischen(){
+  var I=strangstrom();
+  $("bQ").textContent=z.ein?"Schalter ist EIN: ausschalten":"Schalter ist AUS: einschalten";
+  $("bQ").classList.toggle("an",z.ein); $("bQ").setAttribute("aria-pressed",z.ein?"true":"false");
+  $("aR").innerHTML="<small><span class='fz'>R</span><sub>Str</sub></small>"+z.r+" Ω"; $("rr").value=z.r;
+  $("mU12").textContent=zahl(U,1,"V");
+  $("mU1N").textContent=zahl(z.ein?USTR:0,1,"V");
+  $("mI1").textContent=zahl(Math.hypot.apply(null,zeiger(0)),2,"A");
+  $("mI2").textContent=zahl(Math.hypot.apply(null,zeiger(1)),2,"A");
+  $("mI3").textContent=zahl(Math.hypot.apply(null,zeiger(2)),2,"A");
+  $("mIN").textContent=zahl(neutralleiter(),2,"A");
+  $("aA").innerHTML="<small>Cursor bei <span class='fz'>α</span></small>"+z.a+"°"; $("ww").value=z.a;
+  for(var k=0;k<3;k++) $("c"+(k+1)).textContent=zahl(augenblick(k,z.a),2,"A");
+  $("aY").innerHTML=adiv()+" "+bruch("A","div");
+  zeichneSchaltung(); zeichneOszi();
+}
+function setzeR(r){ z.r=Math.max(10,Math.min(200,Math.round(r))); auffrischen(); }
+function setzeA(a){ a=Math.round(a); if(a<0) a+=360; if(a>360) a-=360; z.a=a; auffrischen(); }
+$("bQ").onclick=function(){ z.ein=!z.ein; auffrischen(); };
+$("rr").addEventListener("input",function(){ setzeR(+this.value); });
+$("r10m").onclick=function(){ setzeR(z.r-10); }; $("r1m").onclick=function(){ setzeR(z.r-1); };
+$("r1p").onclick=function(){ setzeR(z.r+1); };  $("r10p").onclick=function(){ setzeR(z.r+10); };
+$("ww").addEventListener("input",function(){ setzeA(+this.value); });
+$("a10m").onclick=function(){ setzeA(z.a-10); }; $("a1m").onclick=function(){ setzeA(z.a-1); };
+$("a1p").onclick=function(){ setzeA(z.a+1); };  $("a10p").onclick=function(){ setzeA(z.a+10); };
+$("bReset").onclick=function(){ z={ein:START.ein,r:START.r,a:START.a}; auffrischen(); };
+window.__stelle=function(r,ein,a){ z.r=r; z.ein=!!ein; if(a!==undefined) z.a=a; auffrischen();
+  return ["mU12","mU1N","mI1","mI2","mI3","mIN","c1","c2","c3"].map(function(id){return $(id).textContent;}).join(" | "); };
+
+// ---------------- Prüfmodus ----------------
+if(/[?&]pruefen\b/.test(location.search)){
+  var bericht={};
+  [[100,0],[46,40],[46,0],[46,10],[23,250],[60,0]].forEach(function(e){ bericht[e[0]+" Ω, "+e[1]+"°"]=window.__stelle(e[0],true,e[1]); });
+  bericht["aus"]=window.__stelle(60,false,0);
+  z={ein:START.ein,r:START.r,a:START.a};
+  $("pruefbericht").textContent=JSON.stringify(bericht);
+}
+auffrischen();
+})();
+</script>
+</body></html>
