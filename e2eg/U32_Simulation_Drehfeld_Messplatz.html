@@ -1,0 +1,303 @@
+<!doctype html>
+<!-- E2EG U32 · Messplatz Drehfeld (Neubau 20.10.2026, Aufgabe IN der Stunde nach dem Muster E1EG B07 und E2EG U26).
+     Ersetzt für die neuen Blätter U32_Simulation_Drehfeld.html (zwei Regler für Frequenz und Polpaarzahl, zeigte die
+     Drehfelddrehzahl fertig gerechnet an und nannte die Formel; das ist Stoff von U33); die alte Adresse bleibt.
+     Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht):
+       (1) Drei um 120° phasenverschobene Leiterströme in drei räumlich um 120° versetzten Spulen ergeben ein
+           Magnetfeld Φ, das sich dreht: Rückt der Winkel α der Ströme um 60° weiter, dreht sich Φ um 60° weiter;
+           in einer Periode einmal herum; die Länge von Φ bleibt gleich. Φ zeigt zur Spule mit dem größten Strom.
+       (2) Vertauscht man zwei Außenleiter, dreht sich Φ andersherum; vertauscht man danach noch einmal zwei,
+           dreht es sich wieder wie zu Beginn.
+     Rechenmodell: Leiterströme i1 = 10 A · sin α, i2 = 10 A · sin(α − 120°), i3 = 10 A · sin(α − 240°) (Winkelzählung
+       wie U04, U07, U26). Spulen U, V, W mit den Achsen bei 0°, 120°, 240° (Gradskala ab der Spule U im
+       Uhrzeigersinn; Anordnung wie Europa Fachkunde S. 493, Bild 1a, und der Generator im Messplatz U26). Feld einer
+       Spule in Richtung ihrer Achse, proportional zum Strom, bei positivem Strom zur Spule hin. Φ ist die Summe der
+       drei Spulenfelder. Bei Anschluss L1-U1, L2-V1, L3-W1 gilt: Richtung von Φ = α − 90°, Länge 1,5-mal das
+       Höchstfeld einer Spule (Fachkunde S. 493: konstanter Betrag, konstante Drehzahl).
+     Anzeige: Winkel in ganzen Grad, Ströme mit einer Nachkommastelle, kein „−0,0“. Prüfmodus ?pruefen: alle Werte der
+     Aufgaben als JSON. Startstellung neutral: α = 45°, Anschluss L1-U1, L2-V1, L3-W1 (keine Aufgabeneinstellung). -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Drehfeld (U32)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"winkel_alpha_grad":45,"anschluss":"L1 an U1, L2 an V1, L3 an W1"},"loesungswerte":{"Aufgabe 3 a), Richtung von Φ":{"0°":"270°","60°":"330°","120°":"30°","180°":"90°","240°":"150°","300°":"210°","360°":"270°"},"Aufgabe 3 b)":{"90°":"i1 größter Strom, Φ zeigt zur Spule U (0°)","210°":"i2, Spule V (120°)","330°":"i3, Spule W (240°)"},"Aufgabe 4 a), L2 und L3 getauscht":{"0°":"90°","120°":"330°","240°":"210°","360°":"90°"},"Aufgabe 4 b), danach L1 und L2 getauscht":{"0°":"150°","120°":"270°"}},"quelle":"Europa Fachkunde S. 493 (Entstehung des Drehfeldes, Bild 1a und Bild 2a), Tabellenbuch Elektrotechnik S. 534 (Drehrichtungsumkehr durch Vertauschen zweier Außenleiter)"}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#1E8A4C}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:10px 8px 40px}
+ .wrap{max-width:1000px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:12px 14px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:6px 0;margin-bottom:10px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:21px;margin:2px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:8px 11px;font-size:14.5px;margin-bottom:10px}
+ .fz{font-family:Cambria,Caladea,'Noto Serif',Georgia,serif;font-style:italic}
+ sub{font-size:.72em;line-height:0;vertical-align:-0.3em}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px;align-items:start}
+ @media(min-width:760px){.buehne{grid-template-columns:1fr 1fr}}
+ canvas{width:100%;height:auto;display:block;touch-action:manipulation}
+ #staender{max-width:440px;margin:8px auto 0;border:1px solid var(--linie);background:#fff}
+ .legende{font-size:13.5px;color:var(--grau);margin-top:4px}
+ .lcdreihe{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+ .lcd{background:#20313a;color:#9BF0B4;font-variant-numeric:tabular-nums;font-size:28px;font-weight:700;padding:4px 10px;border-radius:4px;text-align:right;line-height:1.25}
+ .lcd small{display:block;font-size:13.5px;color:#cfe;font-weight:400;text-align:left}
+ input[type=range]{width:100%;height:44px;accent-color:var(--kupfer);margin:6px 0 2px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+ button{font:inherit;font-size:16px;min-height:48px;min-width:58px;padding:6px 12px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+ button.an{background:var(--kupfer);color:#fff}
+ button.zurueck{border-color:var(--ink);color:var(--ink)}
+ .schritte button{flex:1 1 60px;font-weight:700}
+ .titel{font-size:15px;font-weight:700;margin:12px 0 5px}
+ .anschluss{border:1.4px solid var(--ink);background:var(--hell);padding:8px 10px}
+ .klemmen{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}
+ .klemme{text-align:center;font-weight:700;font-size:17px;background:#fff;border:1px solid var(--linie);padding:4px 2px}
+ .klemme .lt{display:inline-block;min-width:34px;color:#fff;border-radius:3px;padding:0 4px;margin-left:4px}
+ .tausch button{flex:1 1 120px;font-size:15px;padding:6px 8px}
+ .messer{border:1.4px solid var(--ink);background:var(--hell);padding:8px;margin-top:12px}
+ .werte{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+ .wert{text-align:center;font-variant-numeric:tabular-nums;font-size:23px;font-weight:700;white-space:nowrap;background:#fff;border:1px solid var(--linie);padding:4px 2px}
+ .wert .name{display:block;font-size:13.5px;font-weight:700;color:var(--grau)}
+ #diagramm{border:1px solid var(--linie);background:#fff;margin-top:8px}
+ .hinweis{font-size:14px;color:var(--grau);margin-top:10px}
+ #pruefbericht{display:none}
+ @media(max-width:420px){.lcd{font-size:23px} .wert{font-size:19px} button{min-width:50px;padding:6px 8px;font-size:15px} .anleitung{font-size:14px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E2EG · LF 5 · U32</div><h1>Messplatz Drehfeld</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Den Winkel <span class="fz">α</span> der Leiterströme (Zeitpunkt in der
+  Periode) mit dem Schieber oder den Knöpfen einstellen. Die Richtung des Magnetfelds <span class="fz">Φ</span> an der
+  Gradskala im Ständer ablesen. Unter „Anschluss“ zwei Außenleiter am Klemmbrett tauschen.</div>
+
+ <div class="buehne">
+  <div>
+   <div class="lcdreihe" aria-live="polite">
+    <div class="lcd" id="aA"><small>Winkel <span class="fz">α</span></small>45°</div>
+    <div class="lcd" id="aPhi"><small>Richtung von <span class="fz">Φ</span></small>315°</div>
+   </div>
+   <canvas id="staender" width="480" height="480" data-quelle="Anordnung nach Europa Fachkunde S. 493, Bild 1a (drei um 120° räumlich versetzte Spulen U, V, W im Ständer), Gradskala ab Spule U im Uhrzeigersinn"
+    aria-label="Ständer eines Drehstrommotors im Querschnitt: oben Spule U, rechts unten Spule V, links unten Spule W. Innen eine Gradskala und Pfeile für die Magnetfelder."></canvas>
+   <label for="wnk" class="titel" style="display:block">Winkel <span class="fz">α</span> einstellen</label>
+   <input type="range" id="wnk" min="0" max="360" step="5" value="45" aria-label="Winkel alpha in Grad">
+   <div class="knoepfe schritte">
+    <button type="button" id="m15" aria-label="15 Grad zurück">◀ 15°</button>
+    <button type="button" id="m5" aria-label="5 Grad zurück">◀ 5°</button>
+    <button type="button" id="p5" aria-label="5 Grad weiter">5° ▶</button>
+    <button type="button" id="p15" aria-label="15 Grad weiter">15° ▶</button>
+   </div>
+  </div>
+  <div>
+   <div class="titel" style="margin-top:0">Anschluss am Klemmbrett</div>
+   <div class="anschluss">
+    <div class="klemmen" id="klemmen" aria-live="polite"></div>
+    <div class="knoepfe tausch">
+     <button type="button" id="t12">L1 und L2 tauschen</button>
+     <button type="button" id="t23">L2 und L3 tauschen</button>
+     <button type="button" id="t13">L1 und L3 tauschen</button>
+    </div>
+   </div>
+   <div class="messer">
+    <div class="werte" id="werte" aria-live="polite"></div>
+    <canvas id="diagramm" width="480" height="200" aria-label="Liniendiagramm der drei Leiterströme über eine Periode mit einer Marke beim eingestellten Winkel alpha"></canvas>
+   </div>
+   <div class="titel">Ablauf ansehen</div>
+   <div class="knoepfe">
+    <button type="button" id="bPlay">▶ Abspielen (Zeitlupe)</button>
+    <button class="zurueck" id="bReset" type="button">Zurücksetzen</button>
+   </div>
+   <div class="hinweis"><b>Ständer:</b> drei Spulen U, V und W, räumlich um 120° versetzt. Die Gradskala zählt ab der
+    Spule U. Dünne Pfeile: Magnetfeld jeder Spule (je größer der Strom, desto länger; bei positivem Strom zur Spule
+    hin). Grüner Pfeil <span class="fz">Φ</span>: das resultierende Magnetfeld der drei Spulen.</div>
+   <div class="hinweis"><b>Strommesser:</b> Augenblickswerte der Leiterströme in den drei Spulen.
+    <b>Liniendiagramm:</b> die drei Leiterströme <span class="fz">i</span><sub>1</sub>, <span class="fz">i</span><sub>2</sub>,
+    <span class="fz">i</span><sub>3</sub> aus dem 50-Hz-Netz über eine Periode (20 ms); die Marke zeigt den
+    eingestellten Winkel <span class="fz">α</span>.</div>
+   <div class="hinweis"><b>Abspielen:</b> Eine Periode der Ströme (20 ms) läuft in 6 s ab, also 300-mal langsamer als
+    im Netz; sonst wäre nichts zu erkennen.</div>
+  </div>
+ </div>
+ <pre id="pruefbericht"></pre>
+</div>
+
+<script>
+(function(){
+"use strict";
+var IMAX=10;                                   // Scheitelwert der Leiterströme in A
+var START={a:45,an:[1,2,3]};                   // Anschluss: Spule U, V, W an Außenleiter L1, L2, L3
+var FARBE={1:"#1A2530",2:"#C2185B",3:"#1F78C1"};   // i1 schwarz, i2 magenta, i3 blau (wie Fachkunde S. 493)
+var SPULE=["U","V","W"], ACHSE=[0,120,240];   // Achsen der Spulen in Grad, ab Spule U im Uhrzeigersinn
+var z={a:START.a,an:START.an.slice()}, timer=null;
+var $=function(id){return document.getElementById(id);};
+var RAD=Math.PI/180;
+var reduziert=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function strom(k,a){ return IMAX*Math.sin((a-120*(k-1))*RAD); }       // Leiterstrom i_k beim Winkel a
+function feld(a,an){                                                 // Summe der Spulenfelder (x nach rechts, y nach oben)
+  var x=0,y=0;
+  for(var s=0;s<3;s++){ var i=strom(an[s],a)/IMAX; x+=i*Math.sin(ACHSE[s]*RAD); y+=i*Math.cos(ACHSE[s]*RAD); }
+  return {x:x,y:y,betrag:Math.sqrt(x*x+y*y)};
+}
+function richtung(a,an){                                             // Richtung von Φ in ganzen Grad, 0° oben, im Uhrzeigersinn
+  var f=feld(a,an), w=Math.atan2(f.x,f.y)/RAD;
+  w=Math.round(w); w=((w%360)+360)%360; return w;
+}
+function textA(i){ var s=(Math.round(i*10)/10).toFixed(1); if(s==="-0.0") s="0.0"; return s.replace("-","−").replace(".",",")+" A"; }
+
+// ---------------- Ständer ----------------
+var cs=$("staender"), gs=cs.getContext("2d");
+var DPR=Math.max(1,Math.min(3,window.devicePixelRatio||1));
+cs.width=480*DPR; cs.height=480*DPR; gs.scale(DPR,DPR);
+var CX=240, CY=240, RA=230, RI=196, RS=136;   // Außenrand, Innenrand des Rings, Polschuh innen
+function P(r,w){ return [CX+r*Math.sin(w*RAD), CY-r*Math.cos(w*RAD)]; }       // w: Grad ab oben im Uhrzeigersinn
+function Q(r,q,w){ var c=Math.sin(w*RAD), s=-Math.cos(w*RAD); return [CX+r*c-q*s, CY+r*s+q*c]; }  // q quer zur Achse
+function pfeil(g,x0,y0,x1,y1,farbe,breite,spitze){
+  var dx=x1-x0, dy=y1-y0, l=Math.sqrt(dx*dx+dy*dy); if(l<2) return;
+  var ux=dx/l, uy=dy/l, bx=x1-ux*spitze, by=y1-uy*spitze;
+  g.strokeStyle=farbe; g.lineWidth=breite; g.lineCap="round";
+  g.beginPath(); g.moveTo(x0,y0); g.lineTo(bx,by); g.stroke();
+  g.fillStyle=farbe; g.beginPath(); g.moveTo(x1,y1);
+  g.lineTo(bx-uy*spitze*0.55,by+ux*spitze*0.55); g.lineTo(bx+uy*spitze*0.55,by-ux*spitze*0.55); g.closePath(); g.fill();
+}
+function schild(g,txt,x,y,farbe,gr){
+  g.font="bold "+(gr||18)+"px 'Noto Sans',system-ui,sans-serif"; g.textAlign="center"; g.textBaseline="middle";
+  var b=g.measureText(txt).width+8;
+  g.fillStyle="rgba(255,255,255,0.93)"; g.fillRect(x-b/2,y-12,b,24);
+  g.fillStyle=farbe; g.fillText(txt,x,y+1);
+}
+function zeichneStaender(){
+  var g=gs; g.clearRect(0,0,480,480);
+  // Ring
+  g.fillStyle="#D5D9DD"; g.strokeStyle="#1A2530"; g.lineWidth=2;
+  g.beginPath(); g.arc(CX,CY,RA,0,2*Math.PI); g.arc(CX,CY,RI,0,2*Math.PI,true); g.fill("evenodd");
+  g.beginPath(); g.arc(CX,CY,RA,0,2*Math.PI); g.stroke();
+  g.beginPath(); g.arc(CX,CY,RI,0,2*Math.PI); g.stroke();
+  // Zähne mit Polschuh und Spule
+  for(var s=0;s<3;s++){
+    var w=ACHSE[s], lt=z.an[s], fb=FARBE[lt];
+    var zahn=[Q(RI+2,-26,w),Q(RI+2,26,w),Q(150,26,w),Q(150,50,w),Q(RS,50,w),Q(RS,-50,w),Q(150,-50,w),Q(150,-26,w)];
+    g.fillStyle="#D5D9DD"; g.strokeStyle="#1A2530"; g.lineWidth=2;
+    g.beginPath(); g.moveTo(zahn[0][0],zahn[0][1]);
+    for(var i=1;i<zahn.length;i++) g.lineTo(zahn[i][0],zahn[i][1]);
+    g.closePath(); g.fill(); g.stroke();
+    g.strokeStyle=fb; g.lineWidth=3.4;
+    for(var r=157;r<=189;r+=6){ var a1=Q(r,-34,w), a2=Q(r+3,34,w); g.beginPath(); g.moveTo(a1[0],a1[1]); g.lineTo(a2[0],a2[1]); g.stroke(); }
+    var t1=Q(212,-60,w), t2=Q(212,60,w);
+    schild(g,SPULE[s]+"1",t1[0],t1[1],fb); schild(g,SPULE[s]+"2",t2[0],t2[1],fb);
+  }
+  // Gradskala in der Bohrung
+  g.strokeStyle="#5A666F";
+  for(var t=0;t<360;t+=10){
+    var lang=(t%30===0), p1=P(lang?116:123,t), p2=P(132,t);
+    g.lineWidth=lang?2.2:1.2; g.beginPath(); g.moveTo(p1[0],p1[1]); g.lineTo(p2[0],p2[1]); g.stroke();
+    if(lang){ var pl=P(104,t); g.fillStyle="#3B4750"; g.font="bold 14px 'Noto Sans',system-ui,sans-serif";
+      g.textAlign="center"; g.textBaseline="middle"; g.fillText(t+"°",pl[0],pl[1]); }
+  }
+  // Spulenfelder (dünn) und resultierendes Feld Φ (grün)
+  var L1=60;
+  for(var s2=0;s2<3;s2++){
+    var i2=strom(z.an[s2],z.a)/IMAX, e=P(L1*i2,ACHSE[s2]);
+    if(Math.abs(i2)>0.02) pfeil(g,CX,CY,e[0],e[1],FARBE[z.an[s2]],4,13);
+  }
+  var f=feld(z.a,z.an), ex=CX+L1*f.x, ey=CY-L1*f.y;
+  pfeil(g,CX,CY,ex,ey,"#1E8A4C",8,22);
+  var wr=Math.atan2(f.x,f.y)/RAD, lp=Q(62,-22,wr);
+  g.fillStyle="rgba(255,255,255,0.85)"; g.beginPath(); g.arc(lp[0],lp[1],13,0,2*Math.PI); g.fill();
+  g.fillStyle="#1E8A4C"; g.font="italic bold 24px Cambria,Caladea,Georgia,serif"; g.textAlign="center"; g.textBaseline="middle";
+  g.fillText("Φ",lp[0],lp[1]+1);
+  g.fillStyle="#1A2530"; g.beginPath(); g.arc(CX,CY,6,0,2*Math.PI); g.fill();
+}
+
+// ---------------- Liniendiagramm ----------------
+var cd=$("diagramm"), gd=cd.getContext("2d");
+cd.width=480*DPR; cd.height=200*DPR; gd.scale(DPR,DPR);
+var X0=52, XB=400, Y0=96, YA=66;                // 0° bei X0, 360° bei X0+XB; 10 A sind YA Bildpunkte
+function xw(a){ return X0+a/360*XB; }
+function iIndex(g,txt,idx,x,y,gr,farbe){
+  g.fillStyle=farbe; g.textBaseline="alphabetic"; g.textAlign="left";
+  g.font="italic bold "+gr+"px Cambria,Caladea,Georgia,serif"; var b=g.measureText(txt).width; g.fillText(txt,x,y);
+  g.font="bold "+Math.round(gr*0.68)+"px 'Noto Sans',system-ui,sans-serif"; g.fillText(idx,x+b+1,y+Math.round(gr*0.28));
+}
+function zeichneDiagramm(){
+  var g=gd; g.clearRect(0,0,480,200);
+  g.strokeStyle="#C9D1D8"; g.lineWidth=1;
+  for(var a=0;a<=360;a+=30){ g.beginPath(); g.moveTo(xw(a),Y0-YA); g.lineTo(xw(a),Y0+YA); g.stroke(); }
+  g.strokeStyle="#1A2530"; g.lineWidth=1.8;
+  g.beginPath(); g.moveTo(X0,Y0); g.lineTo(X0+XB+14,Y0); g.stroke();
+  g.beginPath(); g.moveTo(X0,Y0+YA+6); g.lineTo(X0,Y0-YA-14); g.stroke();
+  g.fillStyle="#1A2530"; g.beginPath(); g.moveTo(X0+XB+20,Y0); g.lineTo(X0+XB+10,Y0-5); g.lineTo(X0+XB+10,Y0+5); g.fill();
+  g.beginPath(); g.moveTo(X0,Y0-YA-20); g.lineTo(X0-5,Y0-YA-10); g.lineTo(X0+5,Y0-YA-10); g.fill();
+  g.font="13px 'Noto Sans',system-ui,sans-serif"; g.textAlign="center"; g.textBaseline="top";
+  for(var a2=0;a2<=360;a2+=60) g.fillText(a2+"°",xw(a2)+(a2===0?8:0),Y0+YA+8);
+  g.textAlign="right"; g.textBaseline="middle";
+  g.fillText("10",X0-6,Y0-YA); g.fillText("0",X0-6,Y0); g.fillText("−10",X0-6,Y0+YA);
+  g.beginPath(); g.moveTo(X0-3,Y0-YA); g.lineTo(X0+3,Y0-YA); g.moveTo(X0-3,Y0+YA); g.lineTo(X0+3,Y0+YA); g.stroke();
+  g.font="italic bold 16px Cambria,Caladea,Georgia,serif"; g.textAlign="left"; g.textBaseline="middle";
+  g.fillText("i",X0+8,Y0-YA-12); g.font="13px 'Noto Sans',system-ui,sans-serif"; g.fillText("in A",X0+16,Y0-YA-11);
+  g.font="italic bold 17px Cambria,Caladea,Georgia,serif"; g.fillText("α",X0+XB+12,Y0+16);
+  for(var k=1;k<=3;k++){
+    g.strokeStyle=FARBE[k]; g.lineWidth=2.6; g.beginPath();
+    for(var b=0;b<=360;b+=2){ var x=xw(b), y=Y0-strom(k,b)/IMAX*YA; if(b===0) g.moveTo(x,y); else g.lineTo(x,y); }
+    g.stroke();
+    var am=90+120*(k-1); if(am>360) am-=360;
+    iIndex(g,"i",String(k),xw(am)-6,Y0-YA-4,17,FARBE[k]);
+  }
+  var xa=xw(z.a);
+  g.strokeStyle="#A34E0E"; g.lineWidth=2; g.setLineDash([6,4]);
+  g.beginPath(); g.moveTo(xa,Y0-YA-6); g.lineTo(xa,Y0+YA+4); g.stroke(); g.setLineDash([]);
+  for(var k2=1;k2<=3;k2++){ g.fillStyle=FARBE[k2]; g.beginPath(); g.arc(xa,Y0-strom(k2,z.a)/IMAX*YA,5,0,2*Math.PI); g.fill(); }
+}
+
+// ---------------- Anzeigen ----------------
+function auffrischen(){
+  $("aA").innerHTML="<small>Winkel <span class='fz'>α</span></small>"+z.a+"°";
+  $("aPhi").innerHTML="<small>Richtung von <span class='fz'>Φ</span></small>"+richtung(z.a,z.an)+"°";
+  $("wnk").value=z.a;
+  var kl="", we="";
+  for(var s=0;s<3;s++){
+    var lt=z.an[s];
+    kl+="<div class='klemme'>"+SPULE[s]+"1 an<span class='lt' style='background:"+FARBE[lt]+"'>L"+lt+"</span></div>";
+    we+="<div class='wert'><span class='name'>Spule "+SPULE[s]+": <span class='fz'>i</span><sub>"+lt+"</sub></span>"+
+        "<span style='color:"+FARBE[lt]+"'>"+textA(strom(lt,z.a))+"</span></div>";
+  }
+  $("klemmen").innerHTML=kl; $("werte").innerHTML=we;
+  zeichneStaender(); zeichneDiagramm();
+}
+function setzeWinkel(a){ a=Math.round(a); while(a<0) a+=360; while(a>360) a-=360; z.a=a; auffrischen(); }
+function tausche(p,q){                         // Außenleiter Lp und Lq an ihren Klemmen vertauschen
+  var ip=z.an.indexOf(p), iq=z.an.indexOf(q); z.an[ip]=q; z.an[iq]=p; auffrischen();
+}
+function stoppe(){ if(timer){ clearInterval(timer); timer=null; } $("bPlay").textContent="▶ Abspielen (Zeitlupe)"; $("bPlay").classList.remove("an"); }
+$("wnk").addEventListener("input",function(){ stoppe(); setzeWinkel(+this.value); });
+$("m15").onclick=function(){ stoppe(); setzeWinkel(z.a-15); };
+$("m5").onclick=function(){ stoppe(); setzeWinkel(z.a-5); };
+$("p5").onclick=function(){ stoppe(); setzeWinkel(z.a+5); };
+$("p15").onclick=function(){ stoppe(); setzeWinkel(z.a+15); };
+$("t12").onclick=function(){ tausche(1,2); };
+$("t23").onclick=function(){ tausche(2,3); };
+$("t13").onclick=function(){ tausche(1,3); };
+$("bPlay").onclick=function(){
+  if(timer){ stoppe(); return; }
+  this.textContent="Ⅱ Anhalten"; this.classList.add("an");
+  // 60° je Sekunde (eine Periode in 6 s); bei reduzierter Bewegung in Schritten von 30° je Sekunde
+  timer=setInterval(function(){ z.a=(z.a+(reduziert?30:2))%360; auffrischen(); }, reduziert?1000:33);
+};
+$("bReset").onclick=function(){ stoppe(); z={a:START.a,an:START.an.slice()}; auffrischen(); };
+window.__stelle=function(a,an){ stoppe(); z.a=a; if(an) z.an=an.slice(); auffrischen();
+  return $("aA").textContent+" | "+$("aPhi").textContent+" | "+$("werte").textContent; };
+
+// ---------------- Prüfmodus ----------------
+if(/[?&]pruefen\b/.test(location.search)){
+  var bericht={}, AN={"normal":[1,2,3],"L2 und L3 getauscht":[1,3,2],"danach L1 und L2 getauscht":[2,3,1],"nur L1 und L2 getauscht":[2,1,3],"nur L1 und L3 getauscht":[3,2,1]};
+  Object.keys(AN).forEach(function(n){
+    bericht[n]={};
+    [0,30,45,60,90,120,150,180,210,240,270,300,330,360].forEach(function(a){
+      var f=feld(a,AN[n]);
+      bericht[n][a+"°"]={phi:richtung(a,AN[n])+"°",betrag:Math.round(f.betrag*1000)/1000,
+        spulen:AN[n].map(function(lt,s){return SPULE[s]+":i"+lt+"="+textA(strom(lt,a));})};
+    });
+  });
+  $("pruefbericht").textContent=JSON.stringify(bericht);
+}
+auffrischen();
+})();
+</script>
+</body></html>
