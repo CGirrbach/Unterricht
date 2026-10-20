@@ -25,6 +25,7 @@
        Zuleitung I1 = Motorstrom + I_bCΔ. Anlage: S = 3 · U1N · I1* (P Realteil, Q Imaginärteil, Q > 0 induktiv).
      Anzeigen: Ströme mit zwei Nachkommastellen, P und Q in ganzen Watt und var, cos φ mit zwei Stellen; dazu „induktiv“
        oder „kapazitiv“ (bei Q unter 0,5 var und bei cos φ = 1,00 keine Angabe).
+     Beschriftung des Schaltbilds ab 22 Einheiten (am Handy 390 px rund 12 px; Prüfer 20.10.2026: vorher rund 10 px).
      Startstellung neutral: Q1 und Q2 aus, C_Δ = 0,0 µF (keine Einstellung der Aufgaben: 20; 40; 29,2; 14,9 µF).
      Prüfmodus ?pruefen: Anzeigen der Aufgabenstellungen und der Grenzfälle als JSON in #pruefbericht. -->
 <html lang="de"><head><meta charset="utf-8">
@@ -82,7 +83,7 @@
 
  <div class="buehne">
   <div class="schaltung">
-   <svg viewBox="0 0 620 458" role="img" data-quelle="Anordnung nach Rechenbuch S. 134, Bild und Fachkunde S. 166, Bild 2 (Motor und Kondensatorbatterie in Dreieckschaltung an gemeinsamer Zuleitung), Tabellenbuch S. 328 (Einzelkompensation bei 3 AC, Bezeichnungen I_bCΔ und C_Δ); Messgeräte in der Zuleitung nach Fachkunde S. 164, Bild 1"
+   <svg viewBox="0 0 640 466" role="img" data-quelle="Anordnung nach Rechenbuch S. 134, Bild und Fachkunde S. 166, Bild 2 (Motor und Kondensatorbatterie in Dreieckschaltung an gemeinsamer Zuleitung), Tabellenbuch S. 328 (Einzelkompensation bei 3 AC, Bezeichnungen I_bCΔ und C_Δ); Messgeräte in der Zuleitung nach Fachkunde S. 164, Bild 1"
     aria-label="Schaltplan: Drehstromnetz 400 V, 50 Hz mit den Außenleitern L1, L2, L3. In der Zuleitung liegen ein Strommesser in L1, der Leistungsmesser mit Wirkfaktoranzeige und der Blindleistungsmesser. Dahinter zwei Abzweige: der Drehstrommotor über den Schalter Q1 mit einem Strommesser in L1 und die Kondensatorbatterie aus drei gleichen Kondensatoren in Dreieckschaltung über den Schalter Q2 mit einem Strommesser in L1.">
     <g fill="none" stroke="#1A2530" stroke-width="2.4" stroke-linecap="round">
      <!-- Außenleiter (Zuleitung) mit Strommesser in L1, Leistungsmesser und Blindleistungsmesser -->
@@ -121,32 +122,32 @@
      <circle cx="510" cy="332" r="4.3"/><circle cx="590" cy="282" r="4.3"/><circle cx="590" cy="382" r="4.3"/>
     </g>
     <g font-family="Arial,sans-serif" font-weight="700" fill="#1A2530" text-anchor="middle">
-     <text x="96" y="65" font-size="20">A</text><text x="320" y="245" font-size="20">A</text>
-     <text x="480" y="245" font-size="20">A</text>
-     <text x="178" y="72" font-size="24">W</text>
-     <text x="250" y="80" font-size="17">var</text>
-     <text x="340" y="328" font-size="24">M</text><text x="340" y="350" font-size="16" font-weight="400">3~</text>
-     <text x="21" y="65" font-size="20">L1</text><text x="21" y="95" font-size="20">L2</text><text x="21" y="125" font-size="20">L3</text>
+     <text x="96" y="66" font-size="22">A</text><text x="320" y="246" font-size="22">A</text>
+     <text x="480" y="246" font-size="22">A</text>
+     <text x="178" y="73" font-size="26">W</text>
+     <text x="250" y="81" font-size="20">var</text>
+     <text x="340" y="329" font-size="26">M</text><text x="340" y="352" font-size="19" font-weight="400">3~</text>
+     <text x="21" y="66" font-size="22">L1</text><text x="21" y="96" font-size="22">L2</text><text x="21" y="126" font-size="22">L3</text>
     </g>
     <g font-family="Arial,sans-serif" fill="#1A2530">
-     <text x="12" y="166" font-size="18" fill="#5A666F">Drehstromnetz</text><text x="12" y="188" font-size="18" fill="#5A666F">400 V, 50 Hz</text>
-     <text x="156" y="120" font-size="17">cos</text>
-     <text x="340" y="394" font-size="19" text-anchor="middle">Motor</text>
-     <text x="520" y="424" font-size="19" text-anchor="middle">Kondensatorbatterie</text>
-     <text x="520" y="446" font-size="19" text-anchor="middle">in Dreieckschaltung</text>
-     <text x="300" y="184" font-size="19" fill="#5A666F" text-anchor="end">Q1</text>
-     <text x="424" y="184" font-size="19" fill="#5A666F" text-anchor="end">Q2</text>
-     <text x="300" y="206" font-size="18" text-anchor="end" id="tQ1">aus</text>
-     <text x="424" y="206" font-size="18" text-anchor="end" id="tQ2">aus</text>
+     <text x="10" y="172" font-size="24" fill="#5A666F">Drehstromnetz</text><text x="10" y="200" font-size="24" fill="#5A666F">400 V, 50 Hz</text>
+     <text x="153" y="121" font-size="19">cos</text>
+     <text x="340" y="398" font-size="24" text-anchor="middle">Motor</text>
+     <text x="527" y="430" font-size="24" text-anchor="middle">Kondensatorbatterie</text>
+     <text x="527" y="458" font-size="24" text-anchor="middle">in Dreieckschaltung</text>
+     <text x="300" y="184" font-size="24" fill="#5A666F" text-anchor="end">Q1</text>
+     <text x="418" y="184" font-size="24" fill="#5A666F" text-anchor="end">Q2</text>
+     <text x="300" y="210" font-size="23" text-anchor="end" id="tQ1">aus</text>
+     <text x="418" y="210" font-size="23" text-anchor="end" id="tQ2">aus</text>
     </g>
     <g font-family="Cambria,Caladea,'Noto Serif',Georgia,serif" font-style="italic" font-weight="700" fill="#A34E0E">
-     <text x="90" y="32" font-size="23">I</text>
-     <text x="171" y="30" font-size="22">P</text>
-     <text x="187" y="120" font-size="18" fill="#1A2530">φ</text>
-     <text x="243" y="30" font-size="22">Q</text>
-     <text x="278" y="244" font-size="22">I<tspan font-size="15" font-style="normal" font-family="Arial,sans-serif" dy="5">M</tspan></text>
-     <text x="500" y="244" font-size="22">I<tspan font-size="15" font-style="normal" font-family="Arial,sans-serif" dy="5">bCΔ</tspan></text>
-     <text x="514" y="373" font-size="19" fill="#5A666F">C<tspan font-size="13" font-style="normal" font-family="Arial,sans-serif" dy="4">Δ</tspan></text>
+     <text x="90" y="32" font-size="25">I</text>
+     <text x="170" y="31" font-size="25">P</text>
+     <text x="188" y="121" font-size="20" fill="#1A2530">φ</text>
+     <text x="242" y="31" font-size="25">Q</text>
+     <text x="274" y="245" font-size="25">I<tspan font-size="17" font-style="normal" font-family="Arial,sans-serif" dy="5">M</tspan></text>
+     <text x="500" y="245" font-size="25">I<tspan font-size="17" font-style="normal" font-family="Arial,sans-serif" dy="5">bCΔ</tspan></text>
+     <text x="512" y="372" font-size="22" fill="#5A666F">C<tspan font-size="15" font-style="normal" font-family="Arial,sans-serif" dy="4">Δ</tspan></text>
     </g>
    </svg>
    <div class="legende">Leistungsmesser (W) und Blindleistungsmesser (var) messen in den drei Außenleitern der
