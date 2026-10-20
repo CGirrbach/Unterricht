@@ -149,7 +149,7 @@ var U=400;                              // Leiterspannung in V (ideales Netz, 50
 var USTR=U/Math.sqrt(3);                // Spannung an einem Strang bei angeschlossenem Neutralleiter
 var START={ein:false,r:60,a:0};
 var FARBE=["#1A2530","#C2185B","#1F78C1"];
-var STUFEN=[1,2,5,10];                  // A je div
+var STUFEN=[1,2,5,10,20];               // A je div; 20 A je div für 10 Ω (Scheitelwert 32,66 A, Prüfer 20.10.2026)
 var z={ein:START.ein,r:START.r,a:START.a};
 var $=function(id){return document.getElementById(id);};
 
