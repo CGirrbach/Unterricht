@@ -1,0 +1,372 @@
+<!doctype html>
+<!-- E2EG U26 · Messplatz Drehstromgenerator (Neubau 20.10.2026, Aufgabe IN der Stunde nach dem Muster E1EG B07,
+     E2EG U01 Generator und U06 Oszilloskop). Ersetzt für die neuen Blätter U26_Simulation_Drehstrom.html (zeigte die
+     Summe und den Faktor √3 fertig an, nannte die Formeln im Fußtext, kein Messplatz); die alte Adresse bleibt.
+     Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht und rechnet nichts vor):
+       (1) Die drei Strangspannungen haben denselben Scheitelwert und dieselbe Periode; am Oszilloskop liegen ihre
+           Nulldurchgänge gleicher Richtung je 2 div auseinander, eine Periode sind 6 div: 2 von 6 div sind 120°.
+       (2) Die Summe der drei Augenblickswerte ist in jedem Augenblick null (die Schüler addieren selbst).
+     Rechenmodell: Modellgenerator mit einem Polpaar, Scheitelwert je Strang 10 V, Periodendauer 60 ms
+       (1000 Umdrehungen je Minute). u1N = 10 V · sin α, u2N = 10 V · sin(α − 120°), u3N = 10 V · sin(α − 240°).
+       α ist der Winkel des Nordpols gegen die Achse von Strang U im Uhrzeigersinn; bei α = 0° zeigt der Nordpol auf
+       Strang U (Fluss dort am größten, Spannung null). Anordnung der Stränge nach Europa Fachkunde S. 156, Bild 1
+       (U oben, V rechts unten, W links unten; räumlich je 120°). Das Standbild hält einen Augenblick der
+       gleichmäßigen Drehung fest.
+     Oszilloskop: 10 div × 8 div, Amplitude 5 V je div (û = 2 div), Zeitbasis 2, 5, 10 oder 20 ms je div, getriggert
+       auf den Nulldurchgang von u1N von Minus nach Plus am linken Rand. Bei 10 ms je div ist eine Periode 6 div,
+       bei 20 ms je div 3 div; die Nulldurchgänge liegen dann auf Rasterlinien. Die gestrichelte Linie zeigt den
+       Augenblick des Standbilds (Zeit α durch 360° mal 60 ms).
+     Anzeige mit zwei Nachkommastellen, kein „−0,00“. Prüfmodus ?pruefen: Werte und Nulldurchgänge als JSON.
+     Startstellung neutral: α = 0°, Zeitbasis 5 ms je div (keine Aufgabeneinstellung). -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Drehstromgenerator (U26)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"alpha_grad":0,"zeitbasis_ms_je_div":5},"loesungswerte":{"90°":["10,00 V","−5,00 V","−5,00 V"],"50°":["7,66 V","−9,40 V","1,74 V"],"200°":["−3,42 V","9,85 V","−6,43 V"],"300°":["−8,66 V","0,00 V","8,66 V"],"10 ms je div":"Periode 6 div, Abstand 2 div"},"quelle":"Europa Fachkunde S. 156 Bild 1 und Versuch 1, S. 157 Bild 3; Tabellenbuch Elektrotechnik S. 35 (Phasenverschiebung, Formel 9)"}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;
+       --k1:#1A2530;--k2:#C2185B;--k3:#1F78C1}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:1000px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .fz{font-family:Cambria,Caladea,'Noto Serif',Georgia,serif;font-style:italic}
+ .buehne{display:grid;grid-template-columns:1fr;gap:14px;align-items:start}
+ @media(min-width:760px){.buehne{grid-template-columns:1fr 1fr}}
+ canvas{width:100%;height:auto;display:block;touch-action:manipulation}
+ #gen{border:1px solid var(--linie);background:#fff}
+ .legende{font-size:13.5px;color:var(--grau);margin-top:4px}
+ .lcd{background:#20313a;color:#9BF0B4;font-variant-numeric:tabular-nums;font-size:30px;font-weight:700;padding:6px 12px;border-radius:4px;text-align:right}
+ .lcd small{font-size:15px;color:#cfe;font-weight:400;float:left;margin-top:10px}
+ input[type=range]{width:100%;height:44px;accent-color:var(--kupfer);margin:8px 0 2px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+ button{font:inherit;font-size:16px;min-height:48px;min-width:58px;padding:6px 12px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+ button.an{background:var(--kupfer);color:#fff}
+ button.zurueck{border-color:var(--ink);color:var(--ink)}
+ .schritte button{flex:1 1 60px;font-weight:700}
+ .messer{border:1.4px solid var(--ink);background:var(--hell);padding:8px;margin-top:12px}
+ .messer canvas{background:var(--hell)}
+ .werte{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:4px}
+ .wert{text-align:center;font-variant-numeric:tabular-nums;font-size:24px;font-weight:700;white-space:nowrap}
+ .wert .name{display:block;font-size:14px;font-weight:700;color:var(--grau)}
+ .oszi{margin-top:16px}
+ .oszi h2{font-size:17px;margin:0 0 6px}
+ .schirm{border:3px solid var(--ink);background:#30363c;padding:8px;border-radius:6px;max-width:680px}
+ #osz{background:#DDE8DC}
+ .einstellung{display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center;color:#fff;font-size:15px;padding:8px 2px 2px}
+ .einstellung b{color:#FFE66B}
+ .kanal{display:inline-flex;align-items:center;gap:6px}
+ .strich{display:inline-block;width:28px;height:6px;border-radius:2px;border:1.5px solid #fff}
+ .bruch{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;font-size:.78em;line-height:1.05}
+ .bruch>span:first-child{border-bottom:1.3px solid currentColor;padding:0 2px}
+ .bruch>span:last-child{padding:0 2px}
+ .titel{font-size:15px;font-weight:700;margin:12px 0 5px}
+ .hinweis{font-size:14px;color:var(--grau);margin-top:10px}
+ #pruefbericht{display:none}
+ @media(max-width:420px){.lcd{font-size:26px} .wert{font-size:20px} button{min-width:52px;padding:6px 8px;font-size:15px} .einstellung{font-size:14px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E2EG · LF 5 · U26</div><h1>Messplatz Drehstromgenerator</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Den Drehwinkel <span class="fz">α</span> des Polrads mit dem Schieber
+  oder den Knöpfen einstellen. Die drei Spannungsmesser zeigen die Augenblickswerte der drei Strangspannungen in
+  diesem Augenblick. Am Oszilloskop die Zeitbasis wählen und Kästchen (div) zählen.</div>
+
+ <div class="buehne">
+  <div>
+   <canvas id="gen" width="480" height="450" data-quelle="Anordnung nach Europa Fachkunde S. 156, Bild 1 (Ständer mit drei um 120° versetzten Strängen U, V, W und Polrad)"
+    aria-label="Querschnitt eines Generators: Ständer mit drei Spulen, oben Strang U, rechts unten Strang V, links unten Strang W, in der Mitte das Polrad mit Nord- und Südpol."></canvas>
+   <div class="legende">Blick in Richtung der Drehachse. Das Polrad dreht sich gleichmäßig im Uhrzeigersinn; das Bild
+    hält den Augenblick beim Drehwinkel <span class="fz">α</span> fest. <span class="fz">α</span> zählt ab der Achse
+    von Strang U.</div>
+  </div>
+  <div>
+   <div class="lcd" id="aA" aria-live="polite"><small>Drehwinkel α</small>0°</div>
+   <label for="wnk" class="titel" style="display:block">Drehwinkel einstellen</label>
+   <input type="range" id="wnk" min="0" max="360" step="1" value="0" aria-label="Drehwinkel in Grad">
+   <div class="knoepfe schritte">
+    <button type="button" id="m10" aria-label="10 Grad zurück">◀ 10°</button>
+    <button type="button" id="m1" aria-label="1 Grad zurück">◀ 1°</button>
+    <button type="button" id="p1" aria-label="1 Grad weiter">1° ▶</button>
+    <button type="button" id="p10" aria-label="10 Grad weiter">10° ▶</button>
+   </div>
+   <div class="messer">
+    <canvas id="mes" width="480" height="130" aria-label="Drei Spannungsmesser mit Nullpunkt in der Skalenmitte, Skala von minus 10 V bis plus 10 V"></canvas>
+    <div class="werte" aria-live="polite">
+     <div class="wert"><span class="name">Strang U: <span class="fz">u</span><sub>1N</sub></span><span id="w1">0,00 V</span></div>
+     <div class="wert"><span class="name">Strang V: <span class="fz">u</span><sub>2N</sub></span><span id="w2">−8,66 V</span></div>
+     <div class="wert"><span class="name">Strang W: <span class="fz">u</span><sub>3N</sub></span><span id="w3">8,66 V</span></div>
+    </div>
+   </div>
+   <div class="legende">Jeder Spannungsmesser misst die Spannung eines Strangs gegen N, den gemeinsamen Punkt der
+    Strangenden U2, V2 und W2.</div>
+  </div>
+ </div>
+
+ <div class="oszi">
+  <h2>Dreikanal-Oszilloskop</h2>
+  <div class="schirm">
+   <canvas id="osz" width="600" height="480" aria-label="Bildschirm des Oszilloskops mit 10 mal 8 Kästchen und den Kurven der drei Strangspannungen"></canvas>
+   <div class="einstellung" aria-live="polite">
+    <span class="kanal"><span class="strich" style="background:#1A2530"></span>Kanal 1: <span class="fz">u</span><sub>1N</sub></span>
+    <span class="kanal"><span class="strich" style="background:#C2185B"></span>Kanal 2: <span class="fz">u</span><sub>2N</sub></span>
+    <span class="kanal"><span class="strich" style="background:#1F78C1"></span>Kanal 3: <span class="fz">u</span><sub>3N</sub></span>
+    <span>Amplitude: <b>5 <span class="bruch"><span>V</span><span>div</span></span></b></span>
+    <span>Zeitbasis: <b id="aZ"></b></span>
+   </div>
+  </div>
+  <div class="titel">Zeitbasis am Oszilloskop</div>
+  <div class="knoepfe" id="zeitbasen"></div>
+  <div class="titel">Neu beginnen</div>
+  <div class="knoepfe"><button class="zurueck" id="bReset" type="button">Zurücksetzen</button></div>
+  <div class="hinweis">Der Bildschirm ist 10 div breit und 8 div hoch; die Mittellinien tragen Teilstriche im Abstand
+   von 0,2 div. Das Oszilloskop ist auf <span class="fz">u</span><sub>1N</sub> getriggert: <span class="fz">u</span><sub>1N</sub> beginnt am
+   linken Rand mit dem Nulldurchgang von Minus nach Plus. Die gestrichelte Linie markiert den Augenblick des
+   Standbilds.</div>
+ </div>
+ <pre id="pruefbericht"></pre>
+</div>
+
+<script>
+(function(){
+"use strict";
+var UMAX=10;                      // Scheitelwert je Strang in V (Modellgenerator)
+var T_MS=60;                      // Periodendauer in ms (1000 Umdrehungen je Minute, ein Polpaar)
+var ZEITBASEN=[2,5,10,20];        // ms je div
+var START={a:0,z:5};
+var FARBE=["#1A2530","#C2185B","#1F78C1"];
+var NAME=["U","V","W"];
+var z={a:START.a,z:START.z};
+var $=function(id){return document.getElementById(id);};
+
+function spannung(k,a){ return UMAX*Math.sin((a-120*k)*Math.PI/180); }
+function text(u){
+  var s=(Math.round(u*100)/100).toFixed(2);
+  if(s==="-0.00") s="0.00";
+  return s.replace("-","−").replace(".",",")+" V";
+}
+function bruch(zz,nn){return "<span class='bruch'><span>"+zz+"</span><span>"+nn+"</span></span>";}
+
+// Formelzeichen u mit Index (1N): kursiv u, aufrechter Index
+function uIndex(g,txt,idx,x,y,gr,farbe){
+  g.fillStyle=farbe; g.textBaseline="alphabetic"; g.textAlign="left";
+  g.font="italic bold "+gr+"px Cambria,Caladea,Georgia,serif";
+  var b=g.measureText(txt).width;
+  g.fillText(txt,x,y);
+  g.font="bold "+Math.round(gr*0.68)+"px 'Noto Sans',system-ui,sans-serif";
+  g.fillText(idx,x+b+1,y+Math.round(gr*0.28));
+}
+
+// ---------------- Generator ----------------
+var cg=$("gen"), gg=cg.getContext("2d");
+var GX=240, GY=232, RA=192, RI=146;
+var ACHSE=[-90,30,150];             // Bildschirmwinkel der Strangachsen (y nach unten): U oben, V rechts unten, W links unten
+function pol(r,w){ var b=w*Math.PI/180; return [GX+r*Math.cos(b), GY+r*Math.sin(b)]; }
+function pfeilspitze(g,x,y,w,l,farbe){
+  g.fillStyle=farbe; g.beginPath(); g.moveTo(x,y);
+  g.lineTo(x-l*Math.cos(w-0.42),y-l*Math.sin(w-0.42)); g.lineTo(x-l*Math.cos(w+0.42),y-l*Math.sin(w+0.42));
+  g.closePath(); g.fill();
+}
+function schild(g,txt,x,y,farbe){                    // Klemmenname mit weißem Grund (lesbar auf Ring und Leitung)
+  g.font="bold 19px 'Noto Sans',system-ui,sans-serif"; g.textAlign="center"; g.textBaseline="middle";
+  var b=g.measureText(txt).width+8;
+  g.fillStyle="rgba(255,255,255,0.92)"; g.fillRect(x-b/2,y-12,b,24);
+  g.fillStyle=farbe; g.fillText(txt,x,y+1);
+}
+function zeichneGenerator(){
+  var g=gg; g.clearRect(0,0,cg.width,cg.height);
+  // Ständer (Ring)
+  g.fillStyle="#D5D9DD"; g.strokeStyle="#1A2530"; g.lineWidth=2;
+  g.beginPath(); g.arc(GX,GY,RA,0,2*Math.PI); g.arc(GX,GY,RI,0,2*Math.PI,true); g.fill("evenodd");
+  g.beginPath(); g.arc(GX,GY,RA,0,2*Math.PI); g.stroke();
+  g.beginPath(); g.arc(GX,GY,RI,0,2*Math.PI); g.stroke();
+  // Zähne mit Spulen
+  for(var k=0;k<3;k++){
+    var w=ACHSE[k]*Math.PI/180, c=Math.cos(w), s=Math.sin(w), nx=-s, ny=c;
+    function P(r,q){ return [GX+r*c+q*nx, GY+r*s+q*ny]; }
+    var zahn=[P(RI+2,-20),P(RI+2,20),P(112,20),P(112,40),P(98,40),P(98,-40),P(112,-40),P(112,-20)];
+    g.fillStyle="#D5D9DD"; g.strokeStyle="#1A2530"; g.lineWidth=2;
+    g.beginPath(); g.moveTo(zahn[0][0],zahn[0][1]);
+    for(var i=1;i<zahn.length;i++) g.lineTo(zahn[i][0],zahn[i][1]);
+    g.closePath(); g.fill(); g.stroke();
+    // Wicklung: Windungen quer über den Zahn
+    g.strokeStyle=FARBE[k]; g.lineWidth=3.2;
+    for(var r=118;r<=142;r+=6){ var a1=P(r,-27), a2=P(r+3,27); g.beginPath(); g.moveTo(a1[0],a1[1]); g.lineTo(a2[0],a2[1]); g.stroke(); }
+    // Anschlüsse: Anfang (1) und Ende (2)
+    var anf=P(120,-27), end=P(142,-27), anfA=P(120,-58), endA=P(150,-58);
+    g.lineWidth=2.4;
+    g.beginPath(); g.moveTo(anf[0],anf[1]); g.lineTo(anfA[0],anfA[1]); g.stroke();
+    g.beginPath(); g.moveTo(end[0],end[1]); g.lineTo(endA[0],endA[1]); g.stroke();
+    g.fillStyle=FARBE[k];
+    g.beginPath(); g.arc(anfA[0],anfA[1],4.5,0,2*Math.PI); g.fill();
+    g.beginPath(); g.arc(endA[0],endA[1],4.5,0,2*Math.PI); g.fill();
+    var t1=P(118,-84), t2=P(152,-84);
+    schild(g,NAME[k]+"1",t1[0],t1[1],FARBE[k]); schild(g,NAME[k]+"2",t2[0],t2[1],FARBE[k]);
+  }
+  // räumlicher Versatz 120° zwischen Strang U und Strang V (außen)
+  g.strokeStyle="#5A666F"; g.lineWidth=1.6; g.setLineDash([5,4]);
+  for(var j=0;j<2;j++){ var e=pol(RA+4,ACHSE[j]), f=pol(RA+26,ACHSE[j]); g.beginPath(); g.moveTo(e[0],e[1]); g.lineTo(f[0],f[1]); g.stroke(); }
+  g.setLineDash([]);
+  g.beginPath(); g.arc(GX,GY,RA+18,ACHSE[0]*Math.PI/180+0.06,ACHSE[1]*Math.PI/180-0.06); g.stroke();
+  var sp=pol(RA+18,ACHSE[1]-3); pfeilspitze(g,sp[0],sp[1],(ACHSE[1]+90-3)*Math.PI/180,11,"#5A666F");
+  var lb=pol(RA+36,-30); g.fillStyle="#5A666F"; g.font="bold 18px 'Noto Sans',system-ui,sans-serif";
+  g.textAlign="center"; g.textBaseline="middle"; g.fillText("120°",lb[0],lb[1]);
+
+  // Bezugslinie (Achse Strang U) und Winkelbogen α
+  var wa=-90+z.a;                                        // Bildschirmwinkel des Nordpols
+  g.strokeStyle="#9AA5AE"; g.lineWidth=1.5; g.setLineDash([6,5]);
+  var o=pol(96,-90); g.beginPath(); g.moveTo(GX,GY); g.lineTo(o[0],o[1]); g.stroke(); g.setLineDash([]);
+  if(z.a%360>0.5){
+    g.strokeStyle="#A34E0E"; g.lineWidth=2.6;
+    g.beginPath(); g.arc(GX,GY,30,-Math.PI/2,wa*Math.PI/180); g.stroke();
+    var wm=(-90+z.a/2), lp=pol(z.a<40?52:46,wm);
+    g.fillStyle="#A34E0E"; g.font="italic bold 22px Cambria,Caladea,Georgia,serif"; g.textAlign="center"; g.textBaseline="middle";
+    g.fillText("α",lp[0],lp[1]);
+  }
+  // Polrad (Stabmagnet), Nordpol in Richtung wa
+  g.save(); g.translate(GX,GY); g.rotate(wa*Math.PI/180);
+  g.fillStyle="#EE6A4F"; g.fillRect(0,-22,88,44); g.fillStyle="#5FB46C"; g.fillRect(-88,-22,88,44);
+  g.strokeStyle="#1A2530"; g.lineWidth=2; g.strokeRect(-88,-22,176,44);
+  g.fillStyle="#fff"; g.font="bold 24px 'Noto Sans',system-ui,sans-serif"; g.textAlign="center"; g.textBaseline="middle";
+  g.save(); g.translate(56,0); g.rotate(-wa*Math.PI/180); g.fillText("N",0,1); g.restore();
+  g.save(); g.translate(-56,0); g.rotate(-wa*Math.PI/180); g.fillText("S",0,1); g.restore();
+  g.restore();
+  g.fillStyle="#1A2530"; g.beginPath(); g.arc(GX,GY,7,0,2*Math.PI); g.fill();
+  // Drehrichtung (im Uhrzeigersinn), links oben im Bild
+  g.strokeStyle="#5A666F"; g.lineWidth=2.4;
+  g.beginPath(); g.arc(40,392,24,Math.PI*0.75,Math.PI*1.95); g.stroke();
+  var q=[40+24*Math.cos(Math.PI*1.95),392+24*Math.sin(Math.PI*1.95)];
+  pfeilspitze(g,q[0],q[1],Math.PI*1.95+Math.PI/2,12,"#5A666F");
+  g.fillStyle="#5A666F"; g.font="17px 'Noto Sans',system-ui,sans-serif"; g.textAlign="left"; g.textBaseline="middle";
+  g.fillText("Drehrichtung",6,436);
+}
+
+// ---------------- Spannungsmesser ----------------
+var cm=$("mes"), gm=cm.getContext("2d");
+function zeichneMesser(){
+  var g=gm, W=cm.width, H=cm.height; g.clearRect(0,0,W,H);
+  for(var k=0;k<3;k++){
+    var cx=80+160*k, cy=H-18, r=74, wmax=45*Math.PI/180;
+    g.strokeStyle="#1A2530"; g.lineWidth=2;
+    g.beginPath(); g.arc(cx,cy,r,-Math.PI/2-wmax,-Math.PI/2+wmax); g.stroke();
+    g.fillStyle="#1A2530"; g.textAlign="center"; g.textBaseline="middle";
+    for(var t=-10;t<=10;t++){
+      var w=-Math.PI/2+t/10*wmax, l=(t%5===0)?12:6;
+      g.lineWidth=(t%5===0)?2.4:1.2;
+      g.beginPath(); g.moveTo(cx+r*Math.cos(w),cy+r*Math.sin(w)); g.lineTo(cx+(r-l)*Math.cos(w),cy+(r-l)*Math.sin(w)); g.stroke();
+      if(t%10===0){ g.font="bold 20px 'Noto Sans',system-ui,sans-serif";
+        g.fillText((t<0?"−":"")+Math.abs(t),cx+(r+17)*Math.cos(w),cy+(r+15)*Math.sin(w)); }
+    }
+    g.font="bold 18px 'Noto Sans',system-ui,sans-serif"; g.fillText("V",cx+34,cy-12);
+    uIndex(g,"u",(k+1)+"N",cx-62,cy-6,22,FARBE[k]);
+    var u=spannung(k,z.a), wz=-Math.PI/2+Math.max(-1.06,Math.min(1.06,u/UMAX))*wmax;
+    g.strokeStyle=FARBE[k]; g.lineWidth=4;
+    g.beginPath(); g.moveTo(cx,cy); g.lineTo(cx+(r-5)*Math.cos(wz),cy+(r-5)*Math.sin(wz)); g.stroke();
+    g.fillStyle="#1A2530"; g.beginPath(); g.arc(cx,cy,6,0,2*Math.PI); g.fill();
+  }
+}
+
+// ---------------- Oszilloskop ----------------
+var co=$("osz"), go=co.getContext("2d");
+var DPR=Math.max(1,Math.min(3,window.devicePixelRatio||1));
+var BW=600, BH=480, DIV=60, VDIV=5;                 // 10 × 8 div zu je 60 Bildpunkten, 5 V je div
+co.width=BW*DPR; co.height=BH*DPR; go.scale(DPR,DPR);
+var SPUR=["#1A2530","#C2185B","#1F78C1"];
+function raster(){
+  var g=go; g.fillStyle="#DDE8DC"; g.fillRect(0,0,BW,BH);
+  g.strokeStyle="rgba(26,37,48,0.42)"; g.lineWidth=1;
+  for(var i=0;i<=10;i++){ var x=Math.round(i*DIV)+0.5; if(i===10) x-=1; g.beginPath(); g.moveTo(x,0); g.lineTo(x,BH); g.stroke(); }
+  for(var j=0;j<=8;j++){ var y=Math.round(j*DIV)+0.5; if(j===8) y-=1; g.beginPath(); g.moveTo(0,y); g.lineTo(BW,y); g.stroke(); }
+  g.strokeStyle="#1A2530"; g.lineWidth=2;
+  g.beginPath(); g.moveTo(0,BH/2); g.lineTo(BW,BH/2); g.moveTo(BW/2,0); g.lineTo(BW/2,BH); g.stroke();
+  g.lineWidth=1.5;
+  for(var a=0;a<=50;a++){ var xt=a*DIV/5; g.beginPath(); g.moveTo(xt,BH/2-5); g.lineTo(xt,BH/2+5); g.stroke(); }
+  for(var b=0;b<=40;b++){ var yt=b*DIV/5; g.beginPath(); g.moveTo(BW/2-5,yt); g.lineTo(BW/2+5,yt); g.stroke(); }
+}
+function punkte(k){                                   // x in Bildpunkten über 10 div, y aus u in V
+  var tGes=10*z.z, n=1200, p=[];
+  for(var i=0;i<=n;i++){
+    var t=tGes*i/n, a=360*t/T_MS;
+    p.push([BW*i/n, BH/2-spannung(k,a)/VDIV*DIV]);
+  }
+  return p;
+}
+function zeichneOszi(){
+  var g=go; raster();
+  for(var k=0;k<3;k++){
+    var p=punkte(k);
+    g.strokeStyle=SPUR[k]; g.lineWidth=3; g.lineJoin="round";
+    g.beginPath(); g.moveTo(p[0][0],p[0][1]); for(var i=1;i<p.length;i++) g.lineTo(p[i][0],p[i][1]); g.stroke();
+    // Beschriftung am ersten Scheitel, der ganz auf dem Schirm liegt
+    var tScheitel=(90+120*k)/360*T_MS, xs=tScheitel/z.z*DIV;
+    if(xs<=BW-70){ uIndex(g,"u",(k+1)+"N",xs-14,BH/2-UMAX/VDIV*DIV-12,22,SPUR[k]); }
+  }
+  // Augenblick des Standbilds
+  var xa=(z.a/360*T_MS)/z.z*DIV;
+  if(xa<=BW){
+    g.strokeStyle="#A34E0E"; g.lineWidth=2; g.setLineDash([7,5]);
+    g.beginPath(); g.moveTo(xa,0); g.lineTo(xa,BH); g.stroke(); g.setLineDash([]);
+    for(var k2=0;k2<3;k2++){
+      g.fillStyle=SPUR[k2]; g.beginPath(); g.arc(xa,BH/2-spannung(k2,z.a)/VDIV*DIV,6,0,2*Math.PI); g.fill();
+    }
+  }
+}
+
+// ---------------- Bedienung ----------------
+function auffrischen(){
+  $("aA").innerHTML="<small>Drehwinkel α</small>"+z.a+"°";
+  $("wnk").value=z.a;
+  for(var k=0;k<3;k++) $("w"+(k+1)).textContent=text(spannung(k,z.a));
+  $("aZ").innerHTML=z.z+" "+bruch("ms","div");
+  Array.prototype.forEach.call($("zeitbasen").children,function(b){b.classList.toggle("an",parseFloat(b.dataset.wert)===z.z);});
+  zeichneGenerator(); zeichneMesser(); zeichneOszi();
+}
+function setzeWinkel(a){ a=Math.round(a); if(a<0) a+=360; if(a>360) a-=360; z.a=a; auffrischen(); }
+$("wnk").addEventListener("input",function(){ setzeWinkel(+this.value); });
+$("m10").onclick=function(){ setzeWinkel(z.a-10); };
+$("m1").onclick=function(){ setzeWinkel(z.a-1); };
+$("p1").onclick=function(){ setzeWinkel(z.a+1); };
+$("p10").onclick=function(){ setzeWinkel(z.a+10); };
+ZEITBASEN.forEach(function(w){
+  var b=document.createElement("button"); b.type="button"; b.dataset.wert=w;
+  b.innerHTML=w+" "+bruch("ms","div"); b.setAttribute("aria-label","Zeitbasis "+w+" Millisekunden je div");
+  b.onclick=function(){ z.z=w; auffrischen(); }; $("zeitbasen").appendChild(b);
+});
+$("bReset").onclick=function(){ z={a:START.a,z:START.z}; auffrischen(); };
+window.__stelle=function(a,zb){ z.a=a; if(zb) z.z=zb; auffrischen();
+  return [$("w1").textContent,$("w2").textContent,$("w3").textContent].join(" | "); };
+
+// ---------------- Prüfmodus ----------------
+function nulldurchgaenge(k){                          // aus genau den gezeichneten Punkten; |y| < 1e-6 px gilt als null
+  var p=punkte(k), erg=[], eps=1e-6;
+  function y(i){ return BH/2-p[i][1]; }
+  if(Math.abs(y(0))<eps) erg.push({div:0,richtung:y(1)>0?"steigend":"fallend"});
+  for(var i=1;i<p.length;i++){
+    var y0=y(i-1), y1=y(i);
+    if(Math.abs(y0)<eps) continue;
+    if(Math.abs(y1)<eps){
+      if(i<p.length-1) erg.push({div:Math.round(p[i][0]/DIV*1000)/1000,richtung:y0<0?"steigend":"fallend"});
+      else erg.push({div:10,richtung:y0<0?"steigend":"fallend"});
+      continue;
+    }
+    if(y0*y1<0){
+      var x=p[i-1][0]+(p[i][0]-p[i-1][0])*(0-y0)/(y1-y0);
+      erg.push({div:Math.round(x/DIV*1000)/1000,richtung:y1>y0?"steigend":"fallend"});
+    }
+  }
+  return erg;
+}
+if(/[?&]pruefen\b/.test(location.search)){
+  var bericht={werte:{},nulldurchgaenge:{}};
+  [0,50,90,200,300].forEach(function(a){ z.a=a; bericht.werte[a+"°"]=[0,1,2].map(function(k){return text(spannung(k,a));}); });
+  ZEITBASEN.forEach(function(w){ z.z=w; bericht.nulldurchgaenge[w+" ms/div"]=[0,1,2].map(nulldurchgaenge); });
+  z={a:START.a,z:START.z};
+  $("pruefbericht").textContent=JSON.stringify(bericht);
+}
+auffrischen();
+})();
+</script>
+</body></html>
