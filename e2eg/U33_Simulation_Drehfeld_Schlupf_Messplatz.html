@@ -1,0 +1,264 @@
+<!doctype html>
+<!-- E2EG U33 · Messplatz Drehfeld und Läufer (Neubau 20.10.2026, Aufgabe IN der Stunde nach dem Muster E1EG B07 und
+     E2EG U26, U29). Ersetzt für die neuen Blätter U33_Simulation_Schlupf.html: Die alte Seite stellte den Schlupf direkt
+     mit einem Regler ein (statt einer Belastung), nannte im Fußtext die Formeln, rechnete Schlupf und Läuferfrequenz
+     im Bild fertig vor, deutete jede Einstellung in einem fertigen Satz und hatte eine feste Frequenz von 50 Hz. Die
+     alte Adresse bleibt für die alten Blätter unverändert.
+     Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt keine Formel und rechnet nichts vor):
+       (1) Die Drehzahl des Drehfeldes hängt nur von der Frequenz f und der Polpaarzahl p ab: doppelte Polpaarzahl,
+           halbe Drehzahl; halbe Frequenz, halbe Drehzahl; in s⁻¹ ist sie f durch p.
+       (2) Der Läufer dreht sich immer langsamer als das Drehfeld, auch ohne Belastung (Lager- und Luftreibung).
+       (3) Je größer die Belastung, desto größer die Differenz der Drehzahlen und damit der Schlupf.
+     Rechenmodell (Europa Fachkunde S. 493 und 494; Tabellenbuch S. 532, Formel 5 und 13):
+       Drehfelddrehzahl n_s = f / p, angezeigt in min⁻¹ (· 60 s je min).
+       Läufer: im stabilen Arbeitsbereich wächst die Läuferfrequenz linear mit dem Moment. Frequenzumrichter mit fester
+       Spannung je Hertz (gleicher Fluss bei jeder Frequenz): die Läuferfrequenz hängt nur von der Belastung ab,
+       f_L = 0,2 Hz + 0,016 Hz je Prozent Belastung (Leerlauf 0,2 Hz für Lager- und Luftreibung, Bemessungslast 1,8 Hz,
+       bei 50 Hz also Schlupf 3,6 %). Drehzahldifferenz n_s − n = f_L / p, in min⁻¹ · 60.
+       Bei f in 5-Hz-Schritten, p = 1 bis 4 und Belastung in 25-%-Schritten sind alle Anzeigen ganze Zahlen (geprüft im
+       Prüfmodus); es wird nichts gerundet.
+     Anzeigen: Drehzahlmesser in min⁻¹ (ganze Zahlen), Frequenz in Hz. Prüfmodus ?pruefen: Werte als JSON.
+     Startstellung neutral: Schalter aus (beide Drehzahlen 0), f = 35 Hz, p = 4, Bremse 25 % (keine Einstellung der
+     Aufgaben). -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Drehfeld und Läufer (U33)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"schalter":"aus","f_hz":35,"p":4,"bremse_prozent":25},"loesungswerte":{"Aufgabe 1":{"50 Hz, p = 1":"3000","50 Hz, p = 2":"1500","50 Hz, p = 3":"1000","25 Hz, p = 2":"750"},"Aufgabe 4 (50 Hz, p = 2)":{"0 %":["1500","1494"],"50 %":["1500","1470"],"100 %":["1500","1446"]}},"quelle":"Europa Fachkunde S. 493 und 494; Tabellenbuch Elektrotechnik S. 532, Formel 5 und 13"}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:1000px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .fz{font-family:Cambria,Caladea,'Noto Serif',Georgia,serif;font-style:italic}
+ /* Drehzahlmesser: am Handy oben fest, damit die Werte beim Einstellen sichtbar bleiben (R7) */
+ .anzeige{position:sticky;top:0;z-index:5;background:#fff;padding:6px 0 8px;border-bottom:1px solid var(--linie);margin-bottom:12px}
+ .messer{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+ .geraet{border:1.4px solid var(--ink);background:var(--hell);padding:5px 8px}
+ .geraet .name{display:block;font-size:14px;font-weight:700;color:var(--grau)}
+ .lcd{background:#20313a;color:#9BF0B4;font-variant-numeric:tabular-nums;font-size:30px;font-weight:700;padding:4px 10px;border-radius:4px;text-align:right;white-space:nowrap}
+ .lcd .einh{font-size:17px;color:#cfe;font-weight:400}
+ .stand{font-size:14px;color:var(--grau);margin-top:6px}
+ .buehne{display:grid;grid-template-columns:1fr;gap:14px;align-items:start}
+ @media(min-width:760px){.buehne{grid-template-columns:1fr 1fr}}
+ canvas{width:100%;height:auto;display:block;touch-action:manipulation}
+ #motor{border:1px solid var(--linie);background:#fff;max-width:440px;margin:0 auto}
+ .legende{font-size:13.5px;color:var(--grau);margin-top:4px}
+ .titel{font-size:15px;font-weight:700;margin:12px 0 5px}
+ .titel:first-child{margin-top:0}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+ button{font:inherit;font-size:16px;min-height:48px;min-width:52px;padding:6px 12px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+ button.an{background:var(--kupfer);color:#fff}
+ button.zurueck{border-color:var(--ink);color:var(--ink)}
+ #bQ{width:100%;font-weight:700;font-size:18px}
+ .fwahl{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center}
+ .fwahl .lcd{font-size:26px}
+ input[type=range]{width:100%;height:44px;accent-color:var(--kupfer);margin:6px 0 2px}
+ .pwahl{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+ .pwahl button{flex-direction:column;gap:0;font-weight:700;line-height:1.15;padding:4px 4px}
+ .bwahl button{flex:1 1 70px;font-weight:700}
+ .pwahl button small{font-weight:400;font-size:13px}
+ .hinweis{font-size:14px;color:var(--grau);margin-top:12px}
+ #pruefbericht{display:none}
+ @media(max-width:420px){.lcd{font-size:25px} .lcd .einh{font-size:14px} .geraet .name{font-size:13px}
+   button{min-width:46px;padding:6px 8px;font-size:15px} .kopf h1{font-size:19px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E2EG · LF 5 · U33</div><h1>Messplatz Drehfeld und Läufer</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Ein Drehstrom-Asynchronmotor mit Käfigläufer ist an einen
+  Frequenzumrichter angeschlossen; der liefert Drehstrom mit einstellbarer Frequenz <span class="fz">f</span>. Wählen
+  Sie den Motor (Polpaarzahl <span class="fz">p</span>) und die Frequenz, schalten Sie ein und belasten Sie die Welle
+  mit der Bremse. Die beiden Drehzahlmesser zeigen die Drehzahl des Drehfeldes und die Drehzahl des Läufers.</div>
+
+ <div class="anzeige" aria-live="polite">
+  <div class="messer">
+   <div class="geraet"><span class="name">Drehfeld <span class="fz">n</span><sub>s</sub></span>
+    <div class="lcd" id="mNs">0 <span class="einh">min<sup>−1</sup></span></div></div>
+   <div class="geraet"><span class="name">Läufer <span class="fz">n</span></span>
+    <div class="lcd" id="mN">0 <span class="einh">min<sup>−1</sup></span></div></div>
+  </div>
+  <div class="stand" id="stand"></div>
+ </div>
+
+ <div class="buehne">
+  <div>
+   <canvas id="motor" width="440" height="440" data-quelle="Querschnitt nach Europa Fachkunde S. 494, Bild 2 b (Ständer, Läufer mit Käfigwicklung, Drehfeld Φ, Drehrichtung n_s) und S. 493, Bild 2 (Pole des zwei- und vierpoligen Drehfeldes)"
+    aria-label="Querschnitt des Motors: Ständer mit den Polen des Drehfeldes, darin der Käfigläufer mit einer Messmarke. Bild in Zeitlupe."></canvas>
+   <div class="legende">Querschnitt in Zeitlupe (100-mal langsamer). Rot N und grün S: die Pole des Drehfeldes,
+    die grünen Pfeile zeigen das Feld Φ. Der schwarze Strich ist die Messmarke auf dem Läufer.</div>
+  </div>
+  <div>
+   <div class="titel">Schalter</div>
+   <button type="button" id="bQ" aria-pressed="false">Schalter ist AUS: einschalten</button>
+   <div class="titel">Motor (Polpaarzahl <span class="fz">p</span>)</div>
+   <div class="knoepfe pwahl" id="pwahl">
+    <button type="button" data-p="1"><span><span class="fz">p</span>&nbsp;=&nbsp;1</span><small>2&nbsp;Pole</small></button>
+    <button type="button" data-p="2"><span><span class="fz">p</span>&nbsp;=&nbsp;2</span><small>4&nbsp;Pole</small></button>
+    <button type="button" data-p="3"><span><span class="fz">p</span>&nbsp;=&nbsp;3</span><small>6&nbsp;Pole</small></button>
+    <button type="button" data-p="4"><span><span class="fz">p</span>&nbsp;=&nbsp;4</span><small>8&nbsp;Pole</small></button>
+   </div>
+   <div class="titel">Frequenz <span class="fz">f</span> am Frequenzumrichter</div>
+   <div class="fwahl">
+    <button type="button" id="fm" aria-label="5 Hertz weniger">◀ 5</button>
+    <div class="lcd" id="aF">35 <span class="einh">Hz</span></div>
+    <button type="button" id="fp" aria-label="5 Hertz mehr">5 ▶</button>
+   </div>
+   <input type="range" id="fr" min="5" max="60" step="5" value="35" aria-label="Frequenz in Hertz">
+   <div class="titel">Bremse: Belastung in % der Bemessungslast</div>
+   <div class="knoepfe bwahl" id="bwahl">
+    <button type="button" data-b="0">0&nbsp;%</button><button type="button" data-b="25">25&nbsp;%</button>
+    <button type="button" data-b="50">50&nbsp;%</button><button type="button" data-b="75">75&nbsp;%</button>
+    <button type="button" data-b="100">100&nbsp;%</button><button type="button" data-b="125">125&nbsp;%</button>
+   </div>
+   <div class="titel">Neu beginnen</div>
+   <div class="knoepfe"><button class="zurueck" id="bReset" type="button">Zurücksetzen</button></div>
+  </div>
+ </div>
+ <div class="hinweis">Die Drehzahlmesser zeigen ganze Umdrehungen je Minute. Bei 0 % Bremse läuft der Motor im
+  Leerlauf.</div>
+ <pre id="pruefbericht"></pre>
+</div>
+
+<script>
+(function(){
+"use strict";
+var START={ein:false,f:35,p:4,b:25};
+var z={ein:START.ein,f:START.f,p:START.p,b:START.b};
+var $=function(id){return document.getElementById(id);};
+
+// ---------------- Rechenmodell (ganzzahlig, siehe Kopf) ----------------
+function drehfeld(){ return z.ein ? 60*z.f/z.p : 0; }              // min⁻¹
+function laeufer(){                                                // min⁻¹
+  if(!z.ein) return 0;
+  var fl60 = 12 + 24*(z.b/25);                                    // 60 · Läuferfrequenz in Hz: 12 … 132
+  return Math.max(0, 60*z.f/z.p - fl60/z.p);
+}
+function ganz(x){ return String(Math.round(x)); }
+
+// ---------------- Querschnitt ----------------
+var cv=$("motor"), g=cv.getContext("2d");
+var DPR=Math.max(1,Math.min(3,window.devicePixelRatio||1));
+var BW=440, BH=440;
+cv.width=BW*DPR; cv.height=BH*DPR; g.scale(DPR,DPR);
+var MX=220, MY=212, RA=196, RI=128, RL=112;
+var wFeld=0, wLaeufer=0, tAlt=null;
+var ROT="#D7263D", GRUEN="#2F9E44", BLAUH="#8DCDF0", BLAUD="#1F78C1";
+
+function pfeil(x1,y1,x2,y2,farbe,breite){
+  g.strokeStyle=farbe; g.fillStyle=farbe; g.lineWidth=breite;
+  g.beginPath(); g.moveTo(x1,y1); g.lineTo(x2,y2); g.stroke();
+  var w=Math.atan2(y2-y1,x2-x1), l=14;
+  g.beginPath(); g.moveTo(x2,y2); g.lineTo(x2-l*Math.cos(w-0.4),y2-l*Math.sin(w-0.4));
+  g.lineTo(x2-l*Math.cos(w+0.4),y2-l*Math.sin(w+0.4)); g.closePath(); g.fill();
+}
+function zeichne(){
+  g.clearRect(0,0,BW,BH);
+  // Ständer (Blechpaket) wie Fachkunde S. 494, Bild 2
+  g.fillStyle=BLAUH; g.beginPath(); g.arc(MX,MY,RA,0,2*Math.PI); g.arc(MX,MY,RI,0,2*Math.PI,true); g.fill();
+  g.strokeStyle="#1A2530"; g.lineWidth=2;
+  g.beginPath(); g.arc(MX,MY,RA,0,2*Math.PI); g.stroke();
+  g.beginPath(); g.arc(MX,MY,RI,0,2*Math.PI); g.stroke();
+  // Pole des Drehfeldes: 2p Pole auf der Bohrung, laufen mit dem Feld um
+  var p=z.p;
+  if(z.ein){
+    for(var q=0;q<2*p;q++){
+      var wp=wFeld+q*Math.PI/p, nord=(q%2===0), halb=Math.PI/(2*p)*0.7;
+      g.strokeStyle=nord?ROT:GRUEN; g.lineWidth=16;
+      g.beginPath(); g.arc(MX,MY,RI+11,wp-halb,wp+halb); g.stroke();
+      g.fillStyle="#fff"; g.font="bold 15px 'Noto Sans',system-ui,sans-serif"; g.textAlign="center"; g.textBaseline="middle";
+      g.fillText(nord?"N":"S", MX+(RI+11)*Math.cos(wp), MY+(RI+11)*Math.sin(wp));
+    }
+  }
+  // Läufer mit Käfigwicklung (Stäbe) und Messmarke
+  g.fillStyle="#E9EDF0"; g.beginPath(); g.arc(MX,MY,RL,0,2*Math.PI); g.fill();
+  g.strokeStyle="#1A2530"; g.lineWidth=2; g.beginPath(); g.arc(MX,MY,RL,0,2*Math.PI); g.stroke();
+  for(var k=0;k<14;k++){
+    var wb=wLaeufer+k*2*Math.PI/14;
+    g.fillStyle="#fff"; g.strokeStyle="#1A2530"; g.lineWidth=1.6;
+    g.beginPath(); g.arc(MX+(RL-16)*Math.cos(wb),MY+(RL-16)*Math.sin(wb),8,0,2*Math.PI); g.fill(); g.stroke();
+  }
+  g.strokeStyle="#000"; g.lineWidth=7; g.lineCap="round";
+  g.beginPath(); g.moveTo(MX+26*Math.cos(wLaeufer),MY+26*Math.sin(wLaeufer));
+  g.lineTo(MX+(RL-30)*Math.cos(wLaeufer),MY+(RL-30)*Math.sin(wLaeufer)); g.stroke(); g.lineCap="butt";
+  g.fillStyle="#1A2530"; g.beginPath(); g.arc(MX,MY,9,0,2*Math.PI); g.fill();
+  if(z.ein){                                     // Feldlinien im Luftspalt und Läufer: vom N- zum S-Pol (Fachkunde S. 493, Bild 2)
+    for(var k2=0;k2<z.p;k2++){
+      var wn=wFeld+k2*2*Math.PI/z.p, ws=wn+Math.PI/z.p, wm=(wn+ws)/2, rk=(z.p===1)?0:RI*0.42;
+      var x1=MX+(RI-6)*Math.cos(wn), y1=MY+(RI-6)*Math.sin(wn), x2=MX+(RI-6)*Math.cos(ws), y2=MY+(RI-6)*Math.sin(ws);
+      var cx=MX+rk*Math.cos(wm), cy=MY+rk*Math.sin(wm);
+      g.strokeStyle="#1B7A34"; g.lineWidth=3.5; g.beginPath(); g.moveTo(x1,y1); g.quadraticCurveTo(cx,cy,x2,y2); g.stroke();
+      // Pfeilspitze am S-Ende in Richtung der Kurve
+      var tx=x2-cx, ty=y2-cy, w=Math.atan2(ty,tx), l=15;
+      g.fillStyle="#1B7A34"; g.beginPath(); g.moveTo(x2,y2); g.lineTo(x2-l*Math.cos(w-0.4),y2-l*Math.sin(w-0.4));
+      g.lineTo(x2-l*Math.cos(w+0.4),y2-l*Math.sin(w+0.4)); g.closePath(); g.fill();
+      if(k2===0){ g.fillStyle="#1B7A34"; g.font="italic bold 22px Cambria,Caladea,Georgia,serif"; g.textAlign="center"; g.textBaseline="middle";
+        var bx=(x1+2*cx+x2)/4, by=(y1+2*cy+y2)/4;
+        g.fillText("Φ", bx+22*Math.cos(wm+Math.PI/2), by+22*Math.sin(wm+Math.PI/2)); }
+    }
+  }
+  g.fillStyle="#5A666F"; g.font="bold 15px 'Noto Sans',system-ui,sans-serif"; g.textAlign="left"; g.textBaseline="alphabetic";
+    g.textAlign="right"; g.fillText(z.ein?"":"Schalter aus",BW-10,22);
+  g.textAlign="left"; g.fillText("außen Ständer, innen Läufer",10,BH-12);
+}
+function schritt(t){
+  if(tAlt!==null && z.ein){
+    var dt=Math.min(0.1,(t-tAlt)/1000);
+    // Zeitlupe 1 : 100: min⁻¹ / 60 = s⁻¹, davon ein Hundertstel, in Bogenmaß
+    wFeld += 2*Math.PI*drehfeld()/60/100*dt;
+    wLaeufer += 2*Math.PI*laeufer()/60/100*dt;
+  }
+  tAlt=t; zeichne(); requestAnimationFrame(schritt);
+}
+
+// ---------------- Bedienung ----------------
+function auffrischen(){
+  $("bQ").textContent=z.ein?"Schalter ist EIN: ausschalten":"Schalter ist AUS: einschalten";
+  $("bQ").classList.toggle("an",z.ein); $("bQ").setAttribute("aria-pressed",z.ein?"true":"false");
+  $("aF").innerHTML=z.f+" <span class='einh'>Hz</span>"; $("fr").value=z.f;
+  [].forEach.call(document.querySelectorAll("#pwahl button"),function(b){
+    var an=(+b.getAttribute("data-p")===z.p); b.classList.toggle("an",an); b.setAttribute("aria-pressed",an?"true":"false"); });
+  [].forEach.call(document.querySelectorAll("#bwahl button"),function(b){
+    var an=(+b.getAttribute("data-b")===z.b); b.classList.toggle("an",an); b.setAttribute("aria-pressed",an?"true":"false"); });
+  $("mNs").innerHTML=ganz(drehfeld())+" <span class='einh'>min<sup>−1</sup></span>";
+  $("mN").innerHTML=ganz(laeufer())+" <span class='einh'>min<sup>−1</sup></span>";
+  $("stand").innerHTML=(z.ein?"<b>EIN</b>":"<b>AUS</b>")+" · <span class='fz'>f</span> = "+z.f+" Hz · <span class='fz'>p</span> = "+
+    z.p+" ("+(2*z.p)+" Pole) · Bremse "+z.b+" %";
+  zeichne();
+}
+function setzeF(f){ z.f=Math.max(5,Math.min(60,Math.round(f/5)*5)); auffrischen(); }
+$("bQ").onclick=function(){ z.ein=!z.ein; auffrischen(); };
+$("fm").onclick=function(){ setzeF(z.f-5); }; $("fp").onclick=function(){ setzeF(z.f+5); };
+$("fr").addEventListener("input",function(){ setzeF(+this.value); });
+[].forEach.call(document.querySelectorAll("#pwahl button"),function(b){
+  b.onclick=function(){ z.p=+b.getAttribute("data-p"); auffrischen(); }; });
+[].forEach.call(document.querySelectorAll("#bwahl button"),function(b){
+  b.onclick=function(){ z.b=+b.getAttribute("data-b"); auffrischen(); }; });
+$("bReset").onclick=function(){ z={ein:START.ein,f:START.f,p:START.p,b:START.b}; wFeld=0; wLaeufer=0; auffrischen(); };
+window.__stelle=function(f,p,b,ein){ z.f=f; z.p=p; z.b=b; z.ein=(ein===undefined)?true:!!ein; auffrischen();
+  return $("mNs").textContent+" | "+$("mN").textContent; };
+
+// ---------------- Prüfmodus ----------------
+if(/[?&]pruefen\b/.test(location.search)){
+  var bericht={}, unganz=[];
+  [5,10,15,20,25,30,35,40,45,50,55,60].forEach(function(f){ [1,2,3,4].forEach(function(p){ [0,25,50,75,100,125].forEach(function(b){
+    z.ein=true; z.f=f; z.p=p; z.b=b;
+    var a=drehfeld(), c=laeufer();
+    if(Math.abs(a-Math.round(a))>1e-9 || Math.abs(c-Math.round(c))>1e-9 || c<=0) unganz.push([f,p,b,a,c]);
+  }); }); });
+  bericht["nicht ganzzahlig oder nicht positiv"]=unganz;
+  [[50,1,0],[50,2,0],[50,3,0],[25,2,0],[50,2,50],[50,2,100],[35,4,25],[60,1,125],[5,4,125],[50,4,100],[50,3,100],[50,1,100]]
+    .forEach(function(e){ bericht[e[0]+" Hz, p = "+e[1]+", "+e[2]+" %"]=window.__stelle(e[0],e[1],e[2],true); });
+  bericht["aus"]=window.__stelle(35,4,25,false);
+  z={ein:START.ein,f:START.f,p:START.p,b:START.b};
+  $("pruefbericht").textContent=JSON.stringify(bericht);
+}
+auffrischen();
+if(!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches)){ requestAnimationFrame(schritt); }
+})();
+</script>
+</body></html>
