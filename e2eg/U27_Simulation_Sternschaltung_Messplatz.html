@@ -10,7 +10,7 @@
            Außenleiter (Leiterstrom).
        (3) Die Augenblickswerte der drei Leiterströme ergeben zusammen in jedem Augenblick null.
      Rechenmodell (Europa Fachkunde S. 158, Versuch 3 und Bild 1; Tabellenbuch S. 48): ideales Vierleiternetz,
-       Außenleiterspannung U = 400 V, 50 Hz; Strangspannung U / √3 = 230,94 V; Heizwiderstände sind Wirkwiderstände,
+       Leiterspannung U = 400 V, 50 Hz; Strangspannung U / √3 = 230,94 V; Heizwiderstände sind Wirkwiderstände,
        der Strom ist in Phase mit seiner Strangspannung. Zeiger I_k = U_Str / R_Str unter 0°, −120°, −240°;
        Neutralleiterstrom = Betrag der Zeigersumme (gerechnet, nicht vorgegeben). Augenblickswerte
        i_k = √2 · I_k · sin(α − 120° · (k − 1)), α = Winkel ab dem Nulldurchgang von u_1N wie in U26.
@@ -145,7 +145,7 @@
 <script>
 (function(){
 "use strict";
-var U=400;                              // Außenleiterspannung in V (ideales Netz, 50 Hz)
+var U=400;                              // Leiterspannung in V (ideales Netz, 50 Hz)
 var USTR=U/Math.sqrt(3);                // Spannung an einem Strang bei angeschlossenem Neutralleiter
 var START={ein:false,r:60,a:0};
 var FARBE=["#1A2530","#C2185B","#1F78C1"];
