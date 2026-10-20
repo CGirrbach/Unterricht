@@ -25,7 +25,7 @@
 <html lang="de"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Messplatz Motorprüfstand (U34)</title>
-<script type="application/json" id="sim-meta">{"startwerte": {"motor": "aus", "lastmoment_Nm": 0}, "loesungswerte": {"Lastmoment 0 Nm": "1492 min⁻¹, 0,0 Nm", "Lastmoment 20 Nm": "1472 min⁻¹, 20,0 Nm", "Lastmoment 40 Nm": "1444 min⁻¹, 40,0 Nm", "Lastmoment 60 Nm": "1410 min⁻¹, 60,0 Nm", "Lastmoment 80 Nm": "1373 min⁻¹, 80,0 Nm", "Lastmoment 100 Nm": "1282 min⁻¹, 100,0 Nm", "Lastmoment 102 Nm": "1256 min⁻¹", "Lastmoment 103 Nm": "1230 min⁻¹", "Lastmoment 104 Nm": "Motor bleibt stehen: 0 min⁻¹, 79,0 Nm, 77,0 A", "Stillstand, 85 Nm": "läuft nicht an", "Stillstand, 75 Nm": "läuft an bis 1383 min⁻¹", "Lastmoment 36 Nm": "1450 min⁻¹, 11,0 A"}, "quelle": "Europa-Rechenbuch Elektrotechnik S. 248, Bild 2 (Leistungsschild) und Bild 3 (Betriebsverhalten eines 5,5-kW-Motors); Europa Fachkunde S. 495, Bild 2 (Hochlaufkennlinie); Tabellenbuch S. 534 und 535 (Begriffe, Lastmoment)"}</script>
+<script type="application/json" id="sim-meta">{"startwerte": {"motor": "aus", "lastmoment_Nm": 0}, "loesungswerte": {"Lastmoment 0 Nm": "1492 min⁻¹, 0,0 Nm", "Lastmoment 20 Nm": "1472 min⁻¹, 20,0 Nm", "Lastmoment 40 Nm": "1444 min⁻¹, 40,0 Nm", "Lastmoment 60 Nm": "1410 min⁻¹, 60,0 Nm", "Lastmoment 80 Nm": "1373 min⁻¹, 80,0 Nm", "Lastmoment 100 Nm": "1282 min⁻¹, 100,0 Nm", "Lastmoment 102 Nm": "1256 min⁻¹", "Lastmoment 103 Nm": "1230 min⁻¹", "Lastmoment 104 Nm": "Motor bleibt stehen: 0 min⁻¹, 79,0 Nm, 77,0 A", "Stillstand, 81 Nm bis 79 Nm": "läuft nicht an", "Stillstand, 78 Nm": "läuft an bis 1377 min⁻¹", "Lastmoment 36 Nm": "1450 min⁻¹, 11,0 A"}, "quelle": "Europa-Rechenbuch Elektrotechnik S. 248, Bild 2 (Leistungsschild) und Bild 3 (Betriebsverhalten eines 5,5-kW-Motors); Europa Fachkunde S. 495, Bild 2 (Hochlaufkennlinie); Tabellenbuch S. 534 und 535 (Begriffe, Lastmoment)"}</script>
 <style>
  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
  :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F}
@@ -154,46 +154,49 @@ function anzeigen(){
 
 // ---------------- Prüfstand (Schema) ----------------
 var cv=$("ps"), g=cv.getContext("2d");
-var DPR=Math.max(1,Math.min(3,window.devicePixelRatio||1)), BW=560, BH=300;
+var DPR=Math.max(1,Math.min(3,window.devicePixelRatio||1)), BW=560, BH=350;
 cv.width=BW*DPR; cv.height=BH*DPR; g.scale(DPR,DPR);
 var TINTE="#1A2530", GRAU="#5A666F", KUPFER="#A34E0E";
-function linie(pts,farbe,b){ g.strokeStyle=farbe||TINTE; g.lineWidth=b||2.2; g.beginPath(); g.moveTo(pts[0][0],pts[0][1]);
+// Schriftgrößen in Bildpunkten der Zeichnung (560 breit). Am Handy (390 px) wird die Zeichnung auf rund 345 px
+// verkleinert (Faktor 0,62): 21 px ergeben dort 13 px (Prüfer 20.10.2026: vorher 13 px, am Handy 8 px).
+function linie(pts,farbe,b){ g.strokeStyle=farbe||TINTE; g.lineWidth=b||2.4; g.beginPath(); g.moveTo(pts[0][0],pts[0][1]);
   for(var i=1;i<pts.length;i++) g.lineTo(pts[i][0],pts[i][1]); g.stroke(); }
 function text(t,x,y,gr,farbe,ausr,kursiv){ g.fillStyle=farbe||TINTE;
   g.font=(kursiv?"italic bold "+gr+"px Cambria,Caladea,Georgia,serif":"bold "+gr+"px 'Noto Sans',system-ui,sans-serif");
   g.textAlign=ausr||"left"; g.textBaseline="middle"; g.fillText(t,x,y); }
-function punkt(x,y){ g.fillStyle=TINTE; g.beginPath(); g.arc(x,y,4,0,2*Math.PI); g.fill(); }
+function punkt(x,y){ g.fillStyle=TINTE; g.beginPath(); g.arc(x,y,4.5,0,2*Math.PI); g.fill(); }
 function zeichne(){
   g.clearRect(0,0,BW,BH);
-  var YL=[40,70,100], XM=170, YM=180, RM=34, YW=YM;
-  text("L1",8,YL[0],18); text("L2",8,YL[1],18); text("L3",8,YL[2],18);
+  var YL=[76,110,144], XM=186, YM=236, RM=40, YW=YM;
+  text("Drehstromnetz 400 V, 50 Hz",6,18,21,GRAU);
+  text("L1",4,YL[0],22); text("L2",4,YL[1],22); text("L3",4,YL[2],22);
   for(var k=0;k<3;k++){
-    linie([[34,YL[k]],[60,YL[k]]]);
-    if(z.ein) linie([[60,YL[k]],[84,YL[k]]],TINTE,2.8); else linie([[60,YL[k]],[82,YL[k]-14]],TINTE,2.8);
-    punkt(60,YL[k]); punkt(84,YL[k]);
+    linie([[38,YL[k]],[62,YL[k]]]);
+    if(z.ein) linie([[62,YL[k]],[88,YL[k]]],TINTE,3); else linie([[62,YL[k]],[86,YL[k]-16]],TINTE,3);
+    punkt(62,YL[k]); punkt(88,YL[k]);
   }
-  g.setLineDash([5,4]); linie(z.ein?[[72,YL[0]],[72,YL[2]]]:[[71,YL[0]-7],[71,YL[2]-7]],GRAU,1.5); g.setLineDash([]);
-  text("Q1",54,YL[2]+22,15,GRAU);
+  g.setLineDash([5,4]); linie(z.ein?[[75,YL[0]],[75,YL[2]]]:[[74,YL[0]-8],[74,YL[2]-8]],GRAU,1.6); g.setLineDash([]);
+  text("Q1",52,YL[2]+28,21,GRAU);
   // Strommesser in L1
-  linie([[84,YL[0]],[110,YL[0]]]);
-  g.fillStyle="#fff"; g.strokeStyle=TINTE; g.lineWidth=2.2; g.beginPath(); g.arc(126,YL[0],15,0,2*Math.PI); g.fill(); g.stroke();
-  text("A",126,YL[0]+1,17,TINTE,"center"); text("I",146,YL[0]-20,18,KUPFER,"left",true);
+  linie([[88,YL[0]],[112,YL[0]]]);
+  g.fillStyle="#fff"; g.strokeStyle=TINTE; g.lineWidth=2.4; g.beginPath(); g.arc(131,YL[0],19,0,2*Math.PI); g.fill(); g.stroke();
+  text("A",131,YL[0]+1,22,TINTE,"center"); text("I",154,YL[0]-26,24,KUPFER,"left",true);
   // drei Leitungen zum Motor
-  linie([[141,YL[0]],[XM+12,YL[0]],[XM+12,YM-RM+1]]);
-  linie([[84,YL[1]],[XM,YL[1]],[XM,YM-RM]]);
-  linie([[84,YL[2]],[XM-12,YL[2]],[XM-12,YM-RM+1]]);
+  linie([[150,YL[0]],[XM+14,YL[0]],[XM+14,YM-RM+3]]);
+  linie([[88,YL[1]],[XM,YL[1]],[XM,YM-RM]]);
+  linie([[88,YL[2]],[XM-14,YL[2]],[XM-14,YM-RM+3]]);
   // Motor: Kreis mit M und 3~
-  g.fillStyle="#fff"; g.strokeStyle=TINTE; g.lineWidth=2.6; g.beginPath(); g.arc(XM,YM,RM,0,2*Math.PI); g.fill(); g.stroke();
-  text("M",XM,YM-8,24,TINTE,"center"); text("3~",XM,YM+15,17,TINTE,"center");
+  g.fillStyle="#fff"; g.strokeStyle=TINTE; g.lineWidth=2.8; g.beginPath(); g.arc(XM,YM,RM,0,2*Math.PI); g.fill(); g.stroke();
+  text("M",XM,YM-9,28,TINTE,"center"); text("3~",XM,YM+17,21,TINTE,"center");
   // Welle
-  linie([[XM+RM,YW],[540,YW]],TINTE,5);
+  linie([[XM+RM,YW],[556,YW]],TINTE,6);
   // Drehzahlmesser an der Welle
-  var XD=262;
-  g.fillStyle="#fff"; g.strokeStyle=TINTE; g.lineWidth=2.2; g.beginPath(); g.arc(XD,YW+60,15,0,2*Math.PI); g.fill(); g.stroke();
-  text("n",XD,YW+60,18,TINTE,"center",true); g.setLineDash([4,3]); linie([[XD,YW+5],[XD,YW+45]],GRAU,1.6); g.setLineDash([]);
-  text("Drehzahlmesser",XD,YW+92,13,GRAU,"center");
+  var XD=246;
+  g.fillStyle="#fff"; g.strokeStyle=TINTE; g.lineWidth=2.4; g.beginPath(); g.arc(XD,YW+58,19,0,2*Math.PI); g.fill(); g.stroke();
+  text("n",XD,YW+57,24,TINTE,"center",true); g.setLineDash([4,3]); linie([[XD,YW+6],[XD,YW+39]],GRAU,1.8); g.setLineDash([]);
+  text("Drehzahlmesser",XD+14,YW+97,21,GRAU,"center");
   // Wellenstück mit Streifen (wandern mit der Drehung)
-  var X0=XM+RM+70, X1=360, H=16;
+  var X0=XD+22, X1=334, H=18;
   g.fillStyle="#E6EBEF"; g.strokeStyle=TINTE; g.lineWidth=1.8; g.fillRect(X0,YW-H/2,X1-X0,H); g.strokeRect(X0,YW-H/2,X1-X0,H);
   g.save(); g.beginPath(); g.rect(X0,YW-H/2,X1-X0,H); g.clip();
   var ab=14, vers=(z.phi/(2*Math.PI))*ab;
@@ -201,17 +204,16 @@ function zeichne(){
   for(var xs=X0-ab+vers; xs<X1+ab; xs+=ab){ g.beginPath(); g.moveTo(xs,YW+H/2); g.lineTo(xs+8,YW-H/2); g.stroke(); }
   g.restore();
   // Messwelle (Drehmomentmesser)
-  var XW=390;
-  g.fillStyle="#fff"; g.strokeStyle=TINTE; g.lineWidth=2.2; g.fillRect(XW-26,YW-18,52,36); g.strokeRect(XW-26,YW-18,52,36);
-  text("Nm",XW,YW+1,16,TINTE,"center"); text("M",XW,YW-32,18,KUPFER,"center",true);
-  text("Messwelle",XW,YW+34,13,GRAU,"center");
+  var XW=376;
+  g.fillStyle="#fff"; g.strokeStyle=TINTE; g.lineWidth=2.4; g.fillRect(XW-32,YW-22,64,44); g.strokeRect(XW-32,YW-22,64,44);
+  text("Nm",XW,YW+1,22,TINTE,"center"); text("M",XW,YW-40,24,KUPFER,"center",true);
+  text("Messwelle",XW,YW+44,21,GRAU,"center");
   // Bremse
-  var XB=490;
-  g.fillStyle="#F5EBDF"; g.strokeStyle=KUPFER; g.lineWidth=2.6; g.fillRect(XB-36,YW-40,72,80); g.strokeRect(XB-36,YW-40,72,80);
-  text("Bremse",XB,YW-2,15,KUPFER,"center");
-  g.fillStyle=KUPFER; g.font="italic bold 16px Cambria,Caladea,Georgia,serif"; g.textAlign="center"; g.fillText("M",XB-6,YW+26);
-  g.font="bold 11px 'Noto Sans',system-ui,sans-serif"; g.fillText("L",XB+5,YW+30);
-  text("Drehstromnetz 400 V, 50 Hz",200,18,13,GRAU);
+  var XB=500;
+  g.fillStyle="#F5EBDF"; g.strokeStyle=KUPFER; g.lineWidth=2.8; g.fillRect(XB-48,YW-48,96,96); g.strokeRect(XB-48,YW-48,96,96);
+  text("Bremse",XB,YW-12,21,KUPFER,"center");
+  g.fillStyle=KUPFER; g.font="italic bold 24px Cambria,Caladea,Georgia,serif"; g.textAlign="center"; g.fillText("M",XB-7,YW+26);
+  g.font="bold 16px 'Noto Sans',system-ui,sans-serif"; g.fillText("L",XB+9,YW+32);
 }
 
 // ---------------- Bedienung und Ablauf ----------------
@@ -243,7 +245,7 @@ if(/[?&]pruefen\b/.test(location.search)){
   z={ein:true, ml:0, w:0, phi:0};
   [0,10,20,30,36,40,50,60,70,80,90,100,101,102,103].forEach(function(ml){ b["M_L "+ml]=window.__stelle(ml,true,15); });
   b["M_L 104"]=window.__stelle(104,true,15);
-  b["Stillstand, M_L 85"]=window.__stelle(85,true,10);
+  b["Stillstand, M_L 81"]=window.__stelle(81,true,10); b["Stillstand, M_L 80"]=window.__stelle(80,true,10);
   b["Stillstand, M_L 79"]=window.__stelle(79,true,10);
   b["Stillstand, M_L 78"]=window.__stelle(78,true,15);
   b["aus, M_L 0"]=window.__stelle(0,false,30);
