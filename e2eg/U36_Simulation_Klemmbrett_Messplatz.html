@@ -8,7 +8,7 @@
        (2) L1 an U1, L2 an V1, L3 an W1: Die Welle dreht im Uhrzeigersinn (Blick auf die Antriebsseite).
        (3) Zwei Außenleiter tauschen kehrt die Drehrichtung um; die Brücken (Stern oder Dreieck) ändern sie nicht.
      Rechenmodell: Leiterspannung 400 V, Außenleiter L1 = 230,94 V∠0°, L2 = 230,94 V∠−120°, L3 = 230,94 V∠−240°.
-       Drei gleiche Stränge U1–U2, V1–V2, W1–W2 (gleiche Impedanz). Brücken verbinden Klemmen (Knoten). Verbindet eine
+       Drei gleiche Stränge (Anfang U1, V1, W1; Ende U2, V2, W2; gleiche Impedanz). Brücken verbinden Klemmen (Knoten). Verbindet eine
        Brücke zwei verschiedene Außenleiter: Kurzschluss. Sonst Knotenpotentiale der freien Klemmen aus den
        Knotengleichungen (komplex). Strangspannung = Betrag der Spannung zwischen Anfang und Ende des Strangs.
        Drehfeld: Strangströme I_k mit den räumlichen Achsen 0°, 120°, 240° (U, V, W); Mitlaufanteil
@@ -21,7 +21,7 @@
 <html lang="de"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Messplatz Klemmbrett (U36)</title>
-<script type="application/json" id="sim-meta">{"startwerte":{"motor":"A (230/400 V)","bruecken":[],"anschluss":"L1 an U1, L2 an V1, L3 an W1","schalter":"aus"},"loesungswerte":{"Aufgabe 3, Motor A (230/400 V)":{"bruecken":["W2–U2","U2–V2"],"strangspannung":"230,9 V","drehrichtung":"im Uhrzeigersinn"},"Aufgabe 3, Motor B (400/690 V)":{"bruecken":["U1–W2","V1–U2","W1–V2"],"strangspannung":"400,0 V","drehrichtung":"im Uhrzeigersinn"},"Aufgabe 4, L1 und L2 getauscht":"gegen den Uhrzeigersinn","Aufgabe 4, L2 und L3 getauscht":"gegen den Uhrzeigersinn"},"quelle":"Europa Fachkunde S. 489 (Drehsinn, Bild 3) und S. 501 (Bild 3 und 4: Stern- und Dreieckschaltung am Klemmbrett, Tabelle Spannungsangabe/Wicklungsschaltung); Tabellenbuch Elektrotechnik S. 534 (Anschluss für Rechtslauf, Drehrichtungsumkehr)"}</script>
+<script type="application/json" id="sim-meta">{"startwerte":{"motor":"A (230/400 V)","bruecken":[],"anschluss":"L1 an U1, L2 an V1, L3 an W1","schalter":"aus"},"loesungswerte":{"Aufgabe 3, Motor A (230/400 V)":{"bruecken":["W2 und U2","U2 und V2"],"strangspannung":"230,9 V","drehrichtung":"im Uhrzeigersinn"},"Aufgabe 3, Motor B (400/690 V)":{"bruecken":["U1 und W2","V1 und U2","W1 und V2"],"strangspannung":"400,0 V","drehrichtung":"im Uhrzeigersinn"},"Aufgabe 4, L1 und L2 getauscht":"gegen den Uhrzeigersinn","Aufgabe 4, L2 und L3 getauscht":"gegen den Uhrzeigersinn"},"quelle":"Europa Fachkunde S. 489 (Drehsinn, Bild 3) und S. 501 (Bild 3 und 4: Stern- und Dreieckschaltung am Klemmbrett, Tabelle Spannungsangabe/Wicklungsschaltung); Tabellenbuch Elektrotechnik S. 534 (Anschluss für Rechtslauf, Drehrichtungsumkehr)"}</script>
 <style>
  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
  :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#1E8A4C}
@@ -79,7 +79,7 @@
 
  <div class="buehne">
   <div>
-   <div class="titel">Netz 3/N/PE 400/230 V 50 Hz · Klemmbrett</div>
+   <div class="titel">Drehstromnetz 400 V, 50 Hz · Klemmbrett</div>
    <canvas id="brett" width="400" height="378" data-quelle="Klemmbrett und Stränge nach Europa Fachkunde S. 501, Bild 3 und 4 (U1 V1 W1 oben, W2 U2 V2 unten, Brücken)"
     aria-label="Klemmbrett mit den Klemmen U1, V1, W1 oben und W2, U2, V2 unten, darunter die drei Stränge der Ständerwicklung. Gestrichelte Brückenplätze zum Antippen."></canvas>
    <div class="meldung" id="meldung"></div>
@@ -110,7 +110,7 @@
     <button type="button" class="zurueck" id="bReset">Zurücksetzen</button>
    </div>
    <div class="hinweis"><b>Spannungsmesser:</b> Strangspannung jedes Strangs der Ständerwicklung, gemessen zwischen
-    Anfang und Ende (U1–U2, V1–V2, W1–W2).</div>
+    Anfang und Ende jedes Strangs (U1 und U2, V1 und V2, W1 und W2).</div>
    <div class="hinweis"><b>Welle:</b> von vorn gezeichnet, mit Blick auf das Wellenende der Antriebsseite. Sie dreht
     in Zeitlupe; der Motor läuft in Wirklichkeit mit rund 1450 Umdrehungen je Minute.</div>
    <div class="hinweis"><b>Sicherheit:</b> Brücken und Anschlüsse werden nur bei ausgeschaltetem Netz geändert.</div>
@@ -124,7 +124,7 @@
 "use strict";
 var UPH=400/Math.sqrt(3);                              // Spannung Außenleiter gegen N (230,94 V)
 var KN=["U1","V1","W1","U2","V2","W2"];                // Knoten 0..5
-var BR=[{id:"W2–U2",a:5,b:3},{id:"U2–V2",a:3,b:4},{id:"U1–W2",a:0,b:5},{id:"V1–U2",a:1,b:3},{id:"W1–V2",a:2,b:4}];
+var BR=[{id:"W2 und U2",a:5,b:3},{id:"U2 und V2",a:3,b:4},{id:"U1 und W2",a:0,b:5},{id:"V1 und U2",a:1,b:3},{id:"W1 und V2",a:2,b:4}];
 var STR=[{n:"U",a:0,b:3,ach:0},{n:"V",a:1,b:4,ach:120},{n:"W",a:2,b:5,ach:240}];
 var START={motor:"A",br:[false,false,false,false,false],an:[1,2,3],ein:false};
 var z=JSON.parse(JSON.stringify(START)), winkel=0, kurz=false, timer=null, letzte=0;
