@@ -16,11 +16,12 @@
        A = 2π · r² · (1 − cos θ), Ω = A/r²; ganze Kugel θ = 180°, A = 4π · r². Die Lampe im Mittelpunkt gibt den
        Lichtstrom Φv ab; ein Reflektor lenkt ihn ganz und gleichmäßig in den Kegel: Iv = Φv/Ω (in jeder Richtung des
        Kegels). Ändert man r, bleibt der Kegel (Ω) und die Kappenfläche wird Ω · r².
-     Einstellungen: r von 0,5 m bis 2,0 m in Schritten von 0,1 m; A in Schritten von 0,1 m², dazu genau die Halbkugel
+     Einstellungen: r von 0,5 m bis 2,0 m in Schritten von 0,1 m; A in Schritten von 0,1 m² (Knöpfe ±0,1 und ±1 m²
+       rasten an Halbkugel und ganzer Kugel ein, der Regler zieht sie im Umkreis von 1,5 % an), dazu genau die Halbkugel
        (2π · r²) und die ganze Kugel (4π · r²), Regler ganz rechts = ganze Kugel; Φv von 0 bis 2000 lm in Schritten von 10 lm.
-     Anzeigen: A und Ω mit zwei Nachkommastellen, Iv unter 1000 cd mit einer Nachkommastelle, sonst ganz. Kernaussagen exakt
+     Anzeigen: A mit zwei Nachkommastellen, Ω mit zwei Nachkommastellen, unter 1 sr mit drei geltenden Ziffern, Iv unter 1000 cd mit einer Nachkommastelle, sonst ganz. Kernaussagen exakt
        mit den angezeigten Werten nachrechenbar (Prüfmodus und b13_gemeinsam.py): 1000 lm durch 12,57 sr = 79,6 cd,
-       durch 6,28 sr = 159,2 cd, durch 1,00 sr = 1000 cd; 150 lm in 0,30 sr = 500,0 cd; 810 lm, ganze Kugel = 64,5 cd.
+       durch 6,28 sr = 159,2 cd, durch 1,00 sr = 1000 cd; 150 lm in 0,300 sr = 500,0 cd; 810 lm, ganze Kugel = 64,5 cd.
      Bild: Strahlen aus dem Mittelpunkt, ihre Zahl wächst mit dem Lichtstrom (ein Strahl je 25 lm), sie verteilen sich
        gleichmäßig über den Kegel: Je enger der Kegel, desto dichter die Strahlen. Kugel drehbar mit Finger und Maus
        (Zeiger ziehen) und mit den Knöpfen; senkrechte Projektion.
@@ -30,7 +31,7 @@
 <html lang="de"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Messplatz Raumwinkel und Lichtstärke (B13)</title>
-<script type="application/json" id="sim-meta">{"startwerte":{"r":"1,5 m","A":"0,00 m²","Phi_v":"0 lm","Ausschnitt":"geschlossen"},"loesungswerte":{"Aufgabe 2, r 1 m, A 1 m²":{"Omega":"1,00 sr"},"Aufgabe 2, r 2 m, gleicher Kegel":{"A":"4,00 m²","Omega":"1,00 sr"},"Aufgabe 2, r 2 m, A 2 m²":{"Omega":"0,50 sr"},"Aufgabe 3, r 1 m, Halbkugel":{"A":"6,28 m²","Omega":"6,28 sr"},"Aufgabe 3, r 1 m, ganze Kugel":{"A":"12,57 m²","Omega":"12,57 sr"},"Aufgabe 3, r 2 m, ganze Kugel":{"A":"50,27 m²","Omega":"12,57 sr"},"Aufgabe 4, 1000 lm":{"ganze Kugel":"79,6 cd","Halbkugel":"159,2 cd","1 m² bei r 1 m":"1000 cd","r 2 m, gleicher Kegel":"1000 cd"},"Aufgabe 5":{"810 lm, ganze Kugel":"64,5 cd","150 lm, A 0,3 m² bei r 1 m":"500,0 cd"}},"quelle":"Tabellenbuch Elektrotechnik S. 227 (Raumwinkel, Lichtstrom, Lichtstärke Formel 1); Fachkunde S. 390"}</script>
+<script type="application/json" id="sim-meta">{"startwerte":{"r":"1,5 m","A":"0,00 m²","Phi_v":"0 lm","Ausschnitt":"geschlossen"},"loesungswerte":{"Aufgabe 2, r 1 m, A 1 m²":{"Omega":"1,00 sr"},"Aufgabe 2, r 2 m, gleicher Kegel":{"A":"4,00 m²","Omega":"1,00 sr"},"Aufgabe 2, r 2 m, A 2 m²":{"Omega":"0,500 sr"},"Aufgabe 3, r 1 m, Halbkugel":{"A":"6,28 m²","Omega":"6,28 sr"},"Aufgabe 3, r 1 m, ganze Kugel":{"A":"12,57 m²","Omega":"12,57 sr"},"Aufgabe 3, r 2 m, ganze Kugel":{"A":"50,27 m²","Omega":"12,57 sr"},"Aufgabe 4, 1000 lm":{"ganze Kugel":"79,6 cd","Halbkugel":"159,2 cd","1 m² bei r 1 m":"1000 cd","r 2 m, gleicher Kegel":"1000 cd"},"Aufgabe 5":{"810 lm, ganze Kugel":"64,5 cd","150 lm, A 0,3 m² bei r 1 m":"500,0 cd"}},"quelle":"Tabellenbuch Elektrotechnik S. 227 (Raumwinkel, Lichtstrom, Lichtstärke Formel 1); Fachkunde S. 390"}</script>
 <style>
  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
  :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62}
@@ -133,8 +134,9 @@
   </div>
  </div>
 
- <div class="hinweis">Der Regler ganz rechts zieht den Ausschnitt über die ganze Kugel. Die Halbkugel liegt auf dem
-  Regler dort, wo der Rand des Ausschnitts den Äquator erreicht; die Zeile unter den Anzeigen meldet sie.</div>
+ <div class="hinweis">Der Regler ganz rechts zieht den Ausschnitt über die ganze Kugel. Die Halbkugel liegt dort, wo
+  der Rand des Ausschnitts den Äquator erreicht. Regler und Knöpfe rasten an der Halbkugel und an der ganzen Kugel ein;
+  die Zeile unter den Anzeigen meldet sie.</div>
  <pre id="pruefbericht"></pre>
 </div>
 
@@ -182,7 +184,11 @@ function iText(){
   return g+" cd";
 }
 function aText(){ return komma(flaeche(),2)+" m²"; }
-function oText(){ return komma(z.omega,2)+" sr"; }
+function oText(){                                          // mindestens drei geltende Ziffern (Prüfer 21.10.2026: 0,03 sr
+  if(z.omega>=1 || z.omega===0) return komma(z.omega,2)+" sr";  // bei 80 000 cd war zu grob)
+  var st=2-Math.floor(Math.log10(z.omega));
+  return komma(z.omega,st)+" sr";
+}
 
 // ---------------- Zeichnung ----------------
 var cv=$("bild"), g=cv.getContext("2d");
@@ -328,24 +334,37 @@ function setzeR(rz){
   z.rz=rz; baueListe();                                     // der Kegel (Ω) bleibt, die Kappenfläche wird Ω · r²
   zeige();
 }
-function setzeA(index){
-  index=Math.max(0,Math.min(liste.length-1,index));
-  var a=liste[index], rr=r();
-  if(index===liste.length-1) z.omega=4*PI;                  // genau die ganze Kugel
-  else if(Math.abs(a-2*PI*rr*rr)<1e-9) z.omega=2*PI;         // genau die Halbkugel
-  else z.omega=a/(rr*rr);
+function setzeP(pz){ z.pz=Math.max(0,Math.min(200,Math.round(pz))); zeige(); }
+function setzeFlaeche(aw){                                  // Fläche in m²; Halbkugel und ganze Kugel genau
+  var rr=r(), halb=2*PI*rr*rr, ganz=4*PI*rr*rr;
+  if(aw>=ganz-1e-9) z.omega=4*PI;
+  else if(Math.abs(aw-halb)<1e-9) z.omega=2*PI;
+  else z.omega=Math.max(0,aw)/(rr*rr);
   zeige();
 }
-function setzeP(pz){ z.pz=Math.max(0,Math.min(200,Math.round(pz))); zeige(); }
-function aIndex(){ return naechster(flaeche()); }
-function schrittA(delta){                                   // ±0,1 m² oder ±1 m² auf der Liste
-  var a=flaeche(), ziel=a+delta, i=aIndex();
-  if(delta>0){ while(i<liste.length-1 && liste[i]<ziel-1e-9) i++; }
-  else { while(i>0 && liste[i]>ziel+1e-9) i--; }
-  setzeA(i);
+function schrittA(delta){                                   // ±0,1 m² oder ±1 m² auf das Raster; die Grenzfälle
+  var a=flaeche(), s=Math.abs(delta), eps=1e-6, rr=r(),     // Halbkugel und ganze Kugel liegen dazwischen und rasten
+      halb=2*PI*rr*rr, ganz=4*PI*rr*rr, ziel;                // ein (Prüfer 21.10.2026: mit 0,1 ▶ nie 6,28 m²)
+  if(delta>0){
+    ziel=Math.round(Math.ceil((a+eps)/s)*s*10)/10;
+    if(halb>a+eps && halb<ziel-eps) ziel=halb;
+    if(ziel>ganz-eps) ziel=ganz;
+  } else {
+    ziel=Math.round(Math.floor((a-eps)/s)*s*10)/10;
+    if(halb<a-eps && halb>ziel+eps) ziel=halb;
+    if(ziel<0) ziel=0;
+  }
+  setzeFlaeche(ziel);
+}
+function reglerA(index){                                    // Rastpunkte am Regler: Halbkugel und ganze Kugel ziehen
+  var rr=r(), halb=2*PI*rr*rr, ganz=4*PI*rr*rr,             // im Umkreis von 1,5 % des Bereichs an
+      a=liste[Math.max(0,Math.min(liste.length-1,index))], fang=0.015*ganz;
+  if(Math.abs(a-halb)<fang) a=halb;
+  else if(a>ganz-fang) a=ganz;
+  setzeFlaeche(a);
 }
 $("rr").addEventListener("input",function(){ setzeR(Number(this.value)); });
-$("ra").addEventListener("input",function(){ setzeA(Number(this.value)); });
+$("ra").addEventListener("input",function(){ reglerA(Number(this.value)); });
 $("rp").addEventListener("input",function(){ setzeP(Number(this.value)); });
 $("r1m").onclick=function(){ setzeR(z.rz-1); };  $("r1p").onclick=function(){ setzeR(z.rz+1); };
 $("a1m").onclick=function(){ schrittA(-0.1); };  $("a1p").onclick=function(){ schrittA(0.1); };
