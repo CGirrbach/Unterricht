@@ -1,0 +1,366 @@
+<!doctype html>
+<!-- E3EG B09 · Messplatz „Oberschwingungen und Kompensationsanlage“ (neu 21.10.2026, Aufgabe IN der Stunde nach dem
+     Muster E1EG Block 07 und E2EG U23). Zwei Ansichten an einem Messplatz:
+       A  Verbraucherstrom: Strom eines Verbrauchers mit elektronischer Steuerung am Netz 230 V, 50 Hz. Grundschwingung
+          I1 = 10 A (Effektivwert); die Anteile der 3., 5. und 7. Harmonischen sind in Schritten von 5 % (0 % bis 50 %
+          von I1) einstellbar. Oszilloskop mit zwei Kanälen (Kanal 1: Gesamtstrom, 10 A je Kästchen; Kanal 2: die
+          Harmonischen einzeln, 2 A je Kästchen), 4 ms je Kästchen, zwei Perioden. Netzanalysator: Effektivwerte I1, I3,
+          I5, I7, Gesamtstrom (Echt-Effektivwert) und Histogramm über der Ordnungszahl ν; der THD-Wert erst auf Knopfdruck
+          (die Schüler rechnen ihn zuerst selbst, Aufgabe 2).
+       B  Kompensationsanlage: Sammelschiene 3 AC 400 V, 50 Hz, ohne N-Leiter; die Netzspannung enthält die 5. Harmonische
+          (3 %) und die 7. Harmonische (2 %) (Tabellenbuch S. 323: zulässig 6 % und 5 %; bei 3 AC ohne N-Leiter keine
+          Ordnungszahl 3, S. 324, Formel 2). Kompensationsanlage mit 6 Stufen zu je 50 kvar, Kondensatoren in Dreieck,
+          ohne Drossel oder mit 7 % Verdrosselung. Anzeigen: Strom einer Stufe (Echt-Effektivwert), Resonanzfrequenz des
+          Reihenschwingkreises aus Induktivität des Netzes und Anlage, THD-Wert der Spannung an der Sammelschiene,
+          Oszilloskop (Strom einer Stufe, 100 A je Kästchen), Resonanzkurve Z über f mit Marken bei 250 Hz und 350 Hz.
+     Ziel-Erkenntnis (die Seite nennt sie nicht):
+       A  Ein verzerrter Strom ist die Überlagerung der 50-Hz-Grundschwingung mit Oberschwingungen, deren Frequenz ein
+          ganzzahliges Vielfaches von 50 Hz ist (3, 5, 7 Schwingungen in 20 ms).
+       B  Ohne Drossel bilden Kompensationskondensator und Induktivität des Netzes einen Reihenschwingkreis; trifft seine
+          Resonanzfrequenz eine Oberschwingung (3 Stufen: 354 Hz nahe 350 Hz; 6 Stufen: 250 Hz), wird sie verstärkt: Der
+          Strom einer Stufe steigt weit über den Bemessungsstrom, die Spannung wird stark verzerrt (THD über 8 %). Mit 7 %
+          Verdrosselung liegt die Resonanzfrequenz bei jeder Stufenzahl unter 250 Hz (181 Hz bis 153 Hz); der Strom bleibt
+          beim Bemessungsstrom, der THD-Wert sinkt sogar unter den Wert ohne Anlage.
+     Rechenmodell (Ersatzschaltung je Strang; Fachkunde S. 167: Kompensationskapazität und Induktivität des Netzes bilden
+     einen Reihenschwingkreis, Drossel in Reihe, p = X_L/X_C; Tabellenbuch S. 40, Formel 16, 21 und „Bei Resonanz ist
+     X_L = X_C“; Tabellenbuch S. 325, Formel 1 für den THD-Wert; amtlicher Lösungsvorschlag Winter 2016/17 SE 4, 4.5):
+       U = 400 V, U_Str = U/√3; Induktivität des Netzes aus der Kurzschlussleistung 7,5 MVA: X_N = U²/S_k = 21,33 mΩ bei
+       50 Hz; Dämpfung R = 10 mΩ; je Stufe q = 50 kvar bei 50 Hz: ohne Drossel X_C1 = U²/q, mit Drossel X_C1 = U²/(q(1 − p)),
+       X_D1 = p · X_C1 (die verdrosselte Stufe gibt ebenfalls 50 kvar ab). n Stufen: X_C = X_C1/n, X_D = X_D1/n.
+       50-Hz-Anteil: die Sammelschiene hält 400 V, Strom einer Stufe I_1 = q/(√3 · U) = 72,17 A (Bemessungsstrom).
+       Oberschwingung ν (5, 7): Spannungsquelle a_ν · U_Str hinter X_N; X_Zweig = ν · X_D − X_C/ν; Z = √(R² + (ν · X_N + X_Zweig)²);
+       I_ν = a_ν · U_Str/Z (alle Stufen), je Stufe I_ν/n; Spannung an der Sammelschiene U_ν,S = a_ν · U_Str · |X_Zweig|/Z.
+       I_St = √(I_1² + I_5,St² + I_7,St²); THD = √(U_5,S² + U_7,S²)/U_Str (ohne Stufe: √(a_5² + a_7²)).
+       f_r = 50 Hz · √(X_C/(X_N + X_D)); Resonanzkurve Z(f) = √(R² + ((f/50 Hz) · (X_N + X_D) − X_C · 50 Hz/f)²).
+     Anzeigen und Arbeitsblatt (nachgerechnet in b09_gemeinsam.py, gleiche Rundung):
+       ohne Drossel 1/2/3/4/5/6 Stufen: f_r 612/433/354/306/274/250 Hz; I_St 74,8/79,4/165,4/85,0/94,4/136,6 A;
+       THD 4,7/7,3/29,8/10,8/16,6/32,1 %. Mit Drossel: f_r 181/174/168/162/157/153 Hz; I_St 73,1/72,9/72,7/72,6/72,5/72,5 A;
+       THD 3,1/2,7/2,4/2,1/1,9/1,8 %. Ohne Stufe: THD 3,6 %.
+       Ansicht A, 3. Harm. 30 %, 5. Harm. 20 %, 7. Harm. 10 %: I1 10,00 A, I3 3,00 A, I5 2,00 A, I7 1,00 A, I 10,68 A,
+       THD 37,4 %.
+     Startstellung neutral: Ansicht A, alle Anteile 0 %, Kanal 2 aus; Ansicht B: keine Stufe, ohne Drossel.
+     Prüfmodus ?pruefen: alle Einstellungen der Ansicht B und die Einstellung der Aufgabe 2 als JSON in #pruefbericht. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Oberschwingungen und Kompensationsanlage (B09)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"ansicht":"A","h3_prozent":0,"h5_prozent":0,"h7_prozent":0,"kanal2":"aus","stufen":0,"drossel":"ohne"},"loesungswerte":{"Aufgabe 1 a":"je 20 %: 3, 5, 7 Schwingungen in 20 ms; 150 Hz, 250 Hz, 350 Hz","Aufgabe 1 b, Aufgabe 2":"30 %, 20 %, 10 %: I1 10,00 A, I3 3,00 A, I5 2,00 A, I7 1,00 A, I 10,68 A, THD 37,4 %","Aufgabe 3 ohne Drossel":"1 Stufe 612 Hz 74,8 A; 3 Stufen 354 Hz 165,4 A; 4 Stufen 306 Hz 85,0 A; 6 Stufen 250 Hz 136,6 A","Aufgabe 3 mit Drossel":"1 Stufe 73,1 A; 3 Stufen 72,7 A; 4 Stufen 72,6 A; 6 Stufen 72,5 A; f_r 181 Hz bis 153 Hz","Aufgabe 3 THD bei 6 Stufen":"ohne Drossel 32,1 %, mit Drossel 1,8 %","Erkenntnis":"Trifft die Resonanzfrequenz von Kondensator und Induktivität des Netzes eine Oberschwingung, steigt der Strom der Kondensatoren weit über den Bemessungsstrom; mit Drossel liegt die Resonanzfrequenz unter 250 Hz"},"quelle":"Europa Fachkunde S. 167 (Bild 1, Bild 2, Verdrosselungsfaktor), S. 309 (Bild 1), S. 311; Tabellenbuch Elektrotechnik S. 40 (Formel 16, 21), S. 323, S. 324 (Formel 1, 2), S. 325 (Formel 1), S. 327"}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;
+       --i:#C2006B;--u:#0B7BC0;--gruen:#2F7D62}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:1000px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .reiter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+ .reiter button{flex:1 1 200px;font-weight:700}
+ .ansicht{display:none}
+ .ansicht.zeigen{display:block}
+ .lage{background:var(--hell);border:1.2px solid var(--linie);padding:8px 12px;font-size:15px;margin-bottom:12px}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px;align-items:start}
+ @media(min-width:760px){.buehne{grid-template-columns:1fr 1fr}}
+ .wahl .titel{font-size:15px;font-weight:700;margin:8px 0 5px}
+ .wahl .titel:first-child{margin-top:0}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+ .regler{display:grid;grid-template-columns:auto 64px 92px 64px;gap:8px;align-items:center;margin-bottom:8px}
+ .regler .name{font-size:15px;font-weight:700;padding-right:4px}
+ .wert{background:#20313a;color:#FFD48A;font-variant-numeric:tabular-nums;font-size:24px;font-weight:700;padding:6px 8px;border-radius:4px;text-align:center;white-space:nowrap}
+ button{font:inherit;font-size:16px;min-height:48px;min-width:56px;padding:6px 12px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+ button.an{background:var(--kupfer);color:#fff}
+ button.zurueck{border-color:var(--ink);color:var(--ink)}
+ button:disabled{opacity:.4;cursor:default}
+ .geraete{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+ .geraete.drei{margin-top:12px}
+ @media(min-width:760px){.geraete.drei{grid-template-columns:1fr 1fr 1fr}}
+ .regler.stufen{grid-template-columns:64px 92px 64px}
+ .schirm.oben{margin-top:0}
+ .geraet{border:3px solid var(--ink);background:var(--hell);padding:8px 10px;border-radius:6px;min-width:0}
+ .geraet.breit{grid-column:1 / -1}
+ .geraet .name{font-size:14px;font-weight:700;color:var(--grau);line-height:1.25}
+ .lcd{background:#20313a;color:#9BF0B4;font-variant-numeric:tabular-nums;font-size:28px;font-weight:700;padding:6px 10px;margin:6px 0 2px;border-radius:4px;text-align:right;white-space:nowrap}
+ .geraet .art{font-size:13px;color:var(--grau)}
+ .schirm{border:3px solid var(--ink);background:#fff;border-radius:6px;padding:6px 8px;margin-top:12px}
+ .schirm .name{font-size:14px;font-weight:700;color:var(--grau);margin-bottom:4px}
+ canvas{width:100%;display:block;background:#10202a;border-radius:4px}
+ canvas.hellgrund{background:#fff}
+ .legende{font-size:13px;color:var(--grau);margin-top:5px}
+ .legende i.strich{display:inline-block;width:22px;height:0;border-top:3px solid;vertical-align:middle;margin-right:4px}
+ .fz{font-family:Cambria,Caladea,'Noto Serif',Georgia,serif;font-style:italic}
+ .hinweis{font-size:14px;color:var(--grau);margin-top:10px}
+ #pruefbericht{display:none}
+ @media(max-width:420px){.lcd{font-size:22px;padding:6px 7px} .wert{font-size:20px} button{min-width:48px;padding:6px 8px;font-size:15px}
+   .wrap{padding:14px 10px 20px} .geraet{padding:8px 7px} .geraet .name{font-size:12px} .anleitung,.lage{font-size:14px}
+   .regler{grid-template-columns:1fr 52px 78px 52px;gap:6px} .regler .name{font-size:14px} .kopf h1{font-size:19px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E3EG · LF 11 · B09</div><h1>Messplatz: Oberschwingungen und Kompensationsanlage</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Erst die Ansicht wählen, dann einstellen. Das Oszilloskop zeigt den
+  zeitlichen Verlauf, die Messgeräte und der Netzanalysator zeigen Effektivwerte.</div>
+
+ <div class="reiter" id="reiter"></div>
+
+ <!-- =========================================================== Ansicht A -->
+ <div class="ansicht" id="ansichtA">
+  <div class="lage">Verbraucher mit elektronischer Steuerung am Netz 230 V, 50 Hz. Grundschwingung des Stroms:
+   <span class="fz">I</span><sub>1</sub> = 10 A. Die Anteile der Harmonischen stellen Sie in Prozent von
+   <span class="fz">I</span><sub>1</sub> ein.</div>
+  <div class="buehne">
+   <div class="schirm oben"><div class="name">Oszilloskop: 4 ms je Kästchen · Kanal 1 Gesamtstrom 10 A je Kästchen · Kanal 2 Harmonische 2 A je Kästchen</div>
+    <canvas id="cOszA" width="900" height="560" data-verhaeltnis="0.62" data-mindest="330" aria-label="Oszilloskop mit zwei Kanälen"></canvas>
+    <div class="legende"><i class="strich" style="border-color:#FF6FB5"></i>Gesamtstrom <span class="fz">i</span> &nbsp;
+     <i class="strich" style="border-color:#C8D2D8;border-top-style:dashed"></i>Grundschwingung &nbsp;
+     <i class="strich" style="border-color:#FFD48A"></i>3. &nbsp;<i class="strich" style="border-color:#7FE3A0"></i>5. &nbsp;
+     <i class="strich" style="border-color:#7FC8FF"></i>7. Harmonische</div></div>
+   <div class="wahl">
+    <div class="titel">Anteile der Harmonischen</div>
+    <div id="regler"></div>
+    <div class="titel">Kanal 2 des Oszilloskops: Harmonische einzeln</div>
+    <div class="knoepfe" id="kanal2"></div>
+   </div>
+  </div>
+  <div class="geraete drei">
+   <div class="geraet"><div class="name">Grundschwingung <span class="fz">I</span><sub>1</sub></div><div class="lcd" id="aI1">10,00 A</div></div>
+   <div class="geraet"><div class="name">3. Harmonische <span class="fz">I</span><sub>3</sub></div><div class="lcd" id="aI3">0,00 A</div></div>
+   <div class="geraet"><div class="name">5. Harmonische <span class="fz">I</span><sub>5</sub></div><div class="lcd" id="aI5">0,00 A</div></div>
+   <div class="geraet"><div class="name">7. Harmonische <span class="fz">I</span><sub>7</sub></div><div class="lcd" id="aI7">0,00 A</div></div>
+   <div class="geraet"><div class="name">Gesamtstrom <span class="fz">I</span></div><div class="lcd" id="aI">10,00 A</div><div class="art">Echt-Effektivwert</div></div>
+   <div class="geraet"><div class="name">THD-Wert des Stroms</div><div class="lcd" id="aTHDI">verdeckt</div>
+    <div class="knoepfe" id="thdknopf"></div></div>
+  </div>
+  <div class="schirm"><div class="name">Netzanalysator: Histogramm der Effektivwerte über der Ordnungszahl <span class="fz">ν</span></div>
+   <canvas id="cHisto" class="hellgrund" width="900" height="260" data-verhaeltnis="0.29" data-mindest="210" aria-label="Säulen der Effektivwerte für die Ordnungszahlen 1, 3, 5 und 7"></canvas></div>
+  <div class="wahl"><div class="titel">Neu beginnen</div>
+   <div class="knoepfe"><button class="zurueck" id="bResetA" type="button">Zurücksetzen</button></div></div>
+ </div>
+
+ <!-- =========================================================== Ansicht B -->
+ <div class="ansicht" id="ansichtB">
+  <div class="lage">Sammelschiene 3 AC 400 V, 50 Hz, ohne N-Leiter. Die Netzspannung enthält die 5. Harmonische
+   (3 %) und die 7. Harmonische (2 %). Kompensationsanlage: 6 Stufen zu je 50 kvar, Kondensatoren in Dreieck.
+   Bemessungsstrom einer Stufe: 72,2 A.</div>
+  <div class="buehne">
+   <div class="wahl">
+    <div class="titel">Zugeschaltete Stufen</div>
+    <div class="regler stufen" id="stufenzeile"></div>
+    <div class="titel">Drossel vor jedem Kondensator</div>
+    <div class="knoepfe" id="drossel"></div>
+    <div class="hinweis" style="margin-top:6px">7 %: Der Blindwiderstand der Drossel beträgt 7 % des Blindwiderstands
+     des Kondensators (bei 50 Hz).</div>
+   </div>
+   <div class="geraete">
+    <div class="geraet breit"><div class="name">Strom einer Stufe <span class="fz">I</span><sub>St</sub></div><div class="lcd" id="aISt">0,0 A</div><div class="art">Echt-Effektivwert, Bemessungsstrom 72,2 A</div></div>
+    <div class="geraet"><div class="name">Resonanzfrequenz <span class="fz">f</span><sub>r</sub></div><div class="lcd" id="aFr">keine</div><div class="art">Netz und Anlage</div></div>
+    <div class="geraet"><div class="name">THD-Wert der Spannung</div><div class="lcd" id="aTHDU">3,6 %</div><div class="art">an der Sammelschiene</div></div>
+   </div>
+  </div>
+  <div class="schirm"><div class="name">Resonanzkurve: Scheinwiderstand <span class="fz">Z</span> des Reihenschwingkreises aus Induktivität des
+   Netzes und Kompensationsanlage · Marken: 5. und 7. Harmonische</div>
+   <canvas id="cKurve" class="hellgrund" width="900" height="380" data-verhaeltnis="0.42" data-mindest="250" aria-label="Scheinwiderstand über der Frequenz mit Marken bei 250 Hz und 350 Hz"></canvas></div>
+  <div class="schirm"><div class="name">Oszilloskop: Strom einer Stufe · 4 ms je Kästchen · 100 A je Kästchen</div>
+   <canvas id="cOszB" width="900" height="360" data-verhaeltnis="0.4" data-mindest="230" aria-label="Oszilloskop: Strom einer Kondensatorstufe"></canvas>
+   <div class="legende"><i class="strich" style="border-color:#FF6FB5"></i>Strom einer Stufe <span class="fz">i</span><sub>St</sub> &nbsp;
+    <i class="strich" style="border-color:#C8D2D8;border-top-style:dashed"></i>50-Hz-Anteil</div></div>
+  <div class="wahl"><div class="titel">Neu beginnen</div>
+   <div class="knoepfe"><button class="zurueck" id="bResetB" type="button">Zurücksetzen</button></div></div>
+ </div>
+ <div class="hinweis">Ideale Bauteile, nur Ordnungszahlen bis 7. Netz 3 AC ohne N-Leiter: keine Oberschwingung mit der
+  Ordnungszahl 3 in Ansicht B.</div>
+ <pre id="pruefbericht"></pre>
+</div>
+
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id);};
+function komma(s){return String(s).replace(".",",");}
+function f2(x){return komma(x.toFixed(2));}
+function f1(x){return komma(x.toFixed(1));}
+// ---------------------------------------------------------------- Modell Ansicht B (siehe Kopfkommentar)
+var U=400, USTR=U/Math.sqrt(3), SK=7.5e6, XN=U*U/SK, RD=0.010, Q=50e3, P=0.07, A5=0.03, A7=0.02;
+var I1ST=Q/(Math.sqrt(3)*U);
+function anlage(n, dr){
+  if(n===0) return {n:0, ist:0, fr:null, thd:Math.sqrt(A5*A5+A7*A7)*100, xc:0, xd:0, I:[]};
+  var xc1 = dr ? U*U/(Q*(1-P)) : U*U/Q, xd1 = dr ? P*xc1 : 0;
+  var xc=xc1/n, xd=xd1/n, s=I1ST*I1ST, ub=0, I=[];
+  [[5,A5],[7,A7]].forEach(function(h){
+    var nu=h[0], uq=h[1]*USTR, xz=nu*xd-xc/nu, xl=nu*XN+xz, z=Math.sqrt(RD*RD+xl*xl), it=uq/z;
+    s+=(it/n)*(it/n); ub+=Math.pow(uq*Math.abs(xz)/z,2);
+    I.push({nu:nu, ist:it/n, phase:-Math.atan2(xl,RD)});
+  });
+  return {n:n, ist:Math.sqrt(s), fr:50*Math.sqrt(xc/(XN+xd)), thd:Math.sqrt(ub)/USTR*100, xc:xc, xd:xd, I:I};
+}
+function zKurve(f, xc, xd){ var k=f/50, x=k*(XN+xd)-xc/k; return Math.sqrt(RD*RD+x*x); }
+
+// ---------------------------------------------------------------- Zustand
+var START={ansicht:"A", h:{3:0,5:0,7:0}, kanal2:false, thd:false, n:0, dr:false};
+var z={};
+function kopie(s){return {ansicht:s.ansicht, h:{3:s.h[3],5:s.h[5],7:s.h[7]}, kanal2:s.kanal2, thd:s.thd, n:s.n, dr:s.dr};}
+
+// ---------------------------------------------------------------- Bedienelemente
+function knopf(ziel, text, aria, klick){
+  var b=document.createElement("button"); b.type="button"; b.innerHTML=text; b.setAttribute("aria-label",aria);
+  b.onclick=function(){klick(); auffrischen();}; ziel.appendChild(b); return b;
+}
+var reiterA=knopf($("reiter"),"A&nbsp; Verbraucherstrom","Ansicht A: Verbraucherstrom",function(){z.ansicht="A";});
+var reiterB=knopf($("reiter"),"B&nbsp; Kompensationsanlage","Ansicht B: Kompensationsanlage",function(){z.ansicht="B";});
+var reglerAnz={};
+[3,5,7].forEach(function(nu){
+  var r=document.createElement("div"); r.className="regler";
+  var nm=document.createElement("span"); nm.className="name"; nm.textContent=nu+". Harmonische"; r.appendChild(nm);
+  knopf(r,"−","Anteil der "+nu+". Harmonischen kleiner",function(){z.h[nu]=Math.max(0,z.h[nu]-5);});
+  var w=document.createElement("span"); w.className="wert"; w.setAttribute("aria-live","polite"); r.appendChild(w); reglerAnz[nu]=w;
+  knopf(r,"+","Anteil der "+nu+". Harmonischen größer",function(){z.h[nu]=Math.min(50,z.h[nu]+5);});
+  $("regler").appendChild(r);
+});
+var k2aus=knopf($("kanal2"),"aus","Kanal 2 aus",function(){z.kanal2=false;});
+var k2ein=knopf($("kanal2"),"ein","Kanal 2 ein",function(){z.kanal2=true;});
+var thdK=knopf($("thdknopf"),"THD anzeigen","THD-Wert anzeigen",function(){z.thd=!z.thd;});
+// Stufen: Minus, Anzeige, Plus
+var stufenZeile=$("stufenzeile");
+var sMinus=knopf(stufenZeile,"−","eine Stufe weniger",function(){z.n=Math.max(0,z.n-1);});
+var sAnz=document.createElement("span"); sAnz.className="wert"; sAnz.setAttribute("aria-live","polite"); stufenZeile.appendChild(sAnz);
+var sPlus=knopf(stufenZeile,"+","eine Stufe mehr",function(){z.n=Math.min(6,z.n+1);});
+var drOhne=knopf($("drossel"),"ohne","ohne Drossel",function(){z.dr=false;});
+var drMit=knopf($("drossel"),"mit 7 %","mit Drossel, 7 Prozent",function(){z.dr=true;});
+$("bResetA").onclick=function(){var a=z.ansicht; z=kopie(START); z.ansicht=a; auffrischen();};
+$("bResetB").onclick=function(){var a=z.ansicht; z=kopie(START); z.ansicht=a; auffrischen();};
+
+// ---------------------------------------------------------------- Zeichnen
+function bereit(c){
+  var r=window.devicePixelRatio||1, w=c.clientWidth||900,
+      h=Math.round(Math.max(w*parseFloat(c.dataset.verhaeltnis), parseFloat(c.dataset.mindest)));
+  if(c._w!==w||c._r!==r){ c.width=Math.round(w*r); c.height=Math.round(h*r); c.style.height=h+"px"; c._w=w; c._r=r; c._h=h; }
+  var g=c.getContext("2d"); g.setTransform(r,0,0,r,0,0); g.clearRect(0,0,w,c._h); return {g:g,w:w,h:c._h};
+}
+function raster(g,x,y,w,h,nx,ny,farbe){
+  g.strokeStyle=farbe; g.lineWidth=1;
+  for(var i=0;i<=nx;i++){ g.beginPath(); g.moveTo(x+w*i/nx,y); g.lineTo(x+w*i/nx,y+h); g.stroke(); }
+  for(var j=0;j<=ny;j++){ g.beginPath(); g.moveTo(x,y+h*j/ny); g.lineTo(x+w,y+h*j/ny); g.stroke(); }
+}
+function kurve(g,x,y,w,h,ymax,fn,farbe,breite,strich){
+  g.save(); g.beginPath(); g.rect(x,y,w,h); g.clip();
+  g.strokeStyle=farbe; g.lineWidth=breite; g.setLineDash(strich||[]); g.beginPath();
+  var N=800;
+  for(var k=0;k<=N;k++){ var t=0.04*k/N, v=fn(t), px=x+w*k/N, py=y+h/2-v/ymax*h/2;
+    if(k===0) g.moveTo(px,py); else g.lineTo(px,py); }
+  g.stroke(); g.restore();
+}
+var W50=2*Math.PI*50;
+function zeichneA(){
+  var c=bereit($("cOszA")), g=c.g, w=c.w, h=c.h, m=Math.max(6,w*0.012);
+  var hk=(h-3*m)/2, bw=w-2*m;
+  var I1=10, a3=z.h[3]/100, a5=z.h[5]/100, a7=z.h[7]/100, s2=Math.SQRT2*I1;
+  raster(g,m,m,bw,hk,10,8,"#2E4A58"); raster(g,m,2*m+hk,bw,hk,10,8,"#2E4A58");
+  g.strokeStyle="#5E7F8F"; g.lineWidth=1.6;
+  [m+hk/2, 2*m+hk+hk/2].forEach(function(yy){g.beginPath(); g.moveTo(m,yy); g.lineTo(m+bw,yy); g.stroke();});
+  g.beginPath(); g.moveTo(m+bw/2,m); g.lineTo(m+bw/2,m+hk); g.stroke();
+  g.beginPath(); g.moveTo(m+bw/2,2*m+hk); g.lineTo(m+bw/2,2*m+2*hk); g.stroke();
+  // Kanal 1: Gesamtstrom (Vorzeichen so, dass die Spitzen zusammenfallen wie bei Gleichrichterlasten)
+  kurve(g,m,m,bw,hk,40,function(t){return s2*Math.sin(W50*t);},"#C8D2D8",1.6,[6,5]);
+  kurve(g,m,m,bw,hk,40,function(t){var x=W50*t; return s2*(Math.sin(x)-a3*Math.sin(3*x)+a5*Math.sin(5*x)-a7*Math.sin(7*x));},"#FF6FB5",3);
+  g.fillStyle="#9FB6C2"; g.font="bold 13px Arial,sans-serif";
+  g.fillText("Kanal 1", m+6, m+16); g.fillText("Kanal 2", m+6, 2*m+hk+16);
+  if(z.kanal2){
+    if(a3>0) kurve(g,m,2*m+hk,bw,hk,8,function(t){return -s2*a3*Math.sin(3*W50*t);},"#FFD48A",2.4);
+    if(a5>0) kurve(g,m,2*m+hk,bw,hk,8,function(t){return s2*a5*Math.sin(5*W50*t);},"#7FE3A0",2.4);
+    if(a7>0) kurve(g,m,2*m+hk,bw,hk,8,function(t){return -s2*a7*Math.sin(7*W50*t);},"#7FC8FF",2.4);
+  } else { g.fillStyle="#6E8794"; g.font="15px Arial,sans-serif"; g.fillText("Kanal 2 aus", m+bw/2-40, 2*m+hk+hk/2-8); }
+}
+function zeichneHisto(){
+  var c=bereit($("cHisto")), g=c.g, w=c.w, h=c.h;
+  var lx=Math.max(54,w*0.08), rx=w-12, oy=14, uy=h-40;
+  g.strokeStyle="#9AA5AE"; g.lineWidth=1; g.fillStyle="#1A2530"; g.font="13px Arial,sans-serif";
+  for(var a=0;a<=10;a+=2){ var y=uy-(uy-oy)*a/10; g.beginPath(); g.moveTo(lx,y); g.lineTo(rx,y); g.stroke();
+    g.fillText(String(a), lx-24, y+4); }
+  g.save(); g.translate(14,(oy+uy)/2+30); g.rotate(-Math.PI/2); g.font="italic 15px Cambria,Caladea,Georgia,serif";
+  g.fillText("I", 0, 0); g.font="13px Arial,sans-serif"; g.fillText("ν", 6, 4); g.fillText(" in A", 14, 0); g.restore();
+  var werte=[[1,10],[3,10*z.h[3]/100],[5,10*z.h[5]/100],[7,10*z.h[7]/100]], farben=["#C2006B","#C98A10","#2F9A5E","#2E7FC0"];
+  var sp=(rx-lx)/4;
+  werte.forEach(function(e,i){
+    var x0=lx+sp*i+sp*0.28, bw=sp*0.44, hh=(uy-oy)*e[1]/10;
+    g.fillStyle=farben[i]; g.fillRect(x0,uy-hh,bw,hh);
+    g.fillStyle="#1A2530"; g.font="bold 15px Arial,sans-serif"; g.fillText(String(e[0]), x0+bw/2-4, uy+18);
+  });
+  g.font="italic 15px Cambria,Caladea,Georgia,serif"; g.fillText("ν", rx-30, uy+34);
+  g.font="13px Arial,sans-serif"; g.fillText("Ordnungszahl", rx-120, uy+34);
+}
+function zeichneB(){
+  var c=bereit($("cOszB")), g=c.g, w=c.w, h=c.h, m=Math.max(6,w*0.012), bw=w-2*m, hk=h-2*m;
+  raster(g,m,m,bw,hk,10,8,"#2E4A58");
+  g.strokeStyle="#5E7F8F"; g.lineWidth=1.6; g.beginPath(); g.moveTo(m,m+hk/2); g.lineTo(m+bw,m+hk/2); g.stroke();
+  g.beginPath(); g.moveTo(m+bw/2,m); g.lineTo(m+bw/2,m+hk); g.stroke();
+  var a=anlage(z.n,z.dr);
+  if(z.n===0){ g.fillStyle="#6E8794"; g.font="15px Arial,sans-serif"; g.fillText("keine Stufe zugeschaltet", m+bw/2-80, m+hk/2-10); return; }
+  var s2=Math.SQRT2;
+  kurve(g,m,m,bw,hk,400,function(t){return s2*I1ST*Math.cos(W50*t);},"#C8D2D8",1.6,[6,5]);
+  kurve(g,m,m,bw,hk,400,function(t){var v=s2*I1ST*Math.cos(W50*t);
+    a.I.forEach(function(e){ v+=s2*e.ist*Math.sin(e.nu*W50*t+e.phase); }); return v;},"#FF6FB5",3);
+}
+function zeichneKurve(){
+  var c=bereit($("cKurve")), g=c.g, w=c.w, h=c.h;
+  var lx=Math.max(58,w*0.085), rx=w-14, oy=16, uy=h-44, FM=700, ZM=0.5;
+  function px(f){return lx+(rx-lx)*f/FM;} function py(zz){return uy-(uy-oy)*Math.min(zz,ZM)/ZM;}
+  g.strokeStyle="#D5DCE1"; g.lineWidth=1;
+  for(var f=0;f<=FM;f+=50){ g.beginPath(); g.moveTo(px(f),oy); g.lineTo(px(f),uy); g.stroke(); }
+  for(var zz=0;zz<=ZM+1e-9;zz+=0.1){ g.beginPath(); g.moveTo(lx,py(zz)); g.lineTo(rx,py(zz)); g.stroke(); }
+  g.strokeStyle="#1A2530"; g.lineWidth=1.6; g.beginPath(); g.moveTo(lx,oy); g.lineTo(lx,uy); g.lineTo(rx,uy); g.stroke();
+  g.fillStyle="#1A2530"; g.font="13px Arial,sans-serif";
+  for(f=0;f<=FM;f+=100){ g.fillText(String(f), px(f)-(f<100?4:12), uy+17); }
+  for(zz=0;zz<=ZM+1e-9;zz+=0.1){ g.fillText(komma(zz.toFixed(1)), lx-30, py(zz)+4); }
+  g.font="italic 15px Cambria,Caladea,Georgia,serif"; g.fillText("f", rx-58, uy+36);
+  g.font="13px Arial,sans-serif"; g.fillText(" in Hz", rx-50, uy+36);
+  g.font="italic 15px Cambria,Caladea,Georgia,serif"; g.fillText("Z", lx-48, oy+12); g.font="13px Arial,sans-serif"; g.fillText("in Ω", lx-48, oy+28);
+  // Marken der Oberschwingungen
+  [[250,"5."],[350,"7."]].forEach(function(e){
+    g.strokeStyle="#A34E0E"; g.lineWidth=2; g.setLineDash([7,5]); g.beginPath(); g.moveTo(px(e[0]),oy); g.lineTo(px(e[0]),uy); g.stroke(); g.setLineDash([]);
+    g.fillStyle="#A34E0E"; g.font="bold 14px Arial,sans-serif"; g.fillText(e[1], px(e[0])+4, oy+14);
+  });
+  var a=anlage(z.n,z.dr);
+  if(z.n===0){ g.fillStyle="#5A666F"; g.font="15px Arial,sans-serif"; g.fillText("keine Stufe zugeschaltet", lx+40, oy+60); return; }
+  g.save(); g.beginPath(); g.rect(lx,oy-2,rx-lx,uy-oy+4); g.clip();
+  g.strokeStyle="#C2006B"; g.lineWidth=3; g.beginPath();
+  for(var k=1;k<=700;k++){ var ff=FM*k/700, yy=py(zKurve(ff,a.xc,a.xd)); if(k===1) g.moveTo(px(ff),yy); else g.lineTo(px(ff),yy); }
+  g.stroke(); g.restore();
+  g.fillStyle="#C2006B"; g.beginPath(); g.arc(px(a.fr),py(RD),5,0,2*Math.PI); g.fill();
+}
+
+// ---------------------------------------------------------------- Anzeigen
+function auffrischen(){
+  reiterA.classList.toggle("an",z.ansicht==="A"); reiterB.classList.toggle("an",z.ansicht==="B");
+  $("ansichtA").classList.toggle("zeigen",z.ansicht==="A"); $("ansichtB").classList.toggle("zeigen",z.ansicht==="B");
+  [3,5,7].forEach(function(nu){ reglerAnz[nu].textContent=z.h[nu]+" %"; });
+  k2aus.classList.toggle("an",!z.kanal2); k2ein.classList.toggle("an",z.kanal2);
+  var I1=10, i3=I1*z.h[3]/100, i5=I1*z.h[5]/100, i7=I1*z.h[7]/100;
+  $("aI1").textContent=f2(I1)+" A"; $("aI3").textContent=f2(i3)+" A"; $("aI5").textContent=f2(i5)+" A"; $("aI7").textContent=f2(i7)+" A";
+  $("aI").textContent=f2(Math.sqrt(I1*I1+i3*i3+i5*i5+i7*i7))+" A";
+  $("aTHDI").textContent=z.thd ? f1(Math.sqrt(i3*i3+i5*i5+i7*i7)/I1*100)+" %" : "verdeckt";
+  thdK.textContent=z.thd ? "THD verbergen" : "THD anzeigen"; thdK.classList.toggle("an",z.thd);
+  sAnz.textContent=String(z.n); sMinus.disabled=z.n===0; sPlus.disabled=z.n===6;
+  drOhne.classList.toggle("an",!z.dr); drMit.classList.toggle("an",z.dr);
+  var a=anlage(z.n,z.dr);
+  $("aISt").textContent=f1(a.ist)+" A";
+  $("aFr").textContent=a.fr===null ? "keine" : Math.round(a.fr)+" Hz";
+  $("aTHDU").textContent=f1(a.thd)+" %";
+  if(z.ansicht==="A"){ zeichneA(); zeichneHisto(); } else { zeichneB(); zeichneKurve(); }
+}
+window.addEventListener("resize",function(){ auffrischen(); });
+
+// ---------------------------------------------------------------- Prüfmodus
+if (/[?&]pruefen\b/.test(location.search)) {
+  var bericht={B:[], A:null};
+  [false,true].forEach(function(dr){ for(var n=0;n<=6;n++){ var a=anlage(n,dr);
+    bericht.B.push({drossel:dr?"7 %":"ohne", stufen:n, I_St:f1(a.ist)+" A", f_r:a.fr===null?"-":Math.round(a.fr)+" Hz", THD:f1(a.thd)+" %"}); } });
+  var i3=3, i5=2, i7=1;
+  bericht.A={I:f2(Math.sqrt(100+i3*i3+i5*i5+i7*i7))+" A", THD:f1(Math.sqrt(i3*i3+i5*i5+i7*i7)/10*100)+" %"};
+  $("pruefbericht").textContent=JSON.stringify(bericht);
+}
+z=kopie(START); auffrischen();
+// Für Bildschirmfotos: window.__stelle({ansicht:"B", n:3, dr:false})
+window.__stelle=function(s){ z=kopie(START); for(var k in s){ if(k==="h"){ for(var nu in s.h) z.h[nu]=s.h[nu]; } else z[k]=s[k]; } auffrischen(); };
+})();
+</script>
+</body></html>
