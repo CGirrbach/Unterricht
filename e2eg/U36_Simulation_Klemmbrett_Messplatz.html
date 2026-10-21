@@ -16,12 +16,20 @@
        Uhrzeigersinn: so ist Rechtslauf bei L1-U1, L2-V1, L3-W1 festgelegt (Europa Fachkunde S. 489 und 501,
        Tabellenbuch S. 534). Sind beide Anteile gleich (Wechselfeld, z. B. nur zwei Stränge in Reihe), läuft der Motor
        nicht an. Die Animation ist Zeitlupe.
+       Motorwahl (21.10.2026, Prüfer): zulässige Strangspannung nach dem Leistungsschild, die kleinere Angabe (Tabellenbuch
+       S. 530, Feld 7): Motor A 230/400 V: 230 V; Motor B 400/690 V: 400 V. Größte Strangspannung über 110 % der
+       zulässigen: Meldung „Strangspannung zu hoch: Die Wicklung wird überlastet.“ (Motor A in Dreieck, 400 V). Unter
+       90 %: „Strangspannung zu klein: Der Motor bringt nur einen Teil seines Drehmoments.“ (Motor B in Stern, 230,9 V;
+       Moment etwa ein Drittel, Fachkunde S. 497). Eine Strangspannung unter 90 %, eine andere zulässig: „Strangspannungen
+       ungleich“. Alle Strangspannungen zulässig, aber Mit- und Gegenlauf des Drehfeldes beide über 10 % (Stränge verkehrt
+       verbunden, z. B. Brücken U2 und V2, U1 und W2, W1 und V2): „Stränge falsch verbunden“. So zeigt nur die richtige
+       Brückung keine Meldung. Die Seite nennt die richtige Schaltung nicht.
      Anzeige: Strangspannungen mit einer Nachkommastelle. Prüfmodus ?pruefen: alle 32 Brückenstellungen × 6 Anschlüsse
      als JSON. Startstellung neutral: Motor A, keine Brücken, Anschluss L1-U1, L2-V1, L3-W1, Schalter aus. -->
 <html lang="de"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Messplatz Klemmbrett (U36)</title>
-<script type="application/json" id="sim-meta">{"startwerte":{"motor":"A (230/400 V)","bruecken":[],"anschluss":"L1 an U1, L2 an V1, L3 an W1","schalter":"aus"},"loesungswerte":{"Aufgabe 3, Motor A (230/400 V)":{"bruecken":["W2 und U2","U2 und V2"],"strangspannung":"230,9 V","drehrichtung":"im Uhrzeigersinn"},"Aufgabe 3, Motor B (400/690 V)":{"bruecken":["U1 und W2","V1 und U2","W1 und V2"],"strangspannung":"400,0 V","drehrichtung":"im Uhrzeigersinn"},"Aufgabe 4, L1 und L2 getauscht":"gegen den Uhrzeigersinn","Aufgabe 4, L2 und L3 getauscht":"gegen den Uhrzeigersinn"},"quelle":"Europa Fachkunde S. 489 (Drehsinn, Bild 3) und S. 501 (Bild 3 und 4: Stern- und Dreieckschaltung am Klemmbrett, Tabelle Spannungsangabe/Wicklungsschaltung); Tabellenbuch Elektrotechnik S. 534 (Anschluss für Rechtslauf, Drehrichtungsumkehr)"}</script>
+<script type="application/json" id="sim-meta">{"startwerte":{"motor":"A (230/400 V)","bruecken":[],"anschluss":"L1 an U1, L2 an V1, L3 an W1","schalter":"aus"},"loesungswerte":{"Aufgabe 3, Motor A (230/400 V)":{"bruecken":["W2 und U2","U2 und V2"],"strangspannung":"230,9 V","drehrichtung":"im Uhrzeigersinn"},"Aufgabe 3, Motor B (400/690 V)":{"bruecken":["U1 und W2","V1 und U2","W1 und V2"],"strangspannung":"400,0 V","drehrichtung":"im Uhrzeigersinn"},"Aufgabe 4, L2 an U1, L1 an V1, L3 an W1":"gegen den Uhrzeigersinn","Aufgabe 4, L1 an U1, L3 an V1, L2 an W1":"gegen den Uhrzeigersinn","Aufgabe 4, L3 an U1, L1 an V1, L2 an W1":"im Uhrzeigersinn"},"quelle":"Europa Fachkunde S. 489 (Drehsinn, Bild 3) und S. 501 (Bild 3 und 4: Stern- und Dreieckschaltung am Klemmbrett, Tabelle Spannungsangabe/Wicklungsschaltung); Tabellenbuch Elektrotechnik S. 534 (Anschluss für Rechtslauf, Drehrichtungsumkehr)"}</script>
 <style>
  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
  :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#1E8A4C}
@@ -39,6 +47,7 @@
  .wert small{display:block;font-size:12px;color:#cfe;font-weight:400;text-align:left}
  .status{grid-column:1 / span 2;font-size:14.5px;font-weight:700;padding:4px 8px;border-radius:3px;background:var(--hell)}
  .status.kurz{background:#fde3e3;color:#9b1c1c}
+ .status.warn{background:#fff1d6;color:#8a4b00}
  .buehne{display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px}
  @media(min-width:760px){.buehne{grid-template-columns:1.15fr 1fr}}
  .titel{font-size:15px;font-weight:700;margin:10px 0 5px}
@@ -127,6 +136,17 @@ var KN=["U1","V1","W1","U2","V2","W2"];                // Knoten 0..5
 var BR=[{id:"W2 und U2",a:5,b:3},{id:"U2 und V2",a:3,b:4},{id:"U1 und W2",a:0,b:5},{id:"V1 und U2",a:1,b:3},{id:"W1 und V2",a:2,b:4}];
 var STR=[{n:"U",a:0,b:3,ach:0},{n:"V",a:1,b:4,ach:120},{n:"W",a:2,b:5,ach:240}];
 var START={motor:"A",br:[false,false,false,false,false],an:[1,2,3],ein:false};
+var ZUL={A:230,B:400};                                  // zulässige Strangspannung nach dem Leistungsschild
+function bewerte(e,motor){                              // Spannung am Strang gegen das Leistungsschild
+  if(e.kurz) return "kurz";
+  var umax=Math.max.apply(null,e.u), umin=Math.min.apply(null,e.u), z=ZUL[motor];
+  if(umax<1) return "aus";
+  if(umax>1.1*z) return "hoch";
+  if(umax<0.9*z) return "klein";
+  if(umin<0.9*z) return "ungleich";
+  if(Math.min(e.mit,e.gegen)>0.1*Math.max(e.mit,e.gegen)) return "falsch";   // Stränge vertauscht verbunden
+  return "ok";
+}
 var z=JSON.parse(JSON.stringify(START)), winkel=0, kurz=false, timer=null, letzte=0;
 var $=function(id){return document.getElementById(id);};
 var RAD=Math.PI/180;
@@ -280,10 +300,15 @@ function auffrischen(){
     html+="<div class='wert'><small>Strang "+STR[s].n+"</small>"+wert+"</div>";
   }
   $("werte").innerHTML=html;
-  var st=$("status"); st.classList.remove("kurz");
+  var st=$("status"); st.classList.remove("kurz"); st.classList.remove("warn");
+  var bw=bewerte(erg,z.motor), lauf=(erg.dreh===0)?"Welle steht still":"Welle dreht sich";
   if(!z.ein) st.textContent="Netz aus";
   else if(erg.kurz){ st.textContent="Kurzschluss: Die Sicherung hat ausgelöst."; st.classList.add("kurz"); }
-  else st.textContent=(erg.dreh===0)?"Netz ein · Welle steht still":"Netz ein · Welle dreht sich";
+  else if(bw==="hoch"){ st.textContent="Netz ein · "+lauf+" · Strangspannung zu hoch: Die Wicklung wird überlastet. Sofort ausschalten!"; st.classList.add("kurz"); }
+  else if(bw==="falsch"){ st.textContent="Netz ein · "+lauf+" · Stränge falsch verbunden: Das Drehfeld ist ungleichmäßig, der Motor wird überlastet."; st.classList.add("kurz"); }
+  else if(bw==="ungleich"){ st.textContent="Netz ein · "+lauf+" · Strangspannungen ungleich: Die Stränge werden ungleich belastet."; st.classList.add("warn"); }
+  else if(bw==="klein"){ st.textContent="Netz ein · "+lauf+" · Strangspannung zu klein: Der Motor bringt nur einen Teil seines Drehmoments."; st.classList.add("warn"); }
+  else st.textContent="Netz ein · "+lauf;
   $("schalter").textContent=z.ein?"Ausschalten":"Einschalten"; $("schalter").classList.toggle("an",z.ein);
   $("mA").classList.toggle("an",z.motor==="A"); $("mB").classList.toggle("an",z.motor==="B");
   BR.forEach(function(b,i){ $("b"+i).classList.toggle("an",z.br[i]); });
@@ -312,7 +337,7 @@ $("mA").onclick=function(){ if(gesperrt()) return; z.motor="A"; auffrischen(); }
 $("mB").onclick=function(){ if(gesperrt()) return; z.motor="B"; auffrischen(); };
 $("schalter").onclick=function(){ $("meldung").textContent=""; z.ein=!z.ein; auffrischen(); };
 $("bReset").onclick=function(){ $("meldung").textContent=""; z=JSON.parse(JSON.stringify(START)); winkel=0; auffrischen(); };
-window.__stelle=function(br,an,ein){ z.br=br.slice(); z.an=an.slice(); z.ein=!!ein; auffrischen();
+window.__stelle=function(br,an,ein,motor){ z.br=br.slice(); z.an=an.slice(); z.ein=!!ein; if(motor) z.motor=motor; auffrischen();
   return $("werte").textContent+" | "+$("status").textContent+" | dreh "+(erg.kurz?"kurz":erg.dreh); };
 
 // ---------------- Prüfmodus ----------------
@@ -323,7 +348,7 @@ if(/[?&]pruefen\b/.test(location.search)){
     var name=BR.filter(function(b,i){return br[i];}).map(function(b){return b.id;}).join(",")||"keine";
     bericht[name]={};
     PERM.forEach(function(an){ var e=rechne(br,an);
-      bericht[name]["L"+an.join("")]=e.kurz?"Kurzschluss":{u:e.u.map(function(x){return Math.round(x*10)/10;}),dreh:e.dreh,mit:Math.round(e.mit*1000)/1000,gegen:Math.round(e.gegen*1000)/1000}; });
+      bericht[name]["L"+an.join("")]=e.kurz?"Kurzschluss":{u:e.u.map(function(x){return Math.round(x*10)/10;}),dreh:e.dreh,mit:Math.round(e.mit*1000)/1000,gegen:Math.round(e.gegen*1000)/1000,A:bewerte(e,"A"),B:bewerte(e,"B")}; });
   }
   $("pruefbericht").textContent=JSON.stringify(bericht);
 }
