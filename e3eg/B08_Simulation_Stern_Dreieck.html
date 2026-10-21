@@ -21,6 +21,9 @@
      Anzeigen: Spannung mit einer, Ströme mit drei Nachkommastellen, Blindleistung in ganzen var; Kernaussagen exakt
        (4524 var : 1508 var = 3; 400,0 V · 3,770 A · 3 = 4524 var; 230,9 V · 2,177 A · 3 = 1508 var).
      Startstellung neutral: Q1 aus, Stern, C = 0 µF, kein Entladewiderstand (keine Einstellung der Aufgaben).
+     Nach einer Änderung bei ausgeschaltetem Q1 meldet der Spannungsmesser „entladen: Q1 ein- und ausschalten“
+     (Prüfer 21.10.2026: wer bei ausgeschaltetem Q1 auf 1 MΩ umstellte, las 0,0 V als „unter 50 V“). Der Hinweis
+     unter der Bühne nennt den Scheitelwert nicht mehr (Lückenwort von Aufgabe 3).
      Prüfmodus ?pruefen: Anzeigen der Aufgabenstellungen und Grenzfälle als JSON in #pruefbericht. -->
 <html lang="de"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -130,9 +133,9 @@
   </div>
  </div>
 
- <div class="hinweis">Q1 trennt im ungünstigsten Augenblick: Der Kondensator bleibt auf dem Scheitelwert der Spannung
-  geladen. Wer Schaltung, Kapazität oder Entladewiderstand bei ausgeschaltetem Q1 ändert, setzt entladene Kondensatoren
-  ein; zum Messen Q1 wieder ein- und ausschalten.</div>
+ <div class="hinweis">Q1 trennt im ungünstigsten Augenblick der Wechselspannung. Wer Schaltung, Kapazität oder
+  Entladewiderstand bei ausgeschaltetem Q1 ändert, setzt entladene Kondensatoren ein; der Spannungsmesser meldet dann
+  „entladen“. Zum Messen für jeden Widerstand Q1 neu ein- und wieder ausschalten.</div>
  <pre id="pruefbericht"></pre>
 </div>
 
@@ -284,7 +287,8 @@ function anzeigen(){
   } else {
     var tt=Math.min(ent.t,TEND), u=uEntladen(ent.u0,z.c,z.r,tt);
     $("mU").textContent=zahl(u,1,"V");
-    $("mUart").textContent= ent.u0>0 ? (ent.t>=TEND ? "60 s nach dem Ausschalten" : zahl(tt,0,"s")+" nach dem Ausschalten") : "";
+    $("mUart").textContent= ent.u0>0 ? (ent.t>=TEND ? "60 s nach dem Ausschalten" : zahl(tt,0,"s")+" nach dem Ausschalten")
+                          : (z.c>0 ? "entladen: Q1 ein- und ausschalten" : "");
     $("mIC").textContent=zahl(0,3,"A"); $("mI").textContent=zahl(0,3,"A");
     $("mQ").textContent="0 var"; $("mQart").textContent="";
   }
