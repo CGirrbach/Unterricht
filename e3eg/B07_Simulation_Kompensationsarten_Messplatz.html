@@ -1,0 +1,306 @@
+<!doctype html>
+<!-- E3EG B07 · Messplatz Kompensationsarten (Neubau 21.10.2026, Aufgabe IN der Stunde nach dem Muster E1EG B07 und
+     E2EG U31). Ersetzt für die neuen Blätter B07_Simulation_Regler.html (bleibt online unverändert). Die alte Seite war
+     eine Vorführung: ein Schieber für die Wirkleistung, ein Diagramm Q über P, fertig gerechnete Werte (Rest-Q, cos φ2)
+     und eine Deutung als Satz („Die Anlage ist überkompensiert …“), Startwert gleich Lösungswert, kleine Knöpfe, am
+     Handy lagen die Anzeigen unter dem Schieber außer Sicht; der Ort des Kondensators kam nicht vor.
+     Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht und rechnet nichts vor):
+       (1) Ein Kondensator entlastet nur die Leitungen zwischen seinem Einbauort und dem Netz. Am Netzanschluss (A1) ist
+           der Strom bei allen drei Einbauorten gleich klein (50,1 A statt 60,0 A); zwischen Kondensator und Motor fließt
+           weiter der volle Motorstrom (A3 = 20,0 A, außer der Kondensator sitzt am Motor: 16,7 A).
+       (2) Eine feste Kondensatorbatterie an einer Verteilung passt nur zu einer Last: Läuft nur ein Motor, wird die Anlage
+           kapazitiv (nur M1: cos φ = 0,86 kapazitiv; nur M2: 0,46 kapazitiv und 17,6 A statt 10,0 A). Der Regler schaltet
+           so viele Einzelbatterien zu, wie die laufenden Motoren brauchen (nur M1: 2; nur M2: 1; alle: 6). Der Kondensator am Motor wird mit dem Motor
+           geschaltet und braucht keinen Regler.
+     Vorlagen: Tabellenbuch S. 329 (Gruppenkompensation, Zentralkompensation, einpolig), Fachkunde S. 165, Bild 2
+       (a Kondensatoren am Motor, b an der Unterverteilung, c am Sammelpunkt mit Regler, der Kondensatoren zu- und
+       abschaltet), Strommesser in der Zuleitung nach Fachkunde S. 164, Bild 1; cos-φ-Messer wie E2EG U30 und U31.
+     Anlage (ideales Netz 400 V, 50 Hz, Leitungen widerstandsfrei, symmetrisch, feste Belastung):
+       M1 Lüftung 20 A, M2 Pumpe 10 A, M3 Kompressor 30 A, jeder cos φ = 0,80 induktiv:
+       P = √3 · 400 V · I · 0,8; Q = √3 · 400 V · I · 0,6 (M1: 11085,1 W, 8313,8 var).
+       Kondensator am Motor (hinter dem Schalter, mit dem Motor geschaltet, hinter A3): M1 5 kvar, M2 2,5 kvar, M3 7,5 kvar.
+       Kondensatorbatterie (an der Unterverteilung oder an der Hauptverteilung): 6 Einzelbatterien zu je 2,5 kvar.
+         Regler aus: alle 6 zugeschaltet. Regler ein: n = kleinste ganze Zahl mit n · 2,5 kvar ≥ P · (tan φ1 − tan φ2),
+         Sollwert cos φ2 = 0,95 (Bedarf gedeckt, aufgerundet wie im Lösungsvorschlag Winter 2020/21, SE 4).
+       Ströme: I = √(P² + Q²) / (√3 · 400 V) mit den Leistungen hinter dem Strommesser.
+     Anzeigen: Ströme mit einer Nachkommastelle in A, cos φ mit zwei Stellen und „induktiv“ oder „kapazitiv“ (ohne Strom: –),
+       Einzelbatterien „n von 6“ (ohne Kondensatorbatterie: –).
+     Startstellung neutral: keine Kondensatoren, alle Motoren aus, Regler aus (alle Anzeigen 0,0 A).
+     Prüfmodus ?pruefen: Anzeigen der Aufgabenstellungen und der Grenzfälle als JSON in #pruefbericht. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Kompensationsarten (E3EG B07)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"Kondensatoren":"keine","Q1":"aus","Q2":"aus","Q3":"aus","Regler":"aus"},"loesungswerte":{"Aufgabe 1, alle Motoren ein, keine Kondensatoren":{"A1":"60,0 A","A2":"60,0 A","A3":"20,0 A"},"Aufgabe 1, an jedem Motor":{"A1":"50,1 A","A2":"50,1 A","A3":"16,7 A"},"Aufgabe 1, an der Unterverteilung":{"A1":"50,1 A","A2":"50,1 A","A3":"20,0 A"},"Aufgabe 1, an der Hauptverteilung":{"A1":"50,1 A","A2":"60,0 A","A3":"20,0 A"},"Aufgabe 2, Hauptverteilung, nur M1, Regler aus":{"cos":"0,86 kapazitiv","Einzelbatterien":"6 von 6"},"Aufgabe 2, Hauptverteilung, nur M1, Regler ein":{"cos":"0,96 induktiv","Einzelbatterien":"2 von 6"},"Aufgabe 2, Hauptverteilung, alle Motoren, Regler ein":{"cos":"0,96 induktiv","Einzelbatterien":"6 von 6"}},"quelle":"Tabellenbuch S. 329 (Gruppen- und Zentralkompensation); Europa Fachkunde S. 164 Bild 1, S. 165 Bild 2"}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:1060px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .fz{font-family:Cambria,Caladea,'Noto Serif',Georgia,serif;font-style:italic}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px;align-items:start;
+         grid-template-areas:"messwerte" "schaltung" "bedienung"}
+ .schaltung{grid-area:schaltung} .messwerte{grid-area:messwerte} .bedienung{grid-area:bedienung}
+ @media(min-width:820px){.buehne{grid-template-columns:1.3fr 1fr;grid-template-areas:"schaltung messwerte" "schaltung bedienung"}}
+ .schaltung svg{width:100%;height:auto;display:block;border:1px solid var(--linie);background:#fff}
+ .messwerte{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;background:#fff}
+ .kachel{grid-column:span 2;border:1.4px solid var(--ink);background:var(--hell);padding:4px 6px;text-align:center;min-width:0}
+ .kachel.breit{grid-column:span 3}
+ .kachel .name{display:block;font-size:16px;font-weight:700;color:var(--kupfer)}
+ .kachel .ort{display:block;font-size:12.5px;color:var(--grau);line-height:1.2;min-height:30px}
+ .kachel .zahl{display:block;font-variant-numeric:tabular-nums;font-size:25px;font-weight:700;white-space:nowrap}
+ .kachel .art{display:block;font-size:14px;font-weight:700;color:var(--kupfer);min-height:19px}
+ .titel{font-size:15px;font-weight:700;margin:10px 0 4px}
+ .titel:first-child{margin-top:0}
+ .raster{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+ .raster3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+ button{font:inherit;font-size:16px;min-height:48px;padding:6px 8px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer;line-height:1.2}
+ button.an{background:var(--kupfer);color:#fff;font-weight:700}
+ button:disabled{border-color:var(--linie);color:var(--linie);background:#fff;cursor:not-allowed}
+ button.zurueck{border-color:var(--ink);color:var(--ink)}
+ .schalter{width:100%;font-weight:700}
+ .hinweis{font-size:14px;color:var(--grau);margin-top:12px}
+ .klein{font-size:13px;color:var(--grau);margin-top:4px;min-height:18px}
+ #pruefbericht{display:none}
+ @media(max-width:819px){.messwerte{position:sticky;top:0;z-index:5;padding:6px 0;box-shadow:0 6px 6px -6px rgba(0,0,0,.25)}}
+ @media(max-width:420px){.wrap{padding:10px 8px 16px} body{padding:8px 4px 30px}
+   .kachel{padding:2px 3px} .kachel .zahl{font-size:21px} .kachel .name{font-size:15px}
+   .kachel .ort{font-size:11px;min-height:27px} .kachel .art{font-size:12.5px;min-height:17px}
+   button{font-size:15px;padding:4px 5px} .anleitung{font-size:14px} .kopf h1{font-size:20px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E3EG · LF 11 · Einheit 1 · Leistungskompensation · B07</div><h1>Messplatz: Wo sitzen die Kondensatoren?</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Drei Motoren hängen an der Unterverteilung eines Betriebs. Wählen Sie unten,
+  wo die Kondensatoren eingebaut sind, und schalten Sie die Motoren mit Q1, Q2 und Q3. Die Strommesser A1, A2, A3 und der
+  cos-<span class="fz">φ</span>-Messer zeigen die Werte oben an.</div>
+
+ <div class="buehne">
+  <div class="messwerte" aria-live="polite">
+   <div class="kachel"><span class="name">A1</span><span class="ort">Zuleitung vom Netz</span><span class="zahl" id="mA1"></span><span class="art"></span></div>
+   <div class="kachel"><span class="name">A2</span><span class="ort">Leitung zur Unterverteilung</span><span class="zahl" id="mA2"></span><span class="art"></span></div>
+   <div class="kachel"><span class="name">A3</span><span class="ort">Zuleitung zum Motor M1</span><span class="zahl" id="mA3"></span><span class="art"></span></div>
+   <div class="kachel breit"><span class="name">cos <span class="fz">φ</span></span><span class="ort">cos-<span class="fz">φ</span>-Messer am Netzanschluss</span><span class="zahl" id="mC"></span><span class="art" id="mCart"></span></div>
+   <div class="kachel breit"><span class="name">Einzelbatterien</span><span class="ort">zugeschaltet in der Kondensatorbatterie</span><span class="zahl" id="mN"></span><span class="art"></span></div>
+  </div>
+
+  <div class="schaltung">
+   <svg viewBox="0 0 600 566" role="img" data-quelle="Anordnung einpolig nach Tabellenbuch S. 329 (Gruppenkompensation, Zentralkompensation) und Fachkunde S. 165, Bild 2 a bis c (Kondensatoren am Motor, an der Unterverteilung, am Sammelpunkt mit Regler); Strommesser in der Zuleitung nach Fachkunde S. 164, Bild 1"
+    aria-label="Übersichtsschaltplan, einpolig: Das Netz 400 V speist über den Strommesser A1 und den cos-phi-Messer die Hauptverteilung. Von dort führt eine Leitung über den Strommesser A2 zur Unterverteilung. An der Unterverteilung hängen drei Motoren über die Schalter Q1, Q2 und Q3; in der Zuleitung zu M1 liegt der Strommesser A3. Je nach Wahl sitzen Kondensatoren an jedem Motor, eine Kondensatorbatterie an der Unterverteilung oder eine Kondensatorbatterie mit Regler an der Hauptverteilung.">
+    <g fill="none" stroke="#1A2530" stroke-width="2.6" stroke-linecap="round">
+     <!-- Einspeisung mit A1 und cos-φ-Messer -->
+     <polyline points="100,10 100,72"/><polyline points="100,112 100,117"/><polyline points="100,163 100,172"/>
+     <polyline points="93,58 107,46"/><polyline points="93,64 107,52"/><polyline points="93,52 107,40"/>
+     <circle cx="100" cy="92" r="20" fill="#fff"/><circle cx="100" cy="140" r="23" fill="#fff"/>
+     <!-- Hauptverteilung -->
+     <polyline points="40,172 580,172" stroke-width="6"/>
+     <!-- Leitung zur Unterverteilung mit A2 -->
+     <polyline points="100,172 100,242"/><polyline points="100,282 100,352"/>
+     <circle cx="100" cy="262" r="20" fill="#fff"/>
+     <!-- Unterverteilung -->
+     <polyline points="40,352 580,352" stroke-width="6"/>
+     <!-- Abgänge zu den Motoren: x 70, 200, 330 -->
+     <polyline points="70,352 70,372"/><polyline points="200,352 200,372"/><polyline points="330,352 330,372"/>
+     <polyline points="70,400 70,424"/><polyline points="70,460 70,486"/>
+     <polyline points="200,400 200,486"/><polyline points="330,400 330,486"/>
+     <circle cx="70" cy="442" r="18" fill="#fff"/>
+     <circle cx="70" cy="510" r="25" fill="#fff"/><circle cx="200" cy="510" r="25" fill="#fff"/><circle cx="330" cy="510" r="25" fill="#fff"/>
+    </g>
+    <g fill="#1A2530"><circle cx="100" cy="172" r="4.5"/><circle cx="100" cy="352" r="4.5"/>
+     <circle cx="70" cy="352" r="4.5"/><circle cx="200" cy="352" r="4.5"/><circle cx="330" cy="352" r="4.5"/></g>
+    <!-- Schalter Q1 bis Q3 (fester Kontakt oben y 372, Schaltstück dreht um y 400) -->
+    <g id="schalter" fill="none" stroke="#1A2530" stroke-width="2.8" stroke-linecap="round"></g>
+    <!-- Kondensatoren an jedem Motor (hinter A3, mit dem Motor geschaltet) -->
+    <g id="einzel" fill="none" stroke="#1A2530" stroke-width="2.6" stroke-linecap="round" style="display:none">
+     <polyline points="70,472 112,472 112,490"/><polyline points="98,490 126,490" stroke-width="3.6"/><polyline points="98,499 126,499" stroke-width="3.6"/>
+     <polyline points="200,472 242,472 242,490"/><polyline points="228,490 256,490" stroke-width="3.6"/><polyline points="228,499 256,499" stroke-width="3.6"/>
+     <polyline points="330,472 372,472 372,490"/><polyline points="358,490 386,490" stroke-width="3.6"/><polyline points="358,499 386,499" stroke-width="3.6"/>
+     <circle cx="70" cy="472" r="4" fill="#1A2530" stroke="none"/><circle cx="200" cy="472" r="4" fill="#1A2530" stroke="none"/><circle cx="330" cy="472" r="4" fill="#1A2530" stroke="none"/>
+    </g>
+    <!-- Kondensatorbatterie mit sechs Einzelbatterien und Regler; wird an der Hauptverteilung (y 172) oder an der
+         Unterverteilung (y 352) gezeichnet -->
+    <g id="batterie" style="display:none"></g>
+    <g font-family="Arial,sans-serif" font-weight="700" fill="#1A2530" text-anchor="middle">
+     <text x="100" y="100" font-size="22">A</text><text x="100" y="270" font-size="22">A</text><text x="70" y="450" font-size="20">A</text>
+     <text x="100" y="146" font-size="15" font-weight="400">cos <tspan font-family="Cambria,Caladea,'Noto Serif',Georgia,serif" font-style="italic">φ</tspan></text>
+     <text x="70" y="510" font-size="22">M</text><text x="70" y="528" font-size="16" font-weight="400">3~</text>
+     <text x="200" y="510" font-size="22">M</text><text x="200" y="528" font-size="16" font-weight="400">3~</text>
+     <text x="330" y="510" font-size="22">M</text><text x="330" y="528" font-size="16" font-weight="400">3~</text>
+    </g>
+    <g font-family="Arial,sans-serif" fill="#1A2530">
+     <text x="118" y="27" font-size="22" fill="#5A666F">Netz 400 V, 50 Hz</text>
+     <text x="128" y="100" font-size="24" font-weight="700" fill="#A34E0E">A1</text>
+     <text x="128" y="270" font-size="24" font-weight="700" fill="#A34E0E">A2</text>
+     <text x="96" y="450" font-size="24" font-weight="700" fill="#A34E0E">A3</text>
+     <text x="150" y="161" font-size="22">Hauptverteilung</text>
+     <text x="150" y="341" font-size="22">Unterverteilung</text>
+     <text x="64" y="559" font-size="20" text-anchor="middle">M1 Lüftung</text>
+     <text x="200" y="559" font-size="20" text-anchor="middle">M2 Pumpe</text>
+     <text x="336" y="559" font-size="20" text-anchor="middle">M3 Kompressor</text>
+     <text x="80" y="395" font-size="21" fill="#5A666F">Q1</text>
+     <text x="210" y="395" font-size="21" fill="#5A666F">Q2</text>
+     <text x="340" y="395" font-size="21" fill="#5A666F">Q3</text>
+    </g>
+   </svg>
+  </div>
+
+  <div class="bedienung">
+   <div class="titel">Wo sitzen die Kondensatoren?</div>
+   <div class="raster">
+    <button type="button" id="oKeine" aria-pressed="true">keine</button>
+    <button type="button" id="oMotor" aria-pressed="false">an jedem Motor</button>
+    <button type="button" id="oUV" aria-pressed="false">an der Unterverteilung</button>
+    <button type="button" id="oHV" aria-pressed="false">an der Hauptverteilung</button>
+   </div>
+   <div class="titel">Motoren</div>
+   <div class="raster3">
+    <button type="button" id="bQ1" aria-pressed="false">Q1 aus</button>
+    <button type="button" id="bQ2" aria-pressed="false">Q2 aus</button>
+    <button type="button" id="bQ3" aria-pressed="false">Q3 aus</button>
+   </div>
+   <div class="titel">Regler der Kondensatorbatterie</div>
+   <button type="button" class="schalter" id="bR" aria-pressed="false">Regler ist AUS: einschalten</button>
+   <div class="klein" id="rHinweis"></div>
+   <div class="titel">Neu beginnen</div>
+   <button class="zurueck schalter" id="bReset" type="button">Zurücksetzen</button>
+  </div>
+ </div>
+
+ <div class="hinweis">Die Kondensatorbatterie besteht aus sechs gleichen Einzelbatterien. Ist ihr Regler aus, sind alle
+  sechs zugeschaltet. „An jedem Motor“: Jeder Motor hat einen eigenen Kondensator, der mit dem Motor ein- und
+  ausgeschaltet wird. Die Motoren laufen mit fester Belastung. Alle Messgeräte zeigen Effektivwerte; die Leitungen gelten
+  als widerstandsfrei.</div>
+ <pre id="pruefbericht"></pre>
+</div>
+
+<script>
+(function(){
+"use strict";
+var U=400, W3=Math.sqrt(3);
+var I_MOTOR=[20,10,30], COS1=0.8, SIN1=0.6;              // M1 Lüftung, M2 Pumpe, M3 Kompressor
+var QC_MOTOR=[5000,2500,7500];                           // Kondensator am Motor in var
+var STUFE=2500, ANZAHL=6;                                // Einzelbatterie in var, Anzahl
+var TAN1=SIN1/COS1, TAN2=Math.tan(Math.acos(0.95));      // Sollwert des Reglers cos φ2 = 0,95
+var P_M=I_MOTOR.map(function(i){return W3*U*i*COS1;}), Q_M=I_MOTOR.map(function(i){return W3*U*i*SIN1;});
+var START={ort:"keine",q:[false,false,false],regler:false};
+var z=kopie(START);
+var $=function(id){return document.getElementById(id);};
+function kopie(s){ return {ort:s.ort,q:s.q.slice(),regler:s.regler}; }
+
+// ---------------- Rechenmodell ----------------
+function zustand(s){
+  var p=0, ql=0, qe=0, i;
+  for(i=0;i<3;i++) if(s.q[i]){ p+=P_M[i]; ql+=Q_M[i]; if(s.ort==="motor") qe+=QC_MOTOR[i]; }
+  var n=null, qb=0;
+  if(s.ort==="uv"||s.ort==="hv"){
+    if(s.regler){ var bedarf=p*(TAN1-TAN2); n=bedarf>0 ? Math.min(ANZAHL, Math.ceil(bedarf/STUFE-1e-9)) : 0; }
+    else n=ANZAHL;
+    qb=n*STUFE;
+  }
+  var i3=0;
+  if(s.q[0]){ var q3=Q_M[0]-(s.ort==="motor"?QC_MOTOR[0]:0); i3=Math.sqrt(P_M[0]*P_M[0]+q3*q3)/(W3*U); }
+  var q2=ql-qe-(s.ort==="uv"?qb:0), i2=Math.sqrt(p*p+q2*q2)/(W3*U);
+  var q1=ql-qe-qb, s1=Math.sqrt(p*p+q1*q1), i1=s1/(W3*U);
+  return {A1:i1, A2:i2, A3:i3, cos: s1>1e-6 ? p/s1 : null, Q:q1, n:n};
+}
+function zahl(x,st){ var s=(Math.round(x*Math.pow(10,st))/Math.pow(10,st)).toFixed(st); return s.replace(".",","); }
+function anzeigen(s){
+  var w=zustand(s);
+  var art = (w.cos===null || Math.abs(w.Q)<0.5) ? "" : (w.Q>0 ? "induktiv" : "kapazitiv");
+  var c = w.cos===null ? "–" : zahl(w.cos,2);
+  return {A1:zahl(w.A1,1)+" A", A2:zahl(w.A2,1)+" A", A3:zahl(w.A3,1)+" A", C:c,
+          Cart:(c==="1,00"?"":art), N: w.n===null ? "–" : (w.n+" von "+ANZAHL)};
+}
+
+// ---------------- Zeichnung ----------------
+var NS="http://www.w3.org/2000/svg";
+function el(name,att,eltern){ var e=document.createElementNS(NS,name); for(var k in att) e.setAttribute(k,att[k]);
+  if(eltern) eltern.appendChild(e); return e; }
+function schalter(){
+  var g=$("schalter"); while(g.firstChild) g.removeChild(g.firstChild);
+  [70,200,330].forEach(function(x,i){
+    var an=z.q[i];
+    el("line",{x1:x,y1:400,x2:an?x:x-15,y2:an?372:377},g);
+    el("circle",{cx:x,cy:372,r:3.4,fill:"#1A2530",stroke:"none"},g);
+    el("circle",{cx:x,cy:400,r:3.4,fill:"#1A2530",stroke:"none"},g);
+  });
+}
+function batterie(){
+  var g=$("batterie"); while(g.firstChild) g.removeChild(g.firstChild);
+  if(z.ort!=="uv" && z.ort!=="hv"){ g.style.display="none"; return; }
+  g.style.display="";
+  var y0 = z.ort==="hv" ? 172 : 352, w=zustand(z), n=w.n;
+  var a={fill:"none",stroke:"#1A2530","stroke-width":2.6,"stroke-linecap":"round"};
+  function linie(pkte,extra){ var o={points:pkte}; for(var k in a) o[k]=a[k]; for(var e in extra||{}) o[e]=extra[e];
+    return el("polyline",o,g); }
+  el("circle",{cx:480,cy:y0,r:4.5,fill:"#1A2530"},g);
+  linie("480,"+y0+" 480,"+(y0+20));
+  linie("395,"+(y0+20)+" 565,"+(y0+20));
+  var xs=[395,429,463,497,531,565];
+  xs.forEach(function(x,i){
+    var an = i<n, farbe = an ? "#1A2530" : "#9AA5AE";
+    el("circle",{cx:x,cy:y0+20,r:3.4,fill:"#1A2530"},g);
+    linie(x+","+(y0+20)+" "+x+","+(y0+28));
+    el("circle",{cx:x,cy:y0+28,r:3,fill:"#1A2530"},g);
+    linie(x+","+(y0+52)+" "+(an?x:x-11)+","+(an?y0+28:y0+33));      // Schaltstück
+    el("circle",{cx:x,cy:y0+52,r:3,fill:"#1A2530"},g);
+    linie(x+","+(y0+52)+" "+x+","+(y0+64),{stroke:farbe});
+    linie((x-12)+","+(y0+64)+" "+(x+12)+","+(y0+64),{stroke:farbe,"stroke-width":3.6});
+    linie((x-12)+","+(y0+72)+" "+(x+12)+","+(y0+72),{stroke:farbe,"stroke-width":3.6});
+  });
+  // Wirkverbindung der Schaltstücke und Regler (Fachkunde S. 165, Bild 2 c)
+  linie("389,"+(y0+40)+" 571,"+(y0+40),{"stroke-dasharray":"5 4","stroke-width":1.6,stroke:"#5A666F"});
+  linie("440,"+(y0+40)+" 440,"+(y0+90),{"stroke-dasharray":"5 4","stroke-width":1.6,stroke:"#5A666F"});
+  el("rect",{x:398,y:y0+90,width:150,height:34,fill:z.regler?"#F5EBDF":"#fff",stroke:"#1A2530","stroke-width":2},g);
+  var t=el("text",{x:473,y:y0+114,"font-family":"Arial,sans-serif","font-size":21,"text-anchor":"middle",
+                   fill:"#1A2530","font-weight":z.regler?"700":"400"},g);
+  t.textContent = z.regler ? "Regler ein" : "Regler aus";
+}
+
+// ---------------- Bedienung ----------------
+var ORTE={oKeine:"keine",oMotor:"motor",oUV:"uv",oHV:"hv"};
+function auffrischen(){
+  var a=anzeigen(z);
+  $("mA1").textContent=a.A1; $("mA2").textContent=a.A2; $("mA3").textContent=a.A3;
+  $("mC").textContent=a.C; $("mCart").textContent=a.Cart; $("mN").textContent=a.N;
+  Object.keys(ORTE).forEach(function(id){ var an=ORTE[id]===z.ort; $(id).classList.toggle("an",an);
+    $(id).setAttribute("aria-pressed",an?"true":"false"); });
+  [0,1,2].forEach(function(i){ var b=$("bQ"+(i+1)); b.textContent="Q"+(i+1)+(z.q[i]?" ein":" aus");
+    b.classList.toggle("an",z.q[i]); b.setAttribute("aria-pressed",z.q[i]?"true":"false"); });
+  var bank = z.ort==="uv" || z.ort==="hv";
+  $("bR").disabled=!bank;
+  $("bR").textContent = z.regler ? "Regler ist EIN: ausschalten" : "Regler ist AUS: einschalten";
+  $("bR").classList.toggle("an", z.regler && bank); $("bR").setAttribute("aria-pressed",z.regler?"true":"false");
+  $("rHinweis").textContent = bank ? "" : "Nur bei einer Kondensatorbatterie an einer Verteilung.";
+  $("einzel").style.display = z.ort==="motor" ? "" : "none";
+  schalter(); batterie();
+}
+Object.keys(ORTE).forEach(function(id){ $(id).onclick=function(){ z.ort=ORTE[id]; auffrischen(); }; });
+[0,1,2].forEach(function(i){ $("bQ"+(i+1)).onclick=function(){ z.q[i]=!z.q[i]; auffrischen(); }; });
+$("bR").onclick=function(){ z.regler=!z.regler; auffrischen(); };
+$("bReset").onclick=function(){ z=kopie(START); auffrischen(); };
+window.__stelle=function(ort,q1,q2,q3,regler){ z={ort:ort,q:[!!q1,!!q2,!!q3],regler:!!regler}; auffrischen();
+  var a=anzeigen(z); return [a.A1,a.A2,a.A3,(a.C+" "+a.Cart).trim(),a.N].join(" | "); };
+
+// ---------------- Prüfmodus ----------------
+if(/[?&]pruefen\b/.test(location.search)){
+  var bericht={};
+  ["keine","motor","uv","hv"].forEach(function(o){
+    [[1,1,1],[1,0,0],[0,1,0],[0,0,1],[1,1,0],[1,0,1],[0,1,1],[0,0,0]].forEach(function(q){
+      [0,1].forEach(function(r){
+        if(r && (o==="keine"||o==="motor")) return;
+        bericht[o+" Q"+q.join("")+(r?" Regler ein":" Regler aus")]=window.__stelle(o,q[0],q[1],q[2],r); }); }); });
+  z=kopie(START);
+  $("pruefbericht").textContent=JSON.stringify(bericht);
+}
+// Prüfstellung über die Adresse, z. B. #stelle=hv,0,1,0,1 (Ort, Q1, Q2, Q3, Regler); ohne Angabe die Startstellung
+var m=/#stelle=(keine|motor|uv|hv),([01]),([01]),([01]),([01])/.exec(location.hash);
+if(m){ z={ort:m[1],q:[m[2]==="1",m[3]==="1",m[4]==="1"],regler:m[5]==="1"}; }
+auffrischen();
+})();
+</script>
+</body></html>
