@@ -1,0 +1,341 @@
+<!doctype html>
+<!-- E3EG B08 · Messplatz Kondensatoren in Stern und in Dreieck (Neubau 21.10.2026, Aufgabe IN der Stunde nach dem Muster
+     E1EG B07 und E2EG U31). Neu, weil keine vorhandene Seite den Vergleich trägt: U31_Simulation_Kompensation_Messplatz.html
+     (E2EG) kennt nur die Dreieckschaltung und keine Entladung; B04_Simulation_Kompensation.html und B07_Simulation_Regler.html
+     (E3EG) rechnen einphasig bzw. mit Stufen.
+     Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht und rechnet nichts vor):
+       (1) In Dreieck liegt jeder Kondensator an der Leiterspannung 400 V, in Stern an der Strangspannung 400 V durch √3.
+           Dieselben Kondensatoren liefern deshalb in Stern ein Drittel der Blindleistung; für dieselbe Blindleistung braucht
+           die Sternschaltung die dreifache Kapazität (30 µF in Dreieck und 90 µF in Stern: je 4524 var).
+       (2) Die Blindleistung der Batterie ist dreimal die eines Kondensators (Spannungsmesser mal Strommesser an C1).
+       (3) Nach dem Abschalten bleibt am Kondensator der Scheitelwert stehen; nur ein Entladewiderstand baut ihn ab.
+     Vorlagen: Tabellenbuch S. 328 (Einzelkompensation bei 3 AC; U_bCY, U_bCΔ, I_bC, I_bCΔ, C_Δ, C_Y), S. 329
+       (Kondensator-Betriebsspannung), S. 48 (Stern- und Dreieckschaltung), S. 46 (Entladen, Spannungsverlauf);
+       Fachkunde S. 165, Bild 2a (Kompensationskondensatoren mit Entladewiderständen); Messgeräte wie U31.
+     Rechenmodell (symmetrisch, ideales Netz 400 V, 50 Hz, Leitungen widerstandsfrei):
+       Spannung am Kondensator U_bC = 400 V (Dreieck) oder 400 V/√3 (Stern); Kondensatorstrom I_bC = ω · C · U_bC;
+       Leiterstrom I = √3 · I_bC (Dreieck) oder I_bC (Stern); Blindleistung Q = 3 · U_bC · I_bC (kapazitiv).
+       Die Wirkleistung der Entladewiderstände (0,5 W bei 1 MΩ in Dreieck) ist vernachlässigt.
+       Entladen: Q1 trennt im ungünstigsten Augenblick, der Kondensator behält û = √2 · U_bC; mit dem Entladewiderstand R_E
+       parallel zu jedem Kondensator gilt u_C = û · e^(−t/(R_E · C)); ohne R_E bleibt û. Zeitraffer: 60 s in 6 s.
+     Anzeigen: Spannung mit einer, Ströme mit drei Nachkommastellen, Blindleistung in ganzen var; Kernaussagen exakt
+       (4524 var : 1508 var = 3; 400,0 V · 3,770 A · 3 = 4524 var; 230,9 V · 2,177 A · 3 = 1508 var).
+     Startstellung neutral: Q1 aus, Stern, C = 0 µF, kein Entladewiderstand (keine Einstellung der Aufgaben).
+     Prüfmodus ?pruefen: Anzeigen der Aufgabenstellungen und Grenzfälle als JSON in #pruefbericht. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Kondensatoren in Stern und Dreieck (B08)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"Q1":"aus","Schaltung":"Stern","C_uF":0,"R_E":"kein"},"loesungswerte":{"Aufgabe 1, Dreieck 30 µF":{"U_bC":"400,0 V","I_bC":"3,770 A","I":"6,530 A","Q":"4524 var"},"Aufgabe 1, Stern 30 µF":{"U_bC":"230,9 V","I_bC":"2,177 A","I":"2,177 A","Q":"1508 var"},"Aufgabe 2, Stern":{"C":"90 µF","Q":"4524 var"},"Aufgabe 3, Dreieck 30 µF nach 60 s":{"kein R_E":"565,7 V","1 MΩ":"76,6 V"},"Aufgabe 5, 820 kΩ nach 60 s":"49,4 V"},"quelle":"Tabellenbuch Elektrotechnik S. 328, 329, 48, 46; Fachkunde S. 165 Bild 2a"}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:1040px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .fz{font-family:Cambria,Caladea,'Noto Serif',Georgia,serif;font-style:italic}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px;align-items:start;
+         grid-template-areas:"schaltung" "messwerte" "bedienung" "kurve"}
+ .schaltung{grid-area:schaltung} .messwerte{grid-area:messwerte} .bedienung{grid-area:bedienung} .kurve{grid-area:kurve}
+ @media(min-width:800px){.buehne{grid-template-columns:1.2fr 1fr;grid-template-areas:"schaltung messwerte" "schaltung bedienung" "kurve bedienung"}}
+ .schaltung svg,.kurve svg{width:100%;height:auto;display:block;border:1px solid var(--linie);background:#fff}
+ .legende{font-size:13.5px;color:var(--grau);margin-top:4px}
+ .messwerte{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:#fff}
+ .kachel{border:1.4px solid var(--ink);background:var(--hell);padding:5px 8px;text-align:center;min-width:0}
+ .kachel .name{display:block;font-size:16px;font-weight:700;color:var(--ink)}
+ .kachel .ort{display:block;font-size:12.5px;color:var(--grau);line-height:1.25}
+ .kachel .zahl{display:block;font-variant-numeric:tabular-nums;font-size:26px;font-weight:700;white-space:nowrap}
+ .kachel .art{display:block;font-size:13.5px;font-weight:700;color:var(--kupfer);min-height:20px}
+ .kachel.breit{grid-column:1 / span 2}
+ .lcd{background:#20313a;color:#9BF0B4;font-variant-numeric:tabular-nums;font-size:28px;font-weight:700;padding:6px 12px;border-radius:4px;text-align:right}
+ .lcd small{font-size:16px;color:#cfe;font-weight:400;float:left;margin-top:8px}
+ input[type=range]{width:100%;height:44px;accent-color:var(--kupfer);margin:6px 0 2px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+ button{font:inherit;font-size:16px;min-height:48px;min-width:52px;padding:6px 10px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+ button.an{background:var(--kupfer);color:#fff}
+ button.zurueck{border-color:var(--ink);color:var(--ink)}
+ .schalter{width:100%;font-weight:700;font-size:17px}
+ .wahl button{flex:1 1 120px;font-weight:700}
+ .schritte button{flex:1 1 44px;font-weight:700;padding:6px 4px}
+ .titel{font-size:15px;font-weight:700;margin:10px 0 4px}
+ .titel:first-child{margin-top:0}
+ .hinweis{font-size:14px;color:var(--grau);margin-top:12px}
+ #pruefbericht{display:none}
+ @media(max-width:799px){.messwerte{position:sticky;top:0;z-index:5;padding:6px 0;box-shadow:0 6px 6px -6px rgba(0,0,0,.25)}}
+ @media(max-width:420px){.wrap{padding:12px 10px 18px} .kachel{padding:3px 5px} .kachel .zahl{font-size:21px}
+   .kachel .name{font-size:15px} .kachel .ort{font-size:11.5px} .kachel .art{font-size:12px;min-height:16px}
+   .lcd{font-size:24px} button{font-size:15px} .anleitung{font-size:14px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E3EG · B08</div><h1>Messplatz: Kondensatoren in Stern und in Dreieck</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Drei gleiche Kondensatoren liegen über Q1 am Drehstromnetz 400 V, 50 Hz.
+  Wählen Sie Stern oder Dreieck und stellen Sie die Kapazität <span class="fz">C</span> eines Kondensators ein.
+  Spannungsmesser und Strommesser messen am Kondensator C1, ein zweiter Strommesser im Außenleiter L1, der
+  Blindleistungsmesser in der Zuleitung. Alle zeigen Effektivwerte. Nach dem Ausschalten von Q1 zeigt der
+  Spannungsmesser die Spannung, die am Kondensator bleibt; die Zeit läuft im Zeitraffer bis 60 s.</div>
+
+ <div class="buehne">
+  <div class="schaltung">
+   <svg id="plan" viewBox="0 0 640 650" role="img"
+    data-quelle="Anordnung nach Tabellenbuch S. 328 (Einzelkompensation bei 3 AC, Bezeichnungen U_bC, I_bC, C_Δ, C_Y) und S. 48 (Stern- und Dreieckschaltung); Entladewiderstände nach Fachkunde S. 165, Bild 2a (hier je Kondensator einer); Messgeräte in der Zuleitung wie E2EG U31"
+    aria-label="Schaltplan: Drehstromnetz 400 V, 50 Hz mit den Außenleitern L1, L2, L3. In L1 ein Strommesser, in der Zuleitung der Blindleistungsmesser, dann der Schalter Q1. Dahinter drei gleiche Kondensatoren in Stern oder in Dreieck. Am Kondensator C1 liegen ein Spannungsmesser parallel und ein Strommesser in Reihe; zu jedem Kondensator kann ein Entladewiderstand parallel liegen.">
+   </svg>
+   <div class="legende">Der Blindleistungsmesser (var) misst in den drei Außenleitern. Die drei Kondensatoren haben dieselbe
+    Kapazität <span class="fz">C</span>; zu jedem liegt derselbe Entladewiderstand <span class="fz">R</span><sub>E</sub>
+    parallel, wenn einer gewählt ist.</div>
+  </div>
+
+  <div class="messwerte" aria-live="polite">
+   <div class="kachel"><span class="name"><span class="fz">U</span><sub>bC</sub></span><span class="ort">Spannungsmesser an C1</span><span class="zahl" id="mU"></span><span class="art" id="mUart"></span></div>
+   <div class="kachel"><span class="name"><span class="fz">I</span><sub>bC</sub></span><span class="ort">Strommesser an C1</span><span class="zahl" id="mIC"></span><span class="art"></span></div>
+   <div class="kachel"><span class="name"><span class="fz">I</span></span><span class="ort">Strommesser in L1</span><span class="zahl" id="mI"></span><span class="art"></span></div>
+   <div class="kachel"><span class="name"><span class="fz">Q</span></span><span class="ort">Blindleistungsmesser</span><span class="zahl" id="mQ"></span><span class="art" id="mQart"></span></div>
+  </div>
+
+  <div class="bedienung">
+   <div class="titel">Schalter Q1</div>
+   <button type="button" class="schalter" id="bQ1" aria-pressed="false">Q1 ist AUS: einschalten</button>
+   <div class="titel">Schaltung der Kondensatoren</div>
+   <div class="knoepfe wahl">
+    <button type="button" id="bY" aria-pressed="true">Stern</button>
+    <button type="button" id="bD" aria-pressed="false">Dreieck</button>
+   </div>
+   <div class="titel">Kapazität eines Kondensators</div>
+   <div class="lcd" id="aC" aria-live="polite"></div>
+   <input type="range" id="rc" min="0" max="150" step="1" value="0" aria-label="Kapazität eines Kondensators in Mikrofarad">
+   <div class="knoepfe schritte">
+    <button type="button" id="c10m" aria-label="10 Mikrofarad weniger">◀ 10</button>
+    <button type="button" id="c1m" aria-label="1 Mikrofarad weniger">◀ 1</button>
+    <button type="button" id="c1p" aria-label="1 Mikrofarad mehr">1 ▶</button>
+    <button type="button" id="c10p" aria-label="10 Mikrofarad mehr">10 ▶</button>
+   </div>
+   <div class="titel">Entladewiderstand je Kondensator</div>
+   <div class="lcd" id="aR" aria-live="polite"></div>
+   <div class="knoepfe schritte">
+    <button type="button" id="r1m" aria-label="nächstkleinerer Widerstand">◀ kleiner</button>
+    <button type="button" id="r1p" aria-label="nächstgrößerer Widerstand">größer ▶</button>
+   </div>
+   <div class="titel">Neu beginnen</div>
+   <div class="knoepfe"><button class="zurueck" id="bReset" type="button">Zurücksetzen</button></div>
+  </div>
+
+  <div class="kurve">
+   <svg id="graf" viewBox="0 0 640 350" role="img" data-quelle="Spannungsverlauf beim Entladen nach Tabellenbuch S. 46"
+    aria-label="Liniendiagramm: Spannung am Kondensator C1 in Volt über der Zeit nach dem Ausschalten in Sekunden, 0 bis 60 s, 0 bis 600 V."></svg>
+   <div class="legende">Spannung am Kondensator C1 nach dem Ausschalten von Q1 (Zeitraffer).</div>
+  </div>
+ </div>
+
+ <div class="hinweis">Q1 trennt im ungünstigsten Augenblick: Der Kondensator bleibt auf dem Scheitelwert der Spannung
+  geladen. Wer Schaltung, Kapazität oder Entladewiderstand bei ausgeschaltetem Q1 ändert, setzt entladene Kondensatoren
+  ein; zum Messen Q1 wieder ein- und ausschalten.</div>
+ <pre id="pruefbericht"></pre>
+</div>
+
+<script>
+(function(){
+"use strict";
+var U=400, F=50, W=2*Math.PI*F;                       // Leiterspannung in V, Frequenz in Hz, Kreisfrequenz in 1/s
+var E12=[100,120,150,180,220,270,330,390,470,560,680,820,1000,1200,1500,1800,2200,2700,3300,3900,4700,5600,6800,8200,10000];
+var START={q1:false,stern:true,c:0,r:-1};             // r: Index in E12, −1 = kein Entladewiderstand
+var z={q1:START.q1,stern:START.stern,c:START.c,r:START.r};
+var ent={u0:0,t:0,lauf:false};                         // Entladen: Anfangsspannung, Zeit in s, läuft?
+var uhr=null, ZEITRAFFER=10, TEND=60;
+var bewegungArm=window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+var $=function(id){return document.getElementById(id);};
+
+// ---------------- Rechenmodell ----------------
+function ubc(stern){ return stern ? U/Math.sqrt(3) : U; }
+function zustand(s){
+  var u=ubc(s.stern), ic=W*s.c*1e-6*u;
+  return {U:u, IC:ic, I: s.stern ? ic : Math.sqrt(3)*ic, Q:3*u*ic};
+}
+function rOhm(i){ return i<0 ? null : E12[i]*1e3; }
+function uEntladen(u0,c,i,t){
+  var r=rOhm(i); if(r===null||c<=0) return u0;
+  return u0*Math.exp(-t/(r*c*1e-6));
+}
+function zahl(x,st,einheit){
+  var s=(Math.round(x*Math.pow(10,st))/Math.pow(10,st)).toFixed(st);
+  if(/^-0[.,]?0*$/.test(s)) s=s.slice(1);
+  return s.replace("-","−").replace(".",",")+(einheit?" "+einheit:"");
+}
+function rText(i){
+  if(i<0) return "kein";
+  var r=E12[i]; return r>=1000 ? zahl(r/1000, r%1000===0?0:1, "MΩ") : r+" kΩ";
+}
+
+// ---------------- Schaltplan ----------------
+var NS="http://www.w3.org/2000/svg";
+function el(tag,att,eltern){ var e=document.createElementNS(NS,tag); for(var k in att) e.setAttribute(k,att[k]); (eltern||plan).appendChild(e); return e; }
+var plan=$("plan");
+function linie(x1,y1,x2,y2,g,w){ return el("line",{x1:x1,y1:y1,x2:x2,y2:y2,stroke:"#1A2530","stroke-width":w||2.4,"stroke-linecap":"round"},g); }
+function punkt(x,y,g){ return el("circle",{cx:x,cy:y,r:4.3,fill:"#1A2530"},g); }
+function text(x,y,t,g,att){ var a={x:x,y:y,"font-family":"Arial,sans-serif","font-size":22,fill:"#1A2530","text-anchor":"middle"};
+  for(var k in att) a[k]=att[k]; var e=el("text",a,g); e.textContent=t; return e; }
+function fz(x,y,sym,idx,g,farbe,gr){ var e=el("text",{x:x,y:y,"font-family":"Cambria,Caladea,'Noto Serif',Georgia,serif","font-style":"italic",
+  "font-weight":"700","font-size":gr||24,fill:farbe||"#A34E0E","text-anchor":"middle"},g); e.textContent=sym;
+  if(idx){ var ts=el("tspan",{"font-size":(gr||24)*0.68,"font-style":"normal","font-family":"Arial,sans-serif",dy:5},e); ts.textContent=idx; } return e; }
+function messgeraet(x,y,buchst,g){ el("circle",{cx:x,cy:y,r:16,fill:"#fff",stroke:"#1A2530","stroke-width":2.4},g);
+  text(x,y+8,buchst,g,{"font-weight":700}); }
+
+// Bauteilkette von p nach q (gedreht): Leitung, Kondensator in der Mitte; optional Strommesser bei Anteil a,
+// Spannungsmesser parallel zum Kondensator auf Seite sv (±1), Entladewiderstand parallel auf Seite sr (±1).
+function kette(p,q,opt,g){
+  var dx=q[0]-p[0], dy=q[1]-p[1], L=Math.sqrt(dx*dx+dy*dy), ang=Math.atan2(dy,dx)*180/Math.PI;
+  var gg=el("g",{transform:"translate("+p[0]+","+p[1]+") rotate("+ang+")"},g);
+  var m=L/2, sp=7;
+  var stuecke=[[0,m-sp]];
+  if(opt.amp){ var xa=L*opt.amp; stuecke=[[0,xa-16],[xa+16,m-sp]]; }
+  stuecke.push([m+sp,L]);
+  stuecke.forEach(function(s){ linie(s[0],0,s[1],0,gg); });
+  linie(m-sp,-15,m-sp,15,gg,3.4); linie(m+sp,-15,m+sp,15,gg,3.4);
+  if(opt.amp){ var xa2=L*opt.amp; el("circle",{cx:xa2,cy:0,r:16,fill:"#fff",stroke:"#1A2530","stroke-width":2.4},gg);
+    var ta=text(xa2,8,"A",gg,{"font-weight":700}); ta.setAttribute("transform","rotate("+(-ang)+" "+xa2+" 0)"); }
+  if(opt.volt){ var s=opt.volt, a1=m-30, a2=m+30, h=40*s;
+    linie(a1,0,a1,h,gg,1.8); linie(a2,0,a2,h,gg,1.8); linie(a1,h,m-16,h,gg,1.8); linie(m+16,h,a2,h,gg,1.8);
+    punkt(a1,0,gg); punkt(a2,0,gg);
+    el("circle",{cx:m,cy:h,r:16,fill:"#fff",stroke:"#1A2530","stroke-width":2.4},gg);
+    var tv=text(m,h+8,"V",gg,{"font-weight":700}); tv.setAttribute("transform","rotate("+(-ang)+" "+m+" "+h+")"); }
+  if(opt.r){ var s2=opt.r, b1=m-38, b2=m+38, h2=30*s2;
+    linie(b1,0,b1,h2,gg,1.8); linie(b2,0,b2,h2,gg,1.8); linie(b1,h2,m-20,h2,gg,1.8); linie(m+20,h2,b2,h2,gg,1.8);
+    el("rect",{x:m-20,y:h2-7,width:40,height:14,fill:"#fff",stroke:"#1A2530","stroke-width":2.2},gg);
+    punkt(b1,0,gg); punkt(b2,0,gg); }
+  return {mitte:[p[0]+dx/2,p[1]+dy/2], winkel:ang};
+}
+
+var A=[250,350], B=[590,350], C=[420,615], S=[420,438];
+function zeichnen(){
+  while(plan.firstChild) plan.removeChild(plan.firstChild);
+  var g=el("g",{});
+  // Außenleiter: L1 y 50, L2 y 80, L3 y 110; Strommesser in L1, Blindleistungsmesser
+  [[50,"L1"],[80,"L2"],[110,"L3"]].forEach(function(e){ text(24,e[0]+9,e[1],g,{"font-weight":700,"font-size":24}); });
+  linie(50,50,94,50,g); linie(126,50,160,50,g); messgeraet(110,50,"A",g);
+  linie(50,80,160,80,g); linie(50,110,160,110,g);
+  el("rect",{x:160,y:30,width:58,height:100,fill:"#fff",stroke:"#1A2530","stroke-width":2.4},g);
+  text(189,89,"var",g,{"font-size":22,"font-weight":700});
+  linie(218,50,250,50,g); linie(218,80,290,80,g); linie(218,110,330,110,g);
+  // Abgänge nach unten zu Q1 (L1 x 250, L2 x 290, L3 x 330)
+  linie(250,50,250,160,g); linie(290,80,290,160,g); linie(330,110,330,160,g);
+  // Q1: fester Kontakt oben y 160, Schaltstück dreht um den unteren Punkt y 192
+  [250,290,330].forEach(function(x){
+    linie(x,192,z.q1?x:x-15,z.q1?160:165,g,2.8); punkt(x,160,g); punkt(x,192,g); });
+  el("line",{x1:z.q1?250:242,y1:z.q1?176:180,x2:z.q1?330:322,y2:z.q1?176:180,stroke:"#5A666F","stroke-width":1.6,"stroke-dasharray":"5 4"},g);
+  text(360,184,"Q1",g,{"text-anchor":"start",fill:"#5A666F","font-size":24});
+  text(408,184,z.q1?"ein":"aus",g,{"text-anchor":"start","font-size":24,"font-weight":700,fill:z.q1?"#2F7D62":"#A34E0E"});
+  // Leitungen zu den Ecken: L1 → A, L2 → B (über y 250), L3 → C (über y 228, rechts außen x 622)
+  linie(290,192,290,250,g); linie(290,250,590,250,g); linie(590,250,590,350,g);
+  linie(330,192,330,228,g); linie(330,228,622,228,g); linie(622,228,622,615,g); linie(622,615,420,615,g);
+  var r = z.r>=0;
+  if(z.stern){
+    // Stern: der Strommesser an C1 liegt in der Zuleitung zu A, denn über A fließt nur der Strom von C1
+    linie(250,192,250,274,g); messgeraet(250,290,"A",g); linie(250,306,250,350,g);
+    kette(A,S,{volt:-1,r:r?1:0},g); kette(B,S,{r:r?1:0},g); kette(C,S,{r:r?1:0},g);
+    punkt(S[0],S[1],g);
+    fz(288,466,"C","1",g,"#5A666F",26); fz(548,440,"C","2",g,"#5A666F",26); fz(384,540,"C","3",g,"#5A666F",26);
+  } else {
+    linie(250,192,250,350,g);
+    kette(A,B,{amp:0.16,volt:-1,r:r?1:0},g); kette(B,C,{r:r?-1:0},g); kette(C,A,{r:r?-1:0},g);
+    fz(420,424,"C","1",g,"#5A666F",26); fz(468,478,"C","2",g,"#5A666F",26); fz(372,478,"C","3",g,"#5A666F",26);
+  }
+  [A,B,C].forEach(function(pq){ punkt(pq[0],pq[1],g); });
+  text(112,300,z.stern?"Stern":"Dreieck",g,{"font-size":30,"font-weight":700,fill:"#A34E0E"});
+  text(112,580,"400 V, 50 Hz",g,{"font-size":22,fill:"#5A666F"});
+  if(r){ var tr=text(112,370,"",g,{"font-size":24});
+    var a1=document.createElementNS(NS,"tspan"); a1.setAttribute("font-family","Cambria,Caladea,Georgia,serif"); a1.setAttribute("font-style","italic"); a1.textContent="R"; tr.appendChild(a1);
+    var a2=document.createElementNS(NS,"tspan"); a2.setAttribute("font-size","16"); a2.setAttribute("dy","5"); a2.textContent="E"; tr.appendChild(a2);
+    var a3=document.createElementNS(NS,"tspan"); a3.setAttribute("dy","-5"); a3.textContent=" je "+rText(z.r); tr.appendChild(a3); }
+}
+
+// ---------------- Liniendiagramm des Entladens ----------------
+var graf=$("graf"), GX0=80, GX1=615, GY0=280, GY1=34;
+function gx(t){ return GX0+(GX1-GX0)*t/TEND; } function gy(u){ return GY0-(GY0-GY1)*u/600; }
+function kurve(){
+  while(graf.firstChild) graf.removeChild(graf.firstChild);
+  var g=document.createElementNS(NS,"g"); graf.appendChild(g);
+  for(var t=0;t<=60;t+=10){ el("line",{x1:gx(t),y1:GY0,x2:gx(t),y2:GY1,stroke:"#dde3e8","stroke-width":1},g);
+    text(gx(t),GY0+28,String(t),g,{"font-size":22}); }
+  for(var u=0;u<=600;u+=100){ el("line",{x1:GX0,y1:gy(u),x2:GX1,y2:gy(u),stroke:"#dde3e8","stroke-width":1},g);
+    text(GX0-8,gy(u)+8,String(u),g,{"font-size":22,"text-anchor":"end"}); }
+  linie(GX0,GY0,GX1+8,GY0,g,1.8); linie(GX0,GY0,GX0,GY1-8,g,1.8);
+  text(GX1+10,GY0+56,"t in s",g,{"font-size":22,"text-anchor":"end"});
+  var lab=text(GX0+8,GY1-8,"",g,{"font-size":22,"text-anchor":"start"});
+  lab.textContent="u"; var ts=document.createElementNS(NS,"tspan"); ts.setAttribute("font-size","15"); ts.setAttribute("dy","4"); ts.textContent="C";
+  lab.appendChild(ts); var ts2=document.createElementNS(NS,"tspan"); ts2.setAttribute("dy","-4"); ts2.textContent=" in V"; lab.appendChild(ts2);
+  lab.setAttribute("font-family","Arial,sans-serif");
+  if(ent.u0>0 && !z.q1){
+    var pkte=[], n=120, tb=Math.min(ent.t,TEND);
+    for(var i=0;i<=n;i++){ var tt=tb*i/n; pkte.push(gx(tt).toFixed(1)+","+gy(uEntladen(ent.u0,z.c,z.r,tt)).toFixed(1)); }
+    el("polyline",{points:pkte.join(" "),fill:"none",stroke:"#2557A3","stroke-width":3},g);
+  }
+}
+
+// ---------------- Bedienung ----------------
+function anzeigen(){
+  var w=zustand(z);
+  if(z.q1){
+    $("mU").textContent=zahl(w.U,1,"V"); $("mUart").textContent="Effektivwert";
+    $("mIC").textContent=zahl(w.IC,3,"A"); $("mI").textContent=zahl(w.I,3,"A");
+    $("mQ").textContent=Math.round(w.Q)+" var"; $("mQart").textContent= w.Q>=0.5 ? "kapazitiv" : "";
+  } else {
+    var tt=Math.min(ent.t,TEND), u=uEntladen(ent.u0,z.c,z.r,tt);
+    $("mU").textContent=zahl(u,1,"V");
+    $("mUart").textContent= ent.u0>0 ? (ent.t>=TEND ? "60 s nach dem Ausschalten" : zahl(tt,0,"s")+" nach dem Ausschalten") : "";
+    $("mIC").textContent=zahl(0,3,"A"); $("mI").textContent=zahl(0,3,"A");
+    $("mQ").textContent="0 var"; $("mQart").textContent="";
+  }
+  $("bQ1").textContent=z.q1?"Q1 ist EIN: ausschalten":"Q1 ist AUS: einschalten";
+  $("bQ1").classList.toggle("an",z.q1); $("bQ1").setAttribute("aria-pressed",z.q1?"true":"false");
+  $("bY").classList.toggle("an",z.stern); $("bY").setAttribute("aria-pressed",z.stern?"true":"false");
+  $("bD").classList.toggle("an",!z.stern); $("bD").setAttribute("aria-pressed",!z.stern?"true":"false");
+  $("aC").innerHTML="<small><span class='fz'>C</span></small>"+z.c+" µF"; $("rc").value=z.c;
+  $("aR").innerHTML="<small><span class='fz'>R</span><sub>E</sub></small>"+rText(z.r);
+  zeichnen(); kurve();
+}
+function stoppen(){ if(uhr){ clearInterval(uhr); uhr=null; } ent.lauf=false; }
+function entladenNeu(){ stoppen(); ent={u0:0,t:0,lauf:false}; }    // andere Kondensatoren: entladen eingesetzt
+function ausschalten(){
+  z.q1=false; stoppen();
+  ent={u0: z.c>0 ? Math.sqrt(2)*ubc(z.stern) : 0, t:0, lauf:false};
+  if(ent.u0>0){
+    if(bewegungArm){ ent.t=TEND; }
+    else { ent.lauf=true; var t0=performance.now();
+      uhr=setInterval(function(){ ent.t=(performance.now()-t0)/1000*ZEITRAFFER; if(ent.t>=TEND){ ent.t=TEND; stoppen(); } anzeigen(); },100); }
+  }
+}
+$("bQ1").onclick=function(){ if(z.q1){ ausschalten(); } else { stoppen(); z.q1=true; } anzeigen(); };
+function aendern(f){ f(); if(!z.q1) entladenNeu(); anzeigen(); }
+$("bY").onclick=function(){ aendern(function(){ z.stern=true; }); };
+$("bD").onclick=function(){ aendern(function(){ z.stern=false; }); };
+function setzeC(c){ aendern(function(){ z.c=Math.max(0,Math.min(150,Math.round(c))); }); }
+$("rc").addEventListener("input",function(){ setzeC(+this.value); });
+$("c10m").onclick=function(){ setzeC(z.c-10); }; $("c1m").onclick=function(){ setzeC(z.c-1); };
+$("c1p").onclick=function(){ setzeC(z.c+1); };   $("c10p").onclick=function(){ setzeC(z.c+10); };
+$("r1m").onclick=function(){ aendern(function(){ z.r=Math.max(-1,z.r-1); }); };
+$("r1p").onclick=function(){ aendern(function(){ z.r=Math.min(E12.length-1,z.r+1); }); };
+$("bReset").onclick=function(){ stoppen(); z={q1:START.q1,stern:START.stern,c:START.c,r:START.r}; ent={u0:0,t:0,lauf:false}; anzeigen(); };
+
+// ---------------- Prüfschnittstellen ----------------
+window.__stelle=function(q1,schaltung,c){ stoppen(); z={q1:!!q1,stern:schaltung==="Y",c:c,r:-1}; ent={u0:0,t:0,lauf:false}; anzeigen();
+  return [$("mU").textContent,$("mIC").textContent,$("mI").textContent,$("mQ").textContent].join(" | "); };
+window.__entladen=function(schaltung,c,rKohm,t){ stoppen(); var i=rKohm===null?-1:E12.indexOf(rKohm);
+  z={q1:true,stern:schaltung==="Y",c:c,r:i}; z.q1=false; ent={u0:Math.sqrt(2)*ubc(z.stern),t:t,lauf:false}; anzeigen();
+  return $("mU").textContent+" | "+$("mUart").textContent; };
+
+if(/[?&]pruefen\b/.test(location.search)){
+  var bericht={};
+  [["D",30],["Y",30],["Y",90],["Y",89],["Y",91],["D",0],["D",150],["Y",150],["D",1],["Y",60.3],["D",60.3]].forEach(function(e){
+    bericht["Q1 ein, "+(e[0]==="Y"?"Stern":"Dreieck")+", "+e[1]+" µF"]=window.__stelle(1,e[0],e[1]); });
+  [["D",30,null],["D",30,1000],["D",30,820],["D",30,680],["D",30,1200],["Y",90,null],["D",150,10000],["Y",1,100]].forEach(function(e){
+    bericht["Entladen "+(e[0]==="Y"?"Stern":"Dreieck")+", "+e[1]+" µF, R_E "+(e[2]===null?"kein":e[2]+" kΩ")+", 60 s"]=window.__entladen(e[0],e[1],e[2],60); });
+  stoppen(); z={q1:START.q1,stern:START.stern,c:START.c,r:START.r}; ent={u0:0,t:0,lauf:false};
+  $("pruefbericht").textContent=JSON.stringify(bericht);
+}
+anzeigen();
+})();
+</script>
+</body></html>
