@@ -1,0 +1,254 @@
+<!doctype html>
+<!-- E3EG B14 · Messplatz Beleuchtungsstärke mit Luxmeter (Neubau 21.10.2026, Aufgabe IN der Stunde nach dem Muster
+     E1EG B07). Neu: Der Block hat keinen alten Stand.
+     Ziel-Erkenntnis (die Schüler finden sie selbst; die Seite nennt sie nicht und rechnet nichts vor):
+       Doppelter Abstand zwischen Strahler und Messfühler ergibt ein Viertel der Beleuchtungsstärke, dreifacher ein
+       Neuntel; das Produkt aus Beleuchtungsstärke und Abstandsquadrat ist bei jedem Abstand gleich und hat den
+       Zahlenwert der Lichtstärke des Strahlers. Fällt das Licht schräg auf den Messfühler, zeigt das Luxmeter weniger
+       (bei 60° die Hälfte): Gemessen wird deshalb mit waagerecht liegendem Messfühler auf der Arbeitsebene.
+     Vorlagen: Laborversuch „Unterschiedliche Beleuchtungsstärke“ des Materialarchivs (Halogenstrahler und Luxmeter);
+       Fachkunde S. 389 (Messung mit dem Beleuchtungsstärkemesser, Luxmeter; Messfühler auf der Arbeitsebene);
+       Tabellenbuch S. 227 (Bild: Lichtquelle, beleuchtete Fläche, Punkt P, Abstand r, Winkel α gegen die Senkrechte;
+       Formel 3 Ep = Iv / r² · cos α); Rechenbuch S. 215, Bild 1 und Bild 2 (Entfernungsgesetz, schräger Lichteinfall).
+       Die Formel steht nur hier im Kommentar, nicht auf der Seite.
+     Rechenmodell: punktförmige Lichtquelle in einem dunklen Messraum (keine Rückstrahlung von Wänden), Lichtstärke I in
+       Richtung der Messbank fest; Messfühler im Abstand r, um den Winkel α gegen die Lichtrichtung geneigt:
+       E = I / r² · cos α.  Strahler 1: 720 cd, Strahler 2: 1152 cd, Strahler 3: 288 cd.
+     Anzeige wie ein Luxmeter mit selbsttätiger Bereichswahl: unter 100 lx eine Nachkommastelle, 100 bis 9999 lx ganze lx,
+       ab 10 000 lx auf 10 lx gerundet (halbe Werte aufwärts, Math.round).
+     Einstellbereich: r 0,25 m bis 5,00 m in Schritten von 0,01 m; α 0° bis 90° in Schritten von 1°.
+       Grenzfälle: Strahler 2 bei 0,25 m (18 430 lx), Strahler 3 bei 5,00 m (11,5 lx), α = 90° (0,0 lx).
+     Startstellung neutral: Strahler 2, r = 3,70 m, α = 15° (keine Einstellung der Aufgaben).
+     Prüfmodus ?pruefen: Anzeigen der Aufgabenstellungen und Grenzfälle als JSON in #pruefbericht;
+       window.__stelle(strahler, r, alpha) stellt ein und gibt die Anzeige zurück. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Beleuchtungsstärke (B14)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"Strahler":2,"r_m":3.7,"alpha_grad":15},"loesungswerte":{"Aufgabe 3, Strahler 1, alpha 0":{"1 m":"720 lx","2 m":"180 lx","3 m":"80,0 lx","4 m":"45,0 lx"},"Aufgabe 3, Strahler 1, r 2 m":{"30 Grad":"156 lx","60 Grad":"90,0 lx"},"Aufgabe 4a, Strahler 2, r 1,5 m":"512 lx","Aufgabe 4b, Strahler 1, 125 lx":"r = 2,40 m"},"quelle":"Tabellenbuch Elektrotechnik S. 227 (Bild und Formel 3); Fachkunde S. 389 (Luxmeter, Messfühler auf der Arbeitsebene); Rechenbuch S. 215 Bild 1 und 2; Laborversuch Beleuchtungsstärke des Materialarchivs"}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62;--blau:#2557A3}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:1040px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .fz{font-family:Cambria,Caladea,'Noto Serif',Georgia,serif;font-style:italic}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px;align-items:start;grid-template-areas:"messwerte" "bild" "bedienung"}
+ .bild{grid-area:bild} .messwerte{grid-area:messwerte} .bedienung{grid-area:bedienung}
+ @media(min-width:800px){.buehne{grid-template-columns:1.35fr 1fr;grid-template-areas:"bild messwerte" "bild bedienung"}}
+ .bild svg{width:100%;height:auto;display:block;border:1px solid var(--linie);background:#fff}
+ .legende{font-size:13.5px;color:var(--grau);margin-top:4px}
+ .messwerte{display:grid;grid-template-columns:1.6fr 1fr;gap:8px;background:#fff}
+ .geraet{background:#2b3a44;border-radius:10px;padding:8px 10px 10px;color:#dfe8ee;min-width:0}
+ .geraet .name{font-size:13px;letter-spacing:.05em;font-weight:700;color:#cfe}
+ .geraet .lcd{background:#cfe3c9;color:#14231a;border-radius:4px;padding:4px 10px;margin-top:4px;text-align:right;
+   font-variant-numeric:tabular-nums;font-size:34px;font-weight:700;white-space:nowrap;line-height:1.15}
+ .geraet .lcd small{font-size:18px;font-weight:700;margin-left:6px}
+ .kachel{border:1.4px solid var(--ink);background:var(--hell);padding:5px 8px;text-align:center;min-width:0}
+ .kachel .zeile{display:block;font-variant-numeric:tabular-nums;font-size:20px;font-weight:700;white-space:nowrap}
+ .kachel .ort{display:block;font-size:12.5px;color:var(--grau);line-height:1.25}
+ .lcdk{background:#20313a;color:#9BF0B4;font-variant-numeric:tabular-nums;font-size:26px;font-weight:700;padding:6px 12px;border-radius:4px;text-align:right}
+ .lcdk small{font-size:16px;color:#cfe;font-weight:400;float:left;margin-top:6px}
+ input[type=range]{width:100%;height:44px;accent-color:var(--kupfer);margin:6px 0 2px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+ button{font:inherit;font-size:16px;min-height:48px;min-width:48px;padding:6px 8px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+ button.an{background:var(--kupfer);color:#fff}
+ button.zurueck{border-color:var(--ink);color:var(--ink)}
+ .schritte button{flex:1 1 44px;font-weight:700;padding:6px 2px}
+ .strahler button{flex:1 1 30%;font-weight:700}
+ .schild{border:1.2px dashed var(--grau);padding:6px 10px;margin-top:6px;font-size:15px}
+ .titel{font-size:15px;font-weight:700;margin:10px 0 4px}
+ .titel:first-child{margin-top:0}
+ .hinweis{font-size:14px;color:var(--grau);margin-top:12px}
+ #pruefbericht{display:none}
+ @media(max-width:799px){.messwerte{position:sticky;top:0;z-index:5;padding:6px 0;box-shadow:0 6px 6px -6px rgba(0,0,0,.25)}}
+ @media(max-width:420px){.wrap{padding:12px 10px 18px} .geraet .lcd{font-size:28px} .kachel .zeile{font-size:17px}
+   .lcdk{font-size:22px} button{font-size:15px} .anleitung{font-size:14px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E3EG · B14</div><h1>Messplatz: Beleuchtungsstärke messen</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> In einem dunklen Messraum steht ein Strahler am Anfang einer Messbank.
+  Der Messfühler des Luxmeters fährt auf der Messbank. Sie wählen den Strahler und stellen den Abstand
+  <span class="fz">r</span> zwischen Strahler und Messfühler ein. Mit dem Winkel <span class="fz">α</span> neigen Sie den
+  Messfühler, dann fällt das Licht schräg auf ihn. Das Luxmeter zeigt die Beleuchtungsstärke <span class="fz">E</span>.</div>
+
+ <div class="buehne">
+  <div class="bild">
+   <svg viewBox="0 0 720 330" role="img" id="messbank" data-quelle="Anordnung nach dem Laborversuch Beleuchtungsstärke (Strahler, Luxmeter) und Tabellenbuch S. 227, Bild (Lichtquelle, Punkt P, Abstand r, Winkel α gegen die Senkrechte); schräger Lichteinfall nach Rechenbuch S. 215, Bild 2"
+    aria-label="Messbank von der Seite: links der Strahler, rechts auf einem Schlitten der Messfühler des Luxmeters. Das Licht fällt vom Strahler auf den Messfühler. Über dem Lichtweg ist der Abstand r bemaßt, am Messfühler der Winkel α zwischen Lichtrichtung und der Senkrechten auf dem Messfühler. Unten eine Skala in Metern.">
+    <g id="mb"></g>
+   </svg>
+   <div class="legende">Seitenansicht der Messbank. Gestrichelt: die Senkrechte auf dem Messfühler. Der Winkel
+    <span class="fz">α</span> liegt zwischen Lichtrichtung und dieser Senkrechten.</div>
+  </div>
+
+  <div class="messwerte" aria-live="polite">
+   <div class="geraet"><span class="name">LUXMETER</span><div class="lcd"><span id="mE"></span><small>lx</small></div></div>
+   <div class="kachel"><span class="ort">Abstand</span><span class="zeile" id="mR"></span>
+    <span class="ort">Winkel</span><span class="zeile" id="mA"></span></div>
+  </div>
+
+  <div class="bedienung">
+   <div class="titel">Strahler</div>
+   <div class="knoepfe strahler">
+    <button type="button" id="s1">Strahler 1</button>
+    <button type="button" id="s2">Strahler 2</button>
+    <button type="button" id="s3">Strahler 3</button>
+   </div>
+   <div class="schild" id="schild"></div>
+   <div class="titel">Abstand <span class="fz">r</span> zwischen Strahler und Messfühler</div>
+   <div class="lcdk" id="aR" aria-live="polite"></div>
+   <input type="range" id="rr" min="0.25" max="5" step="0.01" value="3.7" aria-label="Abstand in Meter">
+   <div class="knoepfe schritte">
+    <button type="button" id="r1m" aria-label="1 Meter weniger">−1</button>
+    <button type="button" id="r01m" aria-label="0,1 Meter weniger">−0,1</button>
+    <button type="button" id="r001m" aria-label="0,01 Meter weniger">−0,01</button>
+    <button type="button" id="r001p" aria-label="0,01 Meter mehr">+0,01</button>
+    <button type="button" id="r01p" aria-label="0,1 Meter mehr">+0,1</button>
+    <button type="button" id="r1p" aria-label="1 Meter mehr">+1</button>
+   </div>
+   <div class="titel">Winkel <span class="fz">α</span> (Messfühler neigen)</div>
+   <div class="lcdk" id="aA" aria-live="polite"></div>
+   <input type="range" id="ra" min="0" max="90" step="1" value="15" aria-label="Winkel in Grad">
+   <div class="knoepfe schritte">
+    <button type="button" id="a10m" aria-label="10 Grad weniger">−10°</button>
+    <button type="button" id="a1m" aria-label="1 Grad weniger">−1°</button>
+    <button type="button" id="a1p" aria-label="1 Grad mehr">+1°</button>
+    <button type="button" id="a10p" aria-label="10 Grad mehr">+10°</button>
+   </div>
+   <div class="titel">Neu beginnen</div>
+   <div class="knoepfe"><button class="zurueck" id="bReset" type="button">Zurücksetzen</button></div>
+  </div>
+ </div>
+
+ <div class="hinweis">Der Messraum ist dunkel: Das Luxmeter erfasst nur das Licht des Strahlers. Der Strahler ist klein
+  gegen den Abstand und gilt als punktförmige Lichtquelle; seine Lichtstärke steht auf dem Typenschild. Grob mit dem
+  Schieber, genau mit den Tasten einstellen.</div>
+ <pre id="pruefbericht"></pre>
+</div>
+
+<script>
+(function(){
+"use strict";
+var STRAHLER={1:720, 2:1152, 3:288};            // Lichtstärke in Richtung der Messbank in cd
+var START={s:2, r:3.7, a:15};
+var z={s:START.s, r:START.r, a:START.a};
+var $=function(id){return document.getElementById(id);};
+
+// ---------------- Rechenmodell ----------------
+function beleuchtung(s){ return STRAHLER[s.s]/(s.r*s.r)*Math.cos(s.a*Math.PI/180); }
+function komma(x,st){
+  var t=(Math.round(x*Math.pow(10,st))/Math.pow(10,st)).toFixed(st);
+  if(/^-0[.,]?0*$/.test(t)) t=t.slice(1);
+  return t.replace(".",",");
+}
+function gruppe(n){ var t=String(n); return t.length>4 ? t.replace(/\B(?=(\d{3})+(?!\d))/g," ") : t; }
+function luxanzeige(e){                          // Luxmeter mit selbsttätiger Bereichswahl
+  var e1=Math.round(e*10)/10;
+  if(e1<100) return komma(e1,1);
+  var e0=Math.round(e);
+  if(e0<10000) return String(e0);
+  return gruppe(Math.round(e/10)*10);
+}
+
+// ---------------- Messbank (Seitenansicht) ----------------
+var NS="http://www.w3.org/2000/svg", X0=74, K=124, YL=160, YB=262;   // 1 m ≙ 124 px; Lichtquelle bei (X0, YL)
+function el(n,a,t){ var e=document.createElementNS(NS,n); for(var k in a) e.setAttribute(k,a[k]); if(t!==undefined) e.textContent=t; return e; }
+function text(g,x,y,t,gr,farbe,anker,kursiv){
+  var a={x:x,y:y,"font-size":gr,fill:farbe||"#1A2530","text-anchor":anker||"start","font-family":kursiv?"Cambria,Caladea,'Noto Serif',Georgia,serif":"Arial,sans-serif"};
+  if(kursiv){ a["font-style"]="italic"; a["font-weight"]="700"; }
+  g.appendChild(el("text",a,t));
+}
+function pfeilspitze(g,x,y,ux,uy,farbe){
+  var s=9; g.appendChild(el("polygon",{points:[x,y, x-ux*s-uy*s*0.45,y-uy*s+ux*s*0.45, x-ux*s+uy*s*0.45,y-uy*s-ux*s*0.45].join(" "),fill:farbe}));
+}
+function messbank(){
+  var g=$("mb"); while(g.firstChild) g.removeChild(g.firstChild);
+  var xs=X0+z.r*K;
+  // Bank und Skala
+  g.appendChild(el("rect",{x:20,y:YB,width:690,height:12,fill:"#C9D2D9",stroke:"#5A666F","stroke-width":1.5}));
+  for(var i=0;i<=10;i++){
+    var x=X0+i*K/2, gross=(i%2===0);
+    g.appendChild(el("line",{x1:x,y1:YB+12,x2:x,y2:YB+(gross?28:21),stroke:"#1A2530","stroke-width":gross?2.4:1.4}));
+    if(gross) text(g,x,YB+56,String(i/2)+" m",28,"#1A2530","middle");
+  }
+  // Strahler
+  g.appendChild(el("rect",{x:14,y:YL-28,width:46,height:56,rx:6,fill:"#5A666F",stroke:"#1A2530","stroke-width":2}));
+  g.appendChild(el("polygon",{points:[60,YL-28, X0,YL-36, X0,YL+36, 60,YL+28].join(" "),fill:"#9AA5AE",stroke:"#1A2530","stroke-width":2}));
+  g.appendChild(el("line",{x1:37,y1:YL+28,x2:37,y2:YB,stroke:"#1A2530","stroke-width":5}));
+  text(g,12,40,"Strahler "+z.s,28,"#1A2530","start");
+  // Licht (Kegel bis zum Messfühler) und Lichtrichtung
+  var spr=(xs-X0)*0.12+5;
+  g.appendChild(el("polygon",{points:[X0,YL-6, xs,YL-spr, xs,YL+spr, X0,YL+6].join(" "),fill:"#FFE27A","fill-opacity":"0.55"}));
+  g.appendChild(el("line",{x1:X0,y1:YL,x2:xs-12,y2:YL,stroke:"#A34E0E","stroke-width":3}));
+  pfeilspitze(g,xs-9,YL,1,0,"#A34E0E");
+  // Bemaßung r
+  var yb=86;
+  g.appendChild(el("line",{x1:X0,y1:yb-14,x2:X0,y2:YL-40,stroke:"#5A666F","stroke-width":1.2}));
+  g.appendChild(el("line",{x1:xs,y1:yb-14,x2:xs,y2:YL-spr-6,stroke:"#5A666F","stroke-width":1.2}));
+  g.appendChild(el("line",{x1:X0+10,y1:yb,x2:xs-10,y2:yb,stroke:"#1A2530","stroke-width":2}));
+  pfeilspitze(g,X0,yb,-1,0,"#1A2530"); pfeilspitze(g,xs,yb,1,0,"#1A2530");
+  var tx=Math.max(X0+24,(X0+xs)/2);
+  text(g,tx,yb-10,"r",34,"#A34E0E","middle",true);
+  // Schlitten mit Messfühler; der Messfühler ist um α geneigt (Drehung um die Achse senkrecht zur Zeichenebene)
+  g.appendChild(el("rect",{x:xs-18,y:YB-14,width:48,height:14,fill:"#5A666F",stroke:"#1A2530","stroke-width":1.5}));
+  g.appendChild(el("line",{x1:xs+6,y1:YB-14,x2:xs+6,y2:YL+30,stroke:"#1A2530","stroke-width":4}));
+  var kopf=el("g",{transform:"translate("+(xs+6)+","+YL+") rotate("+(-z.a)+")"});
+  kopf.appendChild(el("rect",{x:-6,y:-32,width:18,height:64,rx:3,fill:"#2b3a44",stroke:"#1A2530","stroke-width":1.5}));
+  kopf.appendChild(el("rect",{x:-9,y:-27,width:5,height:54,fill:"#F4F6F8",stroke:"#1A2530","stroke-width":1}));
+  // Senkrechte auf dem Messfühler (zeigt zur Lichtquelle hin), nicht länger als der Weg bis zum Strahler
+  var ln=Math.min(130,Math.max(30,xs-X0-8),(YB-YL-10)/Math.max(Math.sin(z.a*Math.PI/180),0.01));
+  kopf.appendChild(el("line",{x1:-9,y1:0,x2:-9-ln,y2:0,stroke:"#2557A3","stroke-width":2.6,"stroke-dasharray":"9 6"}));
+  g.appendChild(kopf);
+  // Winkel α zwischen Lichtrichtung (zur Quelle) und Senkrechter
+  if(z.a>0){
+    var R=Math.min(84,ln), w=z.a*Math.PI/180;
+    var bx=xs+6-R, by=YL;                            // auf der Lichtrichtung
+    var ax=xs+6-R*Math.cos(w), ay=YL+R*Math.sin(w);
+    g.appendChild(el("path",{d:"M "+bx+" "+by+" A "+R+" "+R+" 0 0 0 "+ax+" "+ay,fill:"none",stroke:"#2557A3","stroke-width":2.6}));
+    var m=w/2;
+    text(g,xs+6-(R+24)*Math.cos(m),YL+(R+24)*Math.sin(m)+10,"α",34,"#2557A3","middle",true);
+  }
+  text(g,xs>520?xs-24:xs+28,YB-26,"Messfühler",26,"#1A2530",xs>520?"end":"start");
+}
+
+// ---------------- Bedienung ----------------
+function auffrischen(){
+  $("mE").textContent=luxanzeige(beleuchtung(z));
+  $("mR").textContent=komma(z.r,2)+" m";
+  $("mA").textContent=z.a+"°";
+  $("aR").innerHTML="<small><span class='fz'>r</span></small>"+komma(z.r,2)+" m"; $("rr").value=z.r;
+  $("aA").innerHTML="<small><span class='fz'>α</span></small>"+z.a+"°"; $("ra").value=z.a;
+  [1,2,3].forEach(function(n){ $("s"+n).className=(z.s===n?"an":""); $("s"+n).setAttribute("aria-pressed",z.s===n?"true":"false"); });
+  $("schild").innerHTML="<b>Typenschild Strahler "+z.s+":</b> Lichtstärke <span class='fz'>I</span> = "+STRAHLER[z.s]+"&nbsp;cd in Richtung der Messbank";
+  messbank();
+}
+function setzeR(r){ z.r=Math.max(0.25,Math.min(5,Math.round(r*100)/100)); auffrischen(); }
+function setzeA(a){ z.a=Math.max(0,Math.min(90,Math.round(a))); auffrischen(); }
+$("rr").addEventListener("input",function(){ setzeR(+this.value); });
+$("ra").addEventListener("input",function(){ setzeA(+this.value); });
+[["r1m",-1],["r01m",-0.1],["r001m",-0.01],["r001p",0.01],["r01p",0.1],["r1p",1]].forEach(function(e){
+  $(e[0]).onclick=function(){ setzeR(z.r+e[1]); }; });
+[["a10m",-10],["a1m",-1],["a1p",1],["a10p",10]].forEach(function(e){
+  $(e[0]).onclick=function(){ setzeA(z.a+e[1]); }; });
+[1,2,3].forEach(function(n){ $("s"+n).onclick=function(){ z.s=n; auffrischen(); }; });
+$("bReset").onclick=function(){ z={s:START.s, r:START.r, a:START.a}; auffrischen(); };
+window.__stelle=function(s,r,a){ z={s:s, r:r, a:a}; auffrischen(); return $("mE").textContent+" lx"; };
+
+// ---------------- Prüfmodus ----------------
+if(/[?&]pruefen\b/.test(location.search)){
+  var bericht={};
+  [[1,1,0],[1,2,0],[1,3,0],[1,4,0],[1,2,30],[1,2,60],[2,1.5,0],[1,2.4,0],[1,2.39,0],[1,2.41,0],[2,3.7,15],
+   [2,0.25,0],[3,5,0],[3,5,89],[1,2,90],[3,1,0],[3,2,0],[2,2,0],[2,1,0]].forEach(function(e){
+    bericht["S"+e[0]+" r "+komma(e[1],2)+" a "+e[2]]=window.__stelle(e[0],e[1],e[2]); });
+  z={s:START.s, r:START.r, a:START.a};
+  $("pruefbericht").textContent=JSON.stringify(bericht);
+}
+auffrischen();
+})();
+</script>
+</body></html>
