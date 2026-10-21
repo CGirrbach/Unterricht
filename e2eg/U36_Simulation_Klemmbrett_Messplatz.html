@@ -23,7 +23,8 @@
        Moment etwa ein Drittel, Fachkunde S. 497). Eine Strangspannung unter 90 %, eine andere zulässig: „Strangspannungen
        ungleich“. Alle Strangspannungen zulässig, aber Mit- und Gegenlauf des Drehfeldes beide über 10 % (Stränge verkehrt
        verbunden, z. B. Brücken U2 und V2, U1 und W2, W1 und V2): „Stränge falsch verbunden“. So zeigt nur die richtige
-       Brückung keine Meldung. Die Seite nennt die richtige Schaltung nicht.
+       Brückung keine Meldung. Steht die Welle (kein Drehfeld, z. B. nur Brücke W2 und U2: zwei Stränge in Reihe), gilt
+       vor allen anderen „Stränge falsch verbunden: kein Drehfeld, der Motor läuft nicht an.“ (Prüfer, 21.10.). Die Seite nennt die richtige Schaltung nicht.
      Anzeige: Strangspannungen mit einer Nachkommastelle. Prüfmodus ?pruefen: alle 32 Brückenstellungen × 6 Anschlüsse
      als JSON. Startstellung neutral: Motor A, keine Brücken, Anschluss L1-U1, L2-V1, L3-W1, Schalter aus. -->
 <html lang="de"><head><meta charset="utf-8">
@@ -141,6 +142,7 @@ function bewerte(e,motor){                              // Spannung am Strang ge
   if(e.kurz) return "kurz";
   var umax=Math.max.apply(null,e.u), umin=Math.min.apply(null,e.u), z=ZUL[motor];
   if(umax<1) return "aus";
+  if(e.dreh===0) return "steht";                        // Wechselfeld: kein Drehfeld, kein Anzugsmoment
   if(umax>1.1*z) return "hoch";
   if(umax<0.9*z) return "klein";
   if(umin<0.9*z) return "ungleich";
@@ -304,6 +306,7 @@ function auffrischen(){
   var bw=bewerte(erg,z.motor), lauf=(erg.dreh===0)?"Welle steht still":"Welle dreht sich";
   if(!z.ein) st.textContent="Netz aus";
   else if(erg.kurz){ st.textContent="Kurzschluss: Die Sicherung hat ausgelöst."; st.classList.add("kurz"); }
+  else if(bw==="steht"){ st.textContent="Netz ein · Welle steht still · Stränge falsch verbunden: kein Drehfeld, der Motor läuft nicht an."; st.classList.add("kurz"); }
   else if(bw==="hoch"){ st.textContent="Netz ein · "+lauf+" · Strangspannung zu hoch: Die Wicklung wird überlastet. Sofort ausschalten!"; st.classList.add("kurz"); }
   else if(bw==="falsch"){ st.textContent="Netz ein · "+lauf+" · Stränge falsch verbunden: Das Drehfeld ist ungleichmäßig, der Motor wird überlastet."; st.classList.add("kurz"); }
   else if(bw==="ungleich"){ st.textContent="Netz ein · "+lauf+" · Strangspannungen ungleich: Die Stränge werden ungleich belastet."; st.classList.add("warn"); }
