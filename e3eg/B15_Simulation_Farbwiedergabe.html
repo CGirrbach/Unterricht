@@ -1,0 +1,182 @@
+<!doctype html>
+<!-- E3EG B15 · Messplatz Lichtfarbe und Farbwiedergabe (Neubau 21.10.2026, Aufgabe IN der Stunde nach dem Muster
+     E1EG B07). Neu: Der Block hat keinen alten Stand und keine Simulation.
+     Ziel-Erkenntnis (die Schüler finden sie selbst; die Seite nennt keine Lichtfarbe und keine Farbwiedergabestufe):
+       Lichtfarbe (Farbtemperatur) und Farbwiedergabe (Farbwiedergabeindex R_a) sind zwei verschiedene Eigenschaften einer
+       Lampe. Drei Lampen mit fast gleicher Farbtemperatur (rund 4100 K) geben Farben sehr verschieden gut wieder
+       (R_a 64, 85, 96). Je kleiner R_a, desto stärker weichen die Farben vom naturgetreuen Aussehen ab. Fehlt einer Lampe
+       ein Teil des Spektrums (Natriumdampflampe: kaum Rot), kann sie diese Farbe nicht zeigen: Rot wird braun und dunkel.
+     Vorlagen: Fachkunde S. 388 (Farbspektrum, Farbwiedergabe, Farbwiedergabeindex R_a, Farbtemperatur T in K, Bild 1
+       Licht und Wellenlänge); Tabellenbuch S. 231 (Farbtemperaturen und Lichtfarben, Farbwiedergabestufen).
+     Daten (nichts erfunden, alles CIE-Normdaten, gerechnet mit colour-science 0.4.7 in b15_sim_daten.py):
+       Lampen: CIE-Normlichtart A (Glühlampe), HP1 (Natriumdampf-Hochdrucklampe), FL2 (Leuchtstofflampe), LED-B5, LED-V2,
+       LED-B3 (weiße LED); Spektren aus CIE 15:2018. Farbmuster 1 bis 8 und 9 (gesättigtes Rot): Testfarben der CIE 13.3.
+       Farbtemperatur (Robertson) und allgemeiner Farbwiedergabeindex R_a nach CIE 13.3; Gegenprobe FL2 64, FL7 90, FL11 83.
+       Anzeige der Farbmuster: links unter dem Bezugslicht gleicher Farbtemperatur (Planck'scher Strahler bzw. CIE-Tageslicht,
+       „naturgetreu“), rechts unter der Lampe; beide an die Lichtfarbe angepasst (Bradford, wie das Auge sich umstimmt),
+       sRGB. Leuchtfeld: Farbort der Lampe ohne Anpassung. Spektrum: auf das Maximum bezogen, 380 nm bis 780 nm.
+     Startstellung neutral: Licht aus (keine Lampe, keine Messwerte).
+     Prüfmodus ?pruefen: alle Anzeigen als JSON in #pruefbericht; window.__stelle(lampe) stellt ein und gibt die Anzeige
+       zurück. Erzeugt mit b15_sim_bauen.py. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Lichtfarbe und Farbwiedergabe (B15)</title>
+<script type="application/json" id="sim-meta">{"startwerte": {"Lampe": "aus"}, "loesungswerte": {"Glühlampe": {"T": "2856 K", "R_a": 100}, "Natriumdampflampe": {"T": "1959 K", "R_a": 8}, "Leuchtstofflampe": {"T": "4224 K", "R_a": 64}, "LED-Lampe A": {"T": "6597 K", "R_a": 80}, "LED-Lampe B": {"T": "4069 K", "R_a": 96}, "LED-Lampe C": {"T": "4102 K", "R_a": 85}}, "quelle": "Spektren CIE 15:2018 (A, HP1, FL2, LED-B3, LED-V2, LED-B5), Testfarben CIE 13.3, Normspektralwertfunktionen CIE 1931 2°; Farbtemperatur und R_a nach CIE 13.3, gerechnet mit colour-science 0.4.7 (b15_sim_daten.py)"}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62;--blau:#2557A3}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:1040px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .fz{font-family:Cambria,Caladea,'Noto Serif',Georgia,serif;font-style:italic}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px;align-items:start;grid-template-areas:"messgeraet" "wahl" "muster" "licht"}
+ .messgeraet{grid-area:messgeraet} .wahl{grid-area:wahl} .muster{grid-area:muster} .licht{grid-area:licht}
+ @media(min-width:800px){.buehne{grid-template-columns:1.25fr 1fr;grid-template-areas:"muster messgeraet" "muster wahl" "licht licht"} .licht{grid-template-columns:170px 1fr}}
+ .messgeraet{background:#20313a;border-radius:6px;padding:8px 12px;display:grid;grid-template-columns:1fr 1fr;gap:6px 12px}
+ .messgeraet .titel{grid-column:1 / span 2;color:#cfe;font-size:13px;letter-spacing:.04em}
+ .wert{min-width:0}
+ .wert .name{display:block;color:#cfe;font-size:14px;line-height:1.25}
+ .wert .zahl{display:block;color:#9BF0B4;font-variant-numeric:tabular-nums;font-size:30px;font-weight:700;white-space:nowrap}
+ .titel2{font-size:15px;font-weight:700;margin:0 0 6px}
+ .knoepfe{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+ button{font:inherit;font-size:16px;min-height:50px;padding:6px 8px;border:1.6px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer;font-weight:700}
+ button[aria-pressed=true]{background:var(--kupfer);color:#fff}
+ button.zurueck{border-color:var(--ink);color:var(--ink);font-weight:400;grid-column:1 / span 2}
+ .kabine{background:#6e6e6e;border:1.4px solid var(--ink);padding:10px}
+ .kabine .hinw{color:#fff;font-size:14px;margin:0 0 8px}
+ .raster{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+ .feld{display:flex;flex-direction:column;align-items:stretch}
+ .probe{display:flex;height:74px;border:2px solid #fff}
+ .probe span{flex:1}
+ .probe span+span{border-left:2px solid #fff}
+ .nr{color:#fff;text-align:center;font-weight:700;font-size:15px;margin-top:2px}
+ .licht{display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:center}
+ .leuchtfeld{height:96px;border:1.4px solid var(--ink);border-radius:8px;display:flex;align-items:flex-end;justify-content:center;font-size:13px;color:var(--grau);padding:4px;text-align:center}
+ .spektrum svg{width:100%;height:auto;display:block;border:1px solid var(--linie);background:#fff}
+ .hinweis{font-size:14px;color:var(--grau);margin-top:12px}
+ #pruefbericht{display:none}
+ @media(max-width:799px){.messgeraet{position:sticky;top:0;z-index:5;box-shadow:0 6px 8px -6px rgba(0,0,0,.4)}}
+ @media(max-width:420px){.wrap{padding:12px 10px 18px} .wert .zahl{font-size:26px} .wert .name{font-size:13px}
+   .probe{height:62px} .licht{grid-template-columns:1fr} .leuchtfeld{height:64px} .anleitung{font-size:14px} button{font-size:15px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E3EG · B15</div><h1>Messplatz: Lichtfarbe und Farbwiedergabe</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Wählen Sie eine Lampe. Sie beleuchtet neun Farbmuster. Jedes Muster ist
+  geteilt: <b>links naturgetreu</b>, <b>rechts unter der gewählten Lampe</b>. Das Messgerät zeigt die Farbtemperatur
+  <span class="fz">T</span> und den Farbwiedergabeindex <span class="fz">R</span><sub>a</sub> der Lampe. Unten sehen Sie,
+  wie das Licht der Lampe aussieht, und ihr Spektrum.</div>
+
+ <div class="buehne">
+  <div class="messgeraet" aria-live="polite">
+   <div class="titel">MESSGERÄT</div>
+   <div class="wert"><span class="name">Farbtemperatur <span class="fz">T</span></span><span class="zahl" id="mT"></span></div>
+   <div class="wert"><span class="name">Farbwiedergabeindex <span class="fz">R</span><sub>a</sub></span><span class="zahl" id="mR"></span></div>
+  </div>
+
+  <div class="wahl">
+   <div class="titel2">Lampe wählen</div>
+   <div class="knoepfe" id="knoepfe"></div>
+  </div>
+
+  <div class="muster">
+   <div class="kabine">
+    <p class="hinw" id="hinw">Licht aus</p>
+    <div class="raster" id="raster" role="img" aria-label="Neun Farbmuster, jedes links naturgetreu und rechts unter der gewählten Lampe"></div>
+   </div>
+  </div>
+
+  <div class="licht">
+   <div><div class="titel2">Licht der Lampe</div><div class="leuchtfeld" id="leuchtfeld"></div></div>
+   <div class="spektrum"><div class="titel2">Spektrum der Lampe</div>
+    <svg id="spek" viewBox="0 0 640 250" role="img"
+     data-quelle="Spektren CIE 15:2018; Farbband aus den Normspektralwertfunktionen CIE 1931 (vgl. Fachkunde S. 388, Bild 1: Licht und Wellenlänge)"
+     aria-label="Spektrum der Lampe: relative Strahlungsleistung über der Wellenlänge von 380 nm bis 780 nm, die Fläche ist in der Farbe der jeweiligen Wellenlänge gefärbt"></svg>
+   </div>
+  </div>
+ </div>
+
+ <div class="hinweis">Die Farbmuster sind so gezeigt, wie das Auge sie nach einer Weile unter der Lampe sieht: Es gewöhnt
+  sich an die Lichtfarbe. Die Messwerte sind nach den Regeln der Internationalen Beleuchtungskommission (CIE) aus den
+  Spektren gerechnet.</div>
+ <pre id="pruefbericht"></pre>
+</div>
+<script>
+(function(){
+"use strict";
+var D={"band":["#7200ff","#7200ff","#7200ff","#7100ff","#7100ff","#7000ff","#7000ff","#6f00ff","#6e00ff","#6c00ff","#6a00ff","#6600ff","#6100ff","#5a00ff","#4f00ff","#3e00ff","#1a00ff","#0000ff","#002dff","#005cff","#0087ff","#00b5ff","#00ecff","#00ffd5","#00ffa2","#00ff77","#00ff4a","#00ff00","#00ff00","#00ff00","#00ff00","#00ff00","#00ff00","#00ff00","#00ff00","#53ff00","#96ff00","#caff00","#faff00","#ffd700","#ffb400","#ff9600","#ff7b00","#ff6100","#ff4700","#ff2600","#ff0000","#ff0000","#ff0000","#ff0000","#ff0000","#ff0000","#ff0000","#ff0000","#ff0000","#ff0000","#ff0000","#ff0000","#ff0000","#ff0000","#ff0000","#ff0000","#ff0000","#ff0000","#ff0000","#ff0000","#ff0000","#ff0000","#ff0000","#ff0000","#ff0000","#ff0000","#ff0000","#ff0000","#ff0000","#ff0000","#ff0000","#ff0000","#ff0000","#ff0000","#ff0000"],"lampen":{"gluehlampe":{"name":"Glühlampe","T":2856,"Ra":100,"licht":"#ffb264","spektrum":[0.041,0.045,0.05,0.055,0.061,0.067,0.073,0.08,0.087,0.094,0.102,0.11,0.119,0.128,0.137,0.147,0.156,0.167,0.177,0.188,0.2,0.211,0.223,0.235,0.248,0.26,0.273,0.287,0.3,0.314,0.327,0.341,0.356,0.37,0.384,0.399,0.414,0.429,0.444,0.458,0.474,0.489,0.504,0.519,0.534,0.549,0.564,0.579,0.594,0.609,0.624,0.639,0.654,0.668,0.683,0.697,0.712,0.726,0.74,0.754,0.767,0.781,0.794,0.807,0.82,0.833,0.846,0.858,0.87,0.882,0.894,0.906,0.917,0.928,0.939,0.95,0.96,0.971,0.981,0.99,1.0],"felder":[["#c18b7f","#c18b7f"],["#a7925f","#a7925f"],["#839f43","#839f43"],["#4e9f79","#4e9f79"],["#5c9da7","#5c9da7"],["#7094c7","#7094c7"],["#a889bd","#a889bd"],["#cb86af","#cb86af"],["#d00936","#d00936"]]},"natrium":{"name":"Natriumdampflampe","T":1959,"Ra":8,"licht":"#ff8900","spektrum":[0.006,0.007,0.007,0.008,0.009,0.013,0.011,0.013,0.014,0.015,0.018,0.022,0.024,0.017,0.038,0.02,0.013,0.062,0.039,0.02,0.004,0.004,0.01,0.054,0.168,0.009,0.006,0.04,0.006,0.006,0.007,0.007,0.008,0.015,0.034,0.046,0.062,0.166,0.759,0.168,0.334,0.89,0.426,1.0,0.566,0.352,0.239,0.323,0.14,0.114,0.097,0.085,0.076,0.069,0.061,0.059,0.053,0.05,0.057,0.054,0.041,0.03,0.024,0.023,0.021,0.02,0.019,0.019,0.018,0.018,0.017,0.017,0.017,0.017,0.019,0.018,0.017,0.095,0.083,0.018,0.02],"felder":[["#c58d80","#b49c7a"],["#a79360","#a29b54"],["#7ca03f","#8c9a30"],["#439c7d","#6f8c78"],["#559ba9","#758eaa"],["#7391c8","#7985cd"],["#af88bc","#988bc2"],["#d684b0","#ab8fb3"],["#e40046","#964935"]]},"leuchtstoff":{"name":"Leuchtstofflampe","T":4224,"Ra":64,"licht":"#ffdaad","spektrum":[0.034,0.042,0.053,0.061,0.098,0.449,0.11,0.107,0.12,0.132,0.145,1.0,0.338,0.179,0.19,0.198,0.206,0.212,0.216,0.218,0.219,0.218,0.218,0.213,0.208,0.204,0.202,0.201,0.205,0.214,0.23,0.254,0.286,0.711,0.476,0.417,0.462,0.502,0.532,0.614,0.652,0.551,0.533,0.507,0.473,0.435,0.395,0.353,0.313,0.276,0.24,0.209,0.18,0.155,0.134,0.115,0.099,0.085,0.073,0.063,0.054,0.047,0.044,0.036,0.031,0.028,0.025,0.022,0.019,0.017,0.016,0.015,0.015,0.013,0.013,0.012,0.013,0.013,0.011,0.009,0.008],"felder":[["#bd8a80","#b48e80"],["#a6915f","#a2955c"],["#889f43","#8ba23c"],["#55a176","#689d70"],["#629fa6","#729aa4"],["#7096c6","#778fc8"],["#a489be","#9c88c2"],["#c387b0","#b089b4"],["#c21934","#9d3236"]]},"led_a":{"name":"LED-Lampe A","T":6597,"Ra":80,"licht":"#fdf9ff","spektrum":[0.0,0.0,0.0,0.001,0.002,0.005,0.011,0.024,0.052,0.102,0.184,0.307,0.499,0.778,1.0,0.964,0.725,0.507,0.374,0.281,0.223,0.2,0.201,0.218,0.25,0.292,0.336,0.378,0.414,0.442,0.463,0.479,0.489,0.495,0.498,0.499,0.498,0.494,0.488,0.479,0.468,0.456,0.442,0.426,0.409,0.389,0.368,0.346,0.324,0.301,0.278,0.256,0.234,0.213,0.193,0.175,0.157,0.141,0.126,0.112,0.1,0.088,0.079,0.07,0.062,0.054,0.048,0.042,0.037,0.032,0.029,0.025,0.022,0.02,0.017,0.015,0.014,0.012,0.011,0.01,0.008],"felder":[["#ba8980","#b58b80"],["#a4915f","#a1935d"],["#8b9e43","#8aa23d"],["#5aa374","#64a171"],["#67a0a5","#709ea5"],["#7297c6","#7892c8"],["#a289bf","#9f87c1"],["#bd87b0","#b487b2"],["#b71e34","#a42b35"]]},"led_b":{"name":"LED-Lampe B","T":4069,"Ra":96,"licht":"#ffd6a7","spektrum":[0.0,0.003,0.013,0.057,0.221,0.592,0.983,1.0,0.711,0.442,0.286,0.23,0.24,0.286,0.344,0.4,0.447,0.485,0.52,0.554,0.586,0.618,0.641,0.654,0.657,0.653,0.645,0.636,0.629,0.626,0.627,0.631,0.638,0.644,0.65,0.655,0.66,0.663,0.668,0.674,0.683,0.695,0.712,0.732,0.754,0.773,0.792,0.81,0.824,0.834,0.836,0.833,0.821,0.802,0.777,0.745,0.707,0.665,0.621,0.575,0.528,0.483,0.438,0.395,0.354,0.315,0.279,0.248,0.218,0.192,0.167,0.146,0.127,0.111,0.096,0.084,0.073,0.064,0.054,0.047,0.042],"felder":[["#bd8a80","#be8980"],["#a6915f","#a69160"],["#889f43","#889e45"],["#55a176","#53a178"],["#619fa6","#5f9fa6"],["#7096c6","#6e97c6"],["#a589be","#a58abd"],["#c387b0","#c487af"],["#c31834","#c51834"]]},"led_c":{"name":"LED-Lampe C","T":4102,"Ra":85,"licht":"#ffd5ab","spektrum":[0.0,0.0,0.001,0.001,0.003,0.006,0.013,0.03,0.064,0.126,0.225,0.38,0.642,0.938,1.0,0.773,0.525,0.399,0.319,0.271,0.274,0.308,0.359,0.418,0.474,0.52,0.557,0.586,0.61,0.632,0.656,0.68,0.705,0.731,0.756,0.778,0.799,0.817,0.833,0.846,0.857,0.868,0.874,0.877,0.874,0.865,0.848,0.824,0.793,0.756,0.714,0.669,0.621,0.571,0.522,0.473,0.426,0.382,0.34,0.302,0.266,0.234,0.206,0.18,0.156,0.136,0.118,0.102,0.087,0.076,0.065,0.056,0.048,0.041,0.036,0.031,0.026,0.023,0.02,0.017,0.015],"felder":[["#bd8a80","#ba8c80"],["#a6915f","#a4935d"],["#889f43","#88a03f"],["#55a176","#5ca072"],["#619fa6","#689da5"],["#7096c6","#7492c8"],["#a589be","#a189c1"],["#c387b0","#bc88b2"],["#c31834","#b42735"]]}}};
+var START="aus", z={lampe:START};
+var $=function(id){return document.getElementById(id);};
+var NS="http://www.w3.org/2000/svg";
+var REIHE=["gluehlampe", "natrium", "leuchtstoff", "led_a", "led_b", "led_c"];
+
+// ---------------- Bedienelemente ----------------
+REIHE.forEach(function(k){
+  var b=document.createElement("button"); b.type="button"; b.id="b_"+k; b.textContent=D.lampen[k].name;
+  b.setAttribute("aria-pressed","false"); b.onclick=function(){ z.lampe=k; anzeigen(); }; $("knoepfe").appendChild(b);
+});
+var r=document.createElement("button"); r.type="button"; r.className="zurueck"; r.id="bReset"; r.textContent="Licht aus (zurücksetzen)";
+r.onclick=function(){ z.lampe=START; anzeigen(); }; $("knoepfe").appendChild(r);
+var felder=[];
+for(var i=0;i<9;i++){
+  var f=document.createElement("div"); f.className="feld";
+  var p=document.createElement("div"); p.className="probe";
+  var a=document.createElement("span"), c=document.createElement("span"); p.appendChild(a); p.appendChild(c);
+  var n=document.createElement("div"); n.className="nr"; n.textContent=String(i+1);
+  f.appendChild(p); f.appendChild(n); $("raster").appendChild(f); felder.push([a,c]);
+}
+
+// ---------------- Spektrum ----------------
+var svg=$("spek");
+function el(nm,at,par){ var e=document.createElementNS(NS,nm); for(var k in at) e.setAttribute(k,at[k]); (par||svg).appendChild(e); return e; }
+function txt(x,y,t,at){ var e=el("text",Object.assign({x:x,y:y,"font-size":28,fill:"#1A2530","text-anchor":"middle","font-family":"Arial,sans-serif"},at||{})); e.textContent=t; return e; }
+var X0=40, X1=620, Y0=186, Y1=18;
+function gx(l){ return X0+(X1-X0)*(l-380)/400; }
+function spektrum(){
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+  el("line",{x1:X0,y1:Y0,x2:X1+8,y2:Y0,stroke:"#1A2530","stroke-width":2});
+  [400,500,600,700].forEach(function(l){ el("line",{x1:gx(l),y1:Y0,x2:gx(l),y2:Y0+7,stroke:"#1A2530","stroke-width":2}); txt(gx(l),Y0+34,String(l)); });
+  var lab=txt(X1+10,Y0+62,"",{"text-anchor":"end"});
+  var t1=document.createElementNS(NS,"tspan"); t1.setAttribute("font-style","italic"); t1.setAttribute("font-family","Cambria,Caladea,Georgia,serif"); t1.textContent="λ"; lab.appendChild(t1);
+  var t2=document.createElementNS(NS,"tspan"); t2.textContent=" in nm"; lab.appendChild(t2);
+  if(z.lampe===START){ txt((X0+X1)/2,(Y0+Y1)/2+8,"Licht aus",{fill:"#5A666F"}); return; }
+  var s=D.lampen[z.lampe].spektrum;
+  for(var i=0;i<s.length-1;i++){
+    var xa=gx(380+5*i), xb=gx(385+5*i), ya=Y0-(Y0-Y1)*s[i], yb=Y0-(Y0-Y1)*s[i+1];
+    el("polygon",{points:xa+","+Y0+" "+xa+","+ya.toFixed(1)+" "+xb+","+yb.toFixed(1)+" "+xb+","+Y0,fill:D.band[i],stroke:D.band[i],"stroke-width":0.6});
+  }
+  var pk=[]; for(var j=0;j<s.length;j++) pk.push(gx(380+5*j).toFixed(1)+","+(Y0-(Y0-Y1)*s[j]).toFixed(1));
+  el("polyline",{points:pk.join(" "),fill:"none",stroke:"#1A2530","stroke-width":2});
+}
+
+// ---------------- Anzeige ----------------
+function anzeigen(){
+  var aus=(z.lampe===START), L=aus?null:D.lampen[z.lampe];
+  $("mT").textContent=aus?"– – – – K":(L.T+" K");
+  $("mR").textContent=aus?"– –":String(L.Ra);
+  $("hinw").textContent=aus?"Licht aus":"Links naturgetreu · rechts unter der Lampe";
+  for(var i=0;i<9;i++){
+    felder[i][0].style.background=aus?"#2b2b2b":L.felder[i][0];
+    felder[i][1].style.background=aus?"#2b2b2b":L.felder[i][1];
+  }
+  $("leuchtfeld").style.background=aus?"#2b2b2b":L.licht;
+  REIHE.forEach(function(k){ $("b_"+k).setAttribute("aria-pressed",String(k===z.lampe)); });
+  spektrum();
+}
+
+// ---------------- Prüfschnittstelle ----------------
+window.__stelle=function(k){ z.lampe=k; anzeigen(); return $("mT").textContent+" | "+$("mR").textContent; };
+if(/[?&]pruefen\b/.test(location.search)){
+  var bericht={};
+  REIHE.forEach(function(k){ bericht[D.lampen[k].name]=window.__stelle(k); });
+  z.lampe=START;
+  $("pruefbericht").textContent=JSON.stringify(bericht);
+}
+anzeigen();
+})();
+</script>
+</body></html>
