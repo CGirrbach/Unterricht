@@ -1,0 +1,249 @@
+<!doctype html>
+<!-- E3EG B12 · Messplatz Gleichmäßigkeit der Beleuchtungsstärke (Neubau 21.10.2026, Aufgabe IN der Stunde nach dem Muster
+     E1EG B07). Neu: Für Einheit 2 gibt es noch keine Simulation.
+     Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht und rechnet die Gleichmäßigkeit nicht vor):
+       Die Gleichmäßigkeit U0 = Emin / Em hängt vom Abstand der Leuchten im Verhältnis zu ihrer Höhe ab. Höher gehängte
+       Leuchten machen die Beleuchtung gleichmäßiger, aber dunkler; mehr Leuchten mit kleinerem Abstand machen sie
+       gleichmäßiger und heller. Eine mittlere Beleuchtungsstärke nahe am Wartungswert sagt nichts über die Gleichmäßigkeit.
+     Vorlagen: Tabellenbuch S. 228 (Bereich der Sehaufgabe, Umgebungsbereich mindestens 0,5 m breit, Gleichmäßigkeit
+       U0 = Emin/Em, Formel 1), S. 227 (Lichtpunktmethode, Formel 5: Beleuchtungsstärke einer Leuchte auf der horizontalen
+       Fläche Eh = Iα · cos³α / h²; „a = Leuchtenabstand“). Die Formeln stehen nur hier im Kommentar, nicht auf der Seite.
+     Rechenmodell: Schnitt durch einen 6 m langen Raum; n gleiche Leuchten (0 bis 8) in einer Reihe, gleichmäßig verteilt
+       (Abstand a = 6 m / n, an den Wänden a/2), Höhe h über der Arbeitsfläche 1,00 m bis 3,00 m in Schritten von 0,25 m.
+       Lichtstärke je Leuchte Iα = I0 · cos α mit I0 = 800 cd (breitstrahlende LED-Leuchte, Lichtstrom rund 2500 lm);
+       Beleuchtungsstärke im Punkt x: E = Σ I0 · cos⁴α / h² = Σ I0 · h² / (h² + d²)² mit d = Abstand zur Leuchte.
+       Nur das direkt auf die Arbeitsfläche fallende Licht; Wände und Decke werfen nichts zurück.
+       Messpunkte alle 0,1 m: Bereich der Sehaufgabe (Werkbank) x = 1,0 m bis 5,0 m (41 Punkte), Umgebungsbereich
+       x = 0,5 bis 0,9 m und 5,1 bis 5,5 m (10 Punkte). Anzeigen: Mittelwert Em und kleinster Wert Emin je Bereich, auf
+       ganze lx gerundet (Math.round). Werte gegen b12_gemeinsam.py gerechnet (asserts, gleiche Rundung).
+     Startstellung neutral: keine Leuchte, h = 3,00 m (keine Einstellung der Aufgaben).
+     Prüfmodus ?pruefen: Anzeigen der Aufgabenstellungen und Grenzfälle als JSON in #pruefbericht. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Gleichmäßigkeit der Beleuchtungsstärke (B12)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"Leuchten":0,"h_m":3.0},"loesungswerte":{"Aufgabe 5a, 2 Leuchten, h 1,00 m":{"Em":"485 lx","Emin":"151 lx"},"Aufgabe 5b, 2 Leuchten, h 2,00 m":{"Em":"196 lx","Emin":"164 lx"},"Aufgabe 5c, 6 Leuchten, h 1,00 m":{"Em":"1218 lx","Emin":"1121 lx"},"Aufgabe 6":{"Leuchten":4,"h_m":"1,00 bis 1,50"}},"quelle":"Tabellenbuch Elektrotechnik S. 228 (Gleichmäßigkeit, Formel 1; Umgebungsbereich 0,5 m) und S. 227 (Lichtpunktmethode, Formel 5)"}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62;--blau:#2557A3}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:1040px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .fz{font-family:Cambria,Caladea,'Noto Serif',Georgia,serif;font-style:italic}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px;align-items:start;grid-template-areas:"messwerte" "bild" "bedienung"}
+ .bild{grid-area:bild} .messwerte{grid-area:messwerte} .bedienung{grid-area:bedienung}
+ @media(min-width:800px){.buehne{grid-template-columns:1.35fr 1fr;grid-template-areas:"bild messwerte" "bild bedienung"}}
+ .bild svg{width:100%;height:auto;display:block;border:1px solid var(--linie);background:#fff}
+ .legende{font-size:13.5px;color:var(--grau);margin-top:4px}
+ .messwerte{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:#fff}
+ .bereich{grid-column:1 / span 2;font-size:14px;font-weight:700;margin:2px 0 -4px}
+ .bereich.s{color:var(--kupfer)} .bereich.u{color:var(--blau)}
+ .kachel{border:1.4px solid var(--ink);background:var(--hell);padding:5px 8px;text-align:center;min-width:0}
+ .kachel .name{display:block;font-size:16px;font-weight:700}
+ .kachel .ort{display:block;font-size:12.5px;color:var(--grau);line-height:1.25}
+ .kachel .zahl{display:block;font-variant-numeric:tabular-nums;font-size:26px;font-weight:700;white-space:nowrap}
+ .lcd{background:#20313a;color:#9BF0B4;font-variant-numeric:tabular-nums;font-size:28px;font-weight:700;padding:6px 12px;border-radius:4px;text-align:right}
+ .lcd small{font-size:16px;color:#cfe;font-weight:400;float:left;margin-top:8px}
+ input[type=range]{width:100%;height:44px;accent-color:var(--kupfer);margin:6px 0 2px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+ button{font:inherit;font-size:16px;min-height:48px;min-width:52px;padding:6px 10px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+ button.zurueck{border-color:var(--ink);color:var(--ink)}
+ .schritte button{flex:1 1 44px;font-weight:700;padding:6px 4px}
+ .titel{font-size:15px;font-weight:700;margin:10px 0 4px}
+ .titel:first-child{margin-top:0}
+ .hinweis{font-size:14px;color:var(--grau);margin-top:12px}
+ #pruefbericht{display:none}
+ @media(max-width:799px){.messwerte{position:sticky;top:0;z-index:5;padding:6px 0;box-shadow:0 6px 6px -6px rgba(0,0,0,.25)}}
+ @media(max-width:420px){.wrap{padding:12px 10px 18px} .kachel{padding:3px 5px} .kachel .zahl{font-size:22px}
+   .kachel .name{font-size:15px} .kachel .ort{font-size:11.5px} .lcd{font-size:24px} button{font-size:15px} .anleitung{font-size:14px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E3EG · B12</div><h1>Messplatz: Gleichmäßigkeit der Beleuchtungsstärke</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Über einer Werkbank hängt eine Reihe gleicher LED-Leuchten. Stellen Sie die
+  Zahl der Leuchten und ihre Höhe <span class="fz">h</span> über der Arbeitsfläche ein; die Leuchten verteilen sich
+  gleichmäßig über den 6 m langen Raum. Gemessen wird alle 10 cm auf der Arbeitsfläche: auf der Werkbank (Bereich der
+  Sehaufgabe, 4 m lang) und im Umgebungsbereich (je 0,5 m links und rechts daneben). Die Anzeigen nennen je Bereich die
+  mittlere Beleuchtungsstärke <span class="fz">E</span><sub>m</sub> und den kleinsten Wert
+  <span class="fz">E</span><sub>min</sub>.</div>
+
+ <div class="buehne">
+  <div class="messwerte" aria-live="polite">
+   <div class="bereich s">Bereich der Sehaufgabe (Werkbank)</div>
+   <div class="kachel"><span class="name"><span class="fz">E</span><sub>m</sub></span><span class="ort">mittlere Beleuchtungsstärke</span><span class="zahl" id="mSm"></span></div>
+   <div class="kachel"><span class="name"><span class="fz">E</span><sub>min</sub></span><span class="ort">kleinster Wert</span><span class="zahl" id="mSmin"></span></div>
+   <div class="bereich u">Umgebungsbereich</div>
+   <div class="kachel"><span class="name"><span class="fz">E</span><sub>m</sub></span><span class="ort">mittlere Beleuchtungsstärke</span><span class="zahl" id="mUm"></span></div>
+   <div class="kachel"><span class="name"><span class="fz">E</span><sub>min</sub></span><span class="ort">kleinster Wert</span><span class="zahl" id="mUmin"></span></div>
+  </div>
+
+  <div class="bild">
+   <svg id="plan" viewBox="0 0 640 650" role="img"
+    data-quelle="Schnitt nach Tabellenbuch S. 227 (Lichtpunktmethode: Leuchten, Abstand a, Höhe h über der Messebene) und S. 228 (Bereich der Sehaufgabe, Umgebungsbereich 0,5 m)"
+    aria-label="Oben ein Schnitt durch den Raum: Decke, eine Reihe Leuchten in der eingestellten Höhe über der Werkbank, links und rechts der Werkbank je 0,5 m Umgebungsbereich. Unten ein Liniendiagramm der Beleuchtungsstärke in Lux über dem Ort in Metern, 0 bis 6 m."></svg>
+   <div class="legende">Oben: Schnitt durch den Raum (Werkbank braun, Umgebungsbereich blau schraffiert). Unten: Beleuchtungsstärke
+    <span class="fz">E</span> an jedem Ort der Arbeitsfläche.</div>
+  </div>
+
+  <div class="bedienung">
+   <div class="titel">Zahl der Leuchten</div>
+   <div class="lcd" id="aN" aria-live="polite"></div>
+   <div class="knoepfe schritte">
+    <button type="button" id="nm" aria-label="eine Leuchte weniger">◀ weniger</button>
+    <button type="button" id="np" aria-label="eine Leuchte mehr">mehr ▶</button>
+   </div>
+   <div class="titel">Höhe der Leuchten über der Arbeitsfläche</div>
+   <div class="lcd" id="aH" aria-live="polite"></div>
+   <input type="range" id="rh" min="0" max="8" step="1" value="8" aria-label="Höhe der Leuchten über der Arbeitsfläche">
+   <div class="knoepfe schritte">
+    <button type="button" id="hm" aria-label="25 Zentimeter tiefer">◀ tiefer</button>
+    <button type="button" id="hp" aria-label="25 Zentimeter höher">höher ▶</button>
+   </div>
+   <div class="titel">Neu beginnen</div>
+   <div class="knoepfe"><button class="zurueck" id="bReset" type="button">Zurücksetzen</button></div>
+  </div>
+ </div>
+
+ <div class="hinweis">Alle Leuchten sind gleich und strahlen nach unten breit ab. Gezählt wird nur das Licht, das direkt
+  auf die Arbeitsfläche fällt.</div>
+ <pre id="pruefbericht"></pre>
+</div>
+
+<script>
+(function(){
+"use strict";
+var I0=800, RAUM=6.0, NMAX=8;                           // Lichtstärke senkrecht unter der Leuchte in cd, Raumlänge in m
+var HOEHEN=[1.0,1.25,1.5,1.75,2.0,2.25,2.5,2.75,3.0];   // Höhe über der Arbeitsfläche in m
+var START={n:0,hi:8};
+var z={n:START.n,hi:START.hi};
+var $=function(id){return document.getElementById(id);};
+var NS="http://www.w3.org/2000/svg";
+
+// ---------------- Rechenmodell ----------------
+function E(x,n,h){ var s=0, a=RAUM/n; for(var i=0;i<n;i++){ var d=x-a*(i+0.5); s+=I0*h*h/Math.pow(h*h+d*d,2); } return s; }
+var PS=[], PU=[];
+for(var k=0;k<=40;k++) PS.push(Math.round((1.0+0.1*k)*10)/10);
+[0.5,0.6,0.7,0.8,0.9,5.1,5.2,5.3,5.4,5.5].forEach(function(x){ PU.push(x); });
+function auswerten(punkte,n,h){
+  if(n===0) return {m:0,min:0};
+  var s=0, mi=Infinity; punkte.forEach(function(x){ var e=E(x,n,h); s+=e; if(e<mi) mi=e; });
+  return {m:s/punkte.length,min:mi};
+}
+function zustand(){ var h=HOEHEN[z.hi]; return {h:h, S:auswerten(PS,z.n,h), U:auswerten(PU,z.n,h)}; }
+function lx(v){ return Math.round(v)+" lx"; }
+function komma(v,st){ return v.toFixed(st).replace(".",","); }
+
+// ---------------- Zeichnen ----------------
+var svg=$("plan");
+function el(n,a,p){ var e=document.createElementNS(NS,n); for(var k in a) e.setAttribute(k,a[k]); (p||svg).appendChild(e); return e; }
+function text(x,y,t,p,a){ var e=el("text",Object.assign({x:x,y:y,"font-size":20,fill:"#1A2530","text-anchor":"middle","font-family":"Arial,sans-serif"},a||{}),p); e.textContent=t; return e; }
+var X0=64, X1=616;                                        // x = 0 m und x = 6 m
+function gx(x){ return X0+(X1-X0)*x/RAUM; }
+// Schnitt: Decke bei y 40, Arbeitsfläche bei y 250; 3,0 m Höhe = 200 Einheiten
+var YD=40, YA=250, SK=200/3.0;
+// Diagramm: 0 lx bei y 580, 2000 lx bei y 370
+var GY0=580, GY1=370, EMAX=2000;
+function gy(e){ return GY0-(GY0-GY1)*Math.min(e,EMAX)/EMAX; }
+
+function zeichnen(){
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+  var w=zustand(), h=w.h, g=el("g",{});
+  var defs=el("defs",{},g), pat=el("pattern",{id:"schraff",width:8,height:8,patternUnits:"userSpaceOnUse",patternTransform:"rotate(45)"},defs);
+  el("line",{x1:0,y1:0,x2:0,y2:8,stroke:"#2557A3","stroke-width":3},pat);
+  // Raum
+  el("rect",{x:X0,y:YD,width:X1-X0,height:YA-YD+20,fill:"#fbfaf6",stroke:"none"},g);
+  el("line",{x1:X0,y1:YD,x2:X1,y2:YD,stroke:"#1A2530","stroke-width":4},g);
+  el("line",{x1:X0,y1:YD,x2:X0,y2:YA+20,stroke:"#1A2530","stroke-width":3},g);
+  el("line",{x1:X1,y1:YD,x2:X1,y2:YA+20,stroke:"#1A2530","stroke-width":3},g);
+  // Umgebungsbereich und Werkbank
+  el("rect",{x:gx(0.5),y:YA-6,width:gx(1.0)-gx(0.5),height:12,fill:"url(#schraff)",stroke:"#2557A3","stroke-width":1.5},g);
+  el("rect",{x:gx(5.0),y:YA-6,width:gx(5.5)-gx(5.0),height:12,fill:"url(#schraff)",stroke:"#2557A3","stroke-width":1.5},g);
+  el("rect",{x:gx(1.0),y:YA-8,width:gx(5.0)-gx(1.0),height:16,fill:"#c9a27a",stroke:"#7a4f22","stroke-width":2},g);
+  el("line",{x1:gx(1.25),y1:YA+8,x2:gx(1.25),y2:YA+20,stroke:"#7a4f22","stroke-width":4},g);
+  el("line",{x1:gx(4.75),y1:YA+8,x2:gx(4.75),y2:YA+20,stroke:"#7a4f22","stroke-width":4},g);
+  text(gx(3.0),YA+42,"Werkbank: Bereich der Sehaufgabe",g,{"font-size":22,fill:"#A34E0E"});
+  text(gx(0.75),YA+70,"0,5 m",g,{"font-size":20,fill:"#2557A3"});
+  text(gx(5.25),YA+70,"0,5 m",g,{"font-size":20,fill:"#2557A3"});
+  // Leuchten
+  var yl=YA-h*SK;
+  if(z.n>0){
+    var a=RAUM/z.n;
+    for(var i=0;i<z.n;i++){
+      var xl=gx(a*(i+0.5));
+      el("polygon",{points:(xl-16)+","+(yl+6)+" "+(xl+16)+","+(yl+6)+" "+(xl+70)+","+(YA-8)+" "+(xl-70)+","+(YA-8),fill:"#fff3b0",opacity:0.45},g);
+      el("line",{x1:xl,y1:YD,x2:xl,y2:yl,stroke:"#5A666F","stroke-width":2},g);
+      el("rect",{x:xl-16,y:yl-2,width:32,height:9,fill:"#1A2530"},g);
+    }
+    // Höhe h an der ersten Leuchte
+    var xh=gx(a*0.5)+26;
+    el("line",{x1:xh,y1:yl+7,x2:xh,y2:YA-10,stroke:"#A34E0E","stroke-width":2},g);
+    el("polygon",{points:(xh-5)+","+(yl+16)+" "+(xh+5)+","+(yl+16)+" "+xh+","+(yl+7),fill:"#A34E0E"},g);
+    el("polygon",{points:(xh-5)+","+(YA-19)+" "+(xh+5)+","+(YA-19)+" "+xh+","+(YA-10),fill:"#A34E0E"},g);
+    var th=text(xh+8,(yl+YA)/2+7,"h",g,{"text-anchor":"start","font-style":"italic","font-family":"Cambria,Caladea,Georgia,serif","font-size":22,fill:"#A34E0E"});
+    if(z.n>1){                                           // Abstand a zwischen den ersten beiden Leuchten
+      var ya=yl-16, xa1=gx(a*0.5), xa2=gx(a*1.5);
+      el("line",{x1:xa1,y1:ya,x2:xa2,y2:ya,stroke:"#2557A3","stroke-width":2},g);
+      el("line",{x1:xa1,y1:ya-6,x2:xa1,y2:ya+6,stroke:"#2557A3","stroke-width":2},g);
+      el("line",{x1:xa2,y1:ya-6,x2:xa2,y2:ya+6,stroke:"#2557A3","stroke-width":2},g);
+      text((xa1+xa2)/2,ya-6,"a",g,{"font-style":"italic","font-family":"Cambria,Caladea,Georgia,serif","font-size":22,fill:"#2557A3"});
+    }
+  } else {
+    text(gx(3.0),(YD+YA)/2,"keine Leuchte",g,{"font-size":24,fill:"#5A666F"});
+  }
+  // Diagramm
+  el("rect",{x:gx(0.5),y:GY1,width:gx(1.0)-gx(0.5),height:GY0-GY1,fill:"#e8eef8"},g);
+  el("rect",{x:gx(5.0),y:GY1,width:gx(5.5)-gx(5.0),height:GY0-GY1,fill:"#e8eef8"},g);
+  el("rect",{x:gx(1.0),y:GY1,width:gx(5.0)-gx(1.0),height:GY0-GY1,fill:"#f8efe5"},g);
+  for(var ee=0;ee<=EMAX;ee+=500){ el("line",{x1:X0,y1:gy(ee),x2:X1,y2:gy(ee),stroke:"#d5dce2","stroke-width":1},g);
+    text(X0-6,gy(ee)+8,String(ee),g,{"font-size":21,"text-anchor":"end"}); }
+  for(var xm=0;xm<=6;xm++){ el("line",{x1:gx(xm),y1:GY0,x2:gx(xm),y2:GY0+6,stroke:"#1A2530","stroke-width":1.5},g);
+    text(gx(xm),GY0+28,String(xm),g,{"font-size":22}); }
+  el("line",{x1:X0,y1:GY0,x2:X1+6,y2:GY0,stroke:"#1A2530","stroke-width":1.8},g);
+  el("line",{x1:X0,y1:GY0,x2:X0,y2:GY1-12,stroke:"#1A2530","stroke-width":1.8},g);
+  var lab=text(X0+8,GY1-12,"",g,{"text-anchor":"start","font-size":22});
+  var t1=document.createElementNS(NS,"tspan"); t1.setAttribute("font-style","italic"); t1.setAttribute("font-family","Cambria,Caladea,Georgia,serif"); t1.textContent="E"; lab.appendChild(t1);
+  var t2=document.createElementNS(NS,"tspan"); t2.textContent=" in lx"; lab.appendChild(t2);
+  var lx2=text(X1,GY0+56,"",g,{"text-anchor":"end","font-size":22});
+  var t3=document.createElementNS(NS,"tspan"); t3.setAttribute("font-style","italic"); t3.setAttribute("font-family","Cambria,Caladea,Georgia,serif"); t3.textContent="x"; lx2.appendChild(t3);
+  var t4=document.createElementNS(NS,"tspan"); t4.textContent=" in m"; lx2.appendChild(t4);
+  if(z.n>0){
+    var pk=[]; for(var j=0;j<=240;j++){ var xx=RAUM*j/240; pk.push(gx(xx).toFixed(1)+","+gy(E(xx,z.n,h)).toFixed(1)); }
+    el("polyline",{points:pk.join(" "),fill:"none",stroke:"#A34E0E","stroke-width":3},g);
+  } else {
+    el("line",{x1:X0,y1:GY0,x2:X1,y2:GY0,stroke:"#A34E0E","stroke-width":3},g);
+  }
+}
+
+// ---------------- Bedienung ----------------
+function anzeigen(){
+  var w=zustand();
+  $("mSm").textContent=lx(w.S.m); $("mSmin").textContent=lx(w.S.min);
+  $("mUm").textContent=lx(w.U.m); $("mUmin").textContent=lx(w.U.min);
+  $("aN").innerHTML="<small>"+(z.n>0?"Abstand <span class='fz'>a</span> = "+komma(RAUM/z.n,2)+" m":"")+"</small>"+z.n;
+  $("aH").innerHTML="<small><span class='fz'>h</span></small>"+komma(w.h,2)+" m"; $("rh").value=z.hi;
+  zeichnen();
+}
+$("nm").onclick=function(){ z.n=Math.max(0,z.n-1); anzeigen(); };
+$("np").onclick=function(){ z.n=Math.min(NMAX,z.n+1); anzeigen(); };
+$("hm").onclick=function(){ z.hi=Math.max(0,z.hi-1); anzeigen(); };
+$("hp").onclick=function(){ z.hi=Math.min(HOEHEN.length-1,z.hi+1); anzeigen(); };
+$("rh").addEventListener("input",function(){ z.hi=+this.value; anzeigen(); });
+$("bReset").onclick=function(){ z={n:START.n,hi:START.hi}; anzeigen(); };
+
+// ---------------- Prüfschnittstelle ----------------
+window.__stelle=function(n,h){ z={n:n,hi:HOEHEN.indexOf(h)}; anzeigen();
+  return [$("mSm").textContent,$("mSmin").textContent,$("mUm").textContent,$("mUmin").textContent].join(" | "); };
+
+if(/[?&]pruefen\b/.test(location.search)){
+  var bericht={};
+  for(var n=0;n<=NMAX;n++) HOEHEN.forEach(function(h){ bericht[n+" | "+h]=window.__stelle(n,h); });
+  z={n:START.n,hi:START.hi};
+  $("pruefbericht").textContent=JSON.stringify(bericht);
+}
+anzeigen();
+})();
+</script>
+</body></html>
