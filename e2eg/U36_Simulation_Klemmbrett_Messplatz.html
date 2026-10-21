@@ -1,0 +1,333 @@
+<!doctype html>
+<!-- E2EG U36 · Messplatz Klemmbrett (Neubau 21.10.2026, Aufgabe IN der Stunde nach dem Muster E1EG B07). Der alte Block
+     U36 hatte keine Simulation. Neu, weil Brücken setzen, Außenleiter tauschen und die Drehrichtung beobachten eine
+     Tätigkeit ist, die das Papier nicht trägt (Carlo: keine realen Laborplätze, statt dessen Simulation).
+     Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht):
+       (1) Mit den richtigen Brücken liegt an jedem Strang die zulässige Strangspannung des Leistungsschildes
+           (230/400 V am 400-V-Netz: Stern, 230,9 V; 400/690 V am 400-V-Netz: Dreieck, 400 V).
+       (2) L1 an U1, L2 an V1, L3 an W1: Die Welle dreht im Uhrzeigersinn (Blick auf die Antriebsseite).
+       (3) Zwei Außenleiter tauschen kehrt die Drehrichtung um; die Brücken (Stern oder Dreieck) ändern sie nicht.
+     Rechenmodell: Leiterspannung 400 V, Außenleiter L1 = 230,94 V∠0°, L2 = 230,94 V∠−120°, L3 = 230,94 V∠−240°.
+       Drei gleiche Stränge U1–U2, V1–V2, W1–W2 (gleiche Impedanz). Brücken verbinden Klemmen (Knoten). Verbindet eine
+       Brücke zwei verschiedene Außenleiter: Kurzschluss. Sonst Knotenpotentiale der freien Klemmen aus den
+       Knotengleichungen (komplex). Strangspannung = Betrag der Spannung zwischen Anfang und Ende des Strangs.
+       Drehfeld: Strangströme I_k mit den räumlichen Achsen 0°, 120°, 240° (U, V, W); Mitlaufanteil
+       |Σ I_k·e^{+jθk}|, Gegenlaufanteil |Σ I_k·e^{−jθk}|. Überwiegt der Mitlauf (Folge U, V, W), dreht die Welle im
+       Uhrzeigersinn: so ist Rechtslauf bei L1-U1, L2-V1, L3-W1 festgelegt (Europa Fachkunde S. 489 und 501,
+       Tabellenbuch S. 534). Sind beide Anteile gleich (Wechselfeld, z. B. nur zwei Stränge in Reihe), läuft der Motor
+       nicht an. Die Animation ist Zeitlupe.
+     Anzeige: Strangspannungen mit einer Nachkommastelle. Prüfmodus ?pruefen: alle 32 Brückenstellungen × 6 Anschlüsse
+     als JSON. Startstellung neutral: Motor A, keine Brücken, Anschluss L1-U1, L2-V1, L3-W1, Schalter aus. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Klemmbrett (U36)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"motor":"A (230/400 V)","bruecken":[],"anschluss":"L1 an U1, L2 an V1, L3 an W1","schalter":"aus"},"loesungswerte":{"Aufgabe 3, Motor A (230/400 V)":{"bruecken":["W2–U2","U2–V2"],"strangspannung":"230,9 V","drehrichtung":"im Uhrzeigersinn"},"Aufgabe 3, Motor B (400/690 V)":{"bruecken":["U1–W2","V1–U2","W1–V2"],"strangspannung":"400,0 V","drehrichtung":"im Uhrzeigersinn"},"Aufgabe 4, L1 und L2 getauscht":"gegen den Uhrzeigersinn","Aufgabe 4, L2 und L3 getauscht":"gegen den Uhrzeigersinn"},"quelle":"Europa Fachkunde S. 489 (Drehsinn, Bild 3) und S. 501 (Bild 3 und 4: Stern- und Dreieckschaltung am Klemmbrett, Tabelle Spannungsangabe/Wicklungsschaltung); Tabellenbuch Elektrotechnik S. 534 (Anschluss für Rechtslauf, Drehrichtungsumkehr)"}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#1E8A4C}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:10px 8px 40px}
+ .wrap{max-width:1000px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:12px 14px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:6px 0;margin-bottom:10px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:21px;margin:2px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:8px 11px;font-size:14.5px;margin-bottom:10px}
+ .messfeld{position:sticky;top:0;z-index:5;background:#fff;border:1.4px solid var(--ink);padding:8px;display:grid;grid-template-columns:118px 1fr;gap:8px;align-items:center;box-shadow:0 2px 4px rgba(0,0,0,.08)}
+ #welle{width:118px;height:118px;display:block;touch-action:manipulation}
+ .werte{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+ .wert{background:#20313a;color:#9BF0B4;font-variant-numeric:tabular-nums;font-weight:700;font-size:19px;border-radius:4px;padding:3px 5px;text-align:right;white-space:nowrap}
+ .wert small{display:block;font-size:12px;color:#cfe;font-weight:400;text-align:left}
+ .status{grid-column:1 / span 2;font-size:14.5px;font-weight:700;padding:4px 8px;border-radius:3px;background:var(--hell)}
+ .status.kurz{background:#fde3e3;color:#9b1c1c}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px}
+ @media(min-width:760px){.buehne{grid-template-columns:1.15fr 1fr}}
+ .titel{font-size:15px;font-weight:700;margin:10px 0 5px}
+ .schild{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+ .plate{border:2px solid #4a6a86;background:#dbe8f3;border-radius:5px;padding:5px 6px;font-size:14px}
+ .plate .z{background:#fff;border:1px solid #7c97ad;margin:3px 0;padding:1px 6px;display:flex;justify-content:space-between;gap:6px}
+ .plate .z b{font-variant-numeric:tabular-nums}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+ button{font:inherit;font-size:16px;min-height:48px;min-width:58px;padding:6px 12px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+ button.an{background:var(--kupfer);color:#fff}
+ button.zurueck{border-color:var(--ink);color:var(--ink)}
+ button.motor{flex:1 1 140px;font-weight:700}
+ button.br{flex:1 1 90px;font-weight:700;font-size:15px}
+ button.tausch{flex:1 1 120px;font-size:15px;padding:6px 8px}
+ #schalter{flex:1 1 160px;font-weight:700;border-color:var(--ink);color:var(--ink)}
+ #schalter.an{background:var(--gruen);border-color:var(--gruen);color:#fff}
+ canvas#brett{width:100%;max-width:520px;height:auto;display:block;margin:0 auto;border:1px solid var(--linie);background:#fff;touch-action:manipulation;cursor:pointer}
+ .meldung{min-height:22px;font-size:14px;color:#9b1c1c;font-weight:700;margin-top:4px}
+ .hinweis{font-size:14px;color:var(--grau);margin-top:10px}
+ #pruefbericht{display:none}
+ @media(max-width:420px){.wert{font-size:16px} .wert small{font-size:11px} button{min-width:50px;padding:6px 8px;font-size:15px} .anleitung{font-size:14px} .messfeld{grid-template-columns:104px 1fr} #welle{width:104px;height:104px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E2EG · LF 5 · U36</div><h1>Messplatz Klemmbrett</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Motor wählen. Bei ausgeschaltetem Netz Brücken setzen (auf einen
+  Brückenplatz im Klemmbrett oder auf die Knöpfe tippen) und Außenleiter tauschen. Einschalten, die Strangspannungen
+  ablesen und die Drehrichtung der Welle beobachten.</div>
+
+ <div class="messfeld" aria-live="polite">
+  <figure style="margin:0;text-align:center"><canvas id="welle" width="236" height="236" data-quelle="Ansicht wie Europa Fachkunde S. 489, Bild 3 (Blick auf das Wellenende der Antriebsseite)"
+   aria-label="Motor von vorn, mit Blick auf das Wellenende der Antriebsseite; die Welle trägt eine Markierung, die sich mitdreht."></canvas><figcaption style="font-size:12px;line-height:1.2;color:#5A666F">Blick auf die Antriebsseite</figcaption></figure>
+  <div>
+   <div class="werte" id="werte"></div>
+  </div>
+  <div class="status" id="status">Netz aus</div>
+ </div>
+
+ <div class="buehne">
+  <div>
+   <div class="titel">Netz 3/N/PE 400/230 V 50 Hz · Klemmbrett</div>
+   <canvas id="brett" width="400" height="378" data-quelle="Klemmbrett und Stränge nach Europa Fachkunde S. 501, Bild 3 und 4 (U1 V1 W1 oben, W2 U2 V2 unten, Brücken)"
+    aria-label="Klemmbrett mit den Klemmen U1, V1, W1 oben und W2, U2, V2 unten, darunter die drei Stränge der Ständerwicklung. Gestrichelte Brückenplätze zum Antippen."></canvas>
+   <div class="meldung" id="meldung"></div>
+  </div>
+  <div>
+   <div class="titel" style="margin-top:0">Motor wählen (Leistungsschild)</div>
+   <div class="schild">
+    <div>
+     <button type="button" class="motor" id="mA" style="width:100%">Motor A</button>
+     <div class="plate"><div class="z"><span>3 ~ Mot.</span><span>50 Hz</span></div><div class="z"><b>230/400 V</b></div></div>
+    </div>
+    <div>
+     <button type="button" class="motor" id="mB" style="width:100%">Motor B</button>
+     <div class="plate"><div class="z"><span>3 ~ Mot.</span><span>50 Hz</span></div><div class="z"><b>400/690 V</b></div></div>
+    </div>
+   </div>
+   <div class="titel">Brücken setzen oder entfernen</div>
+   <div class="knoepfe" id="brknoepfe"></div>
+   <div class="titel">Außenleiter tauschen</div>
+   <div class="knoepfe">
+    <button type="button" class="tausch" id="t12">L1 und L2 tauschen</button>
+    <button type="button" class="tausch" id="t23">L2 und L3 tauschen</button>
+    <button type="button" class="tausch" id="t13">L1 und L3 tauschen</button>
+   </div>
+   <div class="titel">Netz</div>
+   <div class="knoepfe">
+    <button type="button" id="schalter">Einschalten</button>
+    <button type="button" class="zurueck" id="bReset">Zurücksetzen</button>
+   </div>
+   <div class="hinweis"><b>Spannungsmesser:</b> Strangspannung jedes Strangs der Ständerwicklung, gemessen zwischen
+    Anfang und Ende (U1–U2, V1–V2, W1–W2).</div>
+   <div class="hinweis"><b>Welle:</b> von vorn gezeichnet, mit Blick auf das Wellenende der Antriebsseite. Sie dreht
+    in Zeitlupe; der Motor läuft in Wirklichkeit mit rund 1450 Umdrehungen je Minute.</div>
+   <div class="hinweis"><b>Sicherheit:</b> Brücken und Anschlüsse werden nur bei ausgeschaltetem Netz geändert.</div>
+  </div>
+ </div>
+ <pre id="pruefbericht"></pre>
+</div>
+
+<script>
+(function(){
+"use strict";
+var UPH=400/Math.sqrt(3);                              // Spannung Außenleiter gegen N (230,94 V)
+var KN=["U1","V1","W1","U2","V2","W2"];                // Knoten 0..5
+var BR=[{id:"W2–U2",a:5,b:3},{id:"U2–V2",a:3,b:4},{id:"U1–W2",a:0,b:5},{id:"V1–U2",a:1,b:3},{id:"W1–V2",a:2,b:4}];
+var STR=[{n:"U",a:0,b:3,ach:0},{n:"V",a:1,b:4,ach:120},{n:"W",a:2,b:5,ach:240}];
+var START={motor:"A",br:[false,false,false,false,false],an:[1,2,3],ein:false};
+var z=JSON.parse(JSON.stringify(START)), winkel=0, kurz=false, timer=null, letzte=0;
+var $=function(id){return document.getElementById(id);};
+var RAD=Math.PI/180;
+var reduziert=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// ---------------- komplexe Zahlen ----------------
+function c(re,im){return {re:re,im:im||0};}
+function add(a,b){return c(a.re+b.re,a.im+b.im);} function sub(a,b){return c(a.re-b.re,a.im-b.im);}
+function mul(a,b){return c(a.re*b.re-a.im*b.im,a.re*b.im+a.im*b.re);}
+function div(a,b){var d=b.re*b.re+b.im*b.im; return c((a.re*b.re+a.im*b.im)/d,(a.im*b.re-a.re*b.im)/d);}
+function betrag(a){return Math.sqrt(a.re*a.re+a.im*a.im);}
+function polar(r,w){return c(r*Math.cos(w*RAD),r*Math.sin(w*RAD));}
+function leiter(k){return polar(UPH,-120*(k-1));}      // L1, L2, L3
+
+// ---------------- Netzwerk ----------------
+function rechne(br,an){
+  var p=[0,1,2,3,4,5];
+  function f(i){while(p[i]!==i){p[i]=p[p[i]];i=p[i];}return i;}
+  br.forEach(function(gesetzt,i){ if(gesetzt){ var x=f(BR[i].a), y=f(BR[i].b); if(x!==y) p[x]=y; } });
+  var fest={}, gruppen={};
+  for(var k=0;k<6;k++){ var g=f(k); gruppen[g]=true; }
+  for(var t=0;t<3;t++){ var g2=f(t); if(fest[g2]!==undefined && fest[g2]!==an[t]) return {kurz:true}; fest[g2]=an[t]; }
+  var frei=Object.keys(gruppen).map(Number).filter(function(g){return fest[g]===undefined;});
+  var idx={}; frei.forEach(function(g,i){idx[g]=i;});
+  var n=frei.length, A=[], B=[];
+  for(var i=0;i<n;i++){ A.push([]); for(var j=0;j<n;j++) A[i].push(c(0)); A[i][i]=c(1e-9); B.push(c(0)); }
+  STR.forEach(function(s){
+    var ga=f(s.a), gb=f(s.b); if(ga===gb) return;
+    [[ga,gb],[gb,ga]].forEach(function(pq){
+      var g=pq[0], h=pq[1]; if(idx[g]===undefined) return;
+      var i=idx[g]; A[i][i]=add(A[i][i],c(1));
+      if(idx[h]!==undefined) A[i][idx[h]]=sub(A[i][idx[h]],c(1)); else B[i]=add(B[i],leiter(fest[h]));
+    });
+  });
+  for(var col=0;col<n;col++){                            // Gauß-Elimination
+    var piv=col; for(var r=col+1;r<n;r++) if(betrag(A[r][col])>betrag(A[piv][col])) piv=r;
+    var tA=A[col]; A[col]=A[piv]; A[piv]=tA; var tB=B[col]; B[col]=B[piv]; B[piv]=tB;
+    for(var r2=0;r2<n;r2++){ if(r2===col) continue; var fk=div(A[r2][col],A[col][col]);
+      for(var c2=col;c2<n;c2++) A[r2][c2]=sub(A[r2][c2],mul(fk,A[col][c2])); B[r2]=sub(B[r2],mul(fk,B[col])); }
+  }
+  function pot(k){ var g=f(k); return fest[g]!==undefined ? leiter(fest[g]) : div(B[idx[g]],A[idx[g]][idx[g]]); }
+  var u=[], mit=c(0), gegen=c(0);
+  STR.forEach(function(s){
+    var us=sub(pot(s.a),pot(s.b)); u.push(betrag(us));
+    mit=add(mit,mul(us,polar(1,s.ach))); gegen=add(gegen,mul(us,polar(1,-s.ach)));
+  });
+  var am=betrag(mit)/(3*UPH), ag=betrag(gegen)/(3*UPH), dreh=0;
+  if(Math.max(am,ag)>0.2 && Math.abs(am-ag)>0.15) dreh=(am>ag)?1:-1;   // 1: Uhrzeigersinn (Mitlauf U, V, W)
+  return {kurz:false,u:u,dreh:dreh,mit:am,gegen:ag};
+}
+function text1(x){ var s=(Math.round(x*10)/10).toFixed(1); return s.replace(".",",")+" V"; }
+
+// ---------------- Klemmbrett zeichnen ----------------
+var cb=$("brett"), gb=cb.getContext("2d");
+var DPR=Math.max(1,Math.min(3,window.devicePixelRatio||1));
+cb.width=400*DPR; cb.height=378*DPR; gb.scale(DPR,DPR);
+var XS=[90,185,280], XPE=355, YO=140, YU=220, YL=[30,46,62,78];   // Klemmen oben/unten, Netzleitungen
+var POS={0:[XS[0],YO],1:[XS[1],YO],2:[XS[2],YO],5:[XS[0],YU],3:[XS[1],YU],4:[XS[2],YU]};
+var FARBE={1:"#6b3b12",2:"#1A2530",3:"#7a7f86"};       // L1 braun, L2 schwarz, L3 grau
+function bruecken_lage(i){ var a=POS[BR[i].a], b=POS[BR[i].b]; return {x1:a[0],y1:a[1],x2:b[0],y2:b[1]}; }
+function zeichneStraenge(g){
+  // Stränge unter dem Klemmbrett wie Fachkunde S. 501, Bild 3 und 4: vom Anfang (U1, V1, W1) rechts heraus nach unten
+  // durch die Wicklung, zurück zum Ende (U2, V2, W2)
+  var yS=290;
+  for(var s=0;s<3;s++){
+    var xa=XS[s], xe=(s===0)?XS[1]:(s===1?XS[2]:XS[0]);   // U1→U2, V1→V2, W1→W2
+    var xc=xa+40, ye=YU+15;
+    g.strokeStyle="#1A2530"; g.lineWidth=1.6;
+    g.beginPath(); g.moveTo(xa+18,YO); g.lineTo(xc,YO); g.lineTo(xc,yS-30); g.stroke();
+    for(var w=0;w<4;w++){ g.beginPath(); g.arc(xc,yS-30+7+w*14,7,-Math.PI/2,Math.PI/2); g.stroke(); }
+    g.beginPath(); g.moveTo(xc,yS+26);
+    if(s<2){ g.lineTo(xc,yS+40+12*s); g.lineTo(xe,yS+40+12*s); g.lineTo(xe,ye); }
+    else { g.lineTo(xc,yS+68); g.lineTo(xe-30,yS+68); g.lineTo(xe-30,YU); g.lineTo(xe-18,YU); }
+    g.stroke();
+    g.fillStyle="#5A666F"; g.textAlign="left"; g.textBaseline="middle"; g.font="13px 'Noto Sans',system-ui,sans-serif";
+    g.font="bold 15px 'Noto Sans',system-ui,sans-serif"; g.fillText(STR[s].n,xc+11,yS-2);
+  }
+}
+function zeichneBrett(){
+  var g=gb; g.clearRect(0,0,400,378);
+  g.font="bold 15px 'Noto Sans',system-ui,sans-serif"; g.textBaseline="middle";
+  var nn=["L1","L2","L3","PE"];
+  for(var i=0;i<4;i++){ g.strokeStyle=i===3?"#2e7d32":"#1A2530"; g.lineWidth=1.6; g.beginPath(); g.moveTo(44,YL[i]); g.lineTo(392,YL[i]); g.stroke();
+    g.fillStyle="#1A2530"; g.textAlign="left"; g.fillText(nn[i],8,YL[i]); }
+  // Klemmbrett (Grund), darauf die Strangleitungen
+  g.fillStyle="#F2E6A6"; g.strokeStyle="#1A2530"; g.lineWidth=2;
+  g.beginPath(); g.rect(46,112,340,140); g.fill(); g.stroke();
+  zeichneStraenge(g);
+  // Zuleitungen zu U1, V1, W1 (je nach Anschluss) und PE
+  g.font="bold 15px 'Noto Sans',system-ui,sans-serif";
+  for(var t=0;t<3;t++){
+    var lt=z.an[t], x=XS[t], y0=YL[lt-1];
+    g.strokeStyle=FARBE[lt]; g.lineWidth=3; g.beginPath(); g.moveTo(x,y0); g.lineTo(x,YO-14); g.stroke();
+    g.fillStyle=FARBE[lt]; g.beginPath(); g.arc(x,y0,4.5,0,2*Math.PI); g.fill();
+    g.fillStyle="#fff"; g.fillRect(x+6,84,32,22); g.fillStyle=FARBE[lt]; g.textAlign="left"; g.fillText("L"+lt,x+9,95);
+  }
+  g.strokeStyle="#2e7d32"; g.lineWidth=3; g.beginPath(); g.moveTo(XPE,YL[3]); g.lineTo(XPE,YO+25); g.stroke();
+  g.fillStyle="#2e7d32"; g.beginPath(); g.arc(XPE,YL[3],4.5,0,2*Math.PI); g.fill();
+  // Brückenplätze und Brücken
+  for(var b=0;b<5;b++){
+    var L=bruecken_lage(b);
+    if(z.br[b]){ g.strokeStyle="#C62828"; g.lineWidth=9; g.lineCap="round"; g.setLineDash([]); }
+    else { g.strokeStyle="#7a8590"; g.lineWidth=2; g.lineCap="butt"; g.setLineDash([6,5]); }
+    var dx=L.x2-L.x1, dy=L.y2-L.y1, l=Math.sqrt(dx*dx+dy*dy), ux=dx/l, uy=dy/l, r=19;
+    g.beginPath(); g.moveTo(L.x1+ux*r,L.y1+uy*r); g.lineTo(L.x2-ux*r,L.y2-uy*r); g.stroke();
+  }
+  g.setLineDash([]); g.lineCap="butt";
+  // Klemmen
+  for(var k=0;k<6;k++){
+    var q=POS[k]; g.fillStyle="#fff"; g.strokeStyle="#1A2530"; g.lineWidth=2;
+    g.beginPath(); g.arc(q[0],q[1],18,0,2*Math.PI); g.fill(); g.stroke();
+    g.fillStyle="#1A2530"; g.textAlign="center"; g.font="bold 15px 'Noto Sans',system-ui,sans-serif"; g.fillText(KN[k],q[0],q[1]+1);
+  }
+  g.fillStyle="#fff"; g.strokeStyle="#1A2530"; g.beginPath(); g.arc(XPE,YO+40,18,0,2*Math.PI); g.fill(); g.stroke();
+  g.fillStyle="#1A2530"; g.textAlign="center"; g.fillText("PE",XPE,YO+41);
+}
+function treffer(x,y){
+  for(var b=0;b<5;b++){ var L=bruecken_lage(b), mx=(L.x1+L.x2)/2, my=(L.y1+L.y2)/2;
+    var w=(L.x1===L.x2)?26:Math.abs(L.x2-L.x1)/2-16, h=(L.x1===L.x2)?Math.abs(L.y2-L.y1)/2-19:17;
+    if(Math.abs(x-mx)<=w && Math.abs(y-my)<=h) return b; }
+  return -1;
+}
+
+// ---------------- Welle zeichnen ----------------
+var cw=$("welle"), gw=cw.getContext("2d");
+cw.width=236*DPR; cw.height=236*DPR; gw.scale(DPR,DPR);
+function zeichneWelle(){
+  var g=gw, cx=118, cy=112; g.clearRect(0,0,236,236);
+  g.fillStyle="#d6e3ef"; g.strokeStyle="#1A2530"; g.lineWidth=2.5;
+  for(var r=0;r<16;r++){ var a=r*22.5*RAD; g.beginPath(); g.moveTo(cx+88*Math.cos(a),cy+88*Math.sin(a)); g.lineTo(cx+100*Math.cos(a),cy+100*Math.sin(a)); g.stroke(); }
+  g.beginPath(); g.arc(cx,cy,88,0,2*Math.PI); g.fill(); g.stroke();
+  g.beginPath(); g.moveTo(cx-60,cy+70); g.lineTo(cx-80,cy+104); g.lineTo(cx-40,cy+104); g.closePath(); g.fill(); g.stroke();
+  g.beginPath(); g.moveTo(cx+60,cy+70); g.lineTo(cx+80,cy+104); g.lineTo(cx+40,cy+104); g.closePath(); g.fill(); g.stroke();
+  g.fillStyle="#fff"; g.beginPath(); g.arc(cx,cy,54,0,2*Math.PI); g.fill(); g.stroke();
+  g.fillStyle="#9aa5ae"; g.beginPath(); g.arc(cx,cy,30,0,2*Math.PI); g.fill(); g.stroke();
+  // Passfeder als Markierung, dreht mit
+  g.save(); g.translate(cx,cy); g.rotate(winkel*RAD);
+  g.fillStyle="#C62828"; g.fillRect(-6,-30,12,14); g.strokeRect(-6,-30,12,14);
+  g.fillStyle="#1A2530"; g.beginPath(); g.arc(0,0,4,0,2*Math.PI); g.fill();
+  g.restore();
+}
+
+// ---------------- Anzeigen ----------------
+var erg=null;
+function auffrischen(){
+  erg=rechne(z.br,z.an);
+  kurz=z.ein && erg.kurz;
+  var html="";
+  for(var s=0;s<3;s++){
+    var wert=(z.ein && !erg.kurz)?text1(erg.u[s]):"0,0 V";
+    html+="<div class='wert'><small>Strang "+STR[s].n+"</small>"+wert+"</div>";
+  }
+  $("werte").innerHTML=html;
+  var st=$("status"); st.classList.remove("kurz");
+  if(!z.ein) st.textContent="Netz aus";
+  else if(erg.kurz){ st.textContent="Kurzschluss: Die Sicherung hat ausgelöst."; st.classList.add("kurz"); }
+  else st.textContent=(erg.dreh===0)?"Netz ein · Welle steht still":"Netz ein · Welle dreht sich";
+  $("schalter").textContent=z.ein?"Ausschalten":"Einschalten"; $("schalter").classList.toggle("an",z.ein);
+  $("mA").classList.toggle("an",z.motor==="A"); $("mB").classList.toggle("an",z.motor==="B");
+  BR.forEach(function(b,i){ $("b"+i).classList.toggle("an",z.br[i]); });
+  zeichneBrett(); zeichneWelle();
+  laufen();
+}
+function laufen(){
+  var dreh=(z.ein && erg && !erg.kurz)?erg.dreh:0;
+  if(timer){ clearInterval(timer); timer=null; }
+  if(dreh===0) return;
+  timer=setInterval(function(){ winkel=(winkel+dreh*(reduziert?30:6)+360)%360; zeichneWelle(); }, reduziert?500:40);
+}
+function gesperrt(){ if(z.ein){ $("meldung").textContent="Erst ausschalten: Änderungen nur bei ausgeschaltetem Netz."; return true; } $("meldung").textContent=""; return false; }
+
+// ---------------- Bedienung ----------------
+var kn=$("brknoepfe");
+BR.forEach(function(b,i){ var e=document.createElement("button"); e.type="button"; e.className="br"; e.id="b"+i; e.textContent=b.id;
+  e.setAttribute("aria-label","Brücke "+b.id); e.onclick=function(){ if(gesperrt()) return; z.br[i]=!z.br[i]; auffrischen(); }; kn.appendChild(e); });
+cb.addEventListener("click",function(ev){
+  var r=cb.getBoundingClientRect(), x=(ev.clientX-r.left)*400/r.width, y=(ev.clientY-r.top)*378/r.height, b=treffer(x,y);
+  if(b<0) return; if(gesperrt()) return; z.br[b]=!z.br[b]; auffrischen();
+});
+function tausche(p,q){ if(gesperrt()) return; var ip=z.an.indexOf(p), iq=z.an.indexOf(q); z.an[ip]=q; z.an[iq]=p; auffrischen(); }
+$("t12").onclick=function(){ tausche(1,2); }; $("t23").onclick=function(){ tausche(2,3); }; $("t13").onclick=function(){ tausche(1,3); };
+$("mA").onclick=function(){ if(gesperrt()) return; z.motor="A"; auffrischen(); };
+$("mB").onclick=function(){ if(gesperrt()) return; z.motor="B"; auffrischen(); };
+$("schalter").onclick=function(){ $("meldung").textContent=""; z.ein=!z.ein; auffrischen(); };
+$("bReset").onclick=function(){ $("meldung").textContent=""; z=JSON.parse(JSON.stringify(START)); winkel=0; auffrischen(); };
+window.__stelle=function(br,an,ein){ z.br=br.slice(); z.an=an.slice(); z.ein=!!ein; auffrischen();
+  return $("werte").textContent+" | "+$("status").textContent+" | dreh "+(erg.kurz?"kurz":erg.dreh); };
+
+// ---------------- Prüfmodus ----------------
+if(/[?&]pruefen\b/.test(location.search)){
+  var bericht={}, PERM=[[1,2,3],[2,1,3],[1,3,2],[3,2,1],[2,3,1],[3,1,2]];
+  for(var m=0;m<32;m++){
+    var br=[0,1,2,3,4].map(function(i){return !!(m&(1<<i));});
+    var name=BR.filter(function(b,i){return br[i];}).map(function(b){return b.id;}).join(",")||"keine";
+    bericht[name]={};
+    PERM.forEach(function(an){ var e=rechne(br,an);
+      bericht[name]["L"+an.join("")]=e.kurz?"Kurzschluss":{u:e.u.map(function(x){return Math.round(x*10)/10;}),dreh:e.dreh,mit:Math.round(e.mit*1000)/1000,gegen:Math.round(e.gegen*1000)/1000}; });
+  }
+  $("pruefbericht").textContent=JSON.stringify(bericht);
+}
+auffrischen();
+})();
+</script>
+</body></html>
