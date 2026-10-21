@@ -1,0 +1,395 @@
+<!doctype html>
+<!-- E3EG B13 · Messplatz Raumwinkel und Lichtstärke an der Kugel (Neubau 21.10.2026, Aufgabe IN der Stunde nach dem
+     Muster E1EG B07 und E3EG B08). Neu: Es gibt keinen alten Block und keine Simulation zum Raumwinkel in der Reihe.
+     Carlos Maßstab (lehrmaschine/ERSTELLUNG.md, Abschnitt 3b): der Raumwinkel als drehbare Kugel mit aufziehbarer Kappe
+     bis zur ganzen Kugel; dann stehen dort 4π ≈ 12,57 sr, gesehen statt geglaubt.
+     Ziel-Erkenntnis (die Schüler finden sie selbst, die Seite nennt sie nicht und rechnet nichts vor):
+       (1) Der Raumwinkel ist die Kappenfläche geteilt durch das Quadrat des Halbmessers; doppelter Halbmesser bei
+           gleichem Kegel gibt die vierfache Kappenfläche und denselben Raumwinkel.
+       (2) Halbkugel 2π sr ≈ 6,28 sr, ganze Kugel 4π sr ≈ 12,57 sr, bei jedem Halbmesser.
+       (3) Derselbe Lichtstrom in einem kleineren Raumwinkel ergibt eine größere Lichtstärke: Lichtstärke mal Raumwinkel
+           ist der Lichtstrom (Reflektorlampe, Strahler); die Lichtstärke hängt nicht vom Halbmesser ab.
+     Vorlage: Tabellenbuch S. 227 (Bild zum Raumwinkel Ω: Kugel mit Halbmesser r, kegelförmiger Ausschnitt, Fläche A;
+       Lichtstrom Φv, Lichtstärke Iv = Φv/Ω, Formel 1; A = Ω · r² unter Formel 3); Fachkunde S. 390 (Lichtstärke:
+       Lichtstrom je Raumwinkeleinheit, bei Reflektorlampen angegeben).
+     Rechenmodell: Kappe der Kugel mit dem Öffnungswinkel θ (halber Kegelwinkel) um die Achse nach unten;
+       A = 2π · r² · (1 − cos θ), Ω = A/r²; ganze Kugel θ = 180°, A = 4π · r². Die Lampe im Mittelpunkt gibt den
+       Lichtstrom Φv ab; ein Reflektor lenkt ihn ganz und gleichmäßig in den Kegel: Iv = Φv/Ω (in jeder Richtung des
+       Kegels). Ändert man r, bleibt der Kegel (Ω) und die Kappenfläche wird Ω · r².
+     Einstellungen: r von 0,5 m bis 2,0 m in Schritten von 0,1 m; A in Schritten von 0,1 m², dazu genau die Halbkugel
+       (2π · r²) und die ganze Kugel (4π · r²), Regler ganz rechts = ganze Kugel; Φv von 0 bis 2000 lm in Schritten von 10 lm.
+     Anzeigen: A und Ω mit zwei Nachkommastellen, Iv unter 1000 cd mit einer Nachkommastelle, sonst ganz. Kernaussagen exakt
+       mit den angezeigten Werten nachrechenbar (Prüfmodus und b13_gemeinsam.py): 1000 lm durch 12,57 sr = 79,6 cd,
+       durch 6,28 sr = 159,2 cd, durch 1,00 sr = 1000 cd; 150 lm in 0,30 sr = 500,0 cd; 810 lm, ganze Kugel = 64,5 cd.
+     Bild: Strahlen aus dem Mittelpunkt, ihre Zahl wächst mit dem Lichtstrom (ein Strahl je 25 lm), sie verteilen sich
+       gleichmäßig über den Kegel: Je enger der Kegel, desto dichter die Strahlen. Kugel drehbar mit Finger und Maus
+       (Zeiger ziehen) und mit den Knöpfen; senkrechte Projektion.
+     Startstellung neutral: r = 1,5 m, Kappe geschlossen (A = 0), Lampe aus (keine Einstellung der Aufgaben).
+     Prüfmodus ?pruefen: Anzeigen der Aufgabenstellungen und Grenzfälle als JSON in #pruefbericht;
+     window.__stelle(r, A oder "halb" oder "ganz", Φv) und window.__radius(r) für die Prüfung. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Raumwinkel und Lichtstärke (B13)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"r":"1,5 m","A":"0,00 m²","Phi_v":"0 lm","Ausschnitt":"geschlossen"},"loesungswerte":{"Aufgabe 2, r 1 m, A 1 m²":{"Omega":"1,00 sr"},"Aufgabe 2, r 2 m, gleicher Kegel":{"A":"4,00 m²","Omega":"1,00 sr"},"Aufgabe 2, r 2 m, A 2 m²":{"Omega":"0,50 sr"},"Aufgabe 3, r 1 m, Halbkugel":{"A":"6,28 m²","Omega":"6,28 sr"},"Aufgabe 3, r 1 m, ganze Kugel":{"A":"12,57 m²","Omega":"12,57 sr"},"Aufgabe 3, r 2 m, ganze Kugel":{"A":"50,27 m²","Omega":"12,57 sr"},"Aufgabe 4, 1000 lm":{"ganze Kugel":"79,6 cd","Halbkugel":"159,2 cd","1 m² bei r 1 m":"1000 cd","r 2 m, gleicher Kegel":"1000 cd"},"Aufgabe 5":{"810 lm, ganze Kugel":"64,5 cd","150 lm, A 0,3 m² bei r 1 m":"500,0 cd"}},"quelle":"Tabellenbuch Elektrotechnik S. 227 (Raumwinkel, Lichtstrom, Lichtstärke Formel 1); Fachkunde S. 390"}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:1080px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .fz{font-family:Cambria,Caladea,'Noto Serif',Georgia,serif;font-style:italic}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px;align-items:start;
+         grid-template-areas:"messwerte" "kugel" "bedienung"}
+ .kugel{grid-area:kugel} .messwerte{grid-area:messwerte} .bedienung{grid-area:bedienung}
+ @media(min-width:820px){.buehne{grid-template-columns:1.25fr 1fr;grid-template-areas:"kugel messwerte" "kugel bedienung"}}
+ .kugel canvas{width:100%;display:block;border:1px solid var(--linie);background:#fff;touch-action:none;cursor:grab}
+ .kugel canvas:active{cursor:grabbing}
+ .legende{font-size:13.5px;color:var(--grau);margin-top:4px}
+ .messwerte{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;background:#fff}
+ .kachel{border:1.4px solid var(--ink);background:var(--hell);padding:5px 6px;text-align:center;min-width:0}
+ .kachel .name{display:block;font-size:15px;font-weight:700;color:var(--ink)}
+ .kachel .zahl{display:block;font-variant-numeric:tabular-nums;font-size:25px;font-weight:700;white-space:nowrap}
+ .status{grid-column:1 / span 3;font-size:15px;font-weight:700;color:var(--kupfer);text-align:center;min-height:22px}
+ .lcd{background:#20313a;color:#9BF0B4;font-variant-numeric:tabular-nums;font-size:26px;font-weight:700;padding:5px 12px;border-radius:4px;text-align:right}
+ .lcd small{font-size:15px;color:#cfe;font-weight:400;float:left;margin-top:7px}
+ input[type=range]{width:100%;height:44px;accent-color:var(--kupfer);margin:6px 0 2px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+ button{font:inherit;font-size:16px;min-height:48px;min-width:52px;padding:6px 10px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+ button.zurueck{border-color:var(--ink);color:var(--ink)}
+ .schritte button{flex:1 1 44px;font-weight:700;padding:6px 4px}
+ .titel{font-size:15px;font-weight:700;margin:12px 0 4px}
+ .titel:first-child{margin-top:0}
+ .hinweis{font-size:14px;color:var(--grau);margin-top:12px}
+ #pruefbericht{display:none}
+ @media(max-width:819px){.messwerte{position:sticky;top:0;z-index:5;padding:6px 0;box-shadow:0 6px 6px -6px rgba(0,0,0,.25)}}
+ @media(max-width:420px){.wrap{padding:12px 8px 18px} .kachel{padding:3px 3px} .kachel .zahl{font-size:19px}
+   .kachel .name{font-size:13px} .status{font-size:14px} .lcd{font-size:22px} button{font-size:15px} .anleitung{font-size:14px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E3EG · B13</div><h1>Messplatz: Raumwinkel und Lichtstärke an der Kugel</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Eine Lampe sitzt im Mittelpunkt einer Kugel mit dem Halbmesser
+  <span class="fz">r</span>. Ein Reflektor lenkt den ganzen Lichtstrom <span class="fz">Φ</span><sub>v</sub> der Lampe
+  gleichmäßig in einen Kegel. Der Kegel schneidet aus der Kugel einen Ausschnitt mit der Ausschnittsfläche
+  <span class="fz">A</span> aus.
+  Stellen Sie <span class="fz">r</span>, <span class="fz">A</span> und <span class="fz">Φ</span><sub>v</sub> ein und
+  lesen Sie oben ab. Drehen Sie die Kugel mit dem Finger oder der Maus.</div>
+
+ <div class="buehne">
+  <div class="kugel">
+   <canvas id="bild" width="640" height="560" role="img"
+    data-quelle="Kugel mit kegelförmigem Ausschnitt, Halbmesser r, Fläche A und Raumwinkel Ω nach Tabellenbuch S. 227 (Bild zum Raumwinkel)"
+    aria-label="Drehbare Kugel mit dem Halbmesser r. Im Mittelpunkt sitzt eine Lampe. Ein Kegel aus dem Mittelpunkt schneidet aus der Kugel einen Ausschnitt mit der Ausschnittsfläche A aus; die Lichtstrahlen der Lampe laufen durch den Kegel zur Ausschnittsfläche."></canvas>
+   <div class="legende">Kupferfarben: die Ausschnittsfläche <span class="fz">A</span>; gelb: die Strahlen der Lampe, je
+    25 lm ein Strahl. Die dicke Linie um die Kugel ist der Äquator.</div>
+  </div>
+
+  <div class="messwerte" aria-live="polite">
+   <div class="kachel"><span class="name">Ausschnittsfläche <span class="fz">A</span></span><span class="zahl" id="mA"></span></div>
+   <div class="kachel"><span class="name">Raumwinkel <span class="fz">Ω</span></span><span class="zahl" id="mO"></span></div>
+   <div class="kachel"><span class="name">Lichtstärke <span class="fz">I</span><sub>v</sub></span><span class="zahl" id="mI"></span></div>
+   <div class="status" id="mStatus"></div>
+  </div>
+
+  <div class="bedienung">
+   <div class="titel">Halbmesser <span class="fz">r</span> der Kugel</div>
+   <div class="lcd" id="aR"></div>
+   <input type="range" id="rr" min="5" max="20" step="1" value="15" aria-label="Halbmesser der Kugel in Zehntelmetern">
+   <div class="knoepfe schritte">
+    <button type="button" id="r1m" aria-label="0,1 m kleiner">◀ 0,1 m</button>
+    <button type="button" id="r1p" aria-label="0,1 m größer">0,1 m ▶</button>
+   </div>
+   <div class="titel">Ausschnitt aufziehen: Ausschnittsfläche <span class="fz">A</span></div>
+   <div class="lcd" id="aA"></div>
+   <input type="range" id="ra" min="0" max="1" step="1" value="0" aria-label="Ausschnittsfläche in Schritten von 0,1 Quadratmetern">
+   <div class="knoepfe schritte">
+    <button type="button" id="a10m" aria-label="1 Quadratmeter weniger">◀ 1</button>
+    <button type="button" id="a1m" aria-label="0,1 Quadratmeter weniger">◀ 0,1</button>
+    <button type="button" id="a1p" aria-label="0,1 Quadratmeter mehr">0,1 ▶</button>
+    <button type="button" id="a10p" aria-label="1 Quadratmeter mehr">1 ▶</button>
+   </div>
+   <div class="titel">Lampe: Lichtstrom <span class="fz">Φ</span><sub>v</sub></div>
+   <div class="lcd" id="aP"></div>
+   <input type="range" id="rp" min="0" max="200" step="1" value="0" aria-label="Lichtstrom in Schritten von 10 Lumen">
+   <div class="knoepfe schritte">
+    <button type="button" id="p10m" aria-label="100 Lumen weniger">◀ 100</button>
+    <button type="button" id="p1m" aria-label="10 Lumen weniger">◀ 10</button>
+    <button type="button" id="p1p" aria-label="10 Lumen mehr">10 ▶</button>
+    <button type="button" id="p10p" aria-label="100 Lumen mehr">100 ▶</button>
+   </div>
+   <div class="titel">Kugel drehen</div>
+   <div class="knoepfe schritte">
+    <button type="button" id="dL" aria-label="nach links drehen">◀</button>
+    <button type="button" id="dR" aria-label="nach rechts drehen">▶</button>
+    <button type="button" id="dO" aria-label="nach oben kippen">▲</button>
+    <button type="button" id="dU" aria-label="nach unten kippen">▼</button>
+   </div>
+   <div class="titel">Neu beginnen</div>
+   <div class="knoepfe"><button class="zurueck" id="bReset" type="button">Zurücksetzen</button></div>
+  </div>
+ </div>
+
+ <div class="hinweis">Der Regler ganz rechts zieht den Ausschnitt über die ganze Kugel. Die Halbkugel liegt auf dem
+  Regler dort, wo der Rand des Ausschnitts den Äquator erreicht; die Zeile unter den Anzeigen meldet sie.</div>
+ <pre id="pruefbericht"></pre>
+</div>
+
+<script>
+(function(){
+"use strict";
+var PI=Math.PI;
+var START={rz:15, omega:0, pz:0, gier:-28, nick:-22};       // rz: r in 0,1 m; pz: Φv in 10 lm; Blickwinkel in Grad
+var z={rz:START.rz, omega:START.omega, pz:START.pz, gier:START.gier, nick:START.nick};
+var liste=[];                                                // erlaubte Kappenflächen beim aktuellen r (m²)
+var $=function(id){return document.getElementById(id);};
+
+// ---------------- Rechenmodell ----------------
+function r(){ return z.rz/10; }
+function phi(){ return z.pz*10; }
+function flaeche(){ return z.omega*r()*r(); }
+function lichtstaerke(){ return z.omega>0 ? phi()/z.omega : null; }
+function theta(){ var c=1-z.omega/(2*PI); return Math.acos(Math.max(-1,Math.min(1,c))); }
+function istHalb(){ return Math.abs(z.omega-2*PI)<1e-9; }
+function istGanz(){ return Math.abs(z.omega-4*PI)<1e-9; }
+function baueListe(){
+  var rr=r(), max=4*PI*rr*rr, halb=2*PI*rr*rr, l=[];
+  for(var k=0; k/10<max-1e-9; k++) l.push(k/10);
+  l.push(halb); l.push(max);
+  l.sort(function(a,b){return a-b;});
+  liste=l.filter(function(v,i){ return i===0 || Math.abs(v-l[i-1])>1e-9; });
+}
+function naechster(a){
+  var best=0, d=1e99;
+  for(var i=0;i<liste.length;i++){ var e=Math.abs(liste[i]-a); if(e<d-1e-12){d=e;best=i;} }
+  return best;
+}
+
+// ---------------- Zahlen ----------------
+function komma(x,st){
+  var s=(Math.round(x*Math.pow(10,st))/Math.pow(10,st)).toFixed(st);
+  return s.replace(".",",");
+}
+function iText(){
+  var i=lichtstaerke();
+  if(i===null) return "—";
+  if(i<1000) return komma(i,1)+" cd";
+  var g=String(Math.round(i));
+  if(g.length>4) g=g.slice(0,g.length-3)+" "+g.slice(-3);
+  return g+" cd";
+}
+function aText(){ return komma(flaeche(),2)+" m²"; }
+function oText(){ return komma(z.omega,2)+" sr"; }
+
+// ---------------- Zeichnung ----------------
+var cv=$("bild"), g=cv.getContext("2d");
+var B=640, H=560, skala=1;
+function groesse(){
+  var w=cv.clientWidth||640;
+  var h=Math.round(Math.min(w*0.86, 560));
+  var dpr=Math.max(1, Math.min(3, window.devicePixelRatio||1));
+  cv.style.height=h+"px";
+  cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr);
+  B=w; H=h; skala=dpr;
+}
+function drehe(p){                                          // Gieren um die Senkrechte, dann Nicken um die Waagerechte
+  var a=z.gier*PI/180, b=z.nick*PI/180;
+  var x1=p[0]*Math.cos(a)+p[2]*Math.sin(a), z1=-p[0]*Math.sin(a)+p[2]*Math.cos(a);
+  var y2=p[1]*Math.cos(b)-z1*Math.sin(b), z2=p[1]*Math.sin(b)+z1*Math.cos(b);
+  return [x1,y2,z2];
+}
+function proj(p,R,cx,cy){ var q=drehe([p[0]*R,p[1]*R,p[2]*R]); return [cx+q[0], cy-q[1], q[2]]; }
+function kugelpunkt(t,f){                                   // t: Winkel zur Achse (Achse zeigt nach unten), f: Umlauf
+  return [Math.sin(t)*Math.cos(f), -Math.cos(t), Math.sin(t)*Math.sin(f)];
+}
+function alpha(tiefe,R,vorn,hinten){ var s=(tiefe/R+1)/2; return hinten+(vorn-hinten)*Math.max(0,Math.min(1,s)); }
+
+function zeichne(){
+  groesse();
+  g.setTransform(skala,0,0,skala,0,0);
+  g.clearRect(0,0,B,H);
+  var Rmax=Math.min(B,H)*0.43, R=Rmax*r()/2.0, cx=B*0.5, cy=H*0.47;
+  var teile=[];                                             // [Tiefe, Zeichenfunktion]
+  // Gitter der Kugel: Breitenkreise (alle 30°) und Längenkreise (alle 30°)
+  function linie(p1,p2,farbe,breite,vorn,hinten,strich){
+    var a=proj(p1,R,cx,cy), b=proj(p2,R,cx,cy), t=(a[2]+b[2])/2;
+    teile.push([t,function(){ g.strokeStyle=farbe.replace("A)",alpha(t,R,vorn,hinten).toFixed(3)+")"); g.lineWidth=breite;
+      g.setLineDash(strich||[]); g.beginPath(); g.moveTo(a[0],a[1]); g.lineTo(b[0],b[1]); g.stroke(); g.setLineDash([]); }]);
+  }
+  var NF=72, i, j;
+  for(var bk=30; bk<180; bk+=30){
+    var t0=bk*PI/180, aequator=(bk===90);
+    for(j=0;j<NF;j++){
+      linie(kugelpunkt(t0,2*PI*j/NF), kugelpunkt(t0,2*PI*(j+1)/NF), aequator?"rgba(26,37,48,A)":"rgba(90,102,111,A)",
+            aequator?2.4:1, aequator?0.85:0.45, aequator?0.30:0.12);
+    }
+  }
+  for(var lk=0; lk<180; lk+=30){
+    var f0=lk*PI/180;
+    for(j=0;j<NF;j++){
+      linie(kugelpunkt(2*PI*j/NF,f0), kugelpunkt(2*PI*(j+1)/NF,f0), "rgba(90,102,111,A)", 1, 0.45, 0.12);
+    }
+  }
+  // Kappe
+  var th=theta();
+  if(z.omega>0){
+    var nt=Math.max(2, Math.min(36, Math.ceil(th/(PI/36)))), nf=48;
+    for(i=0;i<nt;i++){
+      for(j=0;j<nf;j++){
+        (function(i,j){
+          var ta=th*i/nt, tb=th*(i+1)/nt, fa=2*PI*j/nf, fb=2*PI*(j+1)/nf;
+          var ps=[kugelpunkt(ta,fa),kugelpunkt(tb,fa),kugelpunkt(tb,fb),kugelpunkt(ta,fb)].map(function(p){return proj(p,R,cx,cy);});
+          var t=(ps[0][2]+ps[1][2]+ps[2][2]+ps[3][2])/4;
+          teile.push([t,function(){ g.fillStyle="rgba(163,78,14,"+alpha(t,R,0.34,0.16).toFixed(3)+")";
+            g.beginPath(); g.moveTo(ps[0][0],ps[0][1]); for(var k=1;k<4;k++) g.lineTo(ps[k][0],ps[k][1]); g.closePath(); g.fill(); }]);
+        })(i,j);
+      }
+    }
+    // Rand der Kappe und vier Mantellinien des Kegels
+    if(!istGanz()){
+      for(j=0;j<NF;j++) linie(kugelpunkt(th,2*PI*j/NF), kugelpunkt(th,2*PI*(j+1)/NF), "rgba(163,78,14,A)", 3, 1, 0.45);
+      for(j=0;j<4;j++){
+        var pr=kugelpunkt(th,PI/4+j*PI/2);
+        for(var s=0;s<8;s++) linie([pr[0]*s/8,pr[1]*s/8,pr[2]*s/8],[pr[0]*(s+1)/8,pr[1]*(s+1)/8,pr[2]*(s+1)/8],
+                                   "rgba(163,78,14,A)", 1.4, 0.8, 0.3, [5,4]);
+      }
+    }
+  }
+  // Strahlen: ein Strahl je 25 lm, gleichmäßig über den Raumwinkel verteilt (gleiche Teilflächen der Kappe)
+  var n=z.omega>0 ? Math.round(phi()/25) : 0, gold=PI*(3-Math.sqrt(5));
+  for(i=0;i<n;i++){
+    var ct=1-(i+0.5)/n*(1-Math.cos(th)), st=Math.sqrt(Math.max(0,1-ct*ct)), fi=i*gold;
+    var pe=[st*Math.cos(fi), -ct, st*Math.sin(fi)];
+    for(var sgm=0;sgm<4;sgm++){
+      linie([pe[0]*sgm/4,pe[1]*sgm/4,pe[2]*sgm/4],[pe[0]*(sgm+1)/4,pe[1]*(sgm+1)/4,pe[2]*(sgm+1)/4],
+            "rgba(214,150,0,A)", 1.6, 0.9, 0.35);
+    }
+  }
+  // Halbmesser r: Linie vom Mittelpunkt zur Kugel, leicht über dem Äquator
+  var rp=[Math.cos(0.35)*Math.cos(2.2), Math.sin(0.35), Math.cos(0.35)*Math.sin(2.2)];
+  for(var sr=0;sr<6;sr++) linie([rp[0]*sr/6,rp[1]*sr/6,rp[2]*sr/6],[rp[0]*(sr+1)/6,rp[1]*(sr+1)/6,rp[2]*(sr+1)/6],
+                                "rgba(26,37,48,A)", 2, 1, 0.55);
+  teile.sort(function(a,b){return a[0]-b[0];});
+  teile.forEach(function(e){ e[1](); });
+  // Umriss der Kugel
+  g.strokeStyle="rgba(26,37,48,0.9)"; g.lineWidth=2; g.beginPath(); g.arc(cx,cy,R,0,2*PI); g.stroke();
+  // Lampe im Mittelpunkt
+  var an=phi()>0;
+  if(an){ var gl=g.createRadialGradient(cx,cy,0,cx,cy,18); gl.addColorStop(0,"rgba(255,214,30,0.9)"); gl.addColorStop(1,"rgba(255,214,30,0)");
+    g.fillStyle=gl; g.beginPath(); g.arc(cx,cy,18,0,2*PI); g.fill(); }
+  g.fillStyle=an?"#FFD21E":"#C8CDD2"; g.strokeStyle="#5a4600"; g.lineWidth=1.5;
+  g.beginPath(); g.arc(cx,cy,7,0,2*PI); g.fill(); g.stroke();
+  // Beschriftung wie im Tabellenbuch: r, A, Ω
+  var fs=Math.max(15, Math.min(20, B/30));
+  function schrift(text,x,y,farbe,kursiv){
+    g.font=(kursiv?"italic ":"")+"700 "+fs+"px Cambria, Caladea, 'Noto Serif', Georgia, serif";
+    g.textAlign="center"; g.textBaseline="middle"; g.lineWidth=4; g.strokeStyle="rgba(255,255,255,0.95)";
+    g.strokeText(text,x,y); g.fillStyle=farbe; g.fillText(text,x,y);
+  }
+  var pm=proj([rp[0]*0.55,rp[1]*0.55,rp[2]*0.55],R,cx,cy);
+  schrift("r",pm[0],pm[1]-fs*0.8,"#1A2530",true);
+  if(z.omega>0){
+    // A auf der Kappe: die Stelle, die am weitesten vorn und rechts liegt; Ω auf der Achse des Kegels, nah an der Lampe
+    var tm=istGanz()?PI*0.72:th*0.72, pa=null, wert=-1e99;
+    for(var k=0;k<36;k++){ var q=proj(kugelpunkt(tm,2*PI*k/36),R,cx,cy), w=q[2]+0.8*(q[0]-cx);
+      if(w>wert){ wert=w; pa=q; } }
+    schrift("A",pa[0]+fs*0.8,pa[1]-fs*0.2,"#A34E0E",true);
+    var po=proj([0,-0.3,0],R,cx,cy);
+    schrift("Ω",po[0]-fs*0.9,po[1],"#A34E0E",true);
+  }
+}
+
+// ---------------- Anzeigen ----------------
+function zeige(){
+  $("aR").innerHTML="<small>Halbmesser</small>"+komma(r(),1)+" m";
+  $("aA").innerHTML="<small>Fläche</small>"+aText();
+  $("aP").innerHTML="<small>Lichtstrom</small>"+phi()+" lm";
+  $("mA").textContent=aText();
+  $("mO").textContent=oText();
+  $("mI").textContent=iText();
+  var st;
+  if(z.omega===0) st="Ausschnitt geschlossen: Regler aufziehen";
+  else if(istGanz()) st="Der Ausschnitt ist die ganze Kugel";
+  else if(istHalb()) st="Der Ausschnitt ist eine Halbkugel";
+  else st="kegelförmiger Ausschnitt";
+  if(phi()===0) st+=" · Lampe aus";
+  $("mStatus").textContent=st;
+  $("rr").value=z.rz; $("rp").value=z.pz;
+  $("ra").max=liste.length-1; $("ra").value=naechster(flaeche());
+  zeichne();
+}
+
+// ---------------- Bedienung ----------------
+function setzeR(rz){
+  rz=Math.max(5,Math.min(20,Math.round(rz)));
+  z.rz=rz; baueListe();                                     // der Kegel (Ω) bleibt, die Kappenfläche wird Ω · r²
+  zeige();
+}
+function setzeA(index){
+  index=Math.max(0,Math.min(liste.length-1,index));
+  var a=liste[index], rr=r();
+  if(index===liste.length-1) z.omega=4*PI;                  // genau die ganze Kugel
+  else if(Math.abs(a-2*PI*rr*rr)<1e-9) z.omega=2*PI;         // genau die Halbkugel
+  else z.omega=a/(rr*rr);
+  zeige();
+}
+function setzeP(pz){ z.pz=Math.max(0,Math.min(200,Math.round(pz))); zeige(); }
+function aIndex(){ return naechster(flaeche()); }
+function schrittA(delta){                                   // ±0,1 m² oder ±1 m² auf der Liste
+  var a=flaeche(), ziel=a+delta, i=aIndex();
+  if(delta>0){ while(i<liste.length-1 && liste[i]<ziel-1e-9) i++; }
+  else { while(i>0 && liste[i]>ziel+1e-9) i--; }
+  setzeA(i);
+}
+$("rr").addEventListener("input",function(){ setzeR(Number(this.value)); });
+$("ra").addEventListener("input",function(){ setzeA(Number(this.value)); });
+$("rp").addEventListener("input",function(){ setzeP(Number(this.value)); });
+$("r1m").onclick=function(){ setzeR(z.rz-1); };  $("r1p").onclick=function(){ setzeR(z.rz+1); };
+$("a1m").onclick=function(){ schrittA(-0.1); };  $("a1p").onclick=function(){ schrittA(0.1); };
+$("a10m").onclick=function(){ schrittA(-1); };   $("a10p").onclick=function(){ schrittA(1); };
+$("p1m").onclick=function(){ setzeP(z.pz-1); };  $("p1p").onclick=function(){ setzeP(z.pz+1); };
+$("p10m").onclick=function(){ setzeP(z.pz-10); }; $("p10p").onclick=function(){ setzeP(z.pz+10); };
+function blick(dg,dn){ z.gier=(z.gier+dg)%360; z.nick=Math.max(-85,Math.min(85,z.nick+dn)); zeichne(); }
+$("dL").onclick=function(){ blick(-15,0); }; $("dR").onclick=function(){ blick(15,0); };
+$("dO").onclick=function(){ blick(0,15); };  $("dU").onclick=function(){ blick(0,-15); };
+$("bReset").onclick=function(){ z.rz=START.rz; z.omega=START.omega; z.pz=START.pz; z.gier=START.gier; z.nick=START.nick;
+  baueListe(); zeige(); };
+// Drehen mit Finger und Maus
+var zug=null, geplant=false;
+cv.addEventListener("pointerdown",function(e){ zug={x:e.clientX,y:e.clientY}; cv.setPointerCapture(e.pointerId); e.preventDefault(); });
+cv.addEventListener("pointermove",function(e){
+  if(!zug) return;
+  var dx=e.clientX-zug.x, dy=e.clientY-zug.y; zug={x:e.clientX,y:e.clientY};
+  z.gier=(z.gier+dx*0.5)%360; z.nick=Math.max(-85,Math.min(85,z.nick-dy*0.5));
+  if(!geplant){ geplant=true; requestAnimationFrame(function(){ geplant=false; zeichne(); }); }
+});
+["pointerup","pointercancel","pointerleave"].forEach(function(n){ cv.addEventListener(n,function(){ zug=null; }); });
+window.addEventListener("resize",function(){ zeichne(); });
+
+// ---------------- Prüfschnittstelle ----------------
+window.__radius=function(rm){ setzeR(Math.round(rm*10)); return [aText(),oText(),iText()].join(" | "); };
+window.__stelle=function(rm,a,phiLm){
+  z.rz=Math.round(rm*10); baueListe();
+  if(a==="halb") z.omega=2*PI; else if(a==="ganz") z.omega=4*PI; else z.omega=a/(r()*r());
+  z.pz=Math.round(phiLm/10); zeige();
+  return [aText(),oText(),iText()].join(" | ");
+};
+baueListe(); zeige();
+if(/[?&]pruefen/.test(location.search)){
+  var b={};
+  b["A2 r1 A1"]=__stelle(1,1,0); b["A2 r2 gleicher Kegel"]=__radius(2); b["A2 r2 A2"]=__stelle(2,2,0);
+  b["A3 r1 halb"]=__stelle(1,"halb",0); b["A3 r1 ganz"]=__stelle(1,"ganz",0); b["A3 r2 ganz (aus r1)"]=__radius(2);
+  b["A4 1000 ganz"]=__stelle(1,"ganz",1000); b["A4 1000 halb"]=__stelle(1,"halb",1000); b["A4 1000 A1"]=__stelle(1,1,1000);
+  b["A4 r2 gleicher Kegel"]=__radius(2);
+  b["A5a 810 ganz"]=__stelle(1.5,"ganz",810); b["A5b 150 A0,3"]=__stelle(1,0.3,150);
+  b["Grenze r0,5 ganz"]=__stelle(0.5,"ganz",2000); b["Grenze r2 A0,1"]=__stelle(2,0.1,2000);
+  b["Listenende r2"]=(function(){ z.rz=20; baueListe(); return komma(liste[liste.length-1],2)+" · "+liste.length+" Stufen"; })();
+  $("pruefbericht").textContent=JSON.stringify(b,null,1);
+  z.rz=START.rz; z.omega=START.omega; z.pz=START.pz; baueListe(); zeige();
+}
+})();
+</script>
+</body></html>
