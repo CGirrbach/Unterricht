@@ -3,17 +3,22 @@
 <!-- sim_bearbeitung: freiwillig -->
 <!-- E3EG B10, Klassenarbeitstrainer Einheit 1 Leistungskompensation (21.10.2026, material_office/E3EG-B10).
  Bauart nach dem Klassenarbeitstrainer der E1EG (EG1-B19, 019_klassenarbeitstrainer_1_eg1_b19.html): Zufallsaufgaben
- je Thema, Prüfung der Eingabe mit Toleranz (1 Prozent, bei Tangenswerten 2 Prozent, weil die amtlichen
- Lösungsvorschläge die Tangenswerte auf zwei Stellen runden), danach der volle Rechenweg (Formel, Einsetzen mit
+ je Thema, Prüfung der Eingabe mit Toleranz (1 Prozent; 2 Prozent nur bei Aufgaben mit Tangenswerten, weil die
+ amtlichen Lösungsvorschläge die Tangenswerte auf zwei Stellen runden), danach der volle Rechenweg (Formel, Einsetzen mit
  Einheiten, Ergebnis), Verständnisfragen mit Musterlösung. Keine Niveaustufen (Carlo, 12.10.2026).
+ Berichtigt nach dem Prüfer am 21.10.2026: Thema 5 Netzqualität (11.5.4; Tabellenbuch S. 322, 324, 327, Fachkunde
+ S. 166, 167, 311; Leitbegriffe wie Block 9), Typ Laständerung bei gleicher Blindleistung, Typ Leitungsquerschnitt nach
+ der Kompensation (Tabellenbuch S. 197 und 198, Verlegeart B2, jeder Wert am Seitenbild abgelesen), Leistungsdreieck mit
+ Wirkfaktor 0,5 bis 0,95, Kapazitätsaufgaben mit 1 Prozent, nach der Themenwahl Sprung zur Aufgabe (Handy).
  Jede Aufgabe folgt einem Aufgabentyp der 33 Prüfungsaufgaben zur Kompensation
  (Einheit_1_Leistungskompensation/_pruefungsaufgaben_aufgabentypen.md, Abschnitt 3); der Typ steht als Etikett an der
  Aufgabe. Formeln wie im Unterricht: Tabellenbuch S. 37 (Formel 1, 3, 5, 9, 11), S. 48 (Drehstrom), S. 328 (Formel 5, 7,
  8, 13, 14, unter Formel 16), Fachkunde S. 164 bis 166 für die Verständnisfragen.
  Keine Zahl aus den Quellen der Klassenarbeit (206_BT1_A.pdf, 206_BT2_A.pdf, Leitungen_Kompensation.docx): Die
  Zufallsbereiche lassen diese Werte aus; ausgenommen sind nur Netzspannung 230 V und 400 V, 50 Hz und ganze Zahlen bis 10
- (Anzahl der Motoren, Stunden). window.kaprobe(n) liefert alle angezeigten Zahlen vieler Aufgaben für die Prüfung von
- außen (b10_trainer_pruefen.py). Kein Leitungsquerschnitt: dafür bräuchte der Trainer Tabellenwerte. -->
+ (Anzahl der Motoren, Stunden) und die Umgebungstemperaturen 25 °C und 30 °C, unter denen die Tabellen S. 197 und 198
+ stehen. window.kaprobe(n) liefert alle angezeigten Zahlen vieler Aufgaben für die Prüfung von außen
+ (b10_trainer_pruefen.py). -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Klassenarbeitstrainer: Leistungskompensation</title>
@@ -75,14 +80,14 @@ i{font-style:italic}
 <div class="kopf">
  <div class="reihe">E3EG · LF&nbsp;11 · Einheit&nbsp;1 · Leistungskompensation · B10</div>
  <h1>Klassenarbeitstrainer Leistungskompensation</h1>
- <div class="sub">1 Leistungen · 2 Kondensator berechnen · 3 Strom und Kosten · 4 Verständnis</div>
+ <div class="sub">1 Leistungen · 2 Kondensator berechnen · 3 Strom, Leitung und Kosten · 4 Verständnis · 5 Netzqualität</div>
 </div>
 
 <div class="box anleitung">
  <span class="cap">So üben Sie mit dem Trainer</span>
  <p>Der Trainer stellt Ihnen Aufgaben, wie sie in den Abschlussprüfungen zur Kompensation vorkommen, jedes Mal mit neuen Zahlen. Das Etikett an der Aufgabe nennt den Aufgabentyp. Wählen Sie unten ein <b>Thema</b>.</p>
- <p>Rechnen Sie auf Papier mit vollem Rechenweg: <b>Formel, Einsetzen mit Einheiten, Ergebnis</b>. Tragen Sie nur das Ergebnis in der angegebenen Einheit ein (Komma oder Punkt). Ihr Ergebnis gilt als richtig, wenn es höchstens 1&nbsp;% abweicht; bei Aufgaben mit Tangenswerten höchstens 2&nbsp;%. Danach zeigt der Trainer den Rechenweg.</p>
- <p><b>Hilfsmittel</b> wie in der Klassenarbeit: Taschenrechner CALCOOM IQ-S1 (Winkel in Grad) und Tabellenbuch. Den Wirkfaktor cos&nbsp;<i>φ</i> nennen die Prüfungen auch Leistungsfaktor. <b>Fertig, wenn</b> Sie in jedem der vier Themen fünf Aufgaben hintereinander richtig gelöst haben.</p>
+ <p>Rechnen Sie auf Papier mit vollem Rechenweg: <b>Formel, Einsetzen mit Einheiten, Ergebnis</b>. Tragen Sie nur das Ergebnis in der angegebenen Einheit ein (Komma oder Punkt). Ihr Ergebnis gilt als richtig, wenn es höchstens 1&nbsp;% abweicht; nur bei Aufgaben mit Tangenswerten höchstens 2&nbsp;%. Einen Leiterquerschnitt geben Sie genau an. Danach zeigt der Trainer den Rechenweg.</p>
+ <p><b>Hilfsmittel</b> wie in der Klassenarbeit: Taschenrechner CALCOOM IQ-S1 (Winkel in Grad) und Tabellenbuch (Leitungen: S. 195 bis 198). Den Wirkfaktor cos&nbsp;<i>φ</i> nennen die Prüfungen auch Leistungsfaktor. <b>Fertig, wenn</b> Sie in jedem der fünf Themen fünf Aufgaben hintereinander richtig gelöst haben.</p>
 </div>
 
 <div class="box">
@@ -90,8 +95,9 @@ i{font-style:italic}
  <div class="wahl" id="wGebiet">
   <button class="wbtn" type="button" data-g="l" aria-pressed="false">1 Leistungen</button>
   <button class="wbtn" type="button" data-g="k" aria-pressed="false">2 Kondensator berechnen</button>
-  <button class="wbtn" type="button" data-g="s" aria-pressed="false">3 Strom und Kosten</button>
+  <button class="wbtn" type="button" data-g="s" aria-pressed="false">3 Strom, Leitung und Kosten</button>
   <button class="wbtn" type="button" data-g="v" aria-pressed="false">4 Verständnis</button>
+  <button class="wbtn" type="button" data-g="n" aria-pressed="false">5 Netzqualität</button>
   <button class="wbtn" type="button" data-g="alle" aria-pressed="false">alle gemischt</button>
  </div>
  <div class="stand" id="stand"></div>
@@ -182,7 +188,8 @@ L.push({typ: "Leistungen aus Strom und Wirkfaktor", f: function(){
   merke: "Tabellenbuch S. 37, Formel 9. Den Winkel liefert [SHIFT] [cos], dann [sin] [Ans]; nicht sin 0,7 in den Rechner tippen."};
 }});
 L.push({typ: "Leistungsdreieck", f: function(){
- var p = zehntel(1.2, 9.5), q = zehntel(0.6, 8.5), s = Math.sqrt(p*p + q*q), c = p/s;
+ var p, q, s, c;
+ do { p = zehntel(1.2, 9.5); q = zehntel(0.6, 8.5); s = Math.sqrt(p*p + q*q); c = p/s; } while(c < 0.5 || c > 0.95);   /* Wirkfaktor wie bei Anlagen */
  if(Math.random() < 0.5) return {art: "s_dreieck", p: {p: p, q: q}, wert: s, einh: "kVA",
   frage: "Eine Anlage nimmt die Wirkleistung <i>P</i> = " + zahl(p, 1) + " kW und die Blindleistung <i>Q</i> = " + zahl(q, 1) + " kvar auf. Berechnen Sie die Scheinleistung <i>S</i>.",
   weg: [["Formel", "<i>S</i> = " + wz("<i>P</i>² + <i>Q</i>²")], ["Einsetzen", "<i>S</i> = " + wz("(" + zahl(p, 1) + " kW)² + (" + zahl(q, 1) + " kvar)²")], ["Ergebnis", "<i>S</i> " + erg(s, "kVA")]],
@@ -193,6 +200,21 @@ L.push({typ: "Leistungsdreieck", f: function(){
    ["Einsetzen", "<i>S</i> = " + wz("(" + zahl(p, 1) + " kW)² + (" + zahl(q, 1) + " kvar)²") + " " + erg(s, "kVA", 4) + ";  " + COS + " = " + br(zahl(p, 1) + " kW", zahl(s, 4) + " kVA")],
    ["Ergebnis", COS + " " + gl(c, 2) + " " + fest(c, 2)]],
   merke: "Tabellenbuch S. 37, Formel 11 und 5."};
+}});
+L.push({typ: "Laständerung bei gleicher Blindleistung", f: function(){
+ var p1 = zehntel(8, 60), c1 = wahl([0.86, 0.87, 0.89, 0.91, 0.92, 0.93, 0.94]), fak = wahl([1.2, 1.25, 1.3, 1.4, 1.5, 1.6]);
+ var p2 = ziehe(function(){ return Math.round(p1*fak*10)/10 + zuf(0, 3)/10; });
+ var s1 = p1/c1, q = Math.sqrt(s1*s1 - p1*p1), s2 = Math.sqrt(p2*p2 + q*q), c2 = p2/s2;
+ var weg = [["Formel", ix("S", "1") + " = " + br(ix("P", "1"), COS + "<sub>1</sub>") + ";  <i>Q</i> = " + wz(ix("S", "1") + "² − " + ix("P", "1") + "²") + ";  " + ix("S", "2") + " = " + wz(ix("P", "2") + "² + <i>Q</i>²") + ";  " + COS + "<sub>2</sub> = " + br(ix("P", "2"), ix("S", "2"))],
+  ["Einsetzen", ix("S", "1") + " = " + br(zahl(p1, 1) + " kW", fest(c1, 2)) + " " + erg(s1, "kVA", 3) + ";  <i>Q</i> = " + wz("(" + zahl(s1, 3) + " kVA)² − (" + zahl(p1, 1) + " kW)²") + " " + erg(q, "kvar", 3)],
+  ["Einsetzen", ix("S", "2") + " = " + wz("(" + zahl(p2, 1) + " kW)² + (" + zahl(q, 3) + " kvar)²") + " " + erg(s2, "kVA", 3) + ";  " + COS + "<sub>2</sub> = " + br(zahl(p2, 1) + " kW", zahl(s2, 3) + " kVA")],
+  ["Ergebnis", COS + "<sub>2</sub> " + gl(c2, 2) + " " + fest(c2, 2) + ";  " + ix("S", "2") + " " + erg(s2, "kVA")]];
+ var merke = "Tabellenbuch S. 37, Formel 5 und 11. Die Kompensationsanlage bleibt, die Blindleistung also gleich; die Wirkleistung steigt. Damit wird der Quotient aus <i>P</i> und <i>S</i>, der Wirkfaktor, größer.";
+ var frage = "Eine kompensierte Anlage nimmt die Wirkleistung " + ix("P", "1") + " = " + zahl(p1, 1) + " kW bei " + COS + "<sub>1</sub> = " + fest(c1, 2) + " auf. Nach einem Umbau nimmt sie " + ix("P", "2") + " = " + zahl(p2, 1) + " kW auf. Die Kompensationsanlage wird nicht verändert, die Blindleistung bleibt gleich. ";
+ if(Math.random() < 0.6) return {art: "cos_last", p: {p1: p1, c1: c1, p2: p2}, wert: c2, einh: "", tolAbs: 0.005, weg: weg, merke: merke,
+  frage: frage + "Berechnen Sie den neuen Wirkfaktor " + COS + "<sub>2</sub> (zwei Stellen nach dem Komma)."};
+ return {art: "s2_last", p: {p1: p1, c1: c1, p2: p2}, wert: s2, einh: "kVA", weg: weg, merke: merke,
+  frage: frage + "Berechnen Sie die Scheinleistung " + ix("S", "2") + " nach dem Umbau."};
 }});
 L.push({typ: "Drehstromleistung aus dem Leistungsschild", f: function(){
  var i = zehntel(3, 95), c = wahl(COS1.concat([0.86, 0.87])), p = W3*400*i*c;
@@ -224,7 +246,7 @@ K.push({typ: "Grundrechnung: kapazitive Blindleistung", tol: 0.02, f: function()
   weg: [["Winkel", winkelzeile(c1, c2)], ["Formel", QCF], ["Einsetzen", ix("Q", "C") + " = " + zahl(p, 1) + " kW" + MAL + "(" + fest(tanAus(c1), 5) + " − " + fest(tanAus(c2), 5) + ")"], ["Ergebnis", ix("Q", "C") + " " + erg(qc, "kvar")]],
   merke: "Tabellenbuch S. 328, Formel 5. Der Kondensator liefert nur die Differenz der Blindleistungen vor und nach der Kompensation. Falle: tan 0,7 ist nicht tan (cos⁻¹ 0,7)."};
 }});
-K.push({typ: "Einphasige Parallelkompensation", tol: 0.02, f: function(){
+K.push({typ: "Einphasige Parallelkompensation", f: function(){
  var qc = ziehe(function(){ return zuf(12, 95)*10; }), c = qc/(OMEGA*230*230)*1e6;
  return {art: "c_1ph", p: {qc: qc}, wert: c, einh: "µF",
   frage: "Parallel zu einer Leuchtengruppe an 230 V, 50 Hz soll ein Kondensator die kapazitive Blindleistung " + ix("Q", "C") + " = " + zahl(qc, 0) + " var liefern. Berechnen Sie seine Kapazität <i>C</i>.",
@@ -232,7 +254,7 @@ K.push({typ: "Einphasige Parallelkompensation", tol: 0.02, f: function(){
    ["Einsetzen", "<i>C</i> = " + br(zahl(qc, 0) + " var", "2π" + MAL + "50 Hz" + MAL + "(230 V)²")], ["Ergebnis", "<i>C</i> " + erg(c, "µF")]],
   merke: "Tabellenbuch S. 328, Formel 8 und 7. Beim Wechselstrom liegt der Kondensator an der Netzspannung 230 V. Ergebnis in µF: 1 F = 1 000 000 µF. Probe mit dem Faustwert: rund 60 µF je kvar bei 230 V."};
 }});
-K.push({typ: "Kapazität in Dreieck", tol: 0.02, f: function(){
+K.push({typ: "Kapazität in Dreieck", f: function(){
  var qc = zehntel(1.2, 48), c = qc*1000/(OMEGA*400*400)*1e6, cd = c/3;
  return {art: "c_dreieck", p: {qc: qc}, wert: cd, einh: "µF",
   frage: "Eine Kondensatorbatterie aus drei gleichen Kondensatoren in Dreieckschaltung soll am Netz 400 V, 50 Hz die kapazitive Blindleistung " + ix("Q", "C") + " = " + zahl(qc, 1) + " kvar liefern. Berechnen Sie die Kapazität " + ix("C", "Δ") + " eines Kondensators.",
@@ -241,7 +263,7 @@ K.push({typ: "Kapazität in Dreieck", tol: 0.02, f: function(){
    ["Ergebnis", ix("C", "Δ") + " " + erg(cd, "µF")]],
   merke: "Tabellenbuch S. 328: <i>C</i> ist die berechnete Gesamtkapazität, " + ix("C", "Δ") + " die Kapazität eines der drei Kondensatoren (Formel 14). Faustwert: rund 20 µF je kvar und Kondensator, mit einem Drittel von " + ix("Q", "C") + "."};
 }});
-K.push({typ: "Stern gegen Dreieck", tol: 0.02, f: function(){
+K.push({typ: "Stern gegen Dreieck", f: function(){
  var qc = zehntel(1.2, 48), c = qc*1000/(OMEGA*400*400)*1e6;
  return {art: "c_stern", p: {qc: qc}, wert: c, einh: "µF",
   frage: "Eine Kondensatorbatterie aus drei gleichen Kondensatoren in <b>Sternschaltung</b> soll am Netz 400 V, 50 Hz die kapazitive Blindleistung " + ix("Q", "C") + " = " + zahl(qc, 1) + " kvar liefern. Berechnen Sie die Kapazität " + ix("C", "Y") + " eines Kondensators.",
@@ -282,6 +304,52 @@ S.push({typ: "Einphasige Kompensation: Strom", f: function(){
   weg: [["Formel", "<i>P</i> = <i>U</i>" + MAL + "<i>I</i>" + MAL + COS + ", umgestellt " + ix("I", "2") + " = " + br("<i>P</i>", "<i>U</i>" + MAL + COS + "<sub>2</sub>")],
    ["Einsetzen", ix("I", "2") + " = " + br(zahl(p, 0) + " W", "230 V" + MAL + fest(c2, 2))], ["Ergebnis", ix("I", "2") + " " + erg(i2, "A")]],
   merke: "Zum Vergleich vor der Kompensation: " + ix("I", "1") + " " + erg(i1, "A") + "."};
+}});
+/* Tabellenbuch S. 197 (25 °C) und S. 198 (30 °C), Kupfer, Betriebstemperatur 70 °C, Verlegeart B2, am Seitenbild
+   abgelesen (21.10.2026, 300 dpi): [Nennquerschnitt in mm², Strombelastbarkeit I_r in A, Bemessungsstrom I_N der
+   Überstrom-Schutzeinrichtung in A, erster Wert = Leitungsschutzschalter]; Schlüssel: Anzahl der Strom führenden Leiter. */
+var B2 = {25: {2: [[1.5, 17.5, 16], [2.5, 24, 20], [4, 32, 32], [6, 40, 40], [10, 55, 50], [16, 73, 63], [25, 95, 80], [35, 118, 100], [50, 141, 125]],
+               3: [[1.5, 16, 16], [2.5, 21, 20], [4, 29, 25], [6, 36, 35], [10, 49, 40], [16, 66, 63], [25, 85, 80], [35, 105, 100], [50, 125, 125]]},
+          30: {2: [[1.5, 16.5, 16], [2.5, 23, 20], [4, 30, 25], [6, 38, 35], [10, 52, 50], [16, 69, 63], [25, 90, 80], [35, 111, 100], [50, 133, 125]],
+               3: [[1.5, 15, 13], [2.5, 20, 20], [4, 27, 25], [6, 34, 32], [10, 46, 40], [16, 62, 50], [25, 80, 80], [35, 99, 80], [50, 118, 100]]}};
+var LSS = [6, 10, 13, 16, 20, 25, 32, 40, 50, 63, 80, 100, 125];   /* Bemessungsströme der Leitungsschutzschalter */
+function mindestquerschnitt(ib, t, n){
+ var tab = B2[t][n], iN = LSS.filter(function(x){ return x >= ib; })[0], k;
+ for(k = 0; k < tab.length; k++) if(tab[k][1] >= iN) break;
+ var kTab = 0; while(kTab < tab.length && tab[kTab][2] < ib) kTab++;   /* zweiter Weg: untere Tabellenzahl */
+ return {k: k, iN: iN, eindeutig: k < tab.length && k === kTab};
+}
+function qsGut(ib, t, n){
+ if(ib < 8 || ib > 115 || (ib > 32 && ib <= 35)) return false;   /* 35 A gibt es als Schalter nicht in jeder Reihe */
+ var r = mindestquerschnitt(ib, t, n); if(!r.eindeutig) return false;
+ var grenzen = LSS.concat(B2[t][n].map(function(z){ return z[1]; }), B2[t][n].map(function(z){ return z[2]; }));
+ return grenzen.every(function(g){ return Math.abs(ib - g) >= 0.6; });   /* Rundung kippt das Ergebnis nicht */
+}
+S.push({typ: "Leitungsquerschnitt nach der Kompensation", tol: 1e-6, f: function(){
+ var dreh = Math.random() < 0.65, t = wahl([25, 30]), n = dreh ? 3 : 2, p, c1, c2, ib, i1;
+ do {
+  c1 = wahl(COS1); c2 = wahl(COS2);
+  if(dreh){ p = zehntel(4, 60); ib = p*1000/(W3*400*c2); i1 = p*1000/(W3*400*c1); }
+  else { p = ziehe(function(){ return zuf(16, 70)*100; }); ib = p/(230*c2); i1 = p/(230*c1); }
+ } while(!qsGut(ib, t, n));
+ var r = mindestquerschnitt(ib, t, n), tab = B2[t][n], z = tab[r.k], seite = t === 25 ? "S. 197 (25 °C)" : "S. 198 (30 °C)";
+ var vor = qsGut(i1, t, n) ? tab[mindestquerschnitt(i1, t, n).k][0] : null;
+ var frage = (dreh ? "Ein Drehstrommotor nimmt am Netz 400 V die Wirkleistung <i>P</i> = " + zahl(p, 1) + " kW bei " + COS + "<sub>1</sub> = " + fest(c1, 2) + " auf. Ein Kondensator direkt am Motor hebt den Wirkfaktor auf " + COS + "<sub>2</sub> = " + fest(c2, 2) + "."
+   : "Eine Anlage nimmt an 230 V die Wirkleistung <i>P</i> = " + zahl(p, 0) + " W bei " + COS + "<sub>1</sub> = " + fest(c1, 2) + " auf. Ein Kondensator direkt an der Anlage hebt den Wirkfaktor auf " + COS + "<sub>2</sub> = " + fest(c2, 2) + ".") +
+  " Die Kupferleitung liegt in Verlegeart B2 bei der Umgebungstemperatur " + t + " °C; weitere Umrechnungsfaktoren entfallen. Ein Leitungsschutzschalter schützt sie. Bestimmen Sie den Mindestquerschnitt nach der Kompensation.";
+ var formel = dreh ? "<i>P</i> = " + wz("3") + MAL + "<i>U</i>" + MAL + "<i>I</i>" + MAL + COS + ", umgestellt " + ix("I", "B") + " = " + br("<i>P</i>", wz("3") + MAL + "<i>U</i>" + MAL + COS + "<sub>2</sub>")
+   : "<i>P</i> = <i>U</i>" + MAL + "<i>I</i>" + MAL + COS + ", umgestellt " + ix("I", "B") + " = " + br("<i>P</i>", "<i>U</i>" + MAL + COS + "<sub>2</sub>");
+ var einsetzen = ix("I", "B") + " = " + (dreh ? br(zahl(p*1000, 0) + " W", wz("3") + MAL + "400 V" + MAL + fest(c2, 2)) : br(zahl(p, 0) + " W", "230 V" + MAL + fest(c2, 2))) + " " + erg(ib, "A");
+ var tabelle = "Tabellenbuch " + seite + ", Verlegeart B2, " + n + " Strom führende Leiter: " + (r.k > 0 ? zahl(tab[r.k - 1][0]) + " mm² nur " + ix("I", "r") + " = " + zahl(tab[r.k - 1][1]) + " A &lt; " + ix("I", "N") + "; " : "") +
+  zahl(z[0]) + " mm² mit " + ix("I", "r") + " = " + zahl(z[1]) + " A. Ohne Umrechnungsfaktor ist " + ix("I", "Z") + " = " + ix("I", "r") + ".";
+ return {art: "querschnitt", p: {dreh: dreh, p: p, c1: c1, c2: c2, t: t, n: n}, wert: z[0], einh: "mm²",
+  frage: frage,
+  weg: [["Formel", formel], ["Einsetzen", einsetzen],
+   ["Schutz", ix("I", "N") + " = " + r.iN + " A: der nächste Bemessungsstrom eines Leitungsschutzschalters, nicht kleiner als " + ix("I", "B")],
+   ["Tabelle", tabelle],
+   ["Ergebnis", ix("I", "B") + " ≤ " + ix("I", "N") + " ≤ " + ix("I", "Z") + ":  " + zahl(ib) + " A ≤ " + r.iN + " A ≤ " + zahl(z[1]) + " A;  Mindestquerschnitt " + zahl(z[0]) + " mm²"]],
+  merke: "Tabellenbuch S. 206, Formel 1 (Bemessungsstromregel) und S. 195, Formel 2 (" + ix("I", "Z") + " = <i>F</i>" + MAL + ix("I", "r") + "; ohne Umrechnungsfaktor ist <i>F</i> = 1). Die untere Zahl der Tabelle nennt den größten Bemessungsstrom der Schutzeinrichtung für diesen Querschnitt." +
+   (vor !== null ? " Vor der Kompensation (" + ix("I", "1") + " " + erg(i1, "A") + ") wären " + zahl(vor) + " mm² nötig gewesen." : "")};
 }});
 S.push({typ: "Kosten der Blindarbeit", f: function(){
  var q = ziehe(function(){ var x = zuf(13, 95)*10; return x === 500 ? 510 : x; }), h = wahl([6, 7, 8, 9, 10, 12, 14]), tage = wahl([19, 21, 23]), ct = wahl([1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.4]);
@@ -332,13 +400,47 @@ var BEGRIFFE = [
  {typ: "Warum kompensieren", frage: "Warum verlangen Netzbetreiber von Betrieben mit großer induktiver Last eine Kompensation?",
   optionen: ["Die Blindleistung pendelt zwischen Erzeuger und Verbraucher und belastet Leitungen und Transformatoren mit Strom, obwohl sie in keine andere Energieform umgewandelt wird.", "Weil Blindleistung als Wärme verloren geht und den Zähler beschädigt.", "Weil ohne Kompensation die Wirkleistung der Motoren sinkt."], richtig: 0,
   begruendung: "Für die Blindleistung muss Strom fließen. Leitungen, Transformatoren und Schutzeinrichtungen müssen dafür größer bemessen werden. Mit Kompensation sinken Strom und Scheinleistung, die Anlage kann mehr Wirkleistung übertragen."}];
+/* ---------- Thema 5: Netzqualität (11.5.4) ----------
+   Fachlich nach Tabellenbuch S. 322 (Oberschwingungen OS, Folgen, Maßnahmen), S. 324 (Grundschwingung, Harmonische,
+   Ordnungszahl, nicht lineare Kennlinien, Rückwirkung auf die Netzspannung), S. 327 (verdrosselte Kompensation,
+   Rundsteueranlagen, Filter) und Fachkunde S. 166 (Tonfrequenz-Rundsteueranlagen), S. 167 (Kompensation bei
+   nichtsinusförmigen Strömen), S. 311 (Netzqualität, Oberschwingungsfilter). Leitbegriffe wie Block 9. */
+var NETZ = [
+ {typ: "Oberschwingungen", frage: "Was sind Oberschwingungen im Netz?",
+  optionen: ["Sinusförmige Schwingungen, deren Frequenz ein ganzzahliges Vielfaches der Grundschwingungsfrequenz ist; sie überlagern sich der Grundschwingung.", "Kurze Spannungsspitzen, die nur bei Blitzeinschlägen auftreten.", "Schwankungen der Netzfrequenz um 50 Hz herum."], richtig: 0,
+  begruendung: "Eine genau sinusförmige Größe ist die Grundschwingung. Jede davon abweichende Wechselgröße lässt sich aus der Grundschwingung und Oberschwingungen zusammensetzen; deren Frequenzen sind ganzzahlige Vielfache der Grundschwingungsfrequenz. Man nennt sie Harmonische (Tabellenbuch S. 324)."},
+ {typ: "Harmonische und Ordnungszahl", frage: "Welche Frequenz hat im 50-Hz-Netz die 5. Harmonische?",
+  optionen: ["250 Hz", "300 Hz", "55 Hz"], richtig: 0,
+  begruendung: "Die Ordnungszahl <i>ν</i> gibt das Vielfache der Grundschwingungsfrequenz an: 5" + MAL + "50 Hz = 250 Hz (Fachkunde S. 167). Das Tabellenbuch S. 324 rät, nach Ordnungszahlen zu zählen und nicht von der „2. Oberschwingung“ zu sprechen, weil das missverständlich ist."},
+ {typ: "Ursache", frage: "Welche Verbraucher erzeugen Oberschwingungen?",
+  optionen: ["Verbraucher mit nicht linearen Kennlinien, zum Beispiel Frequenzumrichter, Schaltnetzteile und steuerbare Gleichrichter", "Widerstandsheizungen", "Drehstrommotoren direkt am Netz"], richtig: 0,
+  begruendung: "Bauelemente mit nicht linearen Kennlinien (Dioden, Thyristoren, Transistoren) machen den aufgenommenen Strom nichtsinusförmig (Tabellenbuch S. 324). Typische Quellen sind Frequenzumrichter, Schaltnetzteile und steuerbare Gleichrichter (S. 322). Widerstandsheizungen und Drehstrommotoren erzeugen keine Oberschwingungen (Fachkunde S. 167)."},
+ {typ: "Rückwirkung auf das Netz", frage: "Warum stören die Oberschwingungsströme eines Verbrauchers auch andere Verbraucher am selben Netz?",
+  optionen: ["Die Oberschwingungsströme rufen Oberschwingungen der Netzspannung hervor, die alle Verbraucher erreichen.", "Weil sie die Netzfrequenz anheben.", "Gar nicht, Oberschwingungen bleiben im erzeugenden Gerät."], richtig: 0,
+  begruendung: "Lastströme von Verbrauchern rufen Oberschwingungen hervor, die sich der Netzspannung überlagern (Tabellenbuch S. 324, Rückwirkung auf die Netzspannung). Das ist eine Netzrückwirkung."},
+ {typ: "Folgen", frage: "Welche Folge haben Oberschwingungen, vor allem die 3. Harmonische, in einem Vierleiternetz?",
+  optionen: ["Der Strom im Neutralleiter kann größer werden als der Strom in einem Außenleiter; Leitungen und Wicklungen erwärmen sich stärker.", "Der Neutralleiter wird stromlos.", "Der Wirkfaktor wird genau 1."], richtig: 0,
+  begruendung: "Die Ströme der 3. Harmonischen der drei Außenleiter addieren sich im Neutralleiter (Tabellenbuch S. 322, Bild). Außerdem laufen Motoren mit Geräuschen, Verluste und Erwärmung steigen; Neutralleiter, Kondensatoren und Wicklungen können überlastet werden (Fachkunde S. 311)."},
+ {typ: "Resonanz bei Kompensation", frage: "Warum sind Kompensationskondensatoren ohne Drossel in einem Netz mit Oberschwingungen gefährdet?",
+  optionen: ["Die Kompensationskapazität bildet mit der Induktivität des Netzes einen Reihenschwingkreis; liegt dessen Resonanzfrequenz bei einer Oberschwingung, wird sie verstärkt, und Spannungserhöhungen gefährden die Anlage.", "Weil Kondensatoren bei höherer Frequenz einen größeren Blindwiderstand haben und keinen Strom mehr führen.", "Weil Oberschwingungen die induktive Blindleistung der Motoren erhöhen."], richtig: 0,
+  begruendung: "Bildet die Kompensationskapazität mit der Induktivität des Netzes einen Reihenschwingkreis, werden die Oberschwingungen bei Resonanz zusätzlich verstärkt. Es drohen Spannungserhöhungen, Spannungsüberschläge und Anlagenbrände (Fachkunde S. 167)."},
+ {typ: "Verdrosselung", frage: "Was bewirkt eine verdrosselte Kompensation?",
+  optionen: ["Eine Drossel in Reihe zu jedem Kondensator legt die Resonanzfrequenz unter die Frequenzen der Oberschwingungen im Netz; die Oberschwingungen werden nicht mehr verstärkt.", "Die Drossel erhöht die kapazitive Blindleistung der Anlage.", "Die Drossel sperrt die Grundschwingung von 50 Hz."], richtig: 0,
+  begruendung: "Der Reihenschwingkreis aus Drossel und Kondensator wird so abgestimmt, dass seine Resonanzfrequenz unterhalb der Oberschwingungen im Netz liegt, bei 7 % Verdrosselung 189 Hz (Fachkunde S. 167). Durch Verdrosselung der Kondensatoren werden die Oberschwingungen nicht kompensiert, die sonst ohne Drosseln oft verstärkt werden (Tabellenbuch S. 327)."},
+ {typ: "Rundsteueranlage", frage: "Was hat eine Kompensationsanlage mit der Rundsteueranlage des Netzbetreibers zu tun?",
+  optionen: ["Kondensatoren ohne Drossel dämpfen die Tonfrequenzsignale der Rundsteueranlage, weil ihr Widerstand mit steigender Frequenz kleiner wird; verdrosselte Kondensatoren oder Tonfrequenzsperren verhindern das.", "Die Rundsteueranlage liefert die kapazitive Blindleistung für die Kompensation.", "Die Rundsteueranlage misst den Wirkfaktor des Kunden und berechnet die Blindarbeit."], richtig: 0,
+  begruendung: "Der Netzbetreiber steuert mit Tonfrequenzsignalen Schaltgeräte, zum Beispiel Zweitarifzähler. Parallel geschaltete Kondensatoren dämpfen diese Signale, weil ihr Widerstand für höhere Frequenzen kleiner wird (Fachkunde S. 166). Bei verdrosselten Kondensatoren werden die Tonfrequenzsignale der Rundsteueranlagen nicht geschwächt (Tabellenbuch S. 327)."},
+ {typ: "Maßnahmen", frage: "Welche Maßnahme verringert die Oberschwingungsströme im Netz?",
+  optionen: ["Netzfilter, zum Beispiel Saugkreisfilter, Bandsperrenfilter oder ein aktives Filter", "Zusätzliche Kondensatoren ohne Drossel", "Ein kleinerer Neutralleiterquerschnitt"], richtig: 0,
+  begruendung: "Oberschwingungen werden durch elektrische Filter kompensiert: passive Filter (Saugkreisfilter, Bandsperrenfilter) aus Induktivitäten und Kapazitäten oder aktive Filter mit Leistungselektronik (Tabellenbuch S. 327; Fachkunde S. 311). Im Extremfall wird der Neutralleiterquerschnitt größer (Tabellenbuch S. 322)."}];
+var N = [{typ: "", f: function(){ var b = wahl(NETZ); return {art: "netz", mc: true, p: {}, frage: b.frage, optionen: b.optionen, richtig: b.richtig, begruendung: b.begruendung, typText: "Netzrückwirkungen, " + b.typ}; }}];   /* Typ T16 der Prüfungen */
 var V = [{typ: "", f: function(){ var b = wahl(BEGRIFFE); return {art: "begriff", mc: true, p: {}, frage: b.frage, optionen: b.optionen, richtig: b.richtig, begruendung: b.begruendung, typText: b.typ}; }}];
 
-var GEBIETE = {l: {name: "1 Leistungen", liste: L}, k: {name: "2 Kondensator berechnen", liste: K}, s: {name: "3 Strom und Kosten", liste: S}, v: {name: "4 Verständnis", liste: V}};
-var zustand = {gebiet: null, aufgabe: null, geprueft: false, richtig: 0, gesamt: 0, folge: {l: 0, k: 0, s: 0, v: 0}};
+var GEBIETE = {l: {name: "1 Leistungen", liste: L}, k: {name: "2 Kondensator berechnen", liste: K}, s: {name: "3 Strom, Leitung und Kosten", liste: S}, v: {name: "4 Verständnis", liste: V}, n: {name: "5 Netzqualität", liste: N}};
+var zustand = {gebiet: null, aufgabe: null, geprueft: false, richtig: 0, gesamt: 0, folge: {l: 0, k: 0, s: 0, v: 0, n: 0}};
 
 function ziehen(){
- var gk = zustand.gebiet === "alle" ? wahl(["l", "k", "s", "v"]) : zustand.gebiet;
+ var gk = zustand.gebiet === "alle" ? wahl(["l", "k", "s", "v", "n"]) : zustand.gebiet;
  var gen = wahl(GEBIETE[gk].liste), a = gen.f();
  a.gebiet = gk; a.typ = a.typText || gen.typ; a.tol = gen.tol || 0.01;
  return a;
@@ -395,16 +497,22 @@ function mcWahl(i){
  $("fb").innerHTML = (ok ? "Richtig. " : "Nicht richtig. ") + '<span style="font-weight:400;color:var(--ink)"><b>Musterlösung:</b> ' + a.begruendung + "</span>";
 }
 function stand(){
- var f = zustand.folge, fertig = f.l >= 5 && f.k >= 5 && f.s >= 5 && f.v >= 5;
+ var f = zustand.folge, fertig = f.l >= 5 && f.k >= 5 && f.s >= 5 && f.v >= 5 && f.n >= 5;
  $("stand").innerHTML = "<span>Richtig: <b>" + zustand.richtig + "</b> von <b>" + zustand.gesamt + "</b></span>" +
-  "<span>In Folge richtig: Thema 1 <b>" + f.l + "</b>, Thema 2 <b>" + f.k + "</b>, Thema 3 <b>" + f.s + "</b>, Thema 4 <b>" + f.v + "</b></span>" +
-  (fertig ? '<span style="color:var(--gruen);font-weight:700">Fertig: in allen vier Themen fünf in Folge richtig.</span>' : "");
+  "<span>In Folge richtig: Thema 1 <b>" + f.l + "</b>, Thema 2 <b>" + f.k + "</b>, Thema 3 <b>" + f.s + "</b>, Thema 4 <b>" + f.v + "</b>, Thema 5 <b>" + f.n + "</b></span>" +
+  (fertig ? '<span style="color:var(--gruen);font-weight:700">Fertig: in allen fünf Themen fünf in Folge richtig.</span>' : "");
 }
 function knoepfe(gruppe, attr, feld){
  Array.prototype.forEach.call($(gruppe).querySelectorAll("button"), function(b){
   b.addEventListener("click", function(){
    Array.prototype.forEach.call($(gruppe).querySelectorAll("button"), function(x){ x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
    zustand[feld] = b.getAttribute(attr); neu();
+   /* Am Handy liegt die Aufgabe nach der Wahl unter dem sichtbaren Bereich: dorthin springen (Prüfer B10, 21.10.2026) */
+   var karte = $("karte"), r = karte.getBoundingClientRect();
+   if(r.top < 0 || r.top > window.innerHeight*0.35){
+    var ruhig = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    karte.scrollIntoView({block: "start", behavior: ruhig ? "auto" : "smooth"});
+   }
   });
  });
 }
@@ -418,9 +526,9 @@ stand();
 /* ---------- Prüfhilfen für die Nachrechnung von außen ---------- */
 window.probe = function(n){
  var aus = [];
- ["l", "k", "s", "v"].forEach(function(gk){
+ ["l", "k", "s", "v", "n"].forEach(function(gk){
   GEBIETE[gk].liste.forEach(function(gen, k){
-   for(var i = 0; i < n; i++){ var a = gen.f(); aus.push({gebiet: gk, gen: k, art: a.art, p: a.p, wert: a.wert, mc: !!a.mc, frage: a.frage.replace(/<[^>]+>/g, ""), weg: a.weg ? a.weg.map(function(z){ return z[0] + ": " + z[1].replace(/<[^>]+>/g, " "); }).join(" | ") : "", merke: (a.merke || "").replace(/<[^>]+>/g, " ")}); }
+   for(var i = 0; i < n; i++){ var a = gen.f(); aus.push({gebiet: gk, gen: k, typ: gen.typ, tol: gen.tol || 0.01, tolAbs: a.tolAbs || 0, art: a.art, p: a.p, wert: a.wert, mc: !!a.mc, frage: a.frage.replace(/<[^>]+>/g, ""), weg: a.weg ? a.weg.map(function(z){ return z[0] + ": " + z[1].replace(/<[^>]+>/g, " "); }).join(" | ") : "", merke: (a.merke || "").replace(/<[^>]+>/g, " ")}); }
   });
  });
  return aus;
@@ -429,10 +537,11 @@ window.probe = function(n){
 window.kaprobe = function(n){
  var zahlen = {};
  window.probe(n).forEach(function(a){
-  (a.frage.replace(/ /g, "").match(/\d+(?:,\d+)?/g) || []).forEach(function(z){ zahlen[z] = (zahlen[z] || 0) + 1; });
+  /* ausgenommen: die Umgebungstemperatur, unter der die Tabelle S. 197 (25 °C) oder S. 198 (30 °C) steht */
+  (a.frage.replace(/Umgebungstemperatur (25|30) °C/g, "Umgebungstemperatur der Tabelle").replace(/ /g, "").match(/\d+(?:,\d+)?/g) || []).forEach(function(z){ zahlen[z] = (zahlen[z] || 0) + 1; });
  });
  return zahlen;
 };
-window.mcprobe = function(){ return BEGRIFFE.map(function(b){ return b.frage.replace(/<[^>]+>/g, "") + " || " + b.begruendung; }); };
+window.mcprobe = function(){ return BEGRIFFE.concat(NETZ).map(function(b){ return b.frage.replace(/<[^>]+>/g, "") + " || " + b.begruendung; }); };
 })();
 </script>
