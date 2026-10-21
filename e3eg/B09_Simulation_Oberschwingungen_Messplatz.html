@@ -9,41 +9,41 @@
           (die Schüler rechnen ihn zuerst selbst, Aufgabe 2).
        B  Kompensationsanlage: Sammelschiene 3 AC 400 V, 50 Hz, ohne N-Leiter; die Netzspannung enthält die 5. Harmonische
           (3 %) und die 7. Harmonische (2 %) (Tabellenbuch S. 323: zulässig 6 % und 5 %; bei 3 AC ohne N-Leiter keine
-          Ordnungszahl 3, S. 324, Formel 2). Kompensationsanlage mit 6 Stufen zu je 50 kvar, Kondensatoren in Dreieck,
-          ohne Drossel oder mit 7 % Verdrosselung. Anzeigen: Strom einer Stufe (Echt-Effektivwert), Resonanzfrequenz des
+          Ordnungszahl 3, S. 324, Formel 2). Kompensationsanlage mit 6 Einzelbatterien zu je 50 kvar, Kondensatoren in Dreieck,
+          ohne Drossel oder mit 7 % Verdrosselung. Anzeigen: Strom einer Einzelbatterie (Echt-Effektivwert), Resonanzfrequenz des
           Reihenschwingkreises aus Induktivität des Netzes und Anlage, THD-Wert der Spannung an der Sammelschiene,
-          Oszilloskop (Strom einer Stufe, 100 A je Kästchen), Resonanzkurve Z über f mit Marken bei 250 Hz und 350 Hz.
+          Oszilloskop (Strom einer Einzelbatterie, 100 A je Kästchen), Resonanzkurve Z über f mit Marken bei 250 Hz und 350 Hz.
      Ziel-Erkenntnis (die Seite nennt sie nicht):
        A  Ein verzerrter Strom ist die Überlagerung der 50-Hz-Grundschwingung mit Oberschwingungen, deren Frequenz ein
           ganzzahliges Vielfaches von 50 Hz ist (3, 5, 7 Schwingungen in 20 ms).
        B  Ohne Drossel bilden Kompensationskondensator und Induktivität des Netzes einen Reihenschwingkreis; trifft seine
-          Resonanzfrequenz eine Oberschwingung (3 Stufen: 354 Hz nahe 350 Hz; 6 Stufen: 250 Hz), wird sie verstärkt: Der
-          Strom einer Stufe steigt weit über den Bemessungsstrom, die Spannung wird stark verzerrt (THD über 8 %). Mit 7 %
-          Verdrosselung liegt die Resonanzfrequenz bei jeder Stufenzahl unter 250 Hz (181 Hz bis 153 Hz); der Strom bleibt
+          Resonanzfrequenz eine Oberschwingung (3 Einzelbatterien: 354 Hz nahe 350 Hz; 6 Einzelbatterien: 250 Hz), wird sie verstärkt: Der
+          Strom einer Einzelbatterie steigt weit über den Bemessungsstrom, die Spannung wird stark verzerrt (THD über 8 %). Mit 7 %
+          Verdrosselung liegt die Resonanzfrequenz bei jeder Einzelbatterienzahl unter 250 Hz (181 Hz bis 153 Hz); der Strom bleibt
           beim Bemessungsstrom, der THD-Wert sinkt sogar unter den Wert ohne Anlage.
      Rechenmodell (Ersatzschaltung je Strang; Fachkunde S. 167: Kompensationskapazität und Induktivität des Netzes bilden
      einen Reihenschwingkreis, Drossel in Reihe, p = X_L/X_C; Tabellenbuch S. 40, Formel 16, 21 und „Bei Resonanz ist
      X_L = X_C“; Tabellenbuch S. 325, Formel 1 für den THD-Wert; amtlicher Lösungsvorschlag Winter 2016/17 SE 4, 4.5):
        U = 400 V, U_Str = U/√3; Induktivität des Netzes aus der Kurzschlussleistung 7,5 MVA: X_N = U²/S_k = 21,33 mΩ bei
-       50 Hz; Dämpfung R = 10 mΩ; je Stufe q = 50 kvar bei 50 Hz: ohne Drossel X_C1 = U²/q, mit Drossel X_C1 = U²/(q(1 − p)),
-       X_D1 = p · X_C1 (die verdrosselte Stufe gibt ebenfalls 50 kvar ab). n Stufen: X_C = X_C1/n, X_D = X_D1/n.
-       50-Hz-Anteil: die Sammelschiene hält 400 V, Strom einer Stufe I_1 = q/(√3 · U) = 72,17 A (Bemessungsstrom).
+       50 Hz; Dämpfung R = 10 mΩ; je Einzelbatterie q = 50 kvar bei 50 Hz: ohne Drossel X_C1 = U²/q, mit Drossel X_C1 = U²/(q(1 − p)),
+       X_D1 = p · X_C1 (die verdrosselte Einzelbatterie gibt ebenfalls 50 kvar ab). n Einzelbatterien: X_C = X_C1/n, X_D = X_D1/n.
+       50-Hz-Anteil: die Sammelschiene hält 400 V, Strom einer Einzelbatterie I_1 = q/(√3 · U) = 72,17 A (Bemessungsstrom).
        Oberschwingung ν (5, 7): Spannungsquelle a_ν · U_Str hinter X_N; X_Zweig = ν · X_D − X_C/ν; Z = √(R² + (ν · X_N + X_Zweig)²);
-       I_ν = a_ν · U_Str/Z (alle Stufen), je Stufe I_ν/n; Spannung an der Sammelschiene U_ν,S = a_ν · U_Str · |X_Zweig|/Z.
-       I_St = √(I_1² + I_5,St² + I_7,St²); THD = √(U_5,S² + U_7,S²)/U_Str (ohne Stufe: √(a_5² + a_7²)).
+       I_ν = a_ν · U_Str/Z (alle Einzelbatterien), je Einzelbatterie I_ν/n; Spannung an der Sammelschiene U_ν,S = a_ν · U_Str · |X_Zweig|/Z.
+       I_St = √(I_1² + I_5,St² + I_7,St²); THD = √(U_5,S² + U_7,S²)/U_Str (ohne Einzelbatterie: √(a_5² + a_7²)).
        f_r = 50 Hz · √(X_C/(X_N + X_D)); Resonanzkurve Z(f) = √(R² + ((f/50 Hz) · (X_N + X_D) − X_C · 50 Hz/f)²).
      Anzeigen und Arbeitsblatt (nachgerechnet in b09_gemeinsam.py, gleiche Rundung):
-       ohne Drossel 1/2/3/4/5/6 Stufen: f_r 612/433/354/306/274/250 Hz; I_St 74,8/79,4/165,4/85,0/94,4/136,6 A;
+       ohne Drossel 1/2/3/4/5/6 Einzelbatterien: f_r 612/433/354/306/274/250 Hz; I_St 74,8/79,4/165,4/85,0/94,4/136,6 A;
        THD 4,7/7,3/29,8/10,8/16,6/32,1 %. Mit Drossel: f_r 181/174/168/162/157/153 Hz; I_St 73,1/72,9/72,7/72,6/72,5/72,5 A;
-       THD 3,1/2,7/2,4/2,1/1,9/1,8 %. Ohne Stufe: THD 3,6 %.
+       THD 3,1/2,7/2,4/2,1/1,9/1,8 %. Ohne Einzelbatterie: THD 3,6 %.
        Ansicht A, 3. Harm. 30 %, 5. Harm. 20 %, 7. Harm. 10 %: I1 10,00 A, I3 3,00 A, I5 2,00 A, I7 1,00 A, I 10,68 A,
        THD 37,4 %.
-     Startstellung neutral: Ansicht A, alle Anteile 0 %, Kanal 2 aus; Ansicht B: keine Stufe, ohne Drossel.
+     Startstellung neutral: Ansicht A, alle Anteile 0 %, Kanal 2 aus; Ansicht B: keine Einzelbatterie, ohne Drossel.
      Prüfmodus ?pruefen: alle Einstellungen der Ansicht B und die Einstellung der Aufgabe 2 als JSON in #pruefbericht. -->
 <html lang="de"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Messplatz Oberschwingungen und Kompensationsanlage (B09)</title>
-<script type="application/json" id="sim-meta">{"startwerte":{"ansicht":"A","h3_prozent":0,"h5_prozent":0,"h7_prozent":0,"kanal2":"aus","stufen":0,"drossel":"ohne"},"loesungswerte":{"Aufgabe 1 a":"je 20 %: 3, 5, 7 Schwingungen in 20 ms; 150 Hz, 250 Hz, 350 Hz","Aufgabe 1 b, Aufgabe 2":"30 %, 20 %, 10 %: I1 10,00 A, I3 3,00 A, I5 2,00 A, I7 1,00 A, I 10,68 A, THD 37,4 %","Aufgabe 3 ohne Drossel":"1 Stufe 612 Hz 74,8 A; 3 Stufen 354 Hz 165,4 A; 4 Stufen 306 Hz 85,0 A; 6 Stufen 250 Hz 136,6 A","Aufgabe 3 mit Drossel":"1 Stufe 73,1 A; 3 Stufen 72,7 A; 4 Stufen 72,6 A; 6 Stufen 72,5 A; f_r 181 Hz bis 153 Hz","Aufgabe 3 THD bei 6 Stufen":"ohne Drossel 32,1 %, mit Drossel 1,8 %","Erkenntnis":"Trifft die Resonanzfrequenz von Kondensator und Induktivität des Netzes eine Oberschwingung, steigt der Strom der Kondensatoren weit über den Bemessungsstrom; mit Drossel liegt die Resonanzfrequenz unter 250 Hz"},"quelle":"Europa Fachkunde S. 167 (Bild 1, Bild 2, Verdrosselungsfaktor), S. 309 (Bild 1), S. 311; Tabellenbuch Elektrotechnik S. 40 (Formel 16, 21), S. 323, S. 324 (Formel 1, 2), S. 325 (Formel 1), S. 327"}</script>
+<script type="application/json" id="sim-meta">{"startwerte":{"ansicht":"A","h3_prozent":0,"h5_prozent":0,"h7_prozent":0,"kanal2":"aus","stufen":0,"drossel":"ohne"},"loesungswerte":{"Aufgabe 1 a":"je 20 %: 3, 5, 7 Schwingungen in 20 ms; 150 Hz, 250 Hz, 350 Hz","Aufgabe 1 b, Aufgabe 2":"30 %, 20 %, 10 %: I1 10,00 A, I3 3,00 A, I5 2,00 A, I7 1,00 A, I 10,68 A, THD 37,4 %","Aufgabe 4 ohne Drossel":"1 Einzelbatterie 612 Hz 74,8 A; 3 Einzelbatterien 354 Hz 165,4 A; 4 Einzelbatterien 306 Hz 85,0 A; 6 Einzelbatterien 250 Hz 136,6 A","Aufgabe 4 mit Drossel":"1 Einzelbatterie 73,1 A; 3 Einzelbatterien 72,7 A; 4 Einzelbatterien 72,6 A; 6 Einzelbatterien 72,5 A; f_r 181 Hz bis 153 Hz","Aufgabe 4 THD bei 6 Einzelbatterien":"ohne Drossel 32,1 %, mit Drossel 1,8 %","Erkenntnis":"Trifft die Resonanzfrequenz von Kondensator und Induktivität des Netzes eine Oberschwingung, steigt der Strom der Kondensatoren weit über den Bemessungsstrom; mit Drossel liegt die Resonanzfrequenz unter 250 Hz"},"quelle":"Europa Fachkunde S. 167 (Bild 1, Bild 2, Verdrosselungsfaktor), S. 309 (Bild 1), S. 311; Tabellenbuch Elektrotechnik S. 40 (Formel 16, 21), S. 323, S. 324 (Formel 1, 2), S. 325 (Formel 1), S. 327"}</script>
 <style>
  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
  :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;
@@ -140,11 +140,11 @@
  <!-- =========================================================== Ansicht B -->
  <div class="ansicht" id="ansichtB">
   <div class="lage">Sammelschiene 3 AC 400 V, 50 Hz, ohne N-Leiter. Die Netzspannung enthält die 5. Harmonische
-   (3 %) und die 7. Harmonische (2 %). Kompensationsanlage: 6 Stufen zu je 50 kvar, Kondensatoren in Dreieck.
-   Bemessungsstrom einer Stufe: 72,2 A.</div>
+   (3 %) und die 7. Harmonische (2 %). Kompensationsanlage: 6 Einzelbatterien zu je 50 kvar, Kondensatoren in Dreieck.
+   Bemessungsstrom einer Einzelbatterie: 72,2 A.</div>
   <div class="buehne">
    <div class="wahl">
-    <div class="titel">Zugeschaltete Stufen</div>
+    <div class="titel">Zugeschaltete Einzelbatterien</div>
     <div class="regler stufen" id="stufenzeile"></div>
     <div class="titel">Drossel vor jedem Kondensator</div>
     <div class="knoepfe" id="drossel"></div>
@@ -152,7 +152,7 @@
      des Kondensators (bei 50 Hz).</div>
    </div>
    <div class="geraete">
-    <div class="geraet breit"><div class="name">Strom einer Stufe <span class="fz">I</span><sub>St</sub></div><div class="lcd" id="aISt">0,0 A</div><div class="art">Echt-Effektivwert, Bemessungsstrom 72,2 A</div></div>
+    <div class="geraet breit"><div class="name">Strom einer Einzelbatterie <span class="fz">I</span></div><div class="lcd" id="aISt">0,0 A</div><div class="art">Echt-Effektivwert, Bemessungsstrom 72,2 A</div></div>
     <div class="geraet"><div class="name">Resonanzfrequenz <span class="fz">f</span><sub>r</sub></div><div class="lcd" id="aFr">keine</div><div class="art">Netz und Anlage</div></div>
     <div class="geraet"><div class="name">THD-Wert der Spannung</div><div class="lcd" id="aTHDU">3,6 %</div><div class="art">an der Sammelschiene</div></div>
    </div>
@@ -160,9 +160,9 @@
   <div class="schirm"><div class="name">Resonanzkurve: Scheinwiderstand <span class="fz">Z</span> des Reihenschwingkreises aus Induktivität des
    Netzes und Kompensationsanlage · Marken: 5. und 7. Harmonische</div>
    <canvas id="cKurve" class="hellgrund" width="900" height="380" data-verhaeltnis="0.42" data-mindest="250" aria-label="Scheinwiderstand über der Frequenz mit Marken bei 250 Hz und 350 Hz"></canvas></div>
-  <div class="schirm"><div class="name">Oszilloskop: Strom einer Stufe · 4 ms je Kästchen · 100 A je Kästchen</div>
-   <canvas id="cOszB" width="900" height="360" data-verhaeltnis="0.4" data-mindest="230" aria-label="Oszilloskop: Strom einer Kondensatorstufe"></canvas>
-   <div class="legende"><i class="strich" style="border-color:#FF6FB5"></i>Strom einer Stufe <span class="fz">i</span><sub>St</sub> &nbsp;
+  <div class="schirm"><div class="name">Oszilloskop: Strom einer Einzelbatterie · 4 ms je Kästchen · 100 A je Kästchen</div>
+   <canvas id="cOszB" width="900" height="360" data-verhaeltnis="0.4" data-mindest="230" aria-label="Oszilloskop: Strom einer Einzelbatterie"></canvas>
+   <div class="legende"><i class="strich" style="border-color:#FF6FB5"></i>Strom einer Einzelbatterie <span class="fz">i</span> &nbsp;
     <i class="strich" style="border-color:#C8D2D8;border-top-style:dashed"></i>50-Hz-Anteil</div></div>
   <div class="wahl"><div class="titel">Neu beginnen</div>
    <div class="knoepfe"><button class="zurueck" id="bResetB" type="button">Zurücksetzen</button></div></div>
@@ -219,11 +219,11 @@ var reglerAnz={};
 var k2aus=knopf($("kanal2"),"aus","Kanal 2 aus",function(){z.kanal2=false;});
 var k2ein=knopf($("kanal2"),"ein","Kanal 2 ein",function(){z.kanal2=true;});
 var thdK=knopf($("thdknopf"),"THD anzeigen","THD-Wert anzeigen",function(){z.thd=!z.thd;});
-// Stufen: Minus, Anzeige, Plus
+// Einzelbatterien: Minus, Anzeige, Plus
 var stufenZeile=$("stufenzeile");
-var sMinus=knopf(stufenZeile,"−","eine Stufe weniger",function(){z.n=Math.max(0,z.n-1);});
+var sMinus=knopf(stufenZeile,"−","eine Einzelbatterie weniger",function(){z.n=Math.max(0,z.n-1);});
 var sAnz=document.createElement("span"); sAnz.className="wert"; sAnz.setAttribute("aria-live","polite"); stufenZeile.appendChild(sAnz);
-var sPlus=knopf(stufenZeile,"+","eine Stufe mehr",function(){z.n=Math.min(6,z.n+1);});
+var sPlus=knopf(stufenZeile,"+","eine Einzelbatterie mehr",function(){z.n=Math.min(6,z.n+1);});
 var drOhne=knopf($("drossel"),"ohne","ohne Drossel",function(){z.dr=false;});
 var drMit=knopf($("drossel"),"mit 7 %","mit Drossel, 7 Prozent",function(){z.dr=true;});
 $("bResetA").onclick=function(){var a=z.ansicht; z=kopie(START); z.ansicht=a; auffrischen();};
@@ -294,7 +294,7 @@ function zeichneB(){
   g.strokeStyle="#5E7F8F"; g.lineWidth=1.6; g.beginPath(); g.moveTo(m,m+hk/2); g.lineTo(m+bw,m+hk/2); g.stroke();
   g.beginPath(); g.moveTo(m+bw/2,m); g.lineTo(m+bw/2,m+hk); g.stroke();
   var a=anlage(z.n,z.dr);
-  if(z.n===0){ g.fillStyle="#6E8794"; g.font="15px Arial,sans-serif"; g.fillText("keine Stufe zugeschaltet", m+bw/2-80, m+hk/2-10); return; }
+  if(z.n===0){ g.fillStyle="#6E8794"; g.font="15px Arial,sans-serif"; g.fillText("keine Einzelbatterie zugeschaltet", m+bw/2-80, m+hk/2-10); return; }
   var s2=Math.SQRT2;
   kurve(g,m,m,bw,hk,400,function(t){return s2*I1ST*Math.cos(W50*t);},"#C8D2D8",1.6,[6,5]);
   kurve(g,m,m,bw,hk,400,function(t){var v=s2*I1ST*Math.cos(W50*t);
@@ -320,7 +320,7 @@ function zeichneKurve(){
     g.fillStyle="#A34E0E"; g.font="bold 14px Arial,sans-serif"; g.fillText(e[1], px(e[0])+4, oy+14);
   });
   var a=anlage(z.n,z.dr);
-  if(z.n===0){ g.fillStyle="#5A666F"; g.font="15px Arial,sans-serif"; g.fillText("keine Stufe zugeschaltet", lx+40, oy+60); return; }
+  if(z.n===0){ g.fillStyle="#5A666F"; g.font="15px Arial,sans-serif"; g.fillText("keine Einzelbatterie zugeschaltet", lx+40, oy+60); return; }
   g.save(); g.beginPath(); g.rect(lx,oy-2,rx-lx,uy-oy+4); g.clip();
   g.strokeStyle="#C2006B"; g.lineWidth=3; g.beginPath();
   for(var k=1;k<=700;k++){ var ff=FM*k/700, yy=py(zKurve(ff,a.xc,a.xd)); if(k===1) g.moveTo(px(ff),yy); else g.lineTo(px(ff),yy); }
