@@ -51,7 +51,7 @@
  .legende{font-size:13.5px;color:var(--grau);margin-top:4px}
  .messwerte{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;background:#fff}
  .kachel{border:1.4px solid var(--ink);background:var(--hell);padding:5px 6px;text-align:center;min-width:0}
- .kachel .name{display:block;font-size:15px;font-weight:700;color:var(--ink)}
+ .kachel .name{display:block;font-size:15px;font-weight:700;color:var(--ink);hyphens:manual;overflow-wrap:anywhere}
  .kachel .zahl{display:block;font-variant-numeric:tabular-nums;font-size:25px;font-weight:700;white-space:nowrap}
  .status{grid-column:1 / span 3;font-size:15px;font-weight:700;color:var(--kupfer);text-align:center;min-height:22px}
  .lcd{background:#20313a;color:#9BF0B4;font-variant-numeric:tabular-nums;font-size:26px;font-weight:700;padding:5px 12px;border-radius:4px;text-align:right}
@@ -89,7 +89,7 @@
   </div>
 
   <div class="messwerte" aria-live="polite">
-   <div class="kachel"><span class="name">Ausschnittsfläche <span class="fz">A</span></span><span class="zahl" id="mA"></span></div>
+   <div class="kachel"><span class="name">Ausschnitts&shy;fläche <span class="fz">A</span></span><span class="zahl" id="mA"></span></div>
    <div class="kachel"><span class="name">Raumwinkel <span class="fz">Ω</span></span><span class="zahl" id="mO"></span></div>
    <div class="kachel"><span class="name">Lichtstärke <span class="fz">I</span><sub>v</sub></span><span class="zahl" id="mI"></span></div>
    <div class="status" id="mStatus"></div>
