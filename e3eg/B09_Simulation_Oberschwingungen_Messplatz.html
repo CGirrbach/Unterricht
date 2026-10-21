@@ -12,7 +12,10 @@
           Ordnungszahl 3, S. 324, Formel 2). Kompensationsanlage mit 6 Einzelbatterien zu je 50 kvar, Kondensatoren in Dreieck,
           ohne Drossel oder mit 7 % Verdrosselung. Anzeigen: Strom einer Einzelbatterie (Echt-Effektivwert), Resonanzfrequenz des
           Reihenschwingkreises aus Induktivität des Netzes und Anlage, THD-Wert der Spannung an der Sammelschiene,
-          Oszilloskop (Strom einer Einzelbatterie, 100 A je Kästchen), Resonanzkurve Z über f mit Marken bei 250 Hz und 350 Hz.
+          Oszilloskop (Strom einer Einzelbatterie, 100 A je Kästchen), Kurve Z über f (50 Hz bis 700 Hz, Achse nach dem größten
+          Wert, nichts abgeschnitten) mit Marken bei 250 Hz und 350 Hz. Die Resonanzfrequenz ist als „berechnet“ beschriftet und
+          als Punkt im Minimum der Kurve eingetragen (Prüfer 21.10.2026). Die Überschriften nennen nicht, woraus der
+          Reihenschwingkreis besteht: Das begründen die Schüler danach selbst (Arbeitsblatt Aufgabe 5).
      Ziel-Erkenntnis (die Seite nennt sie nicht):
        A  Ein verzerrter Strom ist die Überlagerung der 50-Hz-Grundschwingung mit Oberschwingungen, deren Frequenz ein
           ganzzahliges Vielfaches von 50 Hz ist (3, 5, 7 Schwingungen in 20 ms).
@@ -153,13 +156,12 @@
    </div>
    <div class="geraete">
     <div class="geraet breit"><div class="name">Strom einer Einzelbatterie <span class="fz">I</span></div><div class="lcd" id="aISt">0,0 A</div><div class="art">Echt-Effektivwert, Bemessungsstrom 72,2 A</div></div>
-    <div class="geraet"><div class="name">Resonanzfrequenz <span class="fz">f</span><sub>r</sub></div><div class="lcd" id="aFr">keine</div><div class="art">Netz und Anlage</div></div>
+    <div class="geraet"><div class="name">Resonanzfrequenz <span class="fz">f</span><sub>r</sub> (berechnet)</div><div class="lcd" id="aFr">keine</div><div class="art">Punkt an der Kurve</div></div>
     <div class="geraet"><div class="name">THD-Wert der Spannung</div><div class="lcd" id="aTHDU">3,6 %</div><div class="art">an der Sammelschiene</div></div>
    </div>
   </div>
-  <div class="schirm"><div class="name">Resonanzkurve: Scheinwiderstand <span class="fz">Z</span> des Reihenschwingkreises aus Induktivität des
-   Netzes und Kompensationsanlage · Marken: 5. und 7. Harmonische</div>
-   <canvas id="cKurve" class="hellgrund" width="900" height="380" data-verhaeltnis="0.42" data-mindest="250" aria-label="Scheinwiderstand über der Frequenz mit Marken bei 250 Hz und 350 Hz"></canvas></div>
+  <div class="schirm"><div class="name">Kurve: Scheinwiderstand <span class="fz">Z</span> über der Frequenz <span class="fz">f</span> · Marken: 5. und 7. Harmonische</div>
+   <canvas id="cKurve" class="hellgrund" width="900" height="380" data-verhaeltnis="0.45" data-mindest="270" aria-label="Scheinwiderstand über der Frequenz mit Marken bei 250 Hz und 350 Hz"></canvas></div>
   <div class="schirm"><div class="name">Oszilloskop: Strom einer Einzelbatterie · 4 ms je Kästchen · 100 A je Kästchen</div>
    <canvas id="cOszB" width="900" height="360" data-verhaeltnis="0.4" data-mindest="230" aria-label="Oszilloskop: Strom einer Einzelbatterie"></canvas>
    <div class="legende"><i class="strich" style="border-color:#FF6FB5"></i>Strom einer Einzelbatterie <span class="fz">i</span> &nbsp;
@@ -300,31 +302,40 @@ function zeichneB(){
   kurve(g,m,m,bw,hk,400,function(t){var v=s2*I1ST*Math.cos(W50*t);
     a.I.forEach(function(e){ v+=s2*e.ist*Math.sin(e.nu*W50*t+e.phase); }); return v;},"#FF6FB5",3);
 }
+function zachse(a){
+  // Größter Scheinwiderstand im Bereich 50 Hz bis 700 Hz; Achse in Schritten 0,1 / 0,2 / 0,5 / 1 Ω mit höchstens 7 Teilen
+  var zmax=0; for(var f=FA; f<=FM; f++){ zmax=Math.max(zmax, zKurve(f,a.xc,a.xd)); }
+  var schritt=[0.1,0.2,0.5,1].filter(function(s){return zmax/s<=7;})[0]||1;
+  return {zmax:zmax, schritt:schritt, oben:Math.ceil(zmax/schritt-1e-9)*schritt};
+}
+var FA=50, FM=700;
 function zeichneKurve(){
   var c=bereit($("cKurve")), g=c.g, w=c.w, h=c.h;
-  var lx=Math.max(58,w*0.085), rx=w-14, oy=16, uy=h-44, FM=700, ZM=0.5;
-  function px(f){return lx+(rx-lx)*f/FM;} function py(zz){return uy-(uy-oy)*Math.min(zz,ZM)/ZM;}
+  var lx=Math.max(58,w*0.085), rx=w-14, oy=34, uy=h-44;
+  var a=anlage(z.n,z.dr);
+  var ax=z.n===0 ? {schritt:0.1, oben:0.5} : zachse(a), ZM=ax.oben;
+  function px(f){return lx+(rx-lx)*(f-FA)/(FM-FA);} function py(zz){return uy-(uy-oy)*zz/ZM;}
   g.strokeStyle="#D5DCE1"; g.lineWidth=1;
-  for(var f=0;f<=FM;f+=50){ g.beginPath(); g.moveTo(px(f),oy); g.lineTo(px(f),uy); g.stroke(); }
-  for(var zz=0;zz<=ZM+1e-9;zz+=0.1){ g.beginPath(); g.moveTo(lx,py(zz)); g.lineTo(rx,py(zz)); g.stroke(); }
+  for(var f=FA;f<=FM;f+=50){ g.beginPath(); g.moveTo(px(f),oy); g.lineTo(px(f),uy); g.stroke(); }
+  var nz=Math.round(ZM/ax.schritt), zz;
+  for(var j=0;j<=nz;j++){ zz=j*ax.schritt; g.beginPath(); g.moveTo(lx,py(zz)); g.lineTo(rx,py(zz)); g.stroke(); }
   g.strokeStyle="#1A2530"; g.lineWidth=1.6; g.beginPath(); g.moveTo(lx,oy); g.lineTo(lx,uy); g.lineTo(rx,uy); g.stroke();
   g.fillStyle="#1A2530"; g.font="13px Arial,sans-serif";
-  for(f=0;f<=FM;f+=100){ g.fillText(String(f), px(f)-(f<100?4:12), uy+17); }
-  for(zz=0;zz<=ZM+1e-9;zz+=0.1){ g.fillText(komma(zz.toFixed(1)), lx-30, py(zz)+4); }
+  for(f=100;f<=FM;f+=100){ g.fillText(String(f), px(f)-12, uy+17); }
+  if(px(100)-px(FA)>=34) g.fillText("50", px(FA)-7, uy+17);     // am Handy zu eng neben 100
+  for(j=0;j<=nz;j++){ zz=j*ax.schritt; g.fillText(komma(zz.toFixed(1)), lx-30, py(zz)+4); }
   g.font="italic 15px Cambria,Caladea,Georgia,serif"; g.fillText("f", rx-58, uy+36);
   g.font="13px Arial,sans-serif"; g.fillText(" in Hz", rx-50, uy+36);
-  g.font="italic 15px Cambria,Caladea,Georgia,serif"; g.fillText("Z", lx-48, oy+12); g.font="13px Arial,sans-serif"; g.fillText("in Ω", lx-48, oy+28);
-  // Marken der Oberschwingungen
+  g.font="italic 15px Cambria,Caladea,Georgia,serif"; g.fillText("Z", lx-48, 16); g.font="13px Arial,sans-serif"; g.fillText(" in Ω", lx-38, 16);
+  // Marken der Oberschwingungen (Beschriftung über dem Diagramm, neben der Einheit der Achse)
   [[250,"5."],[350,"7."]].forEach(function(e){
     g.strokeStyle="#A34E0E"; g.lineWidth=2; g.setLineDash([7,5]); g.beginPath(); g.moveTo(px(e[0]),oy); g.lineTo(px(e[0]),uy); g.stroke(); g.setLineDash([]);
-    g.fillStyle="#A34E0E"; g.font="bold 14px Arial,sans-serif"; g.fillText(e[1], px(e[0])+4, oy+14);
+    g.fillStyle="#A34E0E"; g.font="bold 14px Arial,sans-serif"; g.fillText(e[1], px(e[0])-6, oy-6);
   });
-  var a=anlage(z.n,z.dr);
   if(z.n===0){ g.fillStyle="#5A666F"; g.font="15px Arial,sans-serif"; g.fillText("keine Einzelbatterie zugeschaltet", lx+40, oy+60); return; }
-  g.save(); g.beginPath(); g.rect(lx,oy-2,rx-lx,uy-oy+4); g.clip();
   g.strokeStyle="#C2006B"; g.lineWidth=3; g.beginPath();
-  for(var k=1;k<=700;k++){ var ff=FM*k/700, yy=py(zKurve(ff,a.xc,a.xd)); if(k===1) g.moveTo(px(ff),yy); else g.lineTo(px(ff),yy); }
-  g.stroke(); g.restore();
+  for(var k=0;k<=650;k++){ var ff=FA+k, yy=py(zKurve(ff,a.xc,a.xd)); if(k===0) g.moveTo(px(ff),yy); else g.lineTo(px(ff),yy); }
+  g.stroke();
   g.fillStyle="#C2006B"; g.beginPath(); g.arc(px(a.fr),py(RD),5,0,2*Math.PI); g.fill();
 }
 
@@ -353,7 +364,9 @@ window.addEventListener("resize",function(){ auffrischen(); });
 if (/[?&]pruefen\b/.test(location.search)) {
   var bericht={B:[], A:null};
   [false,true].forEach(function(dr){ for(var n=0;n<=6;n++){ var a=anlage(n,dr);
-    bericht.B.push({drossel:dr?"7 %":"ohne", stufen:n, I_St:f1(a.ist)+" A", f_r:a.fr===null?"-":Math.round(a.fr)+" Hz", THD:f1(a.thd)+" %"}); } });
+    var ax=n===0?null:zachse(a);
+    bericht.B.push({drossel:dr?"7 %":"ohne", stufen:n, I_St:f1(a.ist)+" A", f_r:a.fr===null?"-":Math.round(a.fr)+" Hz", THD:f1(a.thd)+" %",
+                    Zmax:ax?ax.zmax.toFixed(3):"-", Achse:ax?komma(ax.oben.toFixed(1))+" Ω":"-"}); } });
   var i3=3, i5=2, i7=1;
   bericht.A={I:f2(Math.sqrt(100+i3*i3+i5*i5+i7*i7))+" A", THD:f1(Math.sqrt(i3*i3+i5*i5+i7*i7)/10*100)+" %"};
   $("pruefbericht").textContent=JSON.stringify(bericht);
