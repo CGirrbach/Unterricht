@@ -1,0 +1,438 @@
+<!-- lehrmaterial -->
+<!-- materialtyp: simulation -->
+<!-- sim_bearbeitung: freiwillig -->
+<!-- E3EG B10, Klassenarbeitstrainer Einheit 1 Leistungskompensation (21.10.2026, material_office/E3EG-B10).
+ Bauart nach dem Klassenarbeitstrainer der E1EG (EG1-B19, 019_klassenarbeitstrainer_1_eg1_b19.html): Zufallsaufgaben
+ je Thema, Prüfung der Eingabe mit Toleranz (1 Prozent, bei Tangenswerten 2 Prozent, weil die amtlichen
+ Lösungsvorschläge die Tangenswerte auf zwei Stellen runden), danach der volle Rechenweg (Formel, Einsetzen mit
+ Einheiten, Ergebnis), Verständnisfragen mit Musterlösung. Keine Niveaustufen (Carlo, 12.10.2026).
+ Jede Aufgabe folgt einem Aufgabentyp der 33 Prüfungsaufgaben zur Kompensation
+ (Einheit_1_Leistungskompensation/_pruefungsaufgaben_aufgabentypen.md, Abschnitt 3); der Typ steht als Etikett an der
+ Aufgabe. Formeln wie im Unterricht: Tabellenbuch S. 37 (Formel 1, 3, 5, 9, 11), S. 48 (Drehstrom), S. 328 (Formel 5, 7,
+ 8, 13, 14, unter Formel 16), Fachkunde S. 164 bis 166 für die Verständnisfragen.
+ Keine Zahl aus den Quellen der Klassenarbeit (206_BT1_A.pdf, 206_BT2_A.pdf, Leitungen_Kompensation.docx): Die
+ Zufallsbereiche lassen diese Werte aus; ausgenommen sind nur Netzspannung 230 V und 400 V, 50 Hz und ganze Zahlen bis 10
+ (Anzahl der Motoren, Stunden). window.kaprobe(n) liefert alle angezeigten Zahlen vieler Aufgaben für die Prüfung von
+ außen (b10_trainer_pruefen.py). Kein Leitungsquerschnitt: dafür bräuchte der Trainer Tabellenwerte. -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Klassenarbeitstrainer: Leistungskompensation</title>
+<script type="application/json" id="sim-meta">
+{"block": "E3EG-B10", "thema": "Klassenarbeitstrainer Leistungskompensation", "startwerte": {"aufgabe": "keine, erst nach Wahl des Themas"}, "loesungswerte": {"aufgabe": "zufällig"}}
+</script>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--rot:#B23A33;--rothell:#F6E4E2;--gruen:#2F7D62;--gruenhell:#EAF3EC;
+ --linie:#9AA5AE;--grau:#5A666F;--hell:#F3F1EC}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;padding:0}
+body{font-family:"Noto Sans",system-ui,Arial,sans-serif;color:var(--ink);line-height:1.45;background:#f4f6f8;padding:14px;max-width:760px;margin:0 auto;font-size:16px}
+.kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0 10px;margin-bottom:12px}
+.kopf .reihe{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--kupfer)}
+.kopf h1{font-size:22px;margin:4px 0 2px}
+.kopf .sub{color:var(--grau);font-size:14px}
+.box{background:#fff;border:1.4px solid var(--linie);padding:12px 14px;margin:12px 0}
+.box .cap{display:block;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--kupfer);margin-bottom:6px}
+.anleitung{background:var(--kupferhell);border-color:var(--kupfer)}
+.anleitung p{margin:6px 0}
+.wahl{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
+.wbtn{font:inherit;font-weight:700;border:1.4px solid var(--linie);background:#fff;color:var(--ink);padding:9px 12px;cursor:pointer;min-height:44px}
+.wbtn[aria-pressed="true"]{border-color:var(--kupfer);background:var(--kupferhell);color:var(--kupfer)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.chip{font-size:12px;font-weight:700;border:1px solid var(--linie);padding:2px 8px;color:var(--grau);background:var(--hell)}
+.frage{font-size:17px;margin:4px 0 10px}
+.eingabe{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.eingabe input{font:inherit;font-size:18px;padding:9px 10px;border:1.4px solid var(--ink);width:170px;max-width:60%}
+.eingabe .einh{font-weight:700;font-size:17px}
+.knopf{font:inherit;font-weight:700;border:1.4px solid var(--kupfer);background:var(--kupfer);color:#fff;padding:10px 16px;cursor:pointer;min-height:44px}
+.knopf.leise{background:#fff;color:var(--ink);border-color:var(--linie)}
+.knoepfe{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.fb{margin-top:12px;padding:9px 12px;font-weight:700;display:none}
+.fb.ok{display:block;border-left:5px solid var(--gruen);background:var(--gruenhell);color:var(--gruen)}
+.fb.falsch{display:block;border-left:5px solid var(--rot);background:var(--rothell);color:var(--rot)}
+.weg{display:none;margin-top:10px;border-top:1px dashed var(--linie);padding-top:8px;overflow-x:auto}
+.weg.an{display:block}
+.weg .zeile{margin:6px 0}
+.weg .lbl{display:inline-block;min-width:88px;color:var(--grau);font-size:14px}
+.weg .merke{margin-top:8px;color:var(--grau);font-size:14px}
+.mc{display:flex;flex-direction:column;gap:8px}
+.mc button{font:inherit;text-align:left;border:1.4px solid var(--linie);background:#fff;color:var(--ink);padding:10px 12px;cursor:pointer;min-height:44px}
+.mc button.richtig{border-color:var(--gruen);background:var(--gruenhell)}
+.mc button.daneben{border-color:var(--rot);background:var(--rothell)}
+.stand{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--grau)}
+.stand b{color:var(--ink)}
+.bruch{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.1;margin:0 .15em;font-size:.95em}
+.bruch>span{padding:0 .2em}
+.bruch>span:first-child{border-bottom:1.3px solid currentColor}
+.wz{white-space:nowrap}
+.wz>span{border-top:1.3px solid currentColor;padding-top:1px;margin-left:1px}
+i{font-style:italic}
+.leer{color:var(--grau)}
+@media (max-width:420px){body{padding:10px}.kopf h1{font-size:20px}.frage{font-size:16px}.weg .lbl{display:block;min-width:0}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="kopf">
+ <div class="reihe">E3EG · LF&nbsp;11 · Einheit&nbsp;1 · Leistungskompensation · B10</div>
+ <h1>Klassenarbeitstrainer Leistungskompensation</h1>
+ <div class="sub">1 Leistungen · 2 Kondensator berechnen · 3 Strom und Kosten · 4 Verständnis</div>
+</div>
+
+<div class="box anleitung">
+ <span class="cap">So üben Sie mit dem Trainer</span>
+ <p>Der Trainer stellt Ihnen Aufgaben, wie sie in den Abschlussprüfungen zur Kompensation vorkommen, jedes Mal mit neuen Zahlen. Das Etikett an der Aufgabe nennt den Aufgabentyp. Wählen Sie unten ein <b>Thema</b>.</p>
+ <p>Rechnen Sie auf Papier mit vollem Rechenweg: <b>Formel, Einsetzen mit Einheiten, Ergebnis</b>. Tragen Sie nur das Ergebnis in der angegebenen Einheit ein (Komma oder Punkt). Ihr Ergebnis gilt als richtig, wenn es höchstens 1&nbsp;% abweicht; bei Aufgaben mit Tangenswerten höchstens 2&nbsp;%. Danach zeigt der Trainer den Rechenweg.</p>
+ <p><b>Hilfsmittel</b> wie in der Klassenarbeit: Taschenrechner CALCOOM IQ-S1 (Winkel in Grad) und Tabellenbuch. Den Wirkfaktor cos&nbsp;<i>φ</i> nennen die Prüfungen auch Leistungsfaktor. <b>Fertig, wenn</b> Sie in jedem der vier Themen fünf Aufgaben hintereinander richtig gelöst haben.</p>
+</div>
+
+<div class="box">
+ <span class="cap">Thema</span>
+ <div class="wahl" id="wGebiet">
+  <button class="wbtn" type="button" data-g="l" aria-pressed="false">1 Leistungen</button>
+  <button class="wbtn" type="button" data-g="k" aria-pressed="false">2 Kondensator berechnen</button>
+  <button class="wbtn" type="button" data-g="s" aria-pressed="false">3 Strom und Kosten</button>
+  <button class="wbtn" type="button" data-g="v" aria-pressed="false">4 Verständnis</button>
+  <button class="wbtn" type="button" data-g="alle" aria-pressed="false">alle gemischt</button>
+ </div>
+ <div class="stand" id="stand"></div>
+</div>
+
+<div class="box" id="karte">
+ <span class="cap">Aufgabe</span>
+ <p class="leer" id="leer">Wählen Sie oben ein Thema, dann erscheint die erste Aufgabe.</p>
+ <div id="inhalt" hidden>
+  <div class="chips" id="chips"></div>
+  <div class="frage" id="frage"></div>
+  <div class="eingabe" id="eingabe"><input id="ein" type="text" inputmode="decimal" autocomplete="off" aria-label="Ihr Ergebnis"><span class="einh" id="einh"></span></div>
+  <div class="mc" id="mc" hidden></div>
+  <div class="knoepfe">
+   <button class="knopf" type="button" id="bPruefen">Prüfen</button>
+   <button class="knopf leise" type="button" id="bWeg">Rechenweg zeigen</button>
+   <button class="knopf leise" type="button" id="bNeu">Neue Aufgabe</button>
+  </div>
+  <div class="fb" id="fb"></div>
+  <div class="weg" id="weg"></div>
+ </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var $ = function(id){ return document.getElementById(id); };
+
+/* ---------- Darstellung ---------- */
+function stellen(x){ if(x === 0) return 0; return Math.max(0, 3 - Math.floor(Math.log10(Math.abs(x)) + 1e-12)); }
+function rund(x, d){ var f = Math.pow(10, d); return Math.round(x*f)/f; }
+function zahl(x, d){
+ if(d === undefined) d = stellen(x);
+ var s = rund(x, d).toFixed(d);
+ if(s.indexOf(".") >= 0) s = s.replace(/0+$/, "").replace(/\.$/, "");
+ var teile = s.split("."), g = teile[0], vz = "";
+ if(g.charAt(0) === "-"){ vz = "−"; g = g.slice(1); }
+ if(g.length > 4) g = g.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+ return vz + g + (teile[1] ? "," + teile[1] : "");
+}
+/* feste Nachkommastellen (Tangens, Wirkfaktor) */
+function fest(x, d){ return rund(x, d).toFixed(d).replace(".", ","); }
+function gl(x, d){ if(d === undefined) d = stellen(x); return Math.abs(rund(x, d) - x) <= 1e-9*Math.max(1, Math.abs(x)) ? "=" : "≈"; }
+function erg(x, einheit, d){ return gl(x, d) + " " + zahl(x, d) + (einheit ? " " + einheit : ""); }
+function br(z, n){ return '<span class="bruch"><span>' + z + '</span><span>' + n + '</span></span>'; }
+function wz(x){ return '<span class="wz">√<span>' + x + '</span></span>'; }
+function zuf(a, b){ return a + Math.floor(Math.random()*(b - a + 1)); }
+function wahl(liste){ return liste[Math.floor(Math.random()*liste.length)]; }
+function mischen(a){ for(var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random()*(i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+var MAL = " · ";
+var PHI = "<i>φ</i>", COS = "cos " + PHI;
+function ix(gr, i){ return "<i>" + gr + "</i><sub>" + i + "</sub>"; }
+var W3 = Math.sqrt(3), OMEGA = 2*Math.PI*50;
+function grad(c){ return Math.acos(c)*180/Math.PI; }
+function tanAus(c){ return Math.tan(Math.acos(c)); }
+
+/* ---------- Zahlen der Klassenarbeit auslassen ----------
+   Alle Zahlen aus 206_BT1_A.pdf, 206_BT2_A.pdf und den Aufgaben in Leitungen_Kompensation.docx (Sommer 2006 SE 1,
+   Winter 2009/10 FS 3, Sommer 2007 SE 7, Sommer 2012 SE 5) außer 230, 400, 50 und ganzen Zahlen bis 10. */
+var KA = [0.12, 0.4, 0.5, 0.6, 0.78, 0.79, 0.8, 0.81, 0.83, 0.85, 0.88, 0.9, 0.95, 0.98, 1.8, 1.9, 2.3, 4.15, 4.62, 11, 15,
+ 16, 17.3, 18, 20, 20.8, 22, 24, 25, 26, 27, 29, 30, 35, 40, 42, 44, 45, 52, 54, 60, 65, 75, 78, 90, 100, 120, 138, 150, 160,
+ 182, 185, 201, 206, 216, 231, 298, 365, 530, 690, 701, 702, 1460, 2000, 2006, 2007, 2008, 2009, 2010, 2012, 2950];
+function verboten(x){ return KA.some(function(k){ return Math.abs(k - x) < 1e-9; }); }
+function ziehe(f){ var x; do { x = f(); } while(verboten(x)); return x; }
+function zehntel(a, b){ return ziehe(function(){ return zuf(a*10, b*10)/10; }); }
+function ganz(a, b){ return ziehe(function(){ return zuf(a, b); }); }
+
+/* Zufallsbereiche ohne die Zahlen der Klassenarbeit */
+var COS1 = [0.62, 0.64, 0.65, 0.67, 0.68, 0.7, 0.72, 0.73, 0.74, 0.75, 0.76, 0.77, 0.82];
+var COS2 = [0.91, 0.92, 0.93, 0.94, 0.96, 0.97];
+var ETA = [0.82, 0.84, 0.86, 0.87, 0.89, 0.91, 0.92];
+var PAB = [1.1, 1.5, 2.2, 5.5, 7.5, 18.5, 37, 55];
+
+/* ---------- Thema 1: Leistungen ---------- */
+var L = [];
+L.push({typ: "Leistungen aus Strom und Wirkfaktor", f: function(){
+ var i = zehntel(2, 38), c = wahl(COS1), u = 230, s = u*i, p = s*c, phi = grad(c), sn = Math.sin(Math.acos(c)), q = s*sn;
+ var was = wahl(["P", "Q"]);
+ if(was === "P") return {art: "p_1ph", p: {i: i, c: c}, wert: p, einh: "W",
+  frage: "Ein Motor nimmt an <i>U</i> = 230 V den Strom <i>I</i> = " + zahl(i, 1) + " A bei " + COS + " = " + fest(c, 2) + " auf. Berechnen Sie die Wirkleistung <i>P</i>.",
+  weg: [["Formel", "<i>P</i> = <i>U</i>" + MAL + "<i>I</i>" + MAL + COS], ["Einsetzen", "<i>P</i> = 230 V" + MAL + zahl(i, 1) + " A" + MAL + fest(c, 2)], ["Ergebnis", "<i>P</i> " + erg(p, "W")]],
+  merke: "Tabellenbuch S. 37, Formel 3."};
+ return {art: "q_1ph", p: {i: i, c: c}, wert: q, einh: "var",
+  frage: "Ein Motor nimmt an <i>U</i> = 230 V den Strom <i>I</i> = " + zahl(i, 1) + " A bei " + COS + " = " + fest(c, 2) + " auf. Berechnen Sie die Blindleistung <i>Q</i>.",
+  weg: [["Winkel", PHI + " = cos⁻¹ " + fest(c, 2) + " = " + zahl(phi, 2) + "°;  sin " + PHI + " = " + fest(sn, 5)],
+   ["Formel", "<i>Q</i> = <i>U</i>" + MAL + "<i>I</i>" + MAL + "sin " + PHI],
+   ["Einsetzen", "<i>Q</i> = 230 V" + MAL + zahl(i, 1) + " A" + MAL + fest(sn, 5)], ["Ergebnis", "<i>Q</i> " + erg(q, "var")]],
+  merke: "Tabellenbuch S. 37, Formel 9. Den Winkel liefert [SHIFT] [cos], dann [sin] [Ans]; nicht sin 0,7 in den Rechner tippen."};
+}});
+L.push({typ: "Leistungsdreieck", f: function(){
+ var p = zehntel(1.2, 9.5), q = zehntel(0.6, 8.5), s = Math.sqrt(p*p + q*q), c = p/s;
+ if(Math.random() < 0.5) return {art: "s_dreieck", p: {p: p, q: q}, wert: s, einh: "kVA",
+  frage: "Eine Anlage nimmt die Wirkleistung <i>P</i> = " + zahl(p, 1) + " kW und die Blindleistung <i>Q</i> = " + zahl(q, 1) + " kvar auf. Berechnen Sie die Scheinleistung <i>S</i>.",
+  weg: [["Formel", "<i>S</i> = " + wz("<i>P</i>² + <i>Q</i>²")], ["Einsetzen", "<i>S</i> = " + wz("(" + zahl(p, 1) + " kW)² + (" + zahl(q, 1) + " kvar)²")], ["Ergebnis", "<i>S</i> " + erg(s, "kVA")]],
+  merke: "Tabellenbuch S. 37, Formel 11. Wirk- und Blindleistung werden geometrisch addiert, nicht einfach zusammengezählt."};
+ return {art: "cos_dreieck", p: {p: p, q: q}, wert: c, einh: "", tolAbs: 0.005,
+  frage: "Eine Anlage nimmt die Wirkleistung <i>P</i> = " + zahl(p, 1) + " kW und die Blindleistung <i>Q</i> = " + zahl(q, 1) + " kvar auf. Berechnen Sie den Wirkfaktor " + COS + " (zwei Stellen nach dem Komma).",
+  weg: [["Formel", "<i>S</i> = " + wz("<i>P</i>² + <i>Q</i>²") + ";  " + COS + " = " + br("<i>P</i>", "<i>S</i>")],
+   ["Einsetzen", "<i>S</i> = " + wz("(" + zahl(p, 1) + " kW)² + (" + zahl(q, 1) + " kvar)²") + " " + erg(s, "kVA", 4) + ";  " + COS + " = " + br(zahl(p, 1) + " kW", zahl(s, 4) + " kVA")],
+   ["Ergebnis", COS + " " + gl(c, 2) + " " + fest(c, 2)]],
+  merke: "Tabellenbuch S. 37, Formel 11 und 5."};
+}});
+L.push({typ: "Drehstromleistung aus dem Leistungsschild", f: function(){
+ var i = zehntel(3, 95), c = wahl(COS1.concat([0.86, 0.87])), p = W3*400*i*c;
+ return {art: "p_3ph", p: {i: i, c: c}, wert: p/1000, einh: "kW",
+  frage: "Ein Drehstrommotor nimmt am Netz 400 V den Leiterstrom <i>I</i> = " + zahl(i, 1) + " A bei " + COS + " = " + fest(c, 2) + " auf. Berechnen Sie die aufgenommene Wirkleistung <i>P</i>.",
+  weg: [["Formel", "<i>P</i> = " + wz("3") + MAL + "<i>U</i>" + MAL + "<i>I</i>" + MAL + COS], ["Einsetzen", "<i>P</i> = " + wz("3") + MAL + "400 V" + MAL + zahl(i, 1) + " A" + MAL + fest(c, 2)],
+   ["Ergebnis", "<i>P</i> " + erg(p, "W") + " " + erg(p/1000, "kW").replace(/^[=≈]/, "≈")]],
+  merke: "Tabellenbuch S. 48: <i>U</i> ist die Leiterspannung, <i>I</i> der Leiterstrom. Steht auf dem Schild auch eine Leistung, ist das die abgegebene; aufgenommen wird mehr."};
+}});
+L.push({typ: "Leistungsschild: abgegebene Leistung", f: function(){
+ var pab = wahl(PAB), eta = wahl(ETA), pzu = pab/eta;
+ return {art: "pzu", p: {pab: pab, eta: eta}, wert: pzu, einh: "kW",
+  frage: "Auf dem Leistungsschild eines Drehstrommotors stehen <i>P</i> = " + zahl(pab, 1) + " kW und <i>η</i> = " + fest(eta, 2) + ". Berechnen Sie die Wirkleistung " + ix("P", "zu") + ", die er dem Netz entnimmt.",
+  weg: [["Formel", "<i>η</i> = " + br(ix("P", "ab"), ix("P", "zu")) + ", umgestellt " + ix("P", "zu") + " = " + br(ix("P", "ab"), "<i>η</i>")], ["Einsetzen", ix("P", "zu") + " = " + br(zahl(pab, 1) + " kW", fest(eta, 2))], ["Ergebnis", ix("P", "zu") + " " + erg(pzu, "kW")]],
+  merke: "Die Leistung auf dem Schild ist die abgegebene mechanische Leistung. Für die Kompensation zählt die aufgenommene."};
+}});
+
+/* ---------- Thema 2: Kondensator berechnen ---------- */
+function winkelzeile(c1, c2){
+ return PHI + "<sub>1</sub> = cos⁻¹ " + fest(c1, 2) + " = " + zahl(grad(c1), 2) + "°;  tan " + PHI + "<sub>1</sub> = " + fest(tanAus(c1), 5) +
+  "<br>" + PHI + "<sub>2</sub> = cos⁻¹ " + fest(c2, 2) + " = " + zahl(grad(c2), 2) + "°;  tan " + PHI + "<sub>2</sub> = " + fest(tanAus(c2), 5);
+}
+var QCF = ix("Q", "C") + " = <i>P</i>" + MAL + "(tan " + PHI + "<sub>1</sub> − tan " + PHI + "<sub>2</sub>)";
+var K = [];
+K.push({typ: "Grundrechnung: kapazitive Blindleistung", tol: 0.02, f: function(){
+ var p = zehntel(2, 85), c1 = wahl(COS1), c2 = wahl(COS2), qc = p*(tanAus(c1) - tanAus(c2));
+ return {art: "qc", p: {p: p, c1: c1, c2: c2}, wert: qc, einh: "kvar",
+  frage: "Eine Anlage nimmt die Wirkleistung <i>P</i> = " + zahl(p, 1) + " kW bei " + COS + "<sub>1</sub> = " + fest(c1, 2) + " auf. Sie soll auf " + COS + "<sub>2</sub> = " + fest(c2, 2) + " kompensiert werden. Berechnen Sie die erforderliche kapazitive Blindleistung " + ix("Q", "C") + ".",
+  weg: [["Winkel", winkelzeile(c1, c2)], ["Formel", QCF], ["Einsetzen", ix("Q", "C") + " = " + zahl(p, 1) + " kW" + MAL + "(" + fest(tanAus(c1), 5) + " − " + fest(tanAus(c2), 5) + ")"], ["Ergebnis", ix("Q", "C") + " " + erg(qc, "kvar")]],
+  merke: "Tabellenbuch S. 328, Formel 5. Der Kondensator liefert nur die Differenz der Blindleistungen vor und nach der Kompensation. Falle: tan 0,7 ist nicht tan (cos⁻¹ 0,7)."};
+}});
+K.push({typ: "Einphasige Parallelkompensation", tol: 0.02, f: function(){
+ var qc = ziehe(function(){ return zuf(12, 95)*10; }), c = qc/(OMEGA*230*230)*1e6;
+ return {art: "c_1ph", p: {qc: qc}, wert: c, einh: "µF",
+  frage: "Parallel zu einer Leuchtengruppe an 230 V, 50 Hz soll ein Kondensator die kapazitive Blindleistung " + ix("Q", "C") + " = " + zahl(qc, 0) + " var liefern. Berechnen Sie seine Kapazität <i>C</i>.",
+  weg: [["Formel", "<i>C</i> = " + br(ix("Q", "C"), "<i>ω</i>" + MAL + ix("U", "bC") + "²") + ",  <i>ω</i> = 2π" + MAL + "<i>f</i>"],
+   ["Einsetzen", "<i>C</i> = " + br(zahl(qc, 0) + " var", "2π" + MAL + "50 Hz" + MAL + "(230 V)²")], ["Ergebnis", "<i>C</i> " + erg(c, "µF")]],
+  merke: "Tabellenbuch S. 328, Formel 8 und 7. Beim Wechselstrom liegt der Kondensator an der Netzspannung 230 V. Ergebnis in µF: 1 F = 1 000 000 µF. Probe mit dem Faustwert: rund 60 µF je kvar bei 230 V."};
+}});
+K.push({typ: "Kapazität in Dreieck", tol: 0.02, f: function(){
+ var qc = zehntel(1.2, 48), c = qc*1000/(OMEGA*400*400)*1e6, cd = c/3;
+ return {art: "c_dreieck", p: {qc: qc}, wert: cd, einh: "µF",
+  frage: "Eine Kondensatorbatterie aus drei gleichen Kondensatoren in Dreieckschaltung soll am Netz 400 V, 50 Hz die kapazitive Blindleistung " + ix("Q", "C") + " = " + zahl(qc, 1) + " kvar liefern. Berechnen Sie die Kapazität " + ix("C", "Δ") + " eines Kondensators.",
+  weg: [["Formel", "<i>C</i> = " + br(ix("Q", "C"), "<i>ω</i>" + MAL + "<i>U</i>²") + ";  " + ix("C", "Δ") + " = " + br("1", "3") + MAL + "<i>C</i>"],
+   ["Einsetzen", "<i>C</i> = " + br(zahl(qc*1000, 0) + " var", "2π" + MAL + "50 Hz" + MAL + "(400 V)²") + " " + erg(c, "µF", 2) + ";  " + ix("C", "Δ") + " = " + br("1", "3") + MAL + zahl(c, 2) + " µF"],
+   ["Ergebnis", ix("C", "Δ") + " " + erg(cd, "µF")]],
+  merke: "Tabellenbuch S. 328: <i>C</i> ist die berechnete Gesamtkapazität, " + ix("C", "Δ") + " die Kapazität eines der drei Kondensatoren (Formel 14). Faustwert: rund 20 µF je kvar und Kondensator, mit einem Drittel von " + ix("Q", "C") + "."};
+}});
+K.push({typ: "Stern gegen Dreieck", tol: 0.02, f: function(){
+ var qc = zehntel(1.2, 48), c = qc*1000/(OMEGA*400*400)*1e6;
+ return {art: "c_stern", p: {qc: qc}, wert: c, einh: "µF",
+  frage: "Eine Kondensatorbatterie aus drei gleichen Kondensatoren in <b>Sternschaltung</b> soll am Netz 400 V, 50 Hz die kapazitive Blindleistung " + ix("Q", "C") + " = " + zahl(qc, 1) + " kvar liefern. Berechnen Sie die Kapazität " + ix("C", "Y") + " eines Kondensators.",
+  weg: [["Formel", ix("C", "Y") + " = " + br(ix("Q", "C"), "3" + MAL + "<i>ω</i>" + MAL + ix("U", "bCY") + "²") + ",  " + ix("U", "bCY") + " = " + br("<i>U</i>", wz("3"))],
+   ["Einsetzen", ix("U", "bCY") + " = " + br("400 V", wz("3")) + " " + erg(400/W3, "V", 1) + ";  " + ix("C", "Y") + " = " + br(zahl(qc*1000, 0) + " var", "3" + MAL + "2π" + MAL + "50 Hz" + MAL + "(" + zahl(400/W3, 1) + " V)²")],
+   ["Ergebnis", ix("C", "Y") + " " + erg(c, "µF")]],
+  merke: "Tabellenbuch S. 328, unter Formel 16 und Formel 13: " + ix("C", "Y") + " = <i>C</i> = " + br(ix("Q", "C"), "<i>ω</i>" + MAL + "<i>U</i>²") + ". In Stern liegt jeder Kondensator nur an der Strangspannung; er braucht deshalb die dreifache Kapazität wie in Dreieck."};
+}});
+K.push({typ: "Mehrere gleiche Motoren", tol: 0.02, f: function(){
+ var n = zuf(2, 6), pab = wahl(PAB.slice(0, 6)), eta = wahl(ETA), c1 = wahl(COS1), c2 = wahl(COS2);
+ var pzu = pab/eta, p = n*pzu, qc = p*(tanAus(c1) - tanAus(c2));
+ return {art: "qc_motoren", p: {n: n, pab: pab, eta: eta, c1: c1, c2: c2}, wert: qc, einh: "kvar",
+  frage: n + " gleiche Drehstrommotoren laufen immer gleichzeitig. Leistungsschild je Motor: <i>P</i> = " + zahl(pab, 1) + " kW, <i>η</i> = " + fest(eta, 2) + ", " + COS + " = " + fest(c1, 2) + ". Sie sollen gemeinsam auf " + COS + "<sub>2</sub> = " + fest(c2, 2) + " kompensiert werden. Berechnen Sie die gesamte kapazitive Blindleistung " + ix("Q", "C") + ".",
+  weg: [["Formel", ix("P", "zu") + " = " + br(ix("P", "ab"), "<i>η</i>") + ";  <i>P</i> = " + n + MAL + ix("P", "zu") + ";  " + QCF],
+   ["Einsetzen", ix("P", "zu") + " = " + br(zahl(pab, 1) + " kW", fest(eta, 2)) + " " + erg(pzu, "kW", 4) + ";  <i>P</i> = " + n + MAL + zahl(pzu, 4) + " kW " + erg(p, "kW", 3)],
+   ["Winkel", winkelzeile(c1, c2)],
+   ["Einsetzen", ix("Q", "C") + " = " + zahl(p, 3) + " kW" + MAL + "(" + fest(tanAus(c1), 5) + " − " + fest(tanAus(c2), 5) + ")"],
+   ["Ergebnis", ix("Q", "C") + " " + erg(qc, "kvar")]],
+  merke: "Zwei Fallen aus den Prüfungen: Die Leistung auf dem Schild ist die abgegebene, und die Anzahl der Motoren steht nur in der Angabe."};
+}});
+
+/* ---------- Thema 3: Strom und Kosten ---------- */
+var S = [];
+S.push({typ: "Strom vor und nach der Kompensation", f: function(){
+ var p = zehntel(4, 85), c1 = wahl(COS1), c2 = wahl(COS2), i1 = p*1000/(W3*400*c1), i2 = p*1000/(W3*400*c2);
+ var nach = Math.random() < 0.6;
+ return {art: nach ? "i2_3ph" : "i1_3ph", p: {p: p, c1: c1, c2: c2}, wert: nach ? i2 : i1, einh: "A",
+  frage: "Eine Anlage am Drehstromnetz 400 V nimmt die Wirkleistung <i>P</i> = " + zahl(p, 1) + " kW bei " + COS + "<sub>1</sub> = " + fest(c1, 2) + " auf. Sie wird auf " + COS + "<sub>2</sub> = " + fest(c2, 2) + " kompensiert. Berechnen Sie den Strom in der Zuleitung " + (nach ? "<b>nach</b>" : "<b>vor</b>") + " der Kompensation.",
+  weg: [["Formel", "<i>P</i> = " + wz("3") + MAL + "<i>U</i>" + MAL + "<i>I</i>" + MAL + COS + ", umgestellt <i>I</i> = " + br("<i>P</i>", wz("3") + MAL + "<i>U</i>" + MAL + COS)],
+   ["Einsetzen", ix("I", "1") + " = " + br(zahl(p*1000, 0) + " W", wz("3") + MAL + "400 V" + MAL + fest(c1, 2)) + ";  " + ix("I", "2") + " = " + br(zahl(p*1000, 0) + " W", wz("3") + MAL + "400 V" + MAL + fest(c2, 2))],
+   ["Ergebnis", ix("I", "1") + " " + erg(i1, "A") + ";  " + ix("I", "2") + " " + erg(i2, "A")]],
+  merke: "Die Wirkleistung bleibt gleich; mit dem größeren Wirkfaktor wird der Strom in der Zuleitung kleiner."};
+}});
+S.push({typ: "Einphasige Kompensation: Strom", f: function(){
+ var p = ziehe(function(){ return zuf(12, 95)*50; }), c1 = wahl(COS1), c2 = wahl(COS2), i1 = p/(230*c1), i2 = p/(230*c2);
+ return {art: "i2_1ph", p: {p: p, c1: c1, c2: c2}, wert: i2, einh: "A",
+  frage: "Eine Beleuchtungsanlage nimmt an 230 V die Wirkleistung <i>P</i> = " + zahl(p, 0) + " W bei " + COS + "<sub>1</sub> = " + fest(c1, 2) + " auf. Ein Kondensator hebt den Wirkfaktor auf " + COS + "<sub>2</sub> = " + fest(c2, 2) + ". Berechnen Sie die Stromstärke " + ix("I", "2") + " nach der Kompensation.",
+  weg: [["Formel", "<i>P</i> = <i>U</i>" + MAL + "<i>I</i>" + MAL + COS + ", umgestellt " + ix("I", "2") + " = " + br("<i>P</i>", "<i>U</i>" + MAL + COS + "<sub>2</sub>")],
+   ["Einsetzen", ix("I", "2") + " = " + br(zahl(p, 0) + " W", "230 V" + MAL + fest(c2, 2))], ["Ergebnis", ix("I", "2") + " " + erg(i2, "A")]],
+  merke: "Zum Vergleich vor der Kompensation: " + ix("I", "1") + " " + erg(i1, "A") + "."};
+}});
+S.push({typ: "Kosten der Blindarbeit", f: function(){
+ var q = ziehe(function(){ var x = zuf(13, 95)*10; return x === 500 ? 510 : x; }), h = wahl([6, 7, 8, 9, 10, 12, 14]), tage = wahl([19, 21, 23]), ct = wahl([1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.4]);
+ var t = h*tage, w = q*t, eur = w*ct/100;
+ return {art: "kosten", p: {q: q, h: h, tage: tage, ct: ct}, wert: eur, einh: "€",
+  frage: "Ein Betrieb nimmt im Mittel die Blindleistung <i>Q</i> = " + zahl(q, 0) + " kvar auf, an " + tage + " Tagen im Monat je " + h + " Stunden. Für eine kvarh Blindarbeit berechnet der Netzbetreiber " + zahl(ct, 1) + " ct. Berechnen Sie die monatlichen Kosten der Blindarbeit in Euro.",
+  weg: [["Formel", ix("W", "bl") + " = <i>Q</i>" + MAL + "<i>t</i>;  Kosten = " + ix("W", "bl") + MAL + "Arbeitspreis"],
+   ["Einsetzen", "<i>t</i> = " + h + " h" + MAL + tage + " = " + t + " h;  " + ix("W", "bl") + " = " + zahl(q, 0) + " kvar" + MAL + t + " h = " + zahl(w, 0) + " kvarh;  Kosten = " + zahl(w, 0) + " kvarh" + MAL + zahl(ct, 1) + " " + br("ct", "kvarh")],
+   ["Ergebnis", "Kosten " + erg(w*ct, "ct", 0) + " " + erg(eur, "€", 2).replace(/^=/, "=")]],
+  merke: "Blindarbeit wie Wirkarbeit: Leistung mal Zeit. 100 ct = 1 €."};
+}});
+
+/* ---------- Thema 4: Verständnis ---------- */
+var BEGRIFFE = [
+ {typ: "Kompensationsarten", frage: "Viele Verbraucher unterschiedlicher Leistung mit wechselnder Einschaltdauer sollen kompensiert werden. Welche Kompensationsart passt?",
+  optionen: ["Zentralkompensation: Ein Blindleistungsregler schaltet so viele Kondensatoren zu oder ab, wie gerade gebraucht werden.", "Einzelkompensation: Jeder Verbraucher bekommt einen festen Kondensator.", "Gruppenkompensation ohne Regler mit einem festen Kondensator für alle Verbraucher."], richtig: 0,
+  begruendung: "Die Zentralkompensation kompensiert viele Verbraucher unterschiedlicher Leistung und wechselnder Einschaltdauer; ein Blindleistungsregler deckt den momentanen Bedarf. Ein fester Kondensator für wechselnde Last würde bei kleiner Last überkompensieren."},
+ {typ: "Kompensationsarten", frage: "Ein Motor großer Leistung läuft den ganzen Arbeitstag mit gleichbleibender Last. Welche Kompensationsart eignet sich?",
+  optionen: ["Einzelkompensation am Motor", "Zentralkompensation mit Regler", "keine, Motoren werden nicht kompensiert"], richtig: 0,
+  begruendung: "Einzelkompensation eignet sich für Verbraucher großer Leistung bis etwa 30 kW mit konstantem Wirkfaktor und langer Einschaltdauer. Der Kondensator wird mit dem Motor zu- und abgeschaltet."},
+ {typ: "Kompensationsarten", frage: "Einige Maschinen in einer Halle laufen immer gemeinsam und hängen am selben Unterverteiler. Welche Kompensationsart liegt nahe?",
+  optionen: ["Gruppenkompensation am Unterverteiler", "Einzelkompensation an jeder Maschine", "Reihenkompensation"], richtig: 0,
+  begruendung: "Die Gruppenkompensation kompensiert eine Gruppe von Verbrauchern gemeinsam. Laufen sie immer zusammen, genügt ein gemeinsamer Kondensatorsatz; das spart Aufwand gegenüber Kondensatoren an jeder Maschine."},
+ {typ: "Ort der Kompensation", frage: "Die Kondensatoren sitzen neben dem Unterverteiler, die Motoren sind über eigene Zuleitungen angeschlossen. Wo wird der Strom durch die Kompensation kleiner?",
+  optionen: ["in der Zuleitung zwischen Netz und Unterverteiler", "in den Zuleitungen vom Unterverteiler zu den Motoren", "überall gleichermaßen"], richtig: 0,
+  begruendung: "Entlastet wird nur der Abschnitt zwischen Kondensator und Netz. Zwischen Kondensator und Motor pendelt die Blindleistung weiter; dort fließt der volle Motorstrom."},
+ {typ: "Überkompensation", frage: "Der Regler schaltet mehr kapazitive Blindleistung zu, als die Anlage induktive Blindleistung aufnimmt. Was geschieht?",
+  optionen: ["Die Anlage wirkt kapazitiv, und der Strom in der Zuleitung steigt wieder.", "Der Strom sinkt weiter, je mehr Kondensatoren zugeschaltet sind.", "Die Wirkleistung der Anlage sinkt."], richtig: 0,
+  begruendung: "Das nennt man Überkompensation: Jenseits der vollen Kompensation überwiegt die kapazitive Blindleistung, sie muss wieder über die Zuleitung pendeln, und der Strom steigt. Die Wirkleistung bleibt gleich."},
+ {typ: "Warum nicht auf cos φ = 1", frage: "Warum kompensiert man nicht auf den Wirkfaktor cos <i>φ</i> = 1?",
+  optionen: ["Zwischen Kompensationskapazität und Verbraucherinduktivität kann Resonanz auftreten; die Spannungsüberhöhung kann die Anlage beschädigen.", "Weil dann keine Wirkleistung mehr übertragen wird.", "Weil der Netzbetreiber Kondensatoren über 1 kvar verbietet."], richtig: 0,
+  begruendung: "Eine Kompensation auf cos φ = 1 ist nicht erlaubt, weil dann Resonanz zwischen Kompensationskapazität und Verbraucherinduktivität auftritt. Außerdem droht bei Teillast Überkompensation."},
+ {typ: "Entladen der Kondensatoren", frage: "Wozu haben Kompensationskondensatoren Entladewiderstände?",
+  optionen: ["Nach dem Abschalten müssen die Kondensatoren innerhalb von 60 Sekunden auf eine ungefährliche Spannung unter 50 V entladen sein.", "Sie begrenzen den Strom beim Einschalten.", "Sie erhöhen die Blindleistung der Kondensatoren."], richtig: 0,
+  begruendung: "Kondensatoren speichern Energie und können nach dem Abschalten eine gefährliche Spannung führen. Über hochohmige Widerstände oder den Verbraucher selbst werden sie binnen 60 Sekunden unter 50 V entladen. Erst messen, dann anfassen."},
+ {typ: "Geregelte Anlage", frage: "Was tut der Blindleistungsregler einer Zentralkompensation?",
+  optionen: ["Er misst den Wirkfaktor und schaltet über Schütze so viele Kondensatorstufen zu oder ab, wie der momentane Blindleistungsbedarf verlangt.", "Er verändert stufenlos die Netzspannung.", "Er schaltet Motoren ab, wenn der Wirkfaktor zu klein ist."], richtig: 0,
+  begruendung: "Der Regler hält den Wirkfaktor im Zielbereich, indem er Kondensatorstufen (Einzelbatterien) zu- und abschaltet. Bei Einzelkompensation braucht man ihn nicht, weil der Kondensator mit dem Verbraucher geschaltet wird."},
+ {typ: "größer, kleiner, gleich", frage: "Wie ändert sich die Wirkleistung in der Zuleitung, wenn eine Anlage kompensiert wird?",
+  optionen: ["Sie bleibt gleich.", "Sie wird größer.", "Sie wird kleiner."], richtig: 0,
+  begruendung: "Die Kondensatoren ändern nur die Blindleistung im Netz. Wirkleistung und Spannung bleiben gleich; Blindleistung, Scheinleistung und Strom werden kleiner, der Wirkfaktor wird größer."},
+ {typ: "größer, kleiner, gleich", frage: "Wie ändern sich Scheinleistung und Wirkfaktor in der Zuleitung durch eine Kompensation (ohne Überkompensation)?",
+  optionen: ["Die Scheinleistung wird kleiner, der Wirkfaktor größer.", "Beide werden größer.", "Die Scheinleistung bleibt gleich, der Wirkfaktor wird größer."], richtig: 0,
+  begruendung: "Bei gleicher Wirkleistung sinkt die Blindleistung im Netz; damit wird die Scheinleistung kleiner und der Quotient <i>P</i> durch <i>S</i>, der Wirkfaktor, größer."},
+ {typ: "Stern gegen Dreieck", frage: "Dieselbe kapazitive Blindleistung soll statt mit Kondensatoren in Dreieck mit Kondensatoren in Stern erzeugt werden. Wie groß muss die Kapazität eines Kondensators sein?",
+  optionen: ["dreimal so groß", "gleich groß", "ein Drittel so groß"], richtig: 0,
+  begruendung: "In Stern liegt jeder Kondensator nur an der Strangspannung, der Leiterspannung geteilt durch √3. Weil die Blindleistung mit dem Quadrat der Spannung geht, braucht er die dreifache Kapazität (Tabellenbuch S. 328, Formel 13 und 14)."},
+ {typ: "Warum kompensieren", frage: "Warum verlangen Netzbetreiber von Betrieben mit großer induktiver Last eine Kompensation?",
+  optionen: ["Die Blindleistung pendelt zwischen Erzeuger und Verbraucher und belastet Leitungen und Transformatoren mit Strom, obwohl sie in keine andere Energieform umgewandelt wird.", "Weil Blindleistung als Wärme verloren geht und den Zähler beschädigt.", "Weil ohne Kompensation die Wirkleistung der Motoren sinkt."], richtig: 0,
+  begruendung: "Für die Blindleistung muss Strom fließen. Leitungen, Transformatoren und Schutzeinrichtungen müssen dafür größer bemessen werden. Mit Kompensation sinken Strom und Scheinleistung, die Anlage kann mehr Wirkleistung übertragen."}];
+var V = [{typ: "", f: function(){ var b = wahl(BEGRIFFE); return {art: "begriff", mc: true, p: {}, frage: b.frage, optionen: b.optionen, richtig: b.richtig, begruendung: b.begruendung, typText: b.typ}; }}];
+
+var GEBIETE = {l: {name: "1 Leistungen", liste: L}, k: {name: "2 Kondensator berechnen", liste: K}, s: {name: "3 Strom und Kosten", liste: S}, v: {name: "4 Verständnis", liste: V}};
+var zustand = {gebiet: null, aufgabe: null, geprueft: false, richtig: 0, gesamt: 0, folge: {l: 0, k: 0, s: 0, v: 0}};
+
+function ziehen(){
+ var gk = zustand.gebiet === "alle" ? wahl(["l", "k", "s", "v"]) : zustand.gebiet;
+ var gen = wahl(GEBIETE[gk].liste), a = gen.f();
+ a.gebiet = gk; a.typ = a.typText || gen.typ; a.tol = gen.tol || 0.01;
+ return a;
+}
+function zeigen(){
+ var a = zustand.aufgabe;
+ $("leer").hidden = true; $("inhalt").hidden = false;
+ $("chips").innerHTML = '<span class="chip">' + GEBIETE[a.gebiet].name + '</span>' + (a.typ ? '<span class="chip">Prüfungstyp: ' + a.typ + '</span>' : "");
+ $("frage").innerHTML = a.frage;
+ $("fb").className = "fb"; $("fb").innerHTML = "";
+ $("weg").className = "weg"; $("weg").innerHTML = "";
+ zustand.geprueft = false;
+ if(a.mc){
+  $("eingabe").hidden = true; $("mc").hidden = false; $("bPruefen").hidden = true; $("bWeg").hidden = true;
+  var reihe = mischen(a.optionen.map(function(o, i){ return i; }));
+  $("mc").innerHTML = reihe.map(function(i){ return '<button type="button" data-i="' + i + '">' + a.optionen[i] + '</button>'; }).join("");
+  Array.prototype.forEach.call($("mc").querySelectorAll("button"), function(b){ b.addEventListener("click", function(){ mcWahl(+b.getAttribute("data-i")); }); });
+ } else {
+  $("eingabe").hidden = false; $("mc").hidden = true; $("bPruefen").hidden = false; $("bWeg").hidden = false;
+  $("ein").value = ""; $("einh").innerHTML = a.einh || "(ohne Einheit)";
+ }
+}
+function neu(){ if(!zustand.gebiet) return; zustand.aufgabe = ziehen(); zeigen(); if(!zustand.aufgabe.mc) $("ein").focus({preventScroll: true}); }
+function wegZeigen(){
+ var a = zustand.aufgabe; if(!a || a.mc) return;
+ if(!zustand.geprueft){ zustand.geprueft = true; werten(false); $("fb").className = "fb falsch"; $("fb").textContent = "Rechenweg angesehen: Diese Aufgabe zählt nicht als gelöst, die Folge beginnt neu."; }
+ $("weg").innerHTML = a.weg.map(function(z){ return '<div class="zeile"><span class="lbl">' + z[0] + '</span> ' + z[1] + '</div>'; }).join("") + (a.merke ? '<div class="merke">' + a.merke + '</div>' : "");
+ $("weg").className = "weg an";
+}
+function werten(ok){
+ zustand.gesamt++; if(ok) zustand.richtig++;
+ var g = zustand.aufgabe.gebiet; zustand.folge[g] = ok ? zustand.folge[g] + 1 : 0;
+ stand();
+}
+function pruefen(){
+ var a = zustand.aufgabe; if(!a || a.mc || zustand.geprueft) return;
+ var roh = $("ein").value.trim().replace(/\s/g, "").replace(",", ".").replace("−", "-");
+ if(roh === "" || isNaN(+roh)){ $("fb").className = "fb falsch"; $("fb").textContent = "Bitte eine Zahl eingeben, zum Beispiel 12,5."; return; }
+ var x = +roh, soll = a.wert;
+ var ok = Math.abs(x - soll) <= Math.max(a.tol*Math.abs(soll), a.tolAbs || 0) + 1e-12;
+ zustand.geprueft = true; werten(ok);
+ $("fb").className = ok ? "fb ok" : "fb falsch";
+ $("fb").innerHTML = ok ? "Richtig. Vergleichen Sie Ihren Rechenweg mit dem unten." : "Noch nicht richtig. Richtig ist " + (a.einh ? erg(soll, a.einh).replace(/^[=≈] /, "") : fest(soll, 2)) + ". Sehen Sie sich den Rechenweg an.";
+ wegZeigen();
+}
+function mcWahl(i){
+ var a = zustand.aufgabe; if(zustand.geprueft) return;
+ var ok = i === a.richtig; zustand.geprueft = true; werten(ok);
+ Array.prototype.forEach.call($("mc").querySelectorAll("button"), function(b){
+  var k = +b.getAttribute("data-i");
+  if(k === a.richtig) b.classList.add("richtig"); else if(k === i) b.classList.add("daneben");
+ });
+ $("fb").className = ok ? "fb ok" : "fb falsch";
+ $("fb").innerHTML = (ok ? "Richtig. " : "Nicht richtig. ") + '<span style="font-weight:400;color:var(--ink)"><b>Musterlösung:</b> ' + a.begruendung + "</span>";
+}
+function stand(){
+ var f = zustand.folge, fertig = f.l >= 5 && f.k >= 5 && f.s >= 5 && f.v >= 5;
+ $("stand").innerHTML = "<span>Richtig: <b>" + zustand.richtig + "</b> von <b>" + zustand.gesamt + "</b></span>" +
+  "<span>In Folge richtig: Thema 1 <b>" + f.l + "</b>, Thema 2 <b>" + f.k + "</b>, Thema 3 <b>" + f.s + "</b>, Thema 4 <b>" + f.v + "</b></span>" +
+  (fertig ? '<span style="color:var(--gruen);font-weight:700">Fertig: in allen vier Themen fünf in Folge richtig.</span>' : "");
+}
+function knoepfe(gruppe, attr, feld){
+ Array.prototype.forEach.call($(gruppe).querySelectorAll("button"), function(b){
+  b.addEventListener("click", function(){
+   Array.prototype.forEach.call($(gruppe).querySelectorAll("button"), function(x){ x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+   zustand[feld] = b.getAttribute(attr); neu();
+  });
+ });
+}
+knoepfe("wGebiet", "data-g", "gebiet");
+$("bPruefen").addEventListener("click", pruefen);
+$("bWeg").addEventListener("click", wegZeigen);
+$("bNeu").addEventListener("click", neu);
+$("ein").addEventListener("keydown", function(ev){ if(ev.key === "Enter") pruefen(); });
+stand();
+
+/* ---------- Prüfhilfen für die Nachrechnung von außen ---------- */
+window.probe = function(n){
+ var aus = [];
+ ["l", "k", "s", "v"].forEach(function(gk){
+  GEBIETE[gk].liste.forEach(function(gen, k){
+   for(var i = 0; i < n; i++){ var a = gen.f(); aus.push({gebiet: gk, gen: k, art: a.art, p: a.p, wert: a.wert, mc: !!a.mc, frage: a.frage.replace(/<[^>]+>/g, ""), weg: a.weg ? a.weg.map(function(z){ return z[0] + ": " + z[1].replace(/<[^>]+>/g, " "); }).join(" | ") : "", merke: (a.merke || "").replace(/<[^>]+>/g, " ")}); }
+  });
+ });
+ return aus;
+};
+/* alle in den Fragen angezeigten Zahlen (für den Vergleich mit den Quellen der Klassenarbeit) */
+window.kaprobe = function(n){
+ var zahlen = {};
+ window.probe(n).forEach(function(a){
+  (a.frage.replace(/ /g, "").match(/\d+(?:,\d+)?/g) || []).forEach(function(z){ zahlen[z] = (zahlen[z] || 0) + 1; });
+ });
+ return zahlen;
+};
+window.mcprobe = function(){ return BEGRIFFE.map(function(b){ return b.frage.replace(/<[^>]+>/g, "") + " || " + b.begruendung; }); };
+})();
+</script>
