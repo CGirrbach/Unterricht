@@ -93,7 +93,7 @@
   <div class="licht">
    <div><div class="titel2">Licht der Lampe</div><div class="leuchtfeld" id="leuchtfeld"></div></div>
    <div class="spektrum"><div class="titel2">Spektrum der Lampe</div>
-    <svg id="spek" viewBox="0 0 640 250" role="img"
+    <svg id="spek" viewBox="0 0 640 262" role="img"
      data-quelle="Spektren CIE 15:2018; Farbband aus den Normspektralwertfunktionen CIE 1931 (vgl. Fachkunde S. 388, Bild 1: Licht und Wellenlänge)"
      aria-label="Spektrum der Lampe: relative Strahlungsleistung über der Wellenlänge von 380 nm bis 780 nm, die Fläche ist in der Farbe der jeweiligen Wellenlänge gefärbt"></svg>
    </div>
@@ -140,9 +140,7 @@ function spektrum(){
   while(svg.firstChild) svg.removeChild(svg.firstChild);
   el("line",{x1:X0,y1:Y0,x2:X1+8,y2:Y0,stroke:"#1A2530","stroke-width":2});
   [400,500,600,700].forEach(function(l){ el("line",{x1:gx(l),y1:Y0,x2:gx(l),y2:Y0+7,stroke:"#1A2530","stroke-width":2}); txt(gx(l),Y0+34,String(l)); });
-  var lab=txt(X1+10,Y0+62,"",{"text-anchor":"end"});
-  var t1=document.createElementNS(NS,"tspan"); t1.setAttribute("font-style","italic"); t1.setAttribute("font-family","Cambria,Caladea,Georgia,serif"); t1.textContent="λ"; lab.appendChild(t1);
-  var t2=document.createElementNS(NS,"tspan"); t2.textContent=" in nm"; lab.appendChild(t2);
+  txt(X1+10,Y0+62,"Wellenlänge in nm",{"text-anchor":"end"});
   if(z.lampe===START){ txt((X0+X1)/2,(Y0+Y1)/2+8,"Licht aus",{fill:"#5A666F"}); return; }
   var s=D.lampen[z.lampe].spektrum;
   for(var i=0;i<s.length-1;i++){
