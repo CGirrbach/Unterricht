@@ -206,7 +206,8 @@
     // Der Browser verrät nicht, ob „hart“ neu geladen wurde. Deshalb merken wir uns
     // den Tastendruck kurz vor dem Neuladen und schauen danach nach.
     document.addEventListener('keydown', ereignis => {
-      const taste = ereignis.key.toLowerCase();
+      // Autofill löst keydown ohne key aus
+      const taste = (ereignis.key || '').toLowerCase();
       const strgOderCmd = ereignis.ctrlKey || ereignis.metaKey;
       const hartesNeuladen = (strgOderCmd && ereignis.shiftKey && taste === 'r')
                           || ((strgOderCmd || ereignis.shiftKey) && taste === 'f5');
@@ -526,7 +527,7 @@
 
     // Liest nur so weit, bis </title> gefunden ist – nicht die ganze Datei
     async function titelAuslesen(pfad) {
-      const antwort = await holen(adresseVon(pfad));
+      const antwort = await holen(adresseVon(pfad), { cache: frischLaden ? 'no-store' : 'default' });
       if (!antwort.ok || !antwort.body) return null;
 
       const leser = antwort.body.getReader();
