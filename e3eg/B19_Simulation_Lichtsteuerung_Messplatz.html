@@ -1,0 +1,548 @@
+<!doctype html>
+<!-- E3EG B19 · Messplatz Lichtsteuerung (Neubau 13.11.2026, Aufgabe IN der Stunde nach dem Muster E1EG B07).
+     Neu: Der Block hat keinen alten Stand.
+     Ziel-Erkenntnisse (die Schüler finden sie selbst; die Seite nennt sie nicht):
+       Teil 1 Lichtsteuerung: Mit Konstantlichtregelung zeigt das Luxmeter am Arbeitsplatz den eingestellten Sollwert,
+       solange das Tageslicht allein nicht reicht; je mehr Tageslicht, desto weiter wird die Leuchte heruntergedimmt, die
+       fensternahe Leuchte stärker als die an der Wand; reicht das Tageslicht, ist die Leuchte aus. Ohne Regelung brennen
+       alle Leuchten voll und nehmen mehr Leistung auf. Der Präsenzmelder schaltet das Licht erst nach der eingestellten
+       Nachlaufzeit aus; kommt vorher jemand zurück, beginnt die Zeit nach dem nächsten Verlassen von neuem.
+       Teil 2 DALI: Ein nicht adressiertes Betriebsgerät reagiert nur auf Befehle an alle (Broadcast). Nach dem
+       Adressieren reagiert jedes Betriebsgerät auf seine Kurzadresse, auf seine Gruppen und auf Befehle an alle; Szenen
+       ruft jedes Betriebsgerät mit dem Wert ab, den es selbst gespeichert hat. Kurzadressen 0 bis 63, Gruppen 0 bis 15,
+       Szenen 0 bis 15.
+     Vorlagen: Fachkunde S. 403 (12.1.13 Lichtmanagementsysteme: Bild 1 Raum mit Lichtsteuerung, Leuchten E1 bis E3,
+       Lichtsensor am Fenster; Bild 2 Raum mit Präsenzmelder; Bild 3 Lichtmanagementsystem DALI mit Steuergerät,
+       Betriebsgeräten, Lichtgruppen, 16 Lichtszenen); Fachkunde S. 106 (Bewegungsmelder: einstellbare Zeit, die immer
+       wieder neu startet); Tabellenbuch S. 155 (Lichtmanagement mit DALI: einzeln oder in Gruppen ansteuern, 16
+       Gruppen, 16 Lichtszenen, tageslichtabhängige Regelung über Dimmfunktion) und S. 375 (Lichtgruppen mit
+       Lichtsensoren); DALI-Handbuch (Tridonic) S. 5, 6, 38, 58, 85 (64 Betriebsgeräte, 16 Gruppen, 16 Szenen,
+       Szenenwerte im Betriebsgerät gespeichert, Kurzadresse, Nachlaufzeit, Broadcast).
+     Rechenmodell (vereinfacht, jede Leuchte beleuchtet nur ihren Arbeitsplatz, keine Rückstrahlung):
+       Tageslicht am Platz = Tageslichtquotient · Außenhelligkeit; Tageslichtquotient Wandplatz 1 %, Mitte 3 %,
+       Fensterplatz 10 %. Außenhelligkeit stündlich (6 bis 20 Uhr: 0, 500, 3000, 6000, 9000, 11 000, 12 000, 12 000,
+       11 000, 9000, 6000, 3000, 500, 0, 0 lx), dazwischen linear je Minute.
+       Jede Leuchte E1 bis E3 erzeugt bei 100 % an ihrem Platz 500 lx und nimmt 50 W auf (proportional zum Dimmwert).
+       Konstantlichtregelung: Dimmwert = (Sollwert − Tageslicht) / 500 lx, begrenzt auf 0 % (aus) bis 100 %.
+       Ohne Regelung: 100 %. Beleuchtungsstärke am Platz = Tageslicht + Dimmwert · 500 lx.
+       Präsenzmelder: Licht frei, solange eine Person im Raum ist oder seit dem Verlassen weniger als die Nachlaufzeit
+       vergangen ist (der Wandtaster muss auf „ein“ stehen; der Präsenzmelder schaltet dann aus und wieder ein). Die Tafelleuchte E4 gehört nicht zur Raumbeleuchtung (im Teil Lichtsteuerung aus).
+     Anzeigen: Beleuchtungsstärke ganze lx, Dimmwert ganze % (0 % heißt „aus“), Leistung ganze W.
+     Aufgabenwerte (Sollwert 500 lx): 8:00 Uhr E1 94 %, E2 82 %, E3 40 %, überall 500 lx, 108 W; 11:00 Uhr E1 78 %,
+       E2 34 %, E3 aus, 500/500/1100 lx, 56 W; 11:00 Uhr ohne Regelung 610/830/1600 lx, 150 W.
+       Nachlaufzeit 5 min: Person geht 10:00, Licht aus 10:05; kommt 10:10, geht 10:12, kommt 10:14, geht 10:15, aus 10:20.
+     Startstellung neutral: 6:00 Uhr (dunkel), Beleuchtung aus, Regelung aus, Sollwert 300 lx, Präsenzmelder aus,
+       Nachlaufzeit 1 min, Person im Raum; DALI: alle Betriebsgeräte ohne Kurzadresse, ohne Gruppe, ohne Szenenwert, aus.
+     Grenzfälle: Sollwert 100 bis 1000 lx (bei 1000 lx und Dunkelheit reicht die Leuchte nicht: 100 %, 500 lx);
+       Uhrzeit 6:00 bis 20:00; Kurzadresse 64 und Szene oder Gruppe 16 werden abgewiesen; zwei Betriebsgeräte mit
+       derselben Kurzadresse reagieren beide.
+     Prüfmodus ?pruefen: Anzeigen der Aufgabenstellungen als JSON in #pruefbericht; window.__stelle(…) stellt ein. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Lichtsteuerung (B19)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"Uhrzeit":"6:00","Beleuchtung":"aus","Konstantlichtregelung":"aus","Sollwert_lx":300,"Praesenzmelder":"aus","Nachlaufzeit_min":1,"Person":"im Raum","DALI":"ohne Kurzadresse, ohne Gruppe, ohne Szenenwert"},"loesungswerte":{"Aufgabe 1, Sollwert 500 lx, 8:00":{"E1":"94 %","E3":"40 %","Wandplatz":"500 lx","Fensterplatz":"500 lx","Leistung":"108 W"},"Aufgabe 1, 11:00":{"E1":"78 %","E3":"aus","Wandplatz":"500 lx","Fensterplatz":"1100 lx","Leistung":"56 W"},"Aufgabe 1, 11:00 ohne Regelung":{"Wandplatz":"610 lx","Fensterplatz":"1600 lx","Leistung":"150 W"},"Aufgabe 2, Nachlaufzeit 5 min":{"geht 10:00":"aus 10:05","kommt 10:10, geht 10:12, kommt 10:14, geht 10:15":"aus 10:20"},"Aufgabe 5":{"Kurzadressen":"0 bis 63","Gruppen":"0 bis 15","Szenen":"0 bis 15"}},"quelle":"Fachkunde S. 403 Bild 1 bis 3, S. 106; Tabellenbuch S. 155, S. 375; DALI-Handbuch (Tridonic) S. 5, 6, 38, 58, 85"}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62;--blau:#2557A3}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:1080px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .reiter{display:flex;gap:6px;margin-bottom:10px}
+ .reiter button{flex:1 1 50%;font-weight:700}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px;align-items:start;grid-template-areas:"messwerte" "bild" "bedienung"}
+ .bild{grid-area:bild} .messwerte{grid-area:messwerte} .bedienung{grid-area:bedienung}
+ @media(min-width:860px){.buehne{grid-template-columns:1.3fr 1fr;grid-template-rows:auto 1fr;grid-template-areas:"messwerte bedienung" "bild bedienung"} .bild{align-self:start}}
+ .bild svg{width:100%;height:auto;display:block;border:1px solid var(--linie);background:#fff}
+ .legende{font-size:13.5px;color:var(--grau);margin-top:4px}
+ .messwerte{background:#fff;display:grid;gap:6px}
+ .zeile2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+ .zeile3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+ .zeile4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px}
+ .ort3{font-size:12.5px;color:var(--grau);margin:4px 0 2px}
+ .geraet{background:#2b3a44;border-radius:8px;padding:4px 8px 6px;color:#dfe8ee;min-width:0}
+ .geraet .name{font-size:12px;letter-spacing:.04em;font-weight:700;color:#cfe;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .geraet .lcd{background:#cfe3c9;color:#14231a;border-radius:4px;padding:2px 6px;margin-top:2px;text-align:right;
+   font-variant-numeric:tabular-nums;font-size:24px;font-weight:700;white-space:nowrap;line-height:1.2}
+ .geraet .lcd small{font-size:14px;font-weight:700;margin-left:4px}
+ .kachel{border:1.4px solid var(--ink);background:var(--hell);padding:3px 6px;text-align:center;min-width:0}
+ .kachel .ort{display:block;font-size:12.5px;color:var(--grau);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .kachel .wert{display:block;font-variant-numeric:tabular-nums;font-size:19px;font-weight:700;white-space:nowrap}
+ .lcdk{background:#20313a;color:#9BF0B4;font-variant-numeric:tabular-nums;font-size:22px;font-weight:700;padding:5px 12px;border-radius:4px;text-align:right}
+ .lcdk small{font-size:15px;color:#cfe;font-weight:400;float:left;margin-top:4px}
+ input[type=range]{width:100%;height:44px;accent-color:var(--kupfer);margin:6px 0 2px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+ button{font:inherit;font-size:16px;min-height:48px;min-width:48px;padding:6px 8px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px;touch-action:manipulation}
+ button.an{background:var(--kupfer);color:#fff}
+ button.zurueck{border-color:var(--ink);color:var(--ink)}
+ button.senden{background:var(--gruen);border-color:var(--gruen);color:#fff;font-weight:700;flex:1 1 100%}
+ .schritte button{flex:1 1 44px;font-weight:700;padding:6px 2px}
+ .wahl button{flex:1 1 22%;font-weight:700}
+ .titel{font-size:15px;font-weight:700;margin:12px 0 4px}
+ .titel:first-child{margin-top:0}
+ .block{border:1.2px solid var(--linie);padding:8px 10px;margin-top:10px}
+ .block .kopfz{font-weight:700;color:var(--kupfer);font-size:14px;letter-spacing:.04em}
+ .hinweis{font-size:14px;color:var(--grau);margin-top:12px}
+ .karte{border:1.4px solid var(--ink);padding:8px 10px;margin-top:8px;background:#fff}
+ .karte .kname{font-weight:700}
+ .zahl{display:flex;gap:6px;align-items:center}
+ .zahl input{font:inherit;font-size:20px;font-weight:700;width:76px;min-height:48px;text-align:center;border:1.4px solid var(--ink);font-variant-numeric:tabular-nums}
+ .zahl .anz{font-size:20px;font-weight:700;min-width:70px;text-align:center;font-variant-numeric:tabular-nums}
+ .zahl button{font-size:24px;font-weight:700}
+ .chips{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin-top:4px}
+ .chips button{min-width:0;min-height:44px;padding:2px 0;font-weight:700;font-size:16px}
+ .meldung{min-height:22px;color:#B00020;font-weight:700;font-size:14px}
+ .protokoll{font-size:14px;color:var(--grau);min-height:20px}
+ .led{display:inline-block;width:14px;height:14px;border-radius:50%;background:#9AA5AE;border:1px solid #1A2530;vertical-align:middle;margin-right:5px}
+ .led.ein{background:#E0352B}
+ #pruefbericht{display:none}
+ [hidden]{display:none!important}
+ @media(max-width:859px){.messwerte{position:sticky;top:0;z-index:5;padding:6px 0;box-shadow:0 6px 6px -6px rgba(0,0,0,.25)}}
+ @media(max-width:500px){.chips{grid-template-columns:repeat(4,1fr)}}
+ @media(max-width:420px){.wrap{padding:12px 8px 18px} .geraet .lcd{font-size:20px} .kachel .wert{font-size:17px}
+   button{font-size:15px} .anleitung{font-size:14px} .kopf h1{font-size:20px} .geraet{padding:3px 5px 5px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E3EG · B19</div><h1>Messplatz: Lichtsteuerung im Seminarraum</h1></div>
+ <div class="anleitung"><b>So arbeiten Sie:</b> Ein Seminarraum mit Fensterfront rechts. Über jedem der drei Arbeitsplätze
+  hängt eine Leuchte (E1 an der Wand, E2 in der Mitte, E3 am Fenster), an der Tafel die Tafelleuchte E4. Auf jedem Platz
+  liegt der Messfühler eines Luxmeters. Im Teil <b>Lichtsteuerung</b> stellen Sie die Uhrzeit und die Steuerung ein, im Teil
+  <b>DALI</b> nehmen Sie die Betriebsgeräte der Leuchten in Betrieb.</div>
+
+ <div class="reiter">
+  <button type="button" id="tabS">Lichtsteuerung</button>
+  <button type="button" id="tabD">DALI</button>
+ </div>
+
+ <div class="buehne">
+  <div class="messwerte" aria-live="polite">
+   <div id="mwS">
+    <div class="zeile2">
+     <div class="kachel"><span class="ort">Uhrzeit</span><span class="wert" id="mT"></span></div>
+     <div class="kachel"><span class="ort">Leistungsaufnahme</span><span class="wert" id="mP"></span></div>
+    </div>
+    <div class="ort3">Luxmeter auf den Arbeitsplätzen</div><div class="zeile3">
+     <div class="geraet"><span class="name">WAND</span><div class="lcd"><span id="mE1"></span><small>lx</small></div></div>
+     <div class="geraet"><span class="name">MITTE</span><div class="lcd"><span id="mE2"></span><small>lx</small></div></div>
+     <div class="geraet"><span class="name">FENSTER</span><div class="lcd"><span id="mE3"></span><small>lx</small></div></div>
+    </div>
+   </div>
+   <div class="zeile4">
+    <div class="kachel"><span class="ort">E1 Wand</span><span class="wert" id="mL1"></span></div>
+    <div class="kachel"><span class="ort">E2 Mitte</span><span class="wert" id="mL2"></span></div>
+    <div class="kachel"><span class="ort">E3 Fenster</span><span class="wert" id="mL3"></span></div>
+    <div class="kachel"><span class="ort">E4 Tafel</span><span class="wert" id="mL4"></span></div>
+   </div>
+  </div>
+
+  <div class="bild">
+   <svg viewBox="0 0 720 352" role="img" id="raum" data-quelle="Raum nach Fachkunde S. 403, Bild 1 (Raum mit Lichtsteuerung, Leuchten E1 bis E3, Lichtsensor am Fenster) und Bild 2 (Raum mit Präsenzmelder); Tafelleuchte E4 ergänzt"
+    aria-label="Seminarraum im Schnitt: links die Tafel mit der Tafelleuchte E4, darüber an der Decke die Leuchten E1, E2 und E3 über drei Arbeitsplätzen, rechts die Fensterfront. An der Decke der Präsenzmelder und am Fenster der Lichtsensor. Das Tageslicht fällt durch das Fenster.">
+    <g id="rg"></g>
+   </svg>
+   <div class="legende" id="legende"></div>
+  </div>
+
+  <div class="bedienung">
+   <!-- ===================== Teil Lichtsteuerung ===================== -->
+   <div id="bedS">
+    <div class="titel">Uhrzeit</div>
+    <div class="lcdk"><small>Uhr</small><span id="aT"></span></div>
+    <input type="range" id="rT" min="360" max="1200" step="1" value="360" aria-label="Uhrzeit">
+    <div class="knoepfe schritte">
+     <button type="button" id="t60m" aria-label="eine Stunde früher">−1 h</button>
+     <button type="button" id="t1m" aria-label="eine Minute früher">−1 min</button>
+     <button type="button" id="t1p" aria-label="eine Minute später">+1 min</button>
+     <button type="button" id="t60p" aria-label="eine Stunde später">+1 h</button>
+    </div>
+
+    <div class="block">
+     <div class="kopfz">BELEUCHTUNG (WANDTASTER)</div>
+     <div class="knoepfe wahl" style="margin-top:6px">
+      <button type="button" id="bAus">aus</button><button type="button" id="bEin">ein</button>
+     </div>
+    </div>
+
+    <div class="block">
+     <div class="kopfz">KONSTANTLICHTREGELUNG (LICHTSENSOR)</div>
+     <div class="knoepfe wahl" style="margin-top:6px">
+      <button type="button" id="kAus">aus</button><button type="button" id="kEin">ein</button>
+     </div>
+     <div class="titel">Sollwert</div>
+     <div class="lcdk"><small>lx</small><span id="aSoll"></span></div>
+     <div class="knoepfe schritte" style="margin-top:6px">
+      <button type="button" id="s100m" aria-label="Sollwert 100 Lux weniger">−100</button>
+      <button type="button" id="s50m" aria-label="Sollwert 50 Lux weniger">−50</button>
+      <button type="button" id="s50p" aria-label="Sollwert 50 Lux mehr">+50</button>
+      <button type="button" id="s100p" aria-label="Sollwert 100 Lux mehr">+100</button>
+     </div>
+    </div>
+
+    <div class="block">
+     <div class="kopfz">PRÄSENZMELDER</div>
+     <div class="knoepfe wahl" style="margin-top:6px">
+      <button type="button" id="pAus">aus</button><button type="button" id="pEin">ein</button>
+     </div>
+     <div class="titel">Nachlaufzeit</div>
+     <div class="knoepfe wahl" id="nachlauf">
+      <button type="button" data-n="1">1 min</button><button type="button" data-n="5">5 min</button>
+      <button type="button" data-n="10">10 min</button><button type="button" data-n="15">15 min</button>
+     </div>
+     <div class="titel">Person</div>
+     <div class="knoepfe wahl">
+      <button type="button" id="perKommt">kommt</button><button type="button" id="perGeht">geht</button>
+     </div>
+     <div class="protokoll" id="aPer"></div>
+    </div>
+    <div class="titel">Neu beginnen</div>
+    <div class="knoepfe"><button class="zurueck" id="resetS" type="button">Zurücksetzen</button></div>
+   </div>
+
+   <!-- ===================== Teil DALI ===================== -->
+   <div id="bedD" hidden>
+    <div class="block" style="margin-top:0">
+     <div class="kopfz">STEUERGERÄT: BEFEHL SENDEN</div>
+     <div class="titel">Ziel</div>
+     <div class="knoepfe wahl" id="zielArt">
+      <button type="button" data-z="adresse">Kurzadresse</button><button type="button" data-z="gruppe">Gruppe</button>
+      <button type="button" data-z="alle">alle (Broadcast)</button>
+     </div>
+     <div class="zahl" id="zielNrZeile" style="margin-top:6px">
+      <button type="button" id="zNm" aria-label="Nummer kleiner">−</button>
+      <input id="zNr" type="text" inputmode="numeric" aria-label="Nummer des Ziels">
+      <button type="button" id="zNp" aria-label="Nummer größer">+</button>
+     </div>
+     <div class="titel">Befehl</div>
+     <div class="knoepfe wahl" id="befehl">
+      <button type="button" data-b="ein">Ein</button><button type="button" data-b="aus">Aus</button>
+      <button type="button" data-b="dimm">Dimmwert</button><button type="button" data-b="szene">Szene</button>
+     </div>
+     <div class="zahl" id="befWertZeile" style="margin-top:6px">
+      <button type="button" id="bWm" aria-label="Wert kleiner">−</button>
+      <span class="anz" id="bWert"></span>
+      <button type="button" id="bWp" aria-label="Wert größer">+</button>
+     </div>
+     <div class="knoepfe" style="margin-top:8px"><button type="button" class="senden" id="senden">Senden</button></div>
+     <div class="meldung" id="zMeld"></div>
+     <div class="protokoll" id="protokoll"></div>
+    </div>
+
+    <div class="titel" style="margin-top:14px">Betriebsgeräte einstellen</div>
+    <div class="block" style="margin-top:4px">
+     <div class="kopfz">SZENE BEARBEITEN</div>
+     <div class="zahl" style="margin-top:6px">
+      <button type="button" id="szm" aria-label="Szene kleiner">−</button>
+      <input id="szNr" type="text" inputmode="numeric" aria-label="Nummer der Szene, die Sie bearbeiten">
+      <button type="button" id="szp" aria-label="Szene größer">+</button>
+     </div>
+     <div class="meldung" id="szMeld"></div>
+    </div>
+    <div id="karten"></div>
+    <div class="titel">Neu beginnen</div>
+    <div class="knoepfe"><button class="zurueck" id="resetD" type="button">Zurücksetzen</button></div>
+   </div>
+  </div>
+ </div>
+
+ <div class="hinweis" id="hinweisS">Jede Leuchte beleuchtet ihren Arbeitsplatz. Das Luxmeter misst Tageslicht und Kunstlicht
+  zusammen. Grob mit dem Schieber, genau mit den Tasten einstellen.</div>
+ <div class="hinweis" id="hinweisD" hidden>Jede Leuchte hat ein DALI-Betriebsgerät. Kurzadresse, Gruppen und Szenenwerte
+  stellen Sie unten am Betriebsgerät ein, Befehle schickt das Steuergerät. Eine Zahl tippen Sie ins Feld oder stellen sie
+  mit − und + ein.</div>
+ <pre id="pruefbericht"></pre>
+</div>
+
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id);};
+// ---------------- Rechenmodell ----------------
+var AUSSEN=[0,500,3000,6000,9000,11000,12000,12000,11000,9000,6000,3000,500,0,0];   // 6:00 bis 20:00 Uhr, lx
+var TQ=[0.01,0.03,0.10];                    // Tageslichtquotient Wand, Mitte, Fenster
+var EK=500, PL=50;                           // Beleuchtungsstärke einer Leuchte bei 100 % an ihrem Platz; Leistung bei 100 %
+var NAME=["E1","E2","E3","E4"], ORT=["Wand","Mitte","Fenster","Tafel"];
+var START={t:360, schalter:false, regel:false, soll:300, praes:false, nach:1, person:true, tGeht:null};
+var z={}, d={};
+function startS(){ for(var k in START) z[k]=START[k]; }
+function startD(){
+  d={adr:[null,null,null,null], grp:[[],[],[],[]], sz:[], lvl:[0,0,0,0], zielArt:"adresse", zielNr:0, bef:"ein",
+     dimm:50, szNr:0, bearb:0, log:""};
+  for(var i=0;i<4;i++){ var a=[]; for(var s=0;s<16;s++) a.push(null); d.sz.push(a); }
+}
+startS(); startD();
+var tab="S";
+
+function aussen(t){
+  var h=(t-360)/60, i=Math.floor(h), f=h-i;
+  if(i>=AUSSEN.length-1) return AUSSEN[AUSSEN.length-1];
+  if(i<0) return AUSSEN[0];
+  return AUSSEN[i]+(AUSSEN[i+1]-AUSSEN[i])*f;
+}
+function tageslicht(t){ var a=aussen(t); return TQ.map(function(q){ return q*a; }); }
+function lichtFrei(){
+  if(!z.schalter) return false;
+  if(!z.praes || z.person) return true;
+  if(z.tGeht===null) return false;
+  return (z.t - z.tGeht) < z.nach;
+}
+function dimmwerte(){
+  var T=tageslicht(z.t);
+  if(!lichtFrei()) return [0,0,0];
+  if(!z.regel) return [1,1,1];
+  return T.map(function(e){ return Math.max(0,Math.min(1,(z.soll-e)/EK)); });
+}
+function zustandS(){
+  var T=tageslicht(z.t), dw=dimmwerte();
+  var E=T.map(function(e,i){ return e+dw[i]*EK; });
+  var P=PL*(dw[0]+dw[1]+dw[2]);
+  return {T:T, d:dw, E:E, P:P};
+}
+// ---------------- Anzeigen ----------------
+function uhr(t){ var h=Math.floor(t/60), m=t-60*h; return h+":"+(m<10?"0":"")+m; }
+function prozent(x){ if(x<=0) return "aus"; var p=Math.round(x*100); return (p<1?"< 1":String(p))+" %"; }
+function lux(e){ return String(Math.round(e)); }
+
+// ---------------- Raum (Schnitt) ----------------
+var NS="http://www.w3.org/2000/svg";
+function el(n,a,t){ var e=document.createElementNS(NS,n); for(var k in a) e.setAttribute(k,a[k]); if(t!==undefined) e.textContent=t; return e; }
+function text(g,x,y,t,gr,farbe,anker,fett){
+  g.appendChild(el("text",{x:x,y:y,"font-size":gr,fill:farbe||"#1A2530","text-anchor":anker||"middle",
+    "font-family":"Arial,sans-serif","font-weight":fett?"700":"400"},t));
+}
+var XL=[175,365,555];                         // Leuchten E1 bis E3 über den Plätzen; Tafelleuchte E4 an der Wand
+var YD=50, YB=262, YT=208;                     // Decke, Boden, Tischplatte
+function raum(stufen, zeigeSensoren){
+  var g=$("rg"); while(g.firstChild) g.removeChild(g.firstChild);
+  var a=aussen(z.t), hell=Math.min(1,a/12000);
+  // Himmel im Fenster
+  var r=Math.round(20+170*hell), gg=Math.round(35+175*hell), b=Math.round(70+170*hell);
+  g.appendChild(el("rect",{x:682,y:84,width:22,height:150,fill:"rgb("+r+","+gg+","+b+")",stroke:"#1A2530","stroke-width":2}));
+  // Tageslicht im Raum
+  if(a>0) g.appendChild(el("polygon",{points:"682,84 682,234 300,"+YB+" 470,"+YB,fill:"#FFE27A","fill-opacity":(0.08+0.45*hell).toFixed(3)}));
+  // Raum
+  g.appendChild(el("rect",{x:20,y:YD,width:684,height:YB-YD,fill:"none",stroke:"#1A2530","stroke-width":3}));
+  g.appendChild(el("line",{x1:20,y1:YB,x2:704,y2:YB,stroke:"#1A2530","stroke-width":5}));
+  // Tafel und Tafelleuchte E4
+  g.appendChild(el("rect",{x:22,y:122,width:12,height:80,fill:"#2F4F3F",stroke:"#1A2530","stroke-width":1.5}));
+  var s4=stufen[3];
+  if(s4>0) g.appendChild(el("polygon",{points:"40,108 46,114 76,202 34,202",fill:"#FFD43B","fill-opacity":(0.15+0.55*s4).toFixed(3)}));
+  g.appendChild(el("rect",{x:24,y:98,width:22,height:14,rx:3,fill:s4>0?"#FFD43B":"#C9D2D9",stroke:"#1A2530","stroke-width":2}));
+  text(g,54,128,"E4",30,"#1A2530","start",true);
+  // Leuchten E1 bis E3, Plätze, Messfühler
+  for(var i=0;i<3;i++){
+    var x=XL[i], s=stufen[i];
+    g.appendChild(el("line",{x1:x,y1:YD,x2:x,y2:66,stroke:"#1A2530","stroke-width":2}));
+    if(s>0) g.appendChild(el("polygon",{points:[x-50,79, x+50,79, x+80,YT, x-80,YT].join(" "),fill:"#FFD43B","fill-opacity":(0.12+0.5*s).toFixed(3)}));
+    g.appendChild(el("rect",{x:x-55,y:66,width:110,height:13,rx:3,fill:s>0?"#FFD43B":"#C9D2D9",stroke:"#1A2530","stroke-width":2}));
+    text(g,x,114,NAME[i],30,"#1A2530","middle",true);
+    // Tisch mit Messfühler
+    g.appendChild(el("rect",{x:x-60,y:YT,width:120,height:8,fill:"#8B6B4A",stroke:"#1A2530","stroke-width":1.5}));
+    g.appendChild(el("line",{x1:x-50,y1:YT+8,x2:x-50,y2:YB,stroke:"#1A2530","stroke-width":3}));
+    g.appendChild(el("line",{x1:x+50,y1:YT+8,x2:x+50,y2:YB,stroke:"#1A2530","stroke-width":3}));
+    g.appendChild(el("rect",{x:x-10,y:YT-7,width:20,height:7,fill:"#F4F6F8",stroke:"#1A2530","stroke-width":1.2}));
+    text(g,x,300,["Wandplatz","Mitte","Fensterplatz"][i],30,"#1A2530","middle",false);
+  }
+  if(zeigeSensoren){
+    // Präsenzmelder an der Decke, Lichtsensor am Fenster
+    g.appendChild(el("path",{d:"M 256 50 A 14 14 0 0 0 284 50 Z",fill:z.praes?"#E0352B":"#9AA5AE",stroke:"#1A2530","stroke-width":1.5}));
+    text(g,270,36,"Präsenzmelder",26,"#1A2530","middle",false);
+    g.appendChild(el("rect",{x:640,y:50,width:22,height:12,fill:z.regel?"#2557A3":"#9AA5AE",stroke:"#1A2530","stroke-width":1.5}));
+    text(g,600,36,"Lichtsensor",26,"#1A2530","middle",false);
+    // Person am mittleren Platz
+    if(z.person){
+      var px=430;
+      g.appendChild(el("circle",{cx:px,cy:160,r:11,fill:"#A34E0E"}));
+      g.appendChild(el("line",{x1:px,y1:171,x2:px,y2:217,stroke:"#A34E0E","stroke-width":7}));
+      g.appendChild(el("line",{x1:px,y1:217,x2:px-14,y2:YB-2,stroke:"#A34E0E","stroke-width":6}));
+      g.appendChild(el("line",{x1:px,y1:217,x2:px+14,y2:YB-2,stroke:"#A34E0E","stroke-width":6}));
+      g.appendChild(el("line",{x1:px,y1:182,x2:px-22,y2:203,stroke:"#A34E0E","stroke-width":5}));
+    }
+  }
+  text(g,702,342,"Fenster",28,"#1A2530","end",false);
+  text(g,22,342,"Tafel",28,"#1A2530","start",false);
+}
+
+// ---------------- Teil Lichtsteuerung ----------------
+function auffrischenS(){
+  var s=zustandS();
+  $("mT").textContent=uhr(z.t)+" Uhr";
+  $("mP").textContent=Math.round(s.P)+" W";
+  for(var i=0;i<3;i++){ $("mE"+(i+1)).textContent=lux(s.E[i]); $("mL"+(i+1)).textContent=prozent(s.d[i]); }
+  $("mL4").textContent="aus";
+  $("aT").textContent=uhr(z.t); $("rT").value=z.t;
+  $("aSoll").textContent=z.soll;
+  setze("bAus",!z.schalter); setze("bEin",z.schalter);
+  setze("kAus",!z.regel); setze("kEin",z.regel);
+  setze("pAus",!z.praes); setze("pEin",z.praes);
+  Array.prototype.forEach.call($("nachlauf").children,function(b){ setze(b,+b.getAttribute("data-n")===z.nach); });
+  setze("perKommt",z.person); setze("perGeht",!z.person);
+  $("aPer").innerHTML="<span class='led"+(z.praes&&z.person?" ein":"")+"'></span>"+(z.person?"Person im Raum":"Raum leer");
+  raum([s.d[0],s.d[1],s.d[2],0],true);
+  $("legende").textContent="Schnitt durch den Seminarraum. Gelb: Licht der Leuchten und Tageslicht durch das Fenster.";
+}
+function setze(b,an){ if(typeof b==="string") b=$(b); b.className=an?"an":""; b.setAttribute("aria-pressed",an?"true":"false"); }
+function setzeT(t){ z.t=Math.max(360,Math.min(1200,Math.round(t))); auffrischenS(); }
+$("rT").addEventListener("input",function(){ setzeT(+this.value); });
+[["t60m",-60],["t1m",-1],["t1p",1],["t60p",60]].forEach(function(e){ $(e[0]).onclick=function(){ setzeT(z.t+e[1]); }; });
+$("bAus").onclick=function(){ z.schalter=false; auffrischenS(); };
+$("bEin").onclick=function(){ z.schalter=true; auffrischenS(); };
+$("kAus").onclick=function(){ z.regel=false; auffrischenS(); };
+$("kEin").onclick=function(){ z.regel=true; auffrischenS(); };
+[["s100m",-100],["s50m",-50],["s50p",50],["s100p",100]].forEach(function(e){
+  $(e[0]).onclick=function(){ z.soll=Math.max(100,Math.min(1000,z.soll+e[1])); auffrischenS(); }; });
+$("pAus").onclick=function(){ z.praes=false; auffrischenS(); };
+$("pEin").onclick=function(){ z.praes=true; if(!z.person) z.tGeht=z.t; auffrischenS(); };
+Array.prototype.forEach.call($("nachlauf").children,function(b){ b.onclick=function(){ z.nach=+b.getAttribute("data-n"); auffrischenS(); }; });
+$("perKommt").onclick=function(){ z.person=true; z.tGeht=null; auffrischenS(); };
+$("perGeht").onclick=function(){ if(z.person){ z.person=false; z.tGeht=z.t; } auffrischenS(); };
+$("resetS").onclick=function(){ startS(); auffrischenS(); };
+
+// ---------------- Teil DALI ----------------
+function karten(){
+  var k=$("karten"); k.innerHTML="";
+  for(var i=0;i<4;i++){
+    var c=document.createElement("div"); c.className="karte";
+    var h="<div class='kname'>Betriebsgerät der Leuchte "+NAME[i]+" ("+ORT[i]+")</div>"+
+      "<div class='titel'>Kurzadresse</div><div class='zahl'><button type='button' data-a='m' data-i='"+i+"' aria-label='Kurzadresse kleiner'>−</button>"+
+      "<input type='text' inputmode='numeric' id='adr"+i+"' aria-label='Kurzadresse "+NAME[i]+"'>"+
+      "<button type='button' data-a='p' data-i='"+i+"' aria-label='Kurzadresse größer'>+</button></div><div class='meldung' id='am"+i+"'></div>"+
+      "<div class='titel'>Gruppen (antippen: gehört dazu)</div><div class='chips' id='gr"+i+"'>";
+    for(var g=0;g<16;g++) h+="<button type='button' data-g='"+g+"' data-i='"+i+"'>"+g+"</button>";
+    h+="</div><div class='titel'>Szenenwert für Szene <span class='szAnz'></span></div><div class='zahl'>"+
+      "<button type='button' data-s='m' data-i='"+i+"' aria-label='Szenenwert kleiner'>−</button><span class='anz' id='szw"+i+"'></span>"+
+      "<button type='button' data-s='p' data-i='"+i+"' aria-label='Szenenwert größer'>+</button></div>";
+    c.innerHTML=h; k.appendChild(c);
+  }
+  Array.prototype.forEach.call(k.querySelectorAll("button[data-a]"),function(b){ b.onclick=function(){
+    var i=+b.getAttribute("data-i"), a=d.adr[i];
+    if(b.getAttribute("data-a")==="p") a=(a===null?0:Math.min(63,a+1)); else a=(a===null||a===0?null:a-1);
+    d.adr[i]=a; $("am"+i).textContent=""; auffrischenD(); }; });
+  Array.prototype.forEach.call(k.querySelectorAll("input[id^=adr]"),function(inp){
+    inp.addEventListener("change",function(){
+      var i=+inp.id.slice(3), t=inp.value.trim();
+      if(t===""||t==="—"){ d.adr[i]=null; $("am"+i).textContent=""; }
+      else if(/^\d+$/.test(t) && +t<=63){ d.adr[i]=+t; $("am"+i).textContent=""; }
+      else { $("am"+i).textContent="Kurzadresse "+t+" nicht möglich."; }
+      auffrischenD(); }); });
+  Array.prototype.forEach.call(k.querySelectorAll("button[data-g]"),function(b){ b.onclick=function(){
+    var i=+b.getAttribute("data-i"), g=+b.getAttribute("data-g"), l=d.grp[i], p=l.indexOf(g);
+    if(p<0) l.push(g); else l.splice(p,1);
+    auffrischenD(); }; });
+  Array.prototype.forEach.call(k.querySelectorAll("button[data-s]"),function(b){ b.onclick=function(){
+    var i=+b.getAttribute("data-i"), w=d.sz[i][d.bearb];
+    if(b.getAttribute("data-s")==="p") w=(w===null?0:Math.min(100,w+10)); else w=(w===null||w===0?null:w-10);
+    d.sz[i][d.bearb]=w; auffrischenD(); }; });
+}
+function zielText(){
+  if(d.zielArt==="alle") return "alle";
+  return (d.zielArt==="adresse"?"Kurzadresse ":"Gruppe ")+d.zielNr;
+}
+function befText(){
+  return {ein:"Ein",aus:"Aus",dimm:"Dimmwert "+d.dimm+" %",szene:"Szene "+d.szNr}[d.bef];
+}
+function senden(){
+  var treffer=[];
+  for(var i=0;i<4;i++){
+    var ja=(d.zielArt==="alle") || (d.zielArt==="adresse" && d.adr[i]===d.zielNr) ||
+           (d.zielArt==="gruppe" && d.grp[i].indexOf(d.zielNr)>=0);
+    if(!ja) continue;
+    if(d.bef==="ein") d.lvl[i]=100;
+    else if(d.bef==="aus") d.lvl[i]=0;
+    else if(d.bef==="dimm") d.lvl[i]=d.dimm;
+    else if(d.sz[i][d.szNr]!==null) d.lvl[i]=d.sz[i][d.szNr];
+  }
+  d.log="Gesendet: "+zielText()+": "+befText();
+  auffrischenD();
+}
+function auffrischenD(){
+  for(var i=0;i<4;i++){
+    $("mL"+(i+1)).textContent=d.lvl[i]>0?d.lvl[i]+" %":"aus";
+    var inp=$("adr"+i); if(document.activeElement!==inp) inp.value=d.adr[i]===null?"—":String(d.adr[i]);
+    Array.prototype.forEach.call($("gr"+i).children,function(b){ setze(b,d.grp[i].indexOf(+b.getAttribute("data-g"))>=0); });
+    var w=d.sz[i][d.bearb]; $("szw"+i).textContent=w===null?"—":w+" %";
+  }
+  Array.prototype.forEach.call(document.querySelectorAll(".szAnz"),function(s){ s.textContent=d.bearb; });
+  var zi=$("szNr"); if(document.activeElement!==zi) zi.value=String(d.bearb);
+  Array.prototype.forEach.call($("zielArt").children,function(b){ setze(b,b.getAttribute("data-z")===d.zielArt); });
+  Array.prototype.forEach.call($("befehl").children,function(b){ setze(b,b.getAttribute("data-b")===d.bef); });
+  $("zielNrZeile").hidden=(d.zielArt==="alle");
+  var zn=$("zNr"); if(document.activeElement!==zn) zn.value=String(d.zielNr);
+  $("befWertZeile").hidden=!(d.bef==="dimm"||d.bef==="szene");
+  $("bWert").textContent=d.bef==="dimm"?d.dimm+" %":"Szene "+d.szNr;
+  $("senden").textContent="Senden: "+zielText()+": "+befText();
+  $("protokoll").textContent=d.log;
+  raum([d.lvl[0]/100,d.lvl[1]/100,d.lvl[2]/100,d.lvl[3]/100],false);
+  $("legende").textContent="Schnitt durch den Seminarraum. Gelb: Licht der Leuchten.";
+}
+function zielGrenze(){ return d.zielArt==="adresse"?63:15; }
+$("zNm").onclick=function(){ d.zielNr=Math.max(0,d.zielNr-1); $("zMeld").textContent=""; auffrischenD(); };
+$("zNp").onclick=function(){ d.zielNr=Math.min(zielGrenze(),d.zielNr+1); $("zMeld").textContent=""; auffrischenD(); };
+$("zNr").addEventListener("change",function(){
+  var t=this.value.trim();
+  if(/^\d+$/.test(t) && +t<=zielGrenze()){ d.zielNr=+t; $("zMeld").textContent=""; }
+  else $("zMeld").textContent=(d.zielArt==="adresse"?"Kurzadresse ":"Gruppe ")+t+" nicht möglich.";
+  auffrischenD(); });
+Array.prototype.forEach.call($("zielArt").children,function(b){ b.onclick=function(){
+  d.zielArt=b.getAttribute("data-z"); if(d.zielNr>zielGrenze()) d.zielNr=zielGrenze(); $("zMeld").textContent=""; auffrischenD(); }; });
+Array.prototype.forEach.call($("befehl").children,function(b){ b.onclick=function(){ d.bef=b.getAttribute("data-b"); auffrischenD(); }; });
+$("bWm").onclick=function(){ if(d.bef==="dimm") d.dimm=Math.max(10,d.dimm-10); else d.szNr=Math.max(0,d.szNr-1); auffrischenD(); };
+$("bWp").onclick=function(){ if(d.bef==="dimm") d.dimm=Math.min(100,d.dimm+10); else d.szNr=Math.min(15,d.szNr+1); auffrischenD(); };
+$("senden").onclick=senden;
+$("szm").onclick=function(){ d.bearb=Math.max(0,d.bearb-1); $("szMeld").textContent=""; auffrischenD(); };
+$("szp").onclick=function(){ d.bearb=Math.min(15,d.bearb+1); $("szMeld").textContent=""; auffrischenD(); };
+$("szNr").addEventListener("change",function(){
+  var t=this.value.trim();
+  if(/^\d+$/.test(t) && +t<=15){ d.bearb=+t; $("szMeld").textContent=""; }
+  else $("szMeld").textContent="Szene "+t+" nicht möglich.";
+  auffrischenD(); });
+$("resetD").onclick=function(){ startD(); ["zMeld","szMeld","am0","am1","am2","am3"].forEach(function(id){ $(id).textContent=""; }); auffrischenD(); };
+
+// ---------------- Reiter ----------------
+function zeigeTab(t){
+  tab=t;
+  setze("tabS",t==="S"); setze("tabD",t==="D");
+  $("bedS").hidden=(t!=="S"); $("bedD").hidden=(t!=="D"); $("mwS").hidden=(t!=="S");
+  $("hinweisS").hidden=(t!=="S"); $("hinweisD").hidden=(t!=="D");
+  if(t==="S") auffrischenS(); else auffrischenD();
+}
+$("tabS").onclick=function(){ zeigeTab("S"); };
+$("tabD").onclick=function(){ zeigeTab("D"); };
+karten();
+
+// ---------------- Prüfmodus ----------------
+function anzeigeS(){
+  return {Uhrzeit:$("mT").textContent, Leistung:$("mP").textContent, Wand:$("mE1").textContent+" lx",
+          Mitte:$("mE2").textContent+" lx", Fenster:$("mE3").textContent+" lx", E1:$("mL1").textContent,
+          E2:$("mL2").textContent, E3:$("mL3").textContent};
+}
+window.__stelle=function(o){ zeigeTab("S"); for(var k in o) z[k]=o[k]; auffrischenS(); return anzeigeS(); };
+window.__zustand=function(){ return {z:JSON.parse(JSON.stringify(z)), d:JSON.parse(JSON.stringify(d)), tab:tab,
+  anzeige:(tab==="S"?anzeigeS():{E1:$("mL1").textContent,E2:$("mL2").textContent,E3:$("mL3").textContent,E4:$("mL4").textContent})}; };
+if(/[?&]pruefen\b/.test(location.search)){
+  var bericht={};
+  var basis={schalter:true, regel:true, soll:500, praes:false, person:true, tGeht:null};
+  function mit(o){ var r={}; for(var k in basis) r[k]=basis[k]; for(var k2 in o) r[k2]=o[k2]; return r; }
+  bericht["8:00 Regelung 500"]=window.__stelle(mit({t:480}));
+  bericht["11:00 Regelung 500"]=window.__stelle(mit({t:660}));
+  bericht["11:00 ohne Regelung"]=window.__stelle(mit({t:660, regel:false}));
+  bericht["15:00 Regelung 500"]=window.__stelle(mit({t:900}));
+  bericht["6:00 Regelung 1000"]=window.__stelle(mit({t:360, soll:1000}));
+  bericht["12:30 Regelung 100"]=window.__stelle(mit({t:750, soll:100}));
+  bericht["20:00 Regelung 500"]=window.__stelle(mit({t:1200}));
+  bericht["Start"]=window.__stelle(START);
+  [["geht 10:00, 10:04",{t:604, praes:true, person:false, tGeht:600, nach:5}],
+   ["geht 10:00, 10:05",{t:605, praes:true, person:false, tGeht:600, nach:5}],
+   ["geht 10:15, 10:19",{t:619, praes:true, person:false, tGeht:615, nach:5}],
+   ["geht 10:15, 10:20",{t:620, praes:true, person:false, tGeht:615, nach:5}]].forEach(function(e){
+    bericht[e[0]]=window.__stelle(mit(e[1])); });
+  startS(); auffrischenS();
+  $("pruefbericht").textContent=JSON.stringify(bericht);
+}
+zeigeTab("S");
+})();
+</script>
+</body></html>
