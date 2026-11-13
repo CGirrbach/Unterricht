@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>B01 Messplatz: Beleuchtungsstromkreis einer Werkhalle</title>
+<!-- lehrmaterial -->
+<!-- materialtyp: simulation -->
+<!-- sim_bearbeitung: pflicht -->
+<script type="application/json" id="sim-meta">
+{"startwerte": {"n": 30, "cosphi": 0.65},
+ "loesungswerte": {"n": 20, "cosphi": 0.5},
+ "weitere_loesungswerte": {"n": [20, 26, 27, 48, 49], "cosphi": [1.0, 0.7, 0.5, 0.9]},
+ "bereich": {"n": [0, 60], "cosphi": [0.3, 1.0]},
+ "gekoppelt": "B01_Arbeitsblatt.docx, Aufgabe 2, 3 und 4",
+ "ziel_erkenntnis": "Bei gleicher Wirkleistung ist die Stromstaerke in der Zuleitung umso groesser, je kleiner der Wirkfaktor ist; der Leitungsschutzschalter laesst deshalb bei kleinem Wirkfaktor weniger Leuchten zu."}
+</script>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:"Noto Sans",system-ui,Arial,sans-serif;color:var(--ink);background:var(--hell);line-height:1.4}
+.wrap{max-width:1000px;margin:0 auto;padding:0 12px 28px}
+header{border-top:6px solid var(--kupfer);background:#fff;border-bottom:1px solid var(--ink);padding:10px 12px 9px;margin:0 -12px 12px}
+header .reihe{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--kupfer);font-weight:700}
+header h1{font-size:20px;margin:2px 0 0}
+.karte{background:#fff;border:1.3px solid var(--ink);padding:10px 12px;margin:0 0 12px}
+.karte h2{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--kupfer);margin:0 0 8px}
+.geraete{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.geraet{border:1.6px solid var(--ink);background:var(--hell);padding:7px 3px 5px;text-align:center;min-width:0}
+.geraet .name{font-size:clamp(9px,2.5vw,12px);letter-spacing:.02em;text-transform:uppercase;color:var(--grau);font-weight:700}
+.geraet .wert{font-family:"DejaVu Sans Mono",ui-monospace,monospace;font-size:clamp(18px,5.4vw,28px);font-weight:700;white-space:nowrap}
+.geraet .zeichen{font-size:14px;color:var(--grau)}
+.strom{margin-top:10px}
+.strom .titel{font-size:13px;color:var(--grau);margin:0 0 3px}
+.strom .skala{position:relative;height:30px;border:1.4px solid var(--ink);background:#fff;overflow:hidden}
+.strom .fuell{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--kupfer)}
+.strom .marke{position:absolute;top:-2px;bottom:-2px;width:0;border-left:3px solid var(--ink)}
+.strom .zahlen{position:relative;height:18px;font-size:12px;color:var(--grau)}
+.strom .zahlen span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.regler{display:grid;grid-template-columns:1fr;gap:12px}
+.zeile label{display:flex;justify-content:space-between;align-items:baseline;font-size:15px;font-weight:700;margin-bottom:2px}
+.zeile label output{font-family:"DejaVu Sans Mono",ui-monospace,monospace;font-size:20px;color:var(--kupfer)}
+.zeile .bedien{display:grid;grid-template-columns:52px 1fr 52px;gap:8px;align-items:center}
+button{appearance:none;border:1.6px solid var(--ink);background:#fff;color:var(--ink);font-size:24px;font-weight:700;
+ height:52px;border-radius:6px;cursor:pointer;touch-action:manipulation}
+button:active{background:var(--kupferhell)}
+button.reset{font-size:15px;height:48px;padding:0 18px;border-color:var(--kupfer);color:var(--kupfer);width:100%}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:52px;background:transparent;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:10px;background:var(--linie);border-radius:5px}
+input[type=range]::-moz-range-track{height:10px;background:var(--linie);border-radius:5px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:36px;height:36px;border-radius:50%;background:var(--kupfer);border:3px solid #fff;box-shadow:0 0 0 1.6px var(--ink);margin-top:-13px}
+input[type=range]::-moz-range-thumb{width:32px;height:32px;border-radius:50%;background:var(--kupfer);border:3px solid #fff;box-shadow:0 0 0 1.6px var(--ink)}
+.hinweis{font-size:13px;color:var(--grau);margin:8px 0 0}
+svg{display:block;width:100%;height:auto}
+svg text{font-family:"Noto Sans",Arial,sans-serif;fill:var(--ink)}
+@media(min-width:760px){.zwei{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}}
+@media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important}}
+</style></head>
+<body><div class="wrap">
+<header><div class="reihe">E3EG · B01 · Messplatz</div>
+<h1>Beleuchtungsstromkreis einer Werkhalle am 230-V-Netz</h1></header>
+
+<div class="zwei">
+<div>
+ <div class="karte">
+  <h2>Anzeigen der Messgeräte</h2>
+  <div class="geraete">
+   <div class="geraet"><div class="name">Spannungsmesser</div><div class="wert" id="aU">230 V</div><div class="zeichen"><i>U</i></div></div>
+   <div class="geraet"><div class="name">Strommesser</div><div class="wert" id="aI">13,85 A</div><div class="zeichen"><i>I</i></div></div>
+   <div class="geraet"><div class="name">Leistungsmesser</div><div class="wert" id="aP">2070 W</div><div class="zeichen"><i>P</i></div></div>
+  </div>
+  <div class="strom">
+   <p class="titel">Stromstärke <i>I</i> in der Zuleitung</p>
+   <div class="skala"><div class="fuell" id="fuell"></div><div class="marke" id="marke"></div></div>
+   <div class="zahlen" id="zahlen"></div>
+   <p class="hinweis" style="margin-top:4px">Senkrechter Strich: Bemessungsstrom des Leitungsschutzschalters F1, 16&nbsp;A.</p>
+  </div>
+ </div>
+ <div class="karte">
+  <h2>Einstellen</h2>
+  <div class="regler">
+   <div class="zeile"><label for="rn"><span>Zahl der Leuchten <i>n</i></span><output id="on">30</output></label>
+    <div class="bedien"><button type="button" id="nm" aria-label="eine Leuchte weniger">&minus;</button>
+    <input type="range" id="rn" min="0" max="60" step="1" value="30" aria-label="Zahl der Leuchten">
+    <button type="button" id="np" aria-label="eine Leuchte mehr">+</button></div></div>
+   <div class="zeile"><label for="rc"><span>Wirkfaktor cos <i>φ</i> der Leuchten</span><output id="oc">0,65</output></label>
+    <div class="bedien"><button type="button" id="cm" aria-label="Wirkfaktor kleiner">&minus;</button>
+    <input type="range" id="rc" min="0.30" max="1.00" step="0.05" value="0.65" aria-label="Wirkfaktor der Leuchten">
+    <button type="button" id="cp" aria-label="Wirkfaktor größer">+</button></div></div>
+   <button type="button" class="reset" id="reset">Zurücksetzen auf die Startstellung</button>
+  </div>
+  <p class="hinweis">Jede Leuchte: Leuchtstofflampe 58 W mit Vorschaltgerät 11 W.</p>
+ </div>
+</div>
+<div class="karte">
+ <h2>Schaltung des Messplatzes</h2>
+ <svg id="schaltung" viewBox="0 0 495 300" role="img" aria-label="Messschaltung: Leitungsschutzschalter, Strommesser, Leistungsmesser und Spannungsmesser vor den Leuchten"
+  data-quelle="eigene Zeichnung nach Europa-Rechenbuch Elektrotechnik, 20. Auflage, S. 121, Bild 2 (Messschaltung mit Strommesser, Leistungsmesser und Spannungsmesser vor dem Verbraucher); ergänzt um den Leitungsschutzschalter vor dem Strommesser und die Leuchten als Verbraucher">
+  <g stroke="#1A2530" stroke-width="2.4" fill="none">
+   <!-- Außenleiter L oben, Neutralleiter N unten -->
+   <line x1="40" y1="60" x2="400" y2="60"/>
+   <line x1="40" y1="250" x2="400" y2="250"/>
+   <!-- Leitungsschutzschalter -->
+   <rect x="70" y="44" width="44" height="32" fill="#fff"/>
+   <!-- Strommesser -->
+   <circle cx="160" cy="60" r="18" fill="#fff"/>
+   <!-- Leistungsmesser: Strompfad im Leiter, Spannungspfad nach N -->
+   <circle cx="240" cy="60" r="18" fill="#fff"/>
+   <line x1="240" y1="78" x2="240" y2="120"/>
+   <line x1="240" y1="120" x2="262" y2="120"/>
+   <line x1="262" y1="120" x2="262" y2="250"/>
+   <!-- Spannungsmesser zwischen L und N -->
+   <line x1="310" y1="60" x2="310" y2="137"/>
+   <circle cx="310" cy="155" r="18" fill="#fff"/>
+   <line x1="310" y1="173" x2="310" y2="250"/>
+   <!-- Verbraucher: Leuchten -->
+   <line x1="370" y1="60" x2="370" y2="122"/>
+   <rect x="345" y="122" width="50" height="66" fill="#F5EBDF"/>
+   <line x1="370" y1="188" x2="370" y2="250"/>
+   <circle cx="370" cy="146" r="12" fill="#fff"/>
+   <line x1="361.5" y1="137.5" x2="378.5" y2="154.5"/>
+   <line x1="378.5" y1="137.5" x2="361.5" y2="154.5"/>
+  </g>
+  <g fill="#1A2530">
+   <circle cx="310" cy="60" r="4"/><circle cx="310" cy="250" r="4"/>
+   <circle cx="370" cy="60" r="4"/><circle cx="370" cy="250" r="4"/>
+   <circle cx="262" cy="250" r="4"/>
+  </g>
+  <text x="160" y="67" text-anchor="middle" font-size="20" font-weight="700">A</text>
+  <text x="240" y="67" text-anchor="middle" font-size="20" font-weight="700">W</text>
+  <text x="310" y="162" text-anchor="middle" font-size="20" font-weight="700">V</text>
+  <text x="26" y="66" text-anchor="middle" font-size="17" font-weight="700">L</text>
+  <text x="26" y="256" text-anchor="middle" font-size="17" font-weight="700">N</text>
+  <text x="92" y="66" text-anchor="middle" font-size="15" font-weight="700">F1</text>
+  <text x="92" y="36" text-anchor="middle" font-size="15">16 A</text>
+  <text x="403" y="160" font-size="15" id="sn">30 Leuchten</text>
+  <text x="40" y="290" font-size="15">~ 50 Hz  230 V</text>
+ </svg>
+ <p class="hinweis">Der Leitungsschutzschalter schützt die Zuleitung. Der Strommesser und der Strompfad des Leistungsmessers liegen im Außenleiter, der Spannungsmesser liegt zwischen Außenleiter und Neutralleiter.</p>
+</div>
+</div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var META = JSON.parse(document.getElementById('sim-meta').textContent);
+var START = META.startwerte;
+var U = 230, P_LAMPE = 58, P_VG = 11, I_N = 16, I_SKALA = 60;
+var rn = document.getElementById('rn'), rc = document.getElementById('rc');
+
+function komma(x, stellen){ return x.toFixed(stellen).replace('.', ','); }
+
+/* Rechenmodell: Wirkleistung je Leuchte 58 W + 11 W (Europa Fachkunde S. 143, Beispiel);
+   Wirkleistung P = n mal Leistung je Leuchte; Scheinleistung S = P / cos phi (Tabellenbuch S. 37, Formel 5 umgestellt);
+   Stromstaerke I = S / U (Tabellenbuch S. 37, neben Formel 1). Die Seite zeigt weder S noch eine Formel. */
+function modell(){
+  var n = parseInt(rn.value, 10), c = parseFloat(rc.value);
+  var P = n * (P_LAMPE + P_VG), S = P / c, I = S / U;
+  return {n: n, c: c, P: P, I: I};
+}
+
+var zahlen = document.getElementById('zahlen');
+[0, 10, 20, 30, 40, 50, 60].forEach(function(a){
+  var s = document.createElement('span'); s.style.left = (a / I_SKALA * 100) + '%';
+  s.textContent = a + (a === 60 ? ' A' : '');
+  if(a === 0) s.style.transform = 'none';
+  if(a === 60) s.style.transform = 'translateX(-100%)';
+  zahlen.appendChild(s);
+});
+document.getElementById('marke').style.left = (I_N / I_SKALA * 100) + '%';
+
+function anzeigen(m){
+  document.getElementById('on').textContent = m.n;
+  document.getElementById('oc').textContent = komma(m.c, 2);
+  document.getElementById('aI').textContent = komma(m.I, 2) + ' A';
+  document.getElementById('aP').textContent = Math.round(m.P) + ' W';
+  document.getElementById('sn').textContent = m.n + (m.n === 1 ? ' Leuchte' : ' Leuchten');
+  document.getElementById('fuell').style.width = Math.min(100, m.I / I_SKALA * 100) + '%';
+}
+function neu(){ anzeigen(modell()); }
+function setze(n, c){ rn.value = n; rc.value = c; neu(); }
+function schritt(el, d){
+  var v = parseFloat(el.value) + d * parseFloat(el.step);
+  v = Math.max(parseFloat(el.min), Math.min(parseFloat(el.max), v));
+  el.value = (el === rc) ? v.toFixed(2) : Math.round(v); neu();
+}
+rn.addEventListener('input', neu); rc.addEventListener('input', neu);
+document.getElementById('nm').addEventListener('click', function(){ schritt(rn, -1); });
+document.getElementById('np').addEventListener('click', function(){ schritt(rn, +1); });
+document.getElementById('cm').addEventListener('click', function(){ schritt(rc, -1); });
+document.getElementById('cp').addEventListener('click', function(){ schritt(rc, +1); });
+document.getElementById('reset').addEventListener('click', function(){ setze(START.n, START.cosphi); });
+
+/* Die Regler oeffnen aus den STARTWERTEN, nie aus den Loesungswerten. */
+setze(START.n, START.cosphi);
+})();
+</script>
+</body></html>
