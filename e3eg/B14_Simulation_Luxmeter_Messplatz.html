@@ -24,7 +24,7 @@
 <html lang="de"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Messplatz Beleuchtungsstärke (B14)</title>
-<script type="application/json" id="sim-meta">{"startwerte":{"Strahler":2,"r_m":3.7,"alpha_grad":15},"loesungswerte":{"Aufgabe 3, Strahler 1, alpha 0":{"1 m":"720 lx","2 m":"180 lx","3 m":"80,0 lx","4 m":"45,0 lx"},"Aufgabe 3 c, Strahler 1, r 2 m, alpha 60":"90,0 lx","Aufgabe 5a, Strahler 2, r 1,5 m":"512 lx","Aufgabe 5b, Strahler 1, 125 lx":"r = 2,40 m"},"quelle":"Tabellenbuch Elektrotechnik S. 227 (Bild und Formel 3); Fachkunde S. 389 (Luxmeter, Messfühler auf der Arbeitsebene); Rechenbuch S. 215 Bild 1 und 2; Laborversuch Beleuchtungsstärke des Materialarchivs"}</script>
+<script type="application/json" id="sim-meta">{"startwerte":{"Strahler":2,"r_m":3.7,"alpha_grad":15},"loesungswerte":{"Aufgabe 3, Strahler 1, alpha 0":{"1 m":"720 lx","2 m":"180 lx","3 m":"80,0 lx"},"Aufgabe 3 c, Strahler 1, r 2 m, alpha 60":"90,0 lx","Aufgabe 5a, Strahler 2, r 1,5 m":"512 lx","Aufgabe 5b, Strahler 1, 125 lx":"r = 2,40 m"},"quelle":"Tabellenbuch Elektrotechnik S. 227 (Bild und Formel 3); Fachkunde S. 389 (Luxmeter, Messfühler auf der Arbeitsebene); Rechenbuch S. 215 Bild 1 und 2; Laborversuch Beleuchtungsstärke des Materialarchivs"}</script>
 <style>
  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
  :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62;--blau:#2557A3}
@@ -156,7 +156,9 @@ function luxanzeige(e){                          // Luxmeter mit selbsttätiger 
 }
 
 // ---------------- Messbank (Seitenansicht) ----------------
-var NS="http://www.w3.org/2000/svg", X0=74, K=124, YL=160, YB=262;   // 1 m ≙ 124 px; Lichtquelle bei (X0, YL)
+var NS="http://www.w3.org/2000/svg", X0=74, K=118, YL=160, YB=262;   // 1 m ≙ 118 px; Lichtquelle bei (X0, YL)
+// 13.11.2026 (Prüfer B14): 1 m ≙ 118 px statt 124 px, damit der geneigte Messfühler bei 5,00 m und 90° ganz im Bild bleibt
+// (rechter Rand höchstens 74 + 590 + 6 + 32 = 702 px von 720 px).
 function el(n,a,t){ var e=document.createElementNS(NS,n); for(var k in a) e.setAttribute(k,a[k]); if(t!==undefined) e.textContent=t; return e; }
 function text(g,x,y,t,gr,farbe,anker,kursiv){
   var a={x:x,y:y,"font-size":gr,fill:farbe||"#1A2530","text-anchor":anker||"start","font-family":kursiv?"Cambria,Caladea,'Noto Serif',Georgia,serif":"Arial,sans-serif"};
@@ -211,9 +213,14 @@ function messbank(){
     var ax=xs+6-R*Math.cos(w), ay=YL+R*Math.sin(w);
     g.appendChild(el("path",{d:"M "+bx+" "+by+" A "+R+" "+R+" 0 0 0 "+ax+" "+ay,fill:"none",stroke:"#2557A3","stroke-width":2.6}));
     var m=w/2;
-    text(g,xs+6-(R+24)*Math.cos(m),YL+(R+24)*Math.sin(m)+10,"α",34,"#2557A3","middle",true);
+    // nahe am Strahler (kleiner Bogen) steht α unter dem Bogen, sonst läge es auf dem Strahlergehäuse
+    if(R<60) text(g,xs-8,YL+R+38,"α",34,"#2557A3","middle",true);
+    else text(g,xs+6-(R+24)*Math.cos(m),YL+(R+24)*Math.sin(m)+10,"α",34,"#2557A3","middle",true);
   }
-  text(g,xs>520?xs-24:xs+28,YB-26,"Messfühler",26,"#1A2530",xs>520?"end":"start");
+  // Beschriftung des Messfühlers: nahe am Strahler rechts neben dem Schlitten, sonst oben über dem Messfühler. Der
+  // Winkelbogen mit α liegt links unter dem Messfühler; so überdeckt keine Schrift die andere (Prüfer B14, 13.11.2026).
+  if(xs<=300) text(g,xs+28,YB-26,"Messfühler",26,"#1A2530","start");
+  else text(g,Math.max(300,Math.min(xs,630)),40,"Messfühler",26,"#1A2530","middle");
 }
 
 // ---------------- Bedienung ----------------
