@@ -355,12 +355,12 @@ KK.push({typ: "Jährliche Energiekosten einer Beleuchtung", f: function(){
   merke: "Tabellenbuch S. 36, Formel 7 und 8 (<i>T</i>: tariflicher Preis je kWh, in Aufgaben auch Arbeitspreis). Die Verluste des Vorschaltgeräts zählen mit. 100 ct = 1 €."};
 }});
 KK.push({typ: "Einsparung beim LED-Retrofit", f: function(){
- var n = zuf(8, 72), pl = wahl([36, 49]), pv = wahl([4, 6, 7, 8, 9]), pled = pl === 49 ? wahl([29, 32, 34]) : wahl([29, 32]), t = zuf(16, 46)*100, ct = zehntel(19, 46);
+ var n = zuf(8, 72), pl = wahl([36, 49]), pv = wahl([4, 6, 7, 8, 9]), pled = pl === 49 ? wahl([24.4, 25.5]) : wahl([15.5, 18.4]), t = zuf(16, 46)*100, ct = zehntel(19, 46);
  var dp = pl + pv - pled, w = n*dp*t/1000, ers = w*ct/100;
  return {art: "ersparnis", p: {n: n, pl: pl, pv: pv, pled: pled, t: t, ct: ct}, wert: ers, einh: "€",
-  frage: "In einer Lagerhalle sollen " + n + " Leuchtstofflampen zu je " + pl + " W gegen LED-Röhren zu je " + pled + " W getauscht werden (Retrofit). Die alten Vorschaltgeräte haben je " + pv + " W Verluste; die LED-Röhren arbeiten mit LED-Starter. Die Beleuchtung brennt " + zahl(t, 0) + " Stunden im Jahr, der Arbeitspreis beträgt " + zahl(ct, 1) + " ct/kWh. Berechnen Sie die jährliche Einsparung der Energiekosten.",
+  frage: "In einer Lagerhalle sollen " + n + " Leuchtstofflampen zu je " + pl + " W gegen LED-Röhren zu je " + zahl(pled, 1) + " W getauscht werden (Retrofit). Die alten Vorschaltgeräte haben je " + pv + " W Verluste; die LED-Röhren arbeiten mit LED-Starter. Die Beleuchtung brennt " + zahl(t, 0) + " Stunden im Jahr, der Arbeitspreis beträgt " + zahl(ct, 1) + " ct/kWh. Berechnen Sie die jährliche Einsparung der Energiekosten.",
   weg: [["Formel", "Δ<i>P</i> = " + ix("P", "alt") + " − " + ix("P", "LED") + ";  Δ<i>W</i> = <i>n</i>" + MAL + "Δ<i>P</i>" + MAL + "<i>t</i>;  Δ" + KA_ + " = Δ<i>W</i>" + MAL + "<i>T</i>"],
-   ["Einsetzen", ix("P", "alt") + " = " + pl + " W + " + pv + " W = " + (pl + pv) + " W;  Δ<i>P</i> = " + (pl + pv) + " W − " + pled + " W = " + dp + " W;  Δ<i>W</i> = " + n + MAL + zahl(dp/1000, 3) + " kW" + MAL + zahl(t, 0) + " h " + erg(w, "kWh", 1)],
+   ["Einsetzen", ix("P", "alt") + " = " + pl + " W + " + pv + " W = " + (pl + pv) + " W;  Δ<i>P</i> = " + (pl + pv) + " W − " + zahl(pled, 1) + " W = " + zahl(dp, 1) + " W;  Δ<i>W</i> = " + n + MAL + zahl(dp/1000, 4) + " kW" + MAL + zahl(t, 0) + " h " + erg(w, "kWh", 1)],
    ["Einsetzen", "Δ" + KA_ + " = " + zahl(w, 1) + " kWh" + MAL + fest(ct/100, 3) + " " + br("€", "kWh")], ["Ergebnis", "Δ" + KA_ + " " + erg(ers, "€", 2) + " im Jahr"]],
   merke: "Tabellenbuch S. 36, Formel 7 und 8. Wie in der Prüfungsvorbereitung (Teil 2 S. 72) zählt bei der LED-Röhre nur ihre Bemessungsleistung; die Verluste des Vorschaltgeräts, das mit LED-Starter in der Leuchte bleibt, werden nicht gerechnet."};
 }});
