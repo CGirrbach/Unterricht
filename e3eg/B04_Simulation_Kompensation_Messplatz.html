@@ -6,8 +6,8 @@
 <!-- materialtyp: simulation -->
 <!-- sim_bearbeitung: pflicht -->
 <script type="application/json" id="sim-meta">
-{"startwerte": {"Q1": "aus", "Q2": "aus", "C_uF": 35, "Zange": "Zuleitung"},
- "loesungswerte": {"Q1": "ein", "Q2": "ein", "C_uF": 55, "Zange": ["Zuleitung", "Motor", "Kondensator"]},
+{"startwerte": {"Motor": "aus", "Kondensator": "aus", "C_uF": 35, "Zange": "Zuleitung"},
+ "loesungswerte": {"Motor": "ein", "Kondensator": "ein", "C_uF": 55, "Zange": ["Zuleitung", "Motor", "Kondensator"]},
  "bereich": {"C_uF": [15, 65], "Schritt_uF": 10},
  "gekoppelt": "B04_Arbeitsblatt.docx, Aufgabe 1 und 2",
  "ziel_erkenntnis": "Der Motor nimmt mit und ohne Kondensator dieselbe Blindleistung auf. Der Kondensator nimmt keine Wirkleistung auf; seine Blindleistung ist kapazitiv. In der Zuleitung bleibt nur die Differenz der beiden Blindleistungen, die Stromstaerke dort sinkt; den Rest der Blindleistung des Motors liefert der Kondensator."}
@@ -58,7 +58,7 @@ svg text{font-family:"Noto Sans",Arial,sans-serif;fill:var(--ink)}
 <div class="zwei">
 <div class="karte">
  <h2>Schaltung des Messplatzes</h2>
- <svg id="schaltung" viewBox="0 0 480 236" role="img" aria-label="Netz 230 V, Zuleitung, parallel ein Motor mit Schalter Q1 und ein Kondensator mit Schalter Q2; die Stromzange umfasst einen der drei Leiter"
+ <svg id="schaltung" viewBox="0 0 480 236" role="img" aria-label="Netz 230 V, Zuleitung, parallel ein Motor und ein Kondensator mit je einem Schalter; die Stromzange umfasst einen der drei Leiter"
   data-quelle="eigene Zeichnung nach Europa-Rechenbuch Elektrotechnik, 20. Auflage, S. 132, Bild 1 (Parallelkompensation eines Motors) und Europa Fachkunde Elektrotechnik S. 164, Bild 1 (Versuchsschaltung mit zuschaltbarem Kondensator); Messgeraet: Netzanalysator (Fachkunde S. 311, Bild 1) mit Stromzange (Fachkunde S. 481)">
   <g stroke="#1A2530" stroke-width="2.4" fill="none">
    <line x1="38" y1="40" x2="440" y2="40"/>
@@ -88,8 +88,6 @@ svg text{font-family:"Noto Sans",Arial,sans-serif;fill:var(--ink)}
   <text x="150" y="78" text-anchor="middle" font-size="14" fill="#5A666F">Zuleitung</text>
   <text x="270" y="150" text-anchor="middle" font-size="19" font-weight="700">M</text>
   <text x="270" y="167" text-anchor="middle" font-size="12">1~</text>
-  <text x="240" y="88" text-anchor="end" font-size="15" font-weight="700">Q1</text>
-  <text x="370" y="88" text-anchor="end" font-size="15" font-weight="700">Q2</text>
   <text x="426" y="152" font-size="17" font-style="italic" font-family="Caladea,Cambria,serif">C</text>
   <text x="270" y="224" text-anchor="middle" font-size="13" fill="#5A666F">Motor</text>
   <text x="400" y="224" text-anchor="middle" font-size="13" fill="#5A666F">Kondensator</text>
@@ -116,8 +114,8 @@ svg text{font-family:"Noto Sans",Arial,sans-serif;fill:var(--ink)}
   <h2>Schalten und messen</h2>
   <div class="bedienung">
    <div class="schalter">
-     <button type="button" id="q1" aria-pressed="false">Motor Q1: aus</button>
-     <button type="button" id="q2" aria-pressed="false">Kondensator Q2: aus</button>
+     <button type="button" id="q1" aria-pressed="false">Motor: aus</button>
+     <button type="button" id="q2" aria-pressed="false">Kondensator: aus</button>
    </div>
    <div class="kap"><p class="titel">Kapazität <i>C</i></p><button type="button" id="cm" aria-label="Kapazität kleiner">&minus;</button>
      <output id="oc">35 µF</output>
@@ -176,8 +174,8 @@ function anzeigen(){
   else { document.getElementById('aC').textContent = komma(m.cos, 2); document.getElementById('aCart').textContent = art(m.Q); }
   document.getElementById('oc').textContent = zustand.c + ' µF';
   var q1 = document.getElementById('q1'), q2 = document.getElementById('q2');
-  q1.setAttribute('aria-pressed', zustand.q1); q1.textContent = 'Motor Q1: ' + (zustand.q1 ? 'ein' : 'aus');
-  q2.setAttribute('aria-pressed', zustand.q2); q2.textContent = 'Kondensator Q2: ' + (zustand.q2 ? 'ein' : 'aus');
+  q1.setAttribute('aria-pressed', zustand.q1); q1.textContent = 'Motor: ' + (zustand.q1 ? 'ein' : 'aus');
+  q2.setAttribute('aria-pressed', zustand.q2); q2.textContent = 'Kondensator: ' + (zustand.q2 ? 'ein' : 'aus');
   document.getElementById('q1zu').style.display = zustand.q1 ? '' : 'none';
   document.getElementById('q1auf').style.display = zustand.q1 ? 'none' : '';
   document.getElementById('q2zu').style.display = zustand.q2 ? '' : 'none';
@@ -190,7 +188,7 @@ function anzeigen(){
 }
 
 function setze(s){
-  zustand.q1 = s.Q1 === 'ein'; zustand.q2 = s.Q2 === 'ein'; zustand.c = s.C_uF; zustand.zange = s.Zange; anzeigen();
+  zustand.q1 = s.Motor === 'ein'; zustand.q2 = s.Kondensator === 'ein'; zustand.c = s.C_uF; zustand.zange = s.Zange; anzeigen();
 }
 document.getElementById('q1').addEventListener('click', function(){ zustand.q1 = !zustand.q1; anzeigen(); });
 document.getElementById('q2').addEventListener('click', function(){ zustand.q2 = !zustand.q2; anzeigen(); });
