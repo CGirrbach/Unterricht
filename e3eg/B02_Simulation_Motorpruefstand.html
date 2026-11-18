@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>B02 Messplatz: Drehstrommotor am Prüfstand</title>
+<!-- lehrmaterial -->
+<!-- materialtyp: simulation -->
+<!-- sim_bearbeitung: pflicht -->
+<script type="application/json" id="sim-meta">
+{"startwerte": {"motor": "4 kW", "hauptschalter": "aus"},
+ "loesungswerte": {"2,2 kW": {"U": "400 V", "I": "4,40 A", "P": "2530 W", "n": "1465", "Pmec": "2200 W"},
+                   "11 kW": {"U": "400 V", "I": "20,5 A", "P": "11 930 W", "n": "1475", "Pmec": "11 000 W"}},
+ "gekoppelt": "B02_Arbeitsblatt, Aufgabe 3 und 4",
+ "ziel_erkenntnis": "Der Leistungsmesser zeigt bei Bemessungsbetrieb mehr Wirkleistung, als auf dem Leistungsschild steht; die Bremse an der Welle zeigt genau den Wert des Schildes.",
+ "quelle": "Europa Fachkunde Elektrotechnik S. 674 (Betriebsdaten von Drehstrom-Asynchronmotoren, 400 V, 50 Hz, Drehfelddrehzahl 1500 1/min: 90S, 100L, 112M, 160M); Wirkleistung nach Tabellenbuch S. 48, Formel 9"}
+</script>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--gruen:#2F7D62;
+ --gruenhell:#EAF3EC;--grau:#5A666F;--anzeige:#0F1B12;--ziffer:#B8F5C8}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:"Noto Sans",system-ui,Arial,sans-serif;color:var(--ink);background:var(--hell);line-height:1.35}
+.wrap{max-width:1000px;margin:0 auto;padding:0 10px 24px}
+header{border-top:6px solid var(--kupfer);background:#fff;border-bottom:1px solid var(--ink);padding:8px 10px 7px;margin:0 -10px 10px}
+header .reihe{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--kupfer);font-weight:700}
+header h1{font-size:19px;margin:2px 0 0}
+.karte{background:#fff;border:1.3px solid var(--ink);padding:8px 10px;margin:0 0 10px;min-width:0}
+.karte h2{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--kupfer);margin:0 0 6px}
+.raster{display:grid;grid-template-columns:1fr;gap:0}
+@media(min-width:760px){.raster{grid-template-columns:1fr 1fr;gap:10px}}
+/* Leistungsschild (Auszug) wie ein Schild: Rahmen, Felder */
+.schild{border:2px solid var(--ink);border-radius:6px;padding:6px;background:#FBFBF7;font-family:Arial,sans-serif}
+.schild .zeile{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:4px 0}
+.schild .feld{border:1.3px solid var(--ink);padding:3px 6px;font-size:16px;font-weight:700;text-align:center;min-width:0;white-space:nowrap}
+.schild .kopf{text-align:center;font-size:13px;color:var(--grau);margin-bottom:2px}
+/* Messgeräte */
+.geraete{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.geraet{border:1.6px solid var(--ink);background:var(--hell);padding:5px 4px 6px;text-align:center;min-width:0}
+.geraet.breit{grid-column:1 / span 2}
+.geraet .name{font-size:12px;color:var(--grau);font-weight:700}
+.geraet .wert{display:block;margin:3px auto 0;background:var(--anzeige);color:var(--ziffer);border-radius:4px;padding:3px 6px;
+ font-family:"DejaVu Sans Mono",ui-monospace,monospace;font-size:clamp(19px,5.6vw,26px);font-weight:700;white-space:nowrap;
+ max-width:13em}
+.geraet .zeichen{font-size:13px;color:var(--grau);margin-top:2px}
+/* Bedienung */
+.knoepfe{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+button{appearance:none;border:1.6px solid var(--ink);background:#fff;color:var(--ink);font-size:17px;font-weight:700;
+ min-height:50px;border-radius:6px;cursor:pointer;padding:4px 6px;font-family:inherit}
+button.gewaehlt{background:var(--kupferhell);border-color:var(--kupfer);color:var(--kupfer);box-shadow:inset 0 0 0 2px var(--kupfer)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.schalter{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+button.ein{background:var(--gruenhell);border-color:var(--gruen);color:var(--gruen)}
+button.reset{font-size:15px;border-color:var(--kupfer);color:var(--kupfer)}
+.hinweis{font-size:13px;color:var(--grau);margin:6px 0 0;min-height:1.3em}
+svg{display:block;width:100%;height:auto}
+.welle{transform-box:fill-box;transform-origin:center}
+.laeuft .welle{animation:drehen .6s linear infinite}
+@keyframes drehen{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){.laeuft .welle{animation:none}}
+</style></head>
+<body><div class="wrap">
+<header><div class="reihe">E3EG · B02 · Messplatz</div>
+<h1>Drehstrommotor am Prüfstand</h1></header>
+
+<div class="raster">
+<div>
+ <div class="karte">
+  <h2>Leistungsschild (Auszug)</h2>
+  <div class="schild" aria-live="polite">
+   <div class="kopf">Hersteller · Typ <span id="sTyp">112M</span></div>
+   <div class="zeile"><div class="feld">3~ Mot.</div><div class="feld">50 Hz</div></div>
+   <div class="zeile"><div class="feld">400 V</div><div class="feld"><span id="sI">7,9</span> A</div></div>
+   <div class="zeile"><div class="feld"><span id="sP">4</span> kW</div><div class="feld">cos <i>φ</i> <span id="sC">0,82</span></div></div>
+   <div class="zeile"><div class="feld"><span id="sN">1460</span> min⁻¹</div><div class="feld">S1</div></div>
+  </div>
+ </div>
+ <div class="karte">
+  <h2>Messgeräte</h2>
+  <div class="geraete">
+   <div class="geraet"><div class="name">Spannungsmesser</div><span class="wert" id="aU">0 V</span><div class="zeichen">Leiterspannung <i>U</i></div></div>
+   <div class="geraet"><div class="name">Strommesser</div><span class="wert" id="aI">0,00 A</span><div class="zeichen">Leiterstrom <i>I</i></div></div>
+   <div class="geraet"><div class="name">Leistungsmesser</div><span class="wert" id="aP">0 W</span><div class="zeichen">Wirkleistung <i>P</i></div></div>
+   <div class="geraet"><div class="name">Drehzahlmesser</div><span class="wert" id="aN">0 min⁻¹</span><div class="zeichen">Drehzahl <i>n</i></div></div>
+   <div class="geraet breit"><div class="name">Bremse an der Welle</div><span class="wert" id="aM">0 W</span><div class="zeichen">mechanische Leistung <i>P</i><sub>mec</sub></div></div>
+  </div>
+ </div>
+</div>
+<div>
+ <div class="karte">
+  <h2>Bedienung</h2>
+  <div style="font-size:14px;font-weight:700;margin:0 0 4px">Motor auf dem Prüfstand</div>
+  <div class="knoepfe" role="group" aria-label="Motor wählen">
+   <button type="button" data-motor="0" id="m0">1,1 kW</button>
+   <button type="button" data-motor="1" id="m1">2,2 kW</button>
+   <button type="button" data-motor="2" id="m2">4 kW</button>
+   <button type="button" data-motor="3" id="m3">11 kW</button>
+  </div>
+  <div class="schalter">
+   <button type="button" id="q1" aria-pressed="false">Hauptschalter: aus</button>
+   <button type="button" class="reset" id="reset">Zurücksetzen</button>
+  </div>
+  <p class="hinweis" id="hinweis">Die Bremse belastet den Motor mit seinem Bemessungsmoment.</p>
+ </div>
+ <div class="karte" id="platz">
+  <h2>Prüfstand</h2>
+  <svg viewBox="0 0 460 220" role="img" aria-label="Prüfstand: Netz L1, L2, L3 über den Hauptschalter Q1, Strommesser und Leistungsmesser zum Drehstrommotor; Spannungsmesser zwischen L1 und L2; Welle mit Drehzahlmesser und Bremse"
+       data-quelle="eigene Zeichnung des Messplatzes (kein Buchbild dieses Prüfstands); Schaltzeichen Messgerät und Motor nach DIN EN 60617 wie Tabellenbuch S. 48 und S. 532">
+   <g font-family="Arial,sans-serif" font-size="15" fill="#1A2530" stroke="#1A2530" stroke-width="1.6">
+    <text x="4" y="40" stroke="none">L1</text><text x="4" y="70" stroke="none">L2</text><text x="4" y="100" stroke="none">L3</text>
+    <text x="4" y="15" stroke="none" font-size="14" fill="#5A666F">Netz 400 V, 50 Hz</text>
+    <!-- Leitungen bis zum Hauptschalter -->
+    <line x1="26" y1="36" x2="60" y2="36"/><line x1="26" y1="66" x2="60" y2="66"/><line x1="26" y1="96" x2="60" y2="96"/>
+    <!-- Hauptschalter Q1: drei Schließer mit Wirkverbindung -->
+    <g id="kontakte">
+     <line x1="60" y1="36" x2="84" y2="24" id="k1"/><line x1="60" y1="66" x2="84" y2="54" id="k2"/><line x1="60" y1="96" x2="84" y2="84" id="k3"/>
+    </g>
+    <line x1="72" y1="30" x2="72" y2="92" stroke-dasharray="4 3" id="wv"/>
+    <text x="62" y="122" stroke="none" font-size="15">Q1</text>
+    <line x1="86" y1="36" x2="130" y2="36"/><line x1="86" y1="66" x2="210" y2="66"/><line x1="86" y1="96" x2="210" y2="96"/>
+    <!-- Strommesser in L1 -->
+    <circle cx="146" cy="36" r="15" fill="#fff"/><text x="141" y="41" stroke="none" font-weight="700">A</text>
+    <line x1="161" y1="36" x2="210" y2="36"/>
+    <!-- Spannungsmesser zwischen L1 und L2 -->
+    <g><circle cx="190" cy="140" r="15" fill="#fff"/><text x="185" y="145" stroke="none" font-weight="700">V</text>
+     <polyline points="112,36 112,140 175,140" fill="none"/><polyline points="205,140 220,140 220,66" fill="none"/>
+     <circle cx="112" cy="36" r="2.6" fill="#1A2530"/><circle cx="220" cy="66" r="2.6" fill="#1A2530"/></g>
+    <!-- Leistungsmesser (Drehstrom) -->
+    <rect x="232" y="22" width="40" height="88" rx="3" fill="#fff"/><text x="245" y="72" stroke="none" font-weight="700">W</text>
+    <line x1="210" y1="36" x2="232" y2="36"/><line x1="210" y1="66" x2="232" y2="66"/><line x1="210" y1="96" x2="232" y2="96"/>
+    <line x1="272" y1="36" x2="300" y2="36"/><line x1="272" y1="66" x2="300" y2="66"/><line x1="272" y1="96" x2="300" y2="96"/>
+    <polyline points="300,36 318,36 318,48" fill="none"/><line x1="300" y1="66" x2="318" y2="66"/><polyline points="300,96 318,96 318,84" fill="none"/>
+    <!-- Motor -->
+    <circle cx="340" cy="66" r="26" fill="#fff"/><text x="332" y="64" stroke="none" font-weight="700" font-size="16">M</text>
+    <text x="330" y="82" stroke="none" font-size="14">3~</text>
+    <!-- Welle, Drehzahlmesser, Bremse -->
+    <rect x="366" y="61" width="30" height="10" fill="#C9D1D7"/>
+    <g id="welle-g"><rect class="welle" x="398" y="56" width="20" height="20" rx="3" fill="#fff"/>
+     <line class="welle" x1="408" y1="56" x2="408" y2="76" stroke="#A34E0E" stroke-width="3"/></g>
+    <text x="402" y="50" stroke="none" font-size="15">n</text>
+    <rect x="420" y="44" width="36" height="44" rx="3" fill="#F5EBDF" stroke="#A34E0E"/>
+    <text x="408" y="108" stroke="none" font-size="14">Bremse</text>
+   </g>
+  </svg>
+ </div>
+</div>
+</div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var META = JSON.parse(document.getElementById('sim-meta').textContent);
+/* Betriebsdaten nach Europa Fachkunde S. 674 (400 V, 50 Hz, Drehfelddrehzahl 1500 1/min). Gezeigt werden die Werte
+   im Bemessungsbetrieb: Die Bremse belastet mit dem Bemessungsmoment. Der Leistungsmesser zeigt die Wirkleistung aus
+   der Leiterspannung, dem Bemessungsstrom und dem Wirkfaktor des Datenblatts (Tabellenbuch S. 48, Formel 9). */
+var MOTOREN = [
+  {name:"1,1 kW", typ:"90S",  pn:1100,  in:2.4,  n:1445, c:0.79},
+  {name:"2,2 kW", typ:"100L", pn:2200,  in:4.4,  n:1465, c:0.83},
+  {name:"4 kW",   typ:"112M", pn:4000,  in:7.9,  n:1460, c:0.82},
+  {name:"11 kW",  typ:"160M", pn:11000, in:20.5, n:1475, c:0.84}
+];
+var U = 400, START = 2;   /* Startstellung: 4 kW, Hauptschalter aus (keine Einstellung der Aufgaben) */
+var wahl = START, an = false;
+function komma(x, s){ return x.toFixed(s).replace('.', ','); }
+function tausend(x){ var s = String(Math.round(x)); return s.length > 4 ? s.slice(0, -3) + ' ' + s.slice(-3) : s; }
+function kw(w){ var k = w / 1000; return (Math.round(k) === k) ? String(k) : komma(k, 1); }
+function strom(i){ return i < 10 ? komma(i, 2) : komma(i, 1); }
+function zeige(){
+  var m = MOTOREN[wahl];
+  document.getElementById('sTyp').textContent = m.typ;
+  document.getElementById('sI').textContent = komma(m.in, 1);
+  document.getElementById('sP').textContent = kw(m.pn);
+  document.getElementById('sC').textContent = komma(m.c, 2);
+  document.getElementById('sN').textContent = String(m.n);
+  for(var k = 0; k < MOTOREN.length; k++){
+    var b = document.getElementById('m' + k);
+    b.classList.toggle('gewaehlt', k === wahl); b.setAttribute('aria-pressed', k === wahl ? 'true' : 'false');
+  }
+  var p = Math.sqrt(3) * U * m.in * m.c;
+  document.getElementById('aU').textContent = an ? U + ' V' : '0 V';
+  document.getElementById('aI').textContent = an ? strom(m.in) + ' A' : '0,00 A';
+  document.getElementById('aP').textContent = an ? tausend(p) + ' W' : '0 W';
+  document.getElementById('aN').textContent = an ? m.n + ' min⁻¹' : '0 min⁻¹';
+  document.getElementById('aM').textContent = an ? tausend(m.pn) + ' W' : '0 W';
+  var q = document.getElementById('q1');
+  q.textContent = 'Hauptschalter: ' + (an ? 'ein' : 'aus'); q.classList.toggle('ein', an); q.setAttribute('aria-pressed', an ? 'true' : 'false');
+  /* Schaltzeichen Q1: geschlossen oder offen */
+  [['k1',36],['k2',66],['k3',96]].forEach(function(z){ var l = document.getElementById(z[0]);
+    l.setAttribute('y2', an ? z[1] : z[1] - 12); l.setAttribute('x2', an ? 86 : 84); });
+  document.getElementById('platz').classList.toggle('laeuft', an);
+}
+function waehle(k){
+  if(an){ document.getElementById('hinweis').textContent = 'Motor wechseln: zuerst den Hauptschalter ausschalten.'; return; }
+  wahl = k; document.getElementById('hinweis').textContent = 'Die Bremse belastet den Motor mit seinem Bemessungsmoment.'; zeige();
+}
+for(var k = 0; k < MOTOREN.length; k++){
+  (function(k){ document.getElementById('m' + k).addEventListener('click', function(){ waehle(k); }); })(k);
+}
+document.getElementById('q1').addEventListener('click', function(){
+  an = !an; document.getElementById('hinweis').textContent = 'Die Bremse belastet den Motor mit seinem Bemessungsmoment.'; zeige(); });
+document.getElementById('reset').addEventListener('click', function(){
+  an = false; wahl = START; document.getElementById('hinweis').textContent = 'Die Bremse belastet den Motor mit seinem Bemessungsmoment.'; zeige(); });
+zeige();
+})();
+</script>
+</body></html>
