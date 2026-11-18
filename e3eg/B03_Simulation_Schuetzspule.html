@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>B03 Messplatz: Schützspule an Wechselspannung</title>
+<!-- lehrmaterial -->
+<!-- materialtyp: simulation -->
+<!-- sim_bearbeitung: pflicht -->
+<script type="application/json" id="sim-meta">
+{"startwerte": {"netzschalter": "aus", "f": "60 Hz", "anker": "festgehalten"},
+ "loesungswerte": {"festgehalten, 50 Hz": {"U": "230 V", "I": "281,0 mA", "Q": "47,14 var", "dt": "2,6 ms"},
+                   "frei (angezogen), 50 Hz": {"U": "230 V", "I": "43,6 mA", "Q": "9,97 var", "dt": "4,7 ms"},
+                   "frei (angezogen), 60 Hz": {"U": "230 V", "I": "36,4 mA", "Q": "8,34 var"}},
+ "gekoppelt": "B03_Arbeitsblatt, Aufgabe 4, 5 und 6",
+ "ziel_erkenntnis": "Mit angezogenem Anker (kleiner Luftspalt) ist die Induktivität der Schützspule rund neunmal so groß wie mit festgehaltenem Anker; ihr Blindwiderstand ist größer, Strom und Blindleistung sind kleiner. Bei 60 Hz bleibt die Induktivität gleich, der Blindwiderstand wächst mit der Frequenz. Der Strom geht später durch null als die Spannung.",
+ "modell": "Ersatzschaltung der Spule: Wirkwiderstand R = 560 Ohm in Reihe mit X_L = 2 pi f L; L = 1,9 H (Anker festgehalten, Luftspalt) oder 16,7 H (Anker angezogen); U = 230 V. Modellwerte, gewählt nach der Halteleistung von rund 10 VA einer Schützspule der Baugröße 0 (Rechenbuch S. 236, Tabelle). I = U/Z, Q = I^2 X_L, phi = arctan(X_L/R)."}
+</script>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--gruen:#2F7D62;
+ --gruenhell:#EAF3EC;--grau:#5A666F;--anzeige:#0F1B12;--ziffer:#B8F5C8;--blau:#1E6FB8;--rot:#C0246B}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:"Noto Sans",system-ui,Arial,sans-serif;color:var(--ink);background:var(--hell);line-height:1.35}
+.wrap{max-width:1000px;margin:0 auto;padding:0 10px 24px}
+header{border-top:6px solid var(--kupfer);background:#fff;border-bottom:1px solid var(--ink);padding:8px 10px 7px;margin:0 -10px 10px}
+header .reihe{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--kupfer);font-weight:700}
+header h1{font-size:19px;margin:2px 0 0}
+.karte{background:#fff;border:1.3px solid var(--ink);padding:8px 10px;margin:0 0 10px;min-width:0}
+.karte h2{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--kupfer);margin:0 0 6px}
+.raster{display:grid;grid-template-columns:1fr;gap:0}
+@media(min-width:760px){.raster{grid-template-columns:1fr 1fr;gap:10px}}
+/* Messgeräte */
+.geraete{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.geraet{border:1.6px solid var(--ink);background:var(--hell);padding:5px 3px 6px;text-align:center;min-width:0}
+.geraet .name{font-size:12px;color:var(--grau);font-weight:700;overflow-wrap:anywhere}
+.geraet .wert{display:block;margin:3px auto 0;background:var(--anzeige);color:var(--ziffer);border-radius:4px;padding:3px 4px;
+ font-family:"DejaVu Sans Mono",ui-monospace,monospace;font-size:clamp(16px,4.6vw,24px);font-weight:700;white-space:nowrap}
+.geraet .zeichen{font-size:13px;color:var(--grau);margin-top:2px}
+/* Bedienung */
+.zeile{display:grid;grid-template-columns:7.2em 1fr 1fr;gap:6px;align-items:center;margin:0 0 6px}
+.zeile .was{font-size:14px;font-weight:700}
+button{appearance:none;border:1.6px solid var(--ink);background:#fff;color:var(--ink);font-size:16px;font-weight:700;
+ min-height:50px;border-radius:6px;cursor:pointer;padding:4px 6px;font-family:inherit}
+button.gewaehlt{background:var(--kupferhell);border-color:var(--kupfer);color:var(--kupfer);box-shadow:inset 0 0 0 2px var(--kupfer)}
+.schalter{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:2px}
+button.ein{background:var(--gruenhell);border-color:var(--gruen);color:var(--gruen)}
+button.reset{font-size:15px;border-color:var(--kupfer);color:var(--kupfer)}
+.hinweis{font-size:13px;color:var(--grau);margin:6px 0 0;min-height:1.3em}
+svg{display:block;width:100%;height:auto}
+.kanal{font-size:13px;color:var(--ink);margin:4px 0 0}
+.kanal b{white-space:nowrap}
+.k1{color:var(--blau)} .k2{color:var(--rot)}
+#anker{transition:transform .25s ease-out}
+@media (prefers-reduced-motion: reduce){#anker{transition:none}}
+</style></head>
+<body><div class="wrap">
+<header><div class="reihe">E3EG · B03 · Messplatz</div>
+<h1>Schützspule an Wechselspannung</h1></header>
+
+<div class="raster">
+<div>
+ <div class="karte">
+  <h2>Messgeräte</h2>
+  <div class="geraete" aria-live="polite">
+   <div class="geraet"><div class="name">Spannungs&shy;messer</div><span class="wert" id="aU">0 V</span><div class="zeichen">Spannung <i>U</i></div></div>
+   <div class="geraet"><div class="name">Strom&shy;messer</div><span class="wert" id="aI">0,0 mA</span><div class="zeichen">Stromstärke <i>I</i></div></div>
+   <div class="geraet"><div class="name">Blindleistungs&shy;messer</div><span class="wert" id="aQ">0,00 var</span><div class="zeichen">Blindleistung <i>Q</i><sub>L</sub></div></div>
+  </div>
+ </div>
+ <div class="karte">
+  <h2>Bedienung</h2>
+  <div class="zeile" role="group" aria-label="Frequenz des Prüfgenerators">
+   <span class="was">Prüfgenerator 230 V</span>
+   <button type="button" id="f50">50 Hz</button>
+   <button type="button" id="f60">60 Hz</button>
+  </div>
+  <div class="zeile" role="group" aria-label="Anker der Schützspule">
+   <span class="was">Anker</span>
+   <button type="button" id="aFest">festgehalten</button>
+   <button type="button" id="aFrei">frei</button>
+  </div>
+  <div class="schalter">
+   <button type="button" id="q1" aria-pressed="false">Netzschalter Q1: aus</button>
+   <button type="button" class="reset" id="reset">Zurücksetzen</button>
+  </div>
+  <p class="hinweis" id="hinweis"></p>
+ </div>
+</div>
+<div>
+ <div class="karte">
+  <h2>Oszilloskop</h2>
+  <svg id="oszi" viewBox="0 0 520 470" role="img" aria-label="Oszilloskop: Kanal 1 zeigt die Spannung u, Kanal 2 den Strom i über eine Periodendauer von 20 ms"
+       data-quelle="eigene Zeichnung eines Zweikanal-Oszilloskops; Achsenteilung wie Technische Mathematik S. 93 (Liniendiagramm über t in ms)">
+   <rect x="10" y="10" width="500" height="400" fill="#101A14"/>
+   <g id="raster" stroke="#3E5A48" stroke-width="1"></g>
+   <polyline id="kurveU" fill="none" stroke="#5FB4FF" stroke-width="3" points=""/>
+   <polyline id="kurveI" fill="none" stroke="#FF6FAE" stroke-width="3" points=""/>
+   <text id="tU" x="0" y="0" fill="#5FB4FF" font-size="24" font-weight="700" font-style="italic" font-family="Georgia,'DejaVu Serif',serif">u</text>
+   <text id="tI" x="0" y="0" fill="#FF6FAE" font-size="24" font-weight="700" font-style="italic" font-family="Georgia,'DejaVu Serif',serif">i</text>
+   <g id="zeitachse" font-family="Arial,sans-serif" font-size="19" fill="#1A2530" text-anchor="middle"></g>
+  </svg>
+  <p class="kanal"><b class="k1">Kanal 1: <i>u</i>, 100 V/Div</b> · <b class="k2">Kanal 2: <i>i</i> (Stromzange), <span id="kb2">0,2 A/Div</span></b> · <b>Zeitbasis: 2 ms/Div</b> · Trigger: <i>u</i>, steigend</p>
+ </div>
+ <div class="karte">
+  <h2>Messplatz</h2>
+  <svg viewBox="0 0 530 250" role="img" aria-label="Messplatz: Prüfgenerator mit Netzschalter Q1, Strommesser und Blindleistungsmesser in der Zuleitung, Spannungsmesser parallel zur Schützspule K1 mit Anker und Eisenkern"
+       data-quelle="eigene Zeichnung des Messplatzes; Schaltzeichen Messgerät und Schützspule nach DIN EN 60617 (Tabellenbuch S. 501); Magnetsystem schematisch nach Europa Fachkunde S. 113, Bild 1 (Anker, Eisenkern, Spule)">
+   <g font-family="Arial,sans-serif" font-size="15" fill="#1A2530" stroke="#1A2530" stroke-width="1.6">
+    <!-- Prüfgenerator -->
+    <circle cx="34" cy="120" r="22" fill="#fff"/><text x="27" y="117" stroke="none" font-weight="700">G</text>
+    <text x="27" y="134" stroke="none" font-size="16">~</text>
+    <text x="4" y="236" stroke="none" font-size="14" fill="#5A666F" id="gText">Prüfgenerator 230 V, 60 Hz</text>
+    <polyline points="34,98 34,40 70,40" fill="none"/><polyline points="34,142 34,200 70,200" fill="none"/>
+    <!-- Netzschalter Q1 (zweipolig) -->
+    <line id="s1" x1="70" y1="40" x2="92" y2="28"/><line id="s2" x1="70" y1="200" x2="92" y2="188"/>
+    <line x1="81" y1="34" x2="81" y2="194" stroke-dasharray="4 3"/>
+    <text x="88" y="124" stroke="none" font-size="14">Q1</text>
+    <line x1="94" y1="40" x2="120" y2="40"/><line x1="94" y1="200" x2="330" y2="200"/>
+    <!-- Strommesser -->
+    <circle cx="136" cy="40" r="15" fill="#fff"/><text x="131" y="45" stroke="none" font-weight="700">A</text>
+    <line x1="151" y1="40" x2="172" y2="40"/>
+    <!-- Blindleistungsmesser: Strompfad in der Zuleitung, Spannungspfad gegen die Rückleitung -->
+    <rect x="172" y="24" width="52" height="34" rx="3" fill="#fff"/><text x="183" y="46" stroke="none" font-weight="700">var</text>
+    <line x1="198" y1="58" x2="198" y2="200"/><circle cx="198" cy="200" r="2.6" fill="#1A2530"/>
+    <line x1="224" y1="40" x2="330" y2="40"/>
+    <!-- Spannungsmesser parallel -->
+    <circle cx="262" cy="120" r="15" fill="#fff"/><text x="257" y="125" stroke="none" font-weight="700">V</text>
+    <line x1="262" y1="40" x2="262" y2="105"/><line x1="262" y1="135" x2="262" y2="200"/>
+    <circle cx="262" cy="40" r="2.6" fill="#1A2530"/><circle cx="262" cy="200" r="2.6" fill="#1A2530"/>
+    <!-- Schützspule K1 -->
+    <line x1="330" y1="40" x2="330" y2="95"/><line x1="330" y1="145" x2="330" y2="200"/>
+    <rect x="312" y="95" width="36" height="50" fill="#fff"/>
+    <text x="352" y="92" stroke="none" font-size="13">A1</text><text x="352" y="160" stroke="none" font-size="13">A2</text>
+    <text x="290" y="125" stroke="none" font-size="14">K1</text>
+    <!-- Magnetsystem: Eisenkern (fest) und Anker (beweglich) -->
+    <path d="M395 200 V150 H409 V186 H451 V150 H465 V200 Z" fill="#7FB88F" stroke="#1A2530"/>
+    <rect x="411" y="160" width="11" height="24" fill="#E7C2D5" stroke="#1A2530" stroke-width="1"/>
+    <rect x="438" y="160" width="11" height="24" fill="#E7C2D5" stroke="#1A2530" stroke-width="1"/>
+    <g id="anker"><rect x="395" y="128" width="70" height="14" fill="#7FB88F" stroke="#1A2530"/></g>
+    <text x="395" y="119" stroke="none" font-size="13">Anker</text>
+    <text x="395" y="218" stroke="none" font-size="13">Eisenkern</text>
+    <g id="spalt"><line x1="467" y1="146" x2="476" y2="146" stroke="#A34E0E" stroke-width="1.2"/>
+     <text x="478" y="150" stroke="none" font-size="12" fill="#A34E0E">Luftspalt</text></g>
+   </g>
+  </svg>
+ </div>
+</div>
+</div>
+</div>
+
+<script>
+(function(){
+"use strict";
+/* Rechenmodell (Ersatzschaltung der Spule, Fachkunde S. 136 und 143): R in Reihe mit X_L = 2·π·f·L
+   (Tabellenbuch S. 40, Formel 1 und 2), I = U/Z mit Z = √(R² + X_L²) (Formel 4 und 6), Q = I²·X_L (Tabellenbuch S. 37,
+   Formel 7; der Spulenstrom fließt durch X_L), φ = arctan(X_L/R). Anker festgehalten: Luftspalt, kleine Induktivität;
+   Anker frei: zieht beim Einschalten an, kleiner Luftspalt, große Induktivität. */
+var U = 230, R = 560, L_OFFEN = 1.9, L_ANGEZOGEN = 16.7;
+var START = {an: false, f: 60, frei: false};
+var an = START.an, f = START.f, frei = START.frei;
+function komma(x, s){ return x.toFixed(s).replace('.', ','); }
+/* kaufmännisch runden (wie DIN 1333), nicht das binäre toFixed allein */
+function rund(x, s){ var p = Math.pow(10, s); return Math.round(x * p + 1e-9) / p; }
+function modell(){
+  var L = (an && frei) ? L_ANGEZOGEN : L_OFFEN;
+  var xl = 2 * Math.PI * f * L, z = Math.sqrt(R * R + xl * xl), i = U / z;
+  return {L: L, xl: xl, z: z, i: i, q: i * i * xl, phi: Math.atan2(xl, R)};
+}
+var NS = 'http://www.w3.org/2000/svg';
+function raster(){
+  var g = document.getElementById('raster'), s = '';
+  for(var k = 0; k <= 10; k++){ s += '<line x1="' + (10 + 50 * k) + '" y1="10" x2="' + (10 + 50 * k) + '" y2="410"/>'; }
+  for(var m = 0; m <= 8; m++){ s += '<line x1="10" y1="' + (10 + 50 * m) + '" x2="510" y2="' + (10 + 50 * m) + '"/>'; }
+  /* Unterteilung der Mittellinien: 5 Striche je Div (0,4 ms bzw. 0,2 Div) */
+  for(var t = 0; t <= 50; t++){ var x = 10 + 10 * t; s += '<line x1="' + x + '" y1="' + (t % 5 ? 205 : 200) + '" x2="' + x + '" y2="' + (t % 5 ? 215 : 220) + '" stroke="#7FA38C"/>'; }
+  for(var u = 0; u <= 40; u++){ var y = 10 + 10 * u; s += '<line x1="255" y1="' + y + '" x2="265" y2="' + y + '" stroke="#7FA38C"/>'; }
+  s += '<line x1="10" y1="210" x2="510" y2="210" stroke="#7FA38C" stroke-width="1.6"/>';
+  g.innerHTML = s;
+  var z = document.getElementById('zeitachse'), a = '';
+  for(var k2 = 0; k2 <= 10; k2++){ a += '<text x="' + (10 + 50 * k2) + '" y="436">' + (2 * k2) + '</text>'; }
+  a += '<text x="260" y="462" font-size="18">t in ms</text>';
+  z.innerHTML = a;
+}
+function kurven(m){
+  var pu = [], pi = [], uh = U * Math.SQRT2, ih = m.i * Math.SQRT2;
+  var bereich = (an && frei) ? 0.02 : 0.2;             /* Kanal 2: Messbereich der Stromzange in A je Div */
+  document.getElementById('kb2').textContent = (bereich === 0.2) ? '0,2 A/Div' : '20 mA/Div';
+  for(var k = 0; k <= 500; k++){
+    var t = k / 500 * 0.020, w = 2 * Math.PI * f * t;
+    var yu = an ? uh * Math.sin(w) / 100 : 0, yi = an ? ih * Math.sin(w - m.phi) / bereich : 0;
+    pu.push((10 + k) + ',' + (210 - 50 * yu).toFixed(1));
+    pi.push((10 + k) + ',' + (210 - 50 * yi).toFixed(1));
+  }
+  document.getElementById('kurveU').setAttribute('points', pu.join(' '));
+  document.getElementById('kurveI').setAttribute('points', pi.join(' '));
+  var tu = document.getElementById('tU'), ti = document.getElementById('tI');
+  if(an){
+    var xs = 10 + 500 * (0.25 / f) / 0.020;            /* Scheitel von u bei einer Viertelperiode */
+    tu.setAttribute('x', (xs - 32).toFixed(0)); tu.setAttribute('y', (210 - 50 * uh / 100 - 6).toFixed(0));
+    var xi = 10 + 500 * ((0.25 + m.phi / (2 * Math.PI)) / f) / 0.020;
+    ti.setAttribute('x', (xi + 16).toFixed(0)); ti.setAttribute('y', (210 - 50 * ih / bereich - 6).toFixed(0));
+    tu.style.display = ''; ti.style.display = '';
+  } else { tu.style.display = 'none'; ti.style.display = 'none'; }
+}
+function zeige(){
+  var m = modell();
+  document.getElementById('aU').textContent = an ? U + ' V' : '0 V';
+  document.getElementById('aI').textContent = an ? komma(rund(m.i * 1000, 1), 1) + ' mA' : '0,0 mA';
+  document.getElementById('aQ').textContent = an ? komma(rund(m.q, 2), 2) + ' var' : '0,00 var';
+  [['f50', f === 50], ['f60', f === 60], ['aFest', !frei], ['aFrei', frei]].forEach(function(z){
+    var b = document.getElementById(z[0]); b.classList.toggle('gewaehlt', z[1]); b.setAttribute('aria-pressed', z[1] ? 'true' : 'false'); });
+  var q = document.getElementById('q1');
+  q.textContent = 'Netzschalter Q1: ' + (an ? 'ein' : 'aus'); q.classList.toggle('ein', an); q.setAttribute('aria-pressed', an ? 'true' : 'false');
+  document.getElementById('s1').setAttribute('y2', an ? 40 : 28); document.getElementById('s1').setAttribute('x2', an ? 94 : 92);
+  document.getElementById('s2').setAttribute('y2', an ? 200 : 188); document.getElementById('s2').setAttribute('x2', an ? 94 : 92);
+  document.getElementById('gText').textContent = 'Prüfgenerator 230 V, ' + f + ' Hz';
+  var zu = an && frei;                                   /* Anker liegt am Eisenkern an */
+  document.getElementById('anker').setAttribute('transform', zu ? 'translate(0,8)' : 'translate(0,0)');
+  document.getElementById('spalt').style.display = zu ? 'none' : '';
+  document.getElementById('hinweis').textContent = frei
+    ? 'Anker frei: Er zieht beim Einschalten an und liegt dann am Eisenkern an.'
+    : 'Anker festgehalten: Er bleibt in der Ausgangsstellung, der Luftspalt bleibt offen.';
+  kurven(m);
+}
+document.getElementById('f50').addEventListener('click', function(){ f = 50; zeige(); });
+document.getElementById('f60').addEventListener('click', function(){ f = 60; zeige(); });
+document.getElementById('aFest').addEventListener('click', function(){ frei = false; zeige(); });
+document.getElementById('aFrei').addEventListener('click', function(){ frei = true; zeige(); });
+document.getElementById('q1').addEventListener('click', function(){ an = !an; zeige(); });
+document.getElementById('reset').addEventListener('click', function(){ an = START.an; f = START.f; frei = START.frei; zeige(); });
+raster();
+zeige();
+})();
+</script>
+</body></html>
