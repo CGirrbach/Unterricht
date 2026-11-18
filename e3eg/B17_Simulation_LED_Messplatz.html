@@ -1,0 +1,371 @@
+<!doctype html>
+<!-- E3EG B17 · Messplatz Leuchtdiode (Neubau 13.11.2026, Aufgabe IN der Stunde nach dem Muster E1EG B07 und E3EG B12).
+     Neu: Für B17 gibt es keinen alten Block und keine Simulation.
+     Ziel-Erkenntnisse (die Schüler finden sie selbst; die Seite nennt sie nicht und rechnet nichts vor):
+       Aufgabe 2: Unterhalb etwa 1,5 V fließt fast kein Strom, darüber steigt I_F steil an; schon bei 1,75 V ist der
+                  Grenzwert I_Fmax = 50 mA überschritten. Die LED braucht eine Strombegrenzung.
+       Aufgabe 3: Am Netzgerät (Konstantspannung) begrenzt der Vorwiderstand den Strom; er nimmt U1 − U_F auf. Mit einer
+                  zweiten LED in Reihe sinkt der Strom. Die Konstantstromquelle hält den Strom fest, ihre Spannung stellt
+                  sich nach der Zahl der LEDs ein.
+       Aufgabe 6: Bei Pulsweitenmodulation fließt im Puls immer derselbe Strom; der Strommesser zeigt g mal diesen Strom.
+     Quellen der Werte (keine erfundenen Zahlen):
+       Kennlinie der LED CQX 35 rotleuchtend: Datenblatt Fachkunde S. 675 (gleich Rechenbuch S. 280), Kurve am Seitenbild
+         digitalisiert und angenähert: U_F = 1,527 V + 0,103 V · log10(I_F / 1 mA) + 0,32 Ω · I_F (Abweichung im Mittel
+         2,6 mV; Fachkunde S. 51, Beispiel 2: 10 mA → 1,63 V, 50 mA → 1,72 V). Grenzwert I_Fmax = 50 mA (S. 675).
+       Helligkeit der Leuchtdiode (nur Bild): Lichtstärke proportional I_F hoch 1,35 (Datenblatt S. 675, Kurve I_v über I_F).
+       PWM-Frequenz 400 Hz: Datenblatt eines LED-Treibers (Abschlussprüfung Winter 2017/18 FS 7.3.3); Tabellenbuch S. 153:
+         Taktfrequenz 100 Hz bis 1 kHz.
+       Vorwiderstände aus der Reihe E12 (Fachkunde S. 670).
+     Rechenmodell = b17_gemeinsam.py (gleiche Bisektion, gleiche Rundung; Anzeigen per assert und sim_anzeigen.json geprüft).
+     Messgeräte zeigen bei Pulsweitenmodulation den Mittelwert (Drehspul- und Digitalmessgeräte für Gleichgrößen), das
+     Oszilloskop den Augenblickswert.
+     Startstellung neutral: Netzgerät 0,00 V, ohne Vorwiderstand, eine LED, Konstantstromquelle 5 mA, Tastgrad 100 %.
+     Prüfmodus ?pruefen: Anzeigen aller Aufgabenstellungen und Grenzfälle als JSON in #pruefbericht. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Leuchtdiode (B17)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"Betriebsart":"Netzgeraet","U1_V":0,"Rv_Ohm":0,"LEDs":1,"I_Quelle_mA":5,"g_Prozent":100},"loesungswerte":{"Aufgabe 2":{"Betriebsart":"Netzgeraet","Rv_Ohm":0,"LEDs":1,"U1_V":[1.5,1.6,1.7,1.75],"I_F_mA":["0,54","4,94","36,76","81,58"]},"Aufgabe 3 a":{"Betriebsart":"Netzgeraet","U1_V":12,"Rv_Ohm":1000,"LEDs":1,"I_F_mA":"10,37","U_F_V":"1,63","U_Rv_V":"10,37"},"Aufgabe 3 b":{"LEDs":2,"I_F_mA":"8,75"},"Aufgabe 3 c":{"Betriebsart":"Konstantstromquelle","I_Quelle_mA":10,"LEDs":1,"U_Quelle_V":"1,63"},"Aufgabe 3 d":{"LEDs":2,"U_Quelle_V":"3,27"},"Aufgabe 6":{"Betriebsart":"Konstantstromquelle","I_Quelle_mA":20,"g_Prozent":[100,50,25],"I_F_mA":["20,00","10,00","5,00"]}},"quelle":"Datenblatt CQX 35, Fachkunde S. 675 (Kennlinie, I_Fmax = 50 mA); Tabellenbuch S. 153 (PWM 100 Hz bis 1 kHz); Winter 2017/18 FS 7.3.3 (PWM-Frequenz 400 Hz)"}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62;--blau:#2557A3;--rot:#B3261E}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:1080px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .fz{font-family:Cambria,Caladea,'Noto Serif',Georgia,serif;font-style:italic}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px;align-items:start;grid-template-areas:"messwerte" "bild" "bedienung"}
+ .bild{grid-area:bild} .messwerte{grid-area:messwerte} .bedienung{grid-area:bedienung}
+ @media(min-width:860px){.buehne{grid-template-columns:1.25fr 1fr;grid-template-areas:"bild messwerte" "bild bedienung"}}
+ .bild svg{width:100%;height:auto;display:block;border:1px solid var(--linie);background:#fff;margin-bottom:8px}
+ .unterschrift{font-size:13.5px;color:var(--grau);margin:-4px 0 10px}
+ .messwerte{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:#fff}
+ .kachel{border:1.4px solid var(--ink);background:var(--hell);padding:5px 8px;text-align:center;min-width:0}
+ .kachel .name{display:block;font-size:15px;font-weight:700}
+ .kachel .ort{display:block;font-size:12.5px;color:var(--grau);line-height:1.25}
+ .kachel .zahl{display:block;font-variant-numeric:tabular-nums;font-size:25px;font-weight:700;white-space:nowrap}
+ .kachel.aus .zahl{color:var(--linie)}
+ .warnung{grid-column:1 / span 2;border:2px solid var(--rot);background:#fdecea;color:var(--rot);font-weight:700;padding:6px 10px;font-size:15px;display:none}
+ .warnung.an{display:block}
+ .lcd{background:#20313a;color:#9BF0B4;font-variant-numeric:tabular-nums;font-size:26px;font-weight:700;padding:5px 12px;border-radius:4px;text-align:right}
+ .lcd small{font-size:15px;color:#cfe;font-weight:400;float:left;margin-top:7px}
+ input[type=range]{width:100%;height:44px;accent-color:var(--kupfer);margin:6px 0 2px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+ button{font:inherit;font-size:16px;min-height:48px;min-width:48px;padding:6px 8px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+ button[aria-pressed=true]{background:var(--kupfer);color:#fff}
+ button:disabled{opacity:.35;cursor:default}
+ button.zurueck{border-color:var(--ink);color:var(--ink)}
+ .schritte button{flex:1 1 40px;font-weight:700;padding:6px 2px}
+ .wahl button{flex:1 1 140px}
+ .titel{font-size:15px;font-weight:700;margin:12px 0 4px}
+ .titel:first-child{margin-top:0}
+ .gruppe.aus{display:none}
+ .hinweis{font-size:14px;color:var(--grau);margin-top:12px}
+ #pruefbericht{display:none}
+ @media(max-width:859px){.messwerte{position:sticky;top:0;z-index:5;padding:6px 0;box-shadow:0 6px 6px -6px rgba(0,0,0,.25)}}
+ @media(max-width:420px){.wrap{padding:12px 9px 18px} .kachel{padding:3px 4px} .kachel .zahl{font-size:21px}
+   .kachel .name{font-size:14px} .kachel .ort{font-size:11.5px} .lcd{font-size:23px} button{font-size:15px} .anleitung{font-size:14px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E3EG · B17</div><h1>Messplatz: Leuchtdiode</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Eine rote Leuchtdiode (Typ CQX 35, Grenzwert
+  <span class="fz">I</span><sub>Fmax</sub> = 50 mA) liegt an einem Netzgerät mit Vorwiderstand oder an einer
+  Konstantstromquelle. Wählen Sie die Betriebsart, stellen Sie die Werte ein und lesen Sie die Messgeräte ab. Mit
+  „Messpunkt eintragen“ zeichnen Sie Ihre Messungen ins Diagramm.</div>
+
+ <div class="buehne">
+  <div class="messwerte" aria-live="polite">
+   <div class="kachel" id="kI"><span class="name">Strommesser</span><span class="ort"><span class="fz">I</span><sub>F</sub></span><span class="zahl" id="mI"></span></div>
+   <div class="kachel" id="kUF"><span class="name">Spannungsmesser</span><span class="ort">an der LED: <span class="fz">U</span><sub>F</sub></span><span class="zahl" id="mUF"></span></div>
+   <div class="kachel" id="kURv"><span class="name">Spannungsmesser</span><span class="ort">am Vorwiderstand: <span class="fz">U</span><sub>Rv</sub></span><span class="zahl" id="mURv"></span></div>
+   <div class="kachel" id="kUQ"><span class="name">Anzeige der Quelle</span><span class="ort">Spannung <span class="fz">U</span></span><span class="zahl" id="mUQ"></span></div>
+   <div class="warnung" id="warnung" role="alert">Grenzwert <span class="fz">I</span><sub>Fmax</sub> = 50 mA überschritten.</div>
+  </div>
+
+  <div class="bild">
+   <svg id="schaltung" viewBox="0 0 520 330" role="img" data-quelle="Schaltung nach Fachkunde S. 220, Bild 2 (LED mit Vorwiderstand) und Tabellenbuch S. 243 (stromgesteuerte LED-Anlage); Schaltzeichen nach Tabellenbuch S. 240"
+    aria-label="Schaltung: Quelle links, Strommesser, Vorwiderstand und Leuchtdioden in Reihe, Spannungsmesser an der ersten LED und am Vorwiderstand."></svg>
+   <div class="unterschrift">Schaltung des Messplatzes. Die Leuchtdiode leuchtet so hell wie im Mittel eingestellt.</div>
+   <svg id="oszi" viewBox="0 0 640 280" role="img" aria-label="Oszilloskop: Strom durch die LED über der Zeit von 0 bis 10 Millisekunden."></svg>
+   <div class="unterschrift">Oszilloskop: Strom <span class="fz">i</span><sub>F</sub> durch die LED über der Zeit. Gestrichelt: Anzeige des Strommessers.</div>
+   <svg id="kennlinie" viewBox="0 0 640 360" role="img" aria-label="Diagramm Strom über Spannung an der LED mit den eingetragenen Messpunkten."></svg>
+   <div class="unterschrift">Diagramm <span class="fz">I</span><sub>F</sub> über <span class="fz">U</span><sub>F</sub>: Ring = jetzige Einstellung (Strom im Puls), Punkte = eingetragene Messungen.</div>
+  </div>
+
+  <div class="bedienung">
+   <div class="titel">Betriebsart</div>
+   <div class="knoepfe wahl">
+    <button type="button" id="bNetz" aria-pressed="true">Netzgerät mit Vorwiderstand</button>
+    <button type="button" id="bKsq" aria-pressed="false">Konstantstromquelle</button>
+   </div>
+
+   <div class="gruppe" id="gNetz">
+    <div class="titel">Netzgerät</div>
+    <div class="lcd" id="aU1" aria-live="polite"></div>
+    <input type="range" id="rU1" min="0" max="1200" step="1" value="0" aria-label="Spannung des Netzgeräts">
+    <div class="knoepfe schritte">
+     <button type="button" data-du="-100" aria-label="1 Volt weniger">−1 V</button>
+     <button type="button" data-du="-10" aria-label="0,1 Volt weniger">−0,1</button>
+     <button type="button" data-du="-1" aria-label="0,01 Volt weniger">−0,01</button>
+     <button type="button" data-du="1" aria-label="0,01 Volt mehr">+0,01</button>
+     <button type="button" data-du="10" aria-label="0,1 Volt mehr">+0,1</button>
+     <button type="button" data-du="100" aria-label="1 Volt mehr">+1 V</button>
+    </div>
+    <div class="titel">Vorwiderstand</div>
+    <div class="lcd" id="aRv" aria-live="polite"></div>
+    <div class="knoepfe schritte">
+     <button type="button" id="rvm" aria-label="kleinerer Vorwiderstand">◀ kleiner</button>
+     <button type="button" id="rvp" aria-label="größerer Vorwiderstand">größer ▶</button>
+    </div>
+   </div>
+
+   <div class="gruppe aus" id="gKsq">
+    <div class="titel">Konstantstromquelle</div>
+    <div class="lcd" id="aIq" aria-live="polite"></div>
+    <div class="knoepfe schritte">
+     <button type="button" id="iqm" aria-label="kleinerer Strom">◀ weniger</button>
+     <button type="button" id="iqp" aria-label="größerer Strom">mehr ▶</button>
+    </div>
+   </div>
+
+   <div class="titel">Leuchtdioden in Reihe</div>
+   <div class="lcd" id="aN" aria-live="polite"></div>
+   <div class="knoepfe schritte">
+    <button type="button" id="nm" aria-label="eine LED weniger">◀ weniger</button>
+    <button type="button" id="np" aria-label="eine LED mehr">mehr ▶</button>
+   </div>
+
+   <div class="titel">Dimmen: Pulsweitenmodulation (PWM), 400 Hz</div>
+   <div class="lcd" id="aG" aria-live="polite"></div>
+   <div class="knoepfe schritte">
+    <button type="button" id="gm" aria-label="Tastgrad 5 Prozent kleiner">◀ kleiner</button>
+    <button type="button" id="gp" aria-label="Tastgrad 5 Prozent größer">größer ▶</button>
+    <button type="button" id="bZeit" aria-pressed="false">Zeitlupe</button>
+   </div>
+
+   <div class="titel">Diagramm</div>
+   <div class="knoepfe">
+    <button type="button" id="bPunkt">Messpunkt eintragen</button>
+    <button type="button" id="bLoesch" class="zurueck">Punkte löschen</button>
+   </div>
+   <div class="titel">Neu beginnen</div>
+   <div class="knoepfe"><button class="zurueck" id="bReset" type="button">Zurücksetzen</button></div>
+  </div>
+ </div>
+ <div class="hinweis">Tastgrad <span class="fz">g</span> in Prozent: Bei 100 % fließt der Strom dauernd. Zeitlupe: Die
+  Leuchtdiode blinkt einmal je Sekunde statt 400-mal.</div>
+ <pre id="pruefbericht"></pre>
+</div>
+
+<script>
+(function(){
+"use strict";
+// ---------------- Rechenmodell (= b17_gemeinsam.py) ----------------
+var A_LED=1.527, M_LED=0.103, RS_LED=0.32, I_FMAX=50, PWM_HZ=400;
+var RV=[0,100,220,330,470,680,1000], IQ=[5,10,15,20];
+var START={ksq:false,u1:0,rvi:0,iqi:0,n:1,g:100,zeit:false};
+var z=JSON.parse(JSON.stringify(START)), punkte=[];
+var $=function(id){return document.getElementById(id);};
+var NS="http://www.w3.org/2000/svg";
+
+function uLed(i){ return i<=0?0:A_LED+M_LED*Math.log(i)/Math.LN10+RS_LED*i/1000; }      // i in mA, Ergebnis V
+function iNetz(u1,rv,n){                                                            // mA
+  if(u1<=0) return 0;
+  var lo=-9, hi=6;
+  for(var k=0;k<200;k++){ var mi=(lo+hi)/2, i=Math.pow(10,mi);
+    if(i*rv/1000+n*uLed(i)>u1) hi=mi; else lo=mi; }
+  return Math.pow(10,(lo+hi)/2);
+}
+function zustand(){
+  var u1=z.u1/100, rv=RV[z.rvi], n=z.n, g=z.g/100, ion, uf, urv, uq;
+  if(z.ksq){ ion=IQ[z.iqi]; uf=uLed(ion); urv=null; uq=n*uf*g; }
+  else { ion=iNetz(u1,rv,n); uf=uLed(ion); urv=ion*rv/1000*g; uq=u1; }
+  return {ion:ion, uf:uf, ufm:uf*g, urv:urv, uq:uq, imittel:ion*g, g:g, n:n, rv:rv, u1:u1, ueber:ion>I_FMAX};
+}
+function fix(x,st){ var f=Math.pow(10,st); return (Math.floor(x*f+0.5+1e-9)/f).toFixed(st).replace(".",","); }
+
+// ---------------- Zeichnen: Schaltung ----------------
+function el(svg,n,a,t){ var e=document.createElementNS(NS,n); for(var k in a) e.setAttribute(k,a[k]); if(t!==undefined) e.textContent=t; svg.appendChild(e); return e; }
+function fz(svg,x,y,sym,idx,a){ var t=el(svg,"text",Object.assign({x:x,y:y,"font-size":22,fill:"#1A2530","text-anchor":"middle","font-family":"Arial,sans-serif"},a||{}));
+  var s1=document.createElementNS(NS,"tspan"); s1.setAttribute("font-style","italic"); s1.setAttribute("font-family","Cambria,Caladea,Georgia,serif"); s1.textContent=sym; t.appendChild(s1);
+  if(idx){ var s2=document.createElementNS(NS,"tspan"); s2.setAttribute("font-size","14"); s2.setAttribute("dy","5"); s2.textContent=idx; t.appendChild(s2); }
+  return t; }
+function helligkeit(w){ if(w.ueber) return 0; var r=Math.pow(Math.max(w.ion,0)/20,1.35); return Math.min(1,r)*w.g; }
+
+function zeichneSchaltung(w){
+  var s=$("schaltung"); while(s.firstChild) s.removeChild(s.firstChild);
+  var L="#1A2530", B="#2557A3", sw=3, yo=62, yu=280, xr=500;
+  var defs=el(s,"defs",{}), rg=document.createElementNS(NS,"radialGradient"); rg.setAttribute("id","glow");
+  [["0%","#ff3b2f","0.9"],["60%","#ff7a5c","0.35"],["100%","#ffffff","0"]].forEach(function(st){ var e=document.createElementNS(NS,"stop"); e.setAttribute("offset",st[0]); e.setAttribute("stop-color",st[1]); e.setAttribute("stop-opacity",st[2]); rg.appendChild(e); });
+  defs.appendChild(rg);
+  function vmeter(x,y){ el(s,"circle",{cx:x,cy:y,r:22,fill:"#fff",stroke:B,"stroke-width":2.2}); el(s,"text",{x:x,y:y+8,"font-size":22,"text-anchor":"middle","font-weight":700,fill:B},"V"); }
+  // Quelle links (Netzgerät G oder Konstantstromquelle)
+  el(s,"line",{x1:62,y1:yo,x2:62,y2:125,stroke:L,"stroke-width":sw}); el(s,"line",{x1:62,y1:215,x2:62,y2:yu,stroke:L,"stroke-width":sw});
+  if(z.ksq){
+    el(s,"rect",{x:20,y:125,width:84,height:90,fill:"#fff",stroke:L,"stroke-width":sw});
+    el(s,"line",{x1:20,y1:215,x2:104,y2:125,stroke:L,"stroke-width":2});
+    el(s,"text",{x:44,y:158,"font-size":22,"text-anchor":"middle"},"U~");
+    fz(s,78,202,"I","const",{"font-size":22});
+  } else {
+    el(s,"rect",{x:20,y:125,width:84,height:90,fill:"#fff",stroke:L,"stroke-width":sw});
+    el(s,"text",{x:62,y:176,"font-size":34,"text-anchor":"middle","font-weight":700},"G");
+    el(s,"line",{x1:44,y1:192,x2:80,y2:192,stroke:L,"stroke-width":2});
+    [44,57,70].forEach(function(x){ el(s,"line",{x1:x,y1:200,x2:x+10,y2:200,stroke:L,"stroke-width":2}); });
+    el(s,"text",{x:112,y:146,"font-size":24,"font-weight":700},"+"); el(s,"text",{x:112,y:212,"font-size":24,"font-weight":700},"−");
+  }
+  // oben: PWM-Schalter, Strommesser, Vorwiderstand
+  el(s,"line",{x1:62,y1:yo,x2:150,y2:yo,stroke:L,"stroke-width":sw});
+  if(z.g<100){ el(s,"rect",{x:150,y:yo-24,width:76,height:48,fill:"#F5EBDF",stroke:"#A34E0E","stroke-width":2.5});
+    el(s,"text",{x:188,y:yo+8,"font-size":22,"text-anchor":"middle",fill:"#A34E0E","font-weight":700},"PWM"); }
+  else el(s,"line",{x1:150,y1:yo,x2:226,y2:yo,stroke:L,"stroke-width":sw});
+  el(s,"line",{x1:226,y1:yo,x2:244,y2:yo,stroke:L,"stroke-width":sw});
+  el(s,"circle",{cx:268,cy:yo,r:24,fill:"#fff",stroke:L,"stroke-width":sw}); el(s,"text",{x:268,y:yo+8,"font-size":24,"text-anchor":"middle","font-weight":700},"A");
+  el(s,"line",{x1:292,y1:yo,x2:330,y2:yo,stroke:L,"stroke-width":sw});
+  if(!z.ksq && w.rv>0){
+    el(s,"rect",{x:330,y:yo-14,width:90,height:28,fill:"#fff",stroke:L,"stroke-width":sw});
+    fz(s,375,yo-24,"R","v",{"font-size":24});
+    el(s,"line",{x1:330,y1:yo,x2:330,y2:yo+68,stroke:B,"stroke-width":1.8}); el(s,"line",{x1:420,y1:yo,x2:420,y2:yo+68,stroke:B,"stroke-width":1.8});
+    el(s,"line",{x1:330,y1:yo+68,x2:353,y2:yo+68,stroke:B,"stroke-width":1.8}); el(s,"line",{x1:397,y1:yo+68,x2:420,y2:yo+68,stroke:B,"stroke-width":1.8});
+    vmeter(375,yo+68);
+  } else el(s,"line",{x1:330,y1:yo,x2:420,y2:yo,stroke:L,"stroke-width":sw});
+  el(s,"line",{x1:420,y1:yo,x2:xr,y2:yo,stroke:L,"stroke-width":sw}); el(s,"line",{x1:xr,y1:yo,x2:xr,y2:yu,stroke:L,"stroke-width":sw});
+  el(s,"line",{x1:xr,y1:yu,x2:62,y2:yu,stroke:L,"stroke-width":sw});
+  // unten: Leuchtdioden in Reihe, Durchlassrichtung von rechts nach links
+  var h=helligkeit(w), xs=[410,310,210];
+  for(var k=0;k<z.n;k++){
+    var cx=xs[k], farbe=w.ueber?"#5A666F":"#B3261E";
+    el(s,"rect",{x:cx-28,y:yu-22,width:56,height:44,fill:"#fff",stroke:"none"});
+    if(h>0) el(s,"circle",{cx:cx,cy:yu,r:48,fill:"url(#glow)",opacity:(0.15+0.85*h).toFixed(3)});
+    el(s,"polygon",{points:(cx+18)+","+(yu-20)+" "+(cx+18)+","+(yu+20)+" "+(cx-16)+","+yu,fill:h>0?"#ff6b5a":"#fff",stroke:farbe,"stroke-width":sw});
+    el(s,"line",{x1:cx-16,y1:yu-20,x2:cx-16,y2:yu+20,stroke:farbe,"stroke-width":sw});
+    el(s,"line",{x1:cx-28,y1:yu,x2:cx-16,y2:yu,stroke:L,"stroke-width":sw}); el(s,"line",{x1:cx+18,y1:yu,x2:cx+28,y2:yu,stroke:L,"stroke-width":sw});
+    [[0,22],[12,22]].forEach(function(q){ var x1=cx+q[0], y1=yu+q[1]; el(s,"line",{x1:x1,y1:y1,x2:x1+12,y2:y1+14,stroke:farbe,"stroke-width":2.2});
+      el(s,"polygon",{points:(x1+12)+","+(y1+14)+" "+(x1+4)+","+(y1+11)+" "+(x1+10)+","+(y1+6),fill:farbe}); });
+    if(w.ueber){ el(s,"line",{x1:cx-24,y1:yu-24,x2:cx+24,y2:yu+24,stroke:"#B3261E","stroke-width":4}); el(s,"line",{x1:cx-24,y1:yu+24,x2:cx+24,y2:yu-24,stroke:"#B3261E","stroke-width":4}); }
+  }
+  // Spannungsmesser an der ersten LED (rechts)
+  var c1=xs[0];
+  el(s,"line",{x1:c1-28,y1:yu,x2:c1-28,y2:yu-78,stroke:B,"stroke-width":1.8}); el(s,"line",{x1:c1+28,y1:yu,x2:c1+28,y2:yu-78,stroke:B,"stroke-width":1.8});
+  el(s,"line",{x1:c1-28,y1:yu-78,x2:c1-22,y2:yu-78,stroke:B,"stroke-width":1.8}); el(s,"line",{x1:c1+22,y1:yu-78,x2:c1+28,y2:yu-78,stroke:B,"stroke-width":1.8});
+  vmeter(c1,yu-78);
+}
+
+// ---------------- Zeichnen: Oszilloskop ----------------
+var OX0=74, OX1=620, OY0=215, OY1=32;
+function zeichneOszi(w){
+  var s=$("oszi"); while(s.firstChild) s.removeChild(s.firstChild);
+  var maxI = w.ion<=25?25:(w.ion<=50?50:100), schritt=maxI/5;
+  el(s,"rect",{x:OX0,y:OY1,width:OX1-OX0,height:OY0-OY1,fill:"#f7fafc",stroke:"#9AA5AE"});
+  for(var k=0;k<=5;k++){ var y=OY0-(OY0-OY1)*k/5; el(s,"line",{x1:OX0,y1:y,x2:OX1,y2:y,stroke:"#d5dce2"}); el(s,"text",{x:OX0-6,y:y+7,"font-size":22,"text-anchor":"end"},String(schritt*k)); }
+  for(var t=0;t<=10;t+=2.5){ var x=OX0+(OX1-OX0)*t/10; el(s,"line",{x1:x,y1:OY0,x2:x,y2:OY1,stroke:"#d5dce2"}); el(s,"text",{x:x+(t===0?8:0),y:OY0+28,"font-size":22,"text-anchor":"middle"},fix(t,1)); }
+  fz(s,OX0+6,OY1-6,"i","F",{"text-anchor":"start","font-size":20}); el(s,"text",{x:OX0+36,y:OY1-6,"font-size":22},"in mA");
+  el(s,"text",{x:OX1,y:OY0+46,"font-size":22,"text-anchor":"end"},"t in ms");
+  var iy=function(i){ return OY0-(OY0-OY1)*Math.min(i,maxI)/maxI; };
+  var T=1000/PWM_HZ, pk=[], tt;
+  if(w.g>=1 || w.g<=0){ var yy=iy(w.g>0?w.ion:0); pk.push(OX0+","+yy, OX1+","+yy); }
+  else { for(tt=0;tt<10-1e-9;tt+=T){ var x0=OX0+(OX1-OX0)*tt/10, x1=OX0+(OX1-OX0)*(tt+T*w.g)/10, x2=OX0+(OX1-OX0)*(tt+T)/10;
+      pk.push(x0+","+iy(0), x0+","+iy(w.ion), x1+","+iy(w.ion), x1+","+iy(0), x2+","+iy(0)); } }
+  el(s,"polyline",{points:pk.join(" "),fill:"none",stroke:"#B3261E","stroke-width":3});
+  if(w.ion>maxI) el(s,"text",{x:OX1-6,y:OY1+22,"font-size":18,"text-anchor":"end",fill:"#B3261E"},"über "+maxI+" mA");
+  var ym=iy(w.imittel); el(s,"line",{x1:OX0,y1:ym,x2:OX1,y2:ym,stroke:"#2557A3","stroke-width":2.5,"stroke-dasharray":"10 7"});
+}
+
+// ---------------- Zeichnen: Kennlinie ----------------
+var KX0=82, KX1=620, KY0=300, KY1=36, UMAX=2.0, IMAX=100;
+function kx(u){ return KX0+(KX1-KX0)*Math.min(u,UMAX)/UMAX; }
+function ky(i){ return KY0-(KY0-KY1)*Math.min(i,IMAX)/IMAX; }
+function zeichneKennlinie(w){
+  var s=$("kennlinie"); while(s.firstChild) s.removeChild(s.firstChild);
+  el(s,"rect",{x:KX0,y:KY1,width:KX1-KX0,height:KY0-KY1,fill:"#fbfaf6",stroke:"#9AA5AE"});
+  for(var u=0;u<=UMAX+1e-9;u+=0.1){ var x=kx(u), gr=Math.abs(u*2-Math.round(u*2))<1e-6;
+    el(s,"line",{x1:x,y1:KY0,x2:x,y2:KY1,stroke:gr?"#c9d1d8":"#e6eaee"});
+    if(gr) el(s,"text",{x:x+(u===0?10:0),y:KY0+28,"font-size":22,"text-anchor":"middle"},fix(u,1)); }
+  for(var i=0;i<=IMAX;i+=10){ var y=ky(i); el(s,"line",{x1:KX0,y1:y,x2:KX1,y2:y,stroke:i%20===0?"#c9d1d8":"#e6eaee"}); if(i%20===0) el(s,"text",{x:KX0-6,y:y+7,"font-size":22,"text-anchor":"end"},String(i)); }
+  var yg=ky(I_FMAX); el(s,"line",{x1:KX0,y1:yg,x2:KX1,y2:yg,stroke:"#B3261E","stroke-width":2,"stroke-dasharray":"8 6"});
+  fz(s,KX0+8,yg-8,"I","Fmax",{"text-anchor":"start","font-size":22,fill:"#B3261E"});
+  fz(s,KX0+6,KY1-8,"I","F",{"text-anchor":"start","font-size":20}); el(s,"text",{x:KX0+36,y:KY1-8,"font-size":22},"in mA");
+  fz(s,KX1-52,KY0+52,"U","F",{"text-anchor":"end","font-size":22}); el(s,"text",{x:KX1,y:KY0+52,"font-size":22,"text-anchor":"end"},"in V");
+  punkte.forEach(function(p){ el(s,"circle",{cx:kx(p[0]),cy:ky(p[1]),r:6.5,fill:"#2557A3"}); });
+  if(w.ion>0){ var cy=ky(w.ion); el(s,"circle",{cx:kx(w.uf),cy:cy,r:10,fill:"none",stroke:"#A34E0E","stroke-width":3});
+    if(w.ion>IMAX) el(s,"text",{x:Math.min(kx(w.uf)+14,KX1-4),y:KY1+20,"font-size":17,fill:"#B3261E","text-anchor":kx(w.uf)>KX1-150?"end":"start"},"↑ über 100 mA"); }
+}
+
+// ---------------- Anzeigen ----------------
+function zeigeStrom(i){ return i>100?"über 100 mA":fix(i,2)+" mA"; }
+function anzeigen(){
+  var w=zustand();
+  $("mI").textContent=zeigeStrom(w.imittel);
+  $("mUF").textContent=(w.ion>100?"—":fix(w.ufm,2)+" V");
+  if(z.ksq || w.rv===0){ $("mURv").textContent="—"; $("kURv").classList.add("aus"); }
+  else { $("mURv").textContent=(w.ion>100?"—":fix(w.urv,2)+" V"); $("kURv").classList.remove("aus"); }
+  // Konstantstromquelle mit Pulsweitenmodulation: In der Pause ist der Kreis offen, die Quelle hat dann keine feste
+  // Spannung; die Anzeige der Quelle steht nur bei 100 %
+  var uqZeigen=!(z.ksq&&(w.ion>100||z.g<100));
+  $("mUQ").textContent=uqZeigen?fix(w.uq,2)+" V":"—"; $("kUQ").classList.toggle("aus",!uqZeigen);
+  $("warnung").classList.toggle("an",w.ueber);
+  $("aU1").innerHTML="<small><span class='fz'>U</span><sub>1</sub></small>"+fix(w.u1,2)+" V"; $("rU1").value=z.u1;
+  $("aRv").innerHTML="<small><span class='fz'>R</span><sub>v</sub></small>"+(w.rv===0?"ohne (0 Ω)":w.rv+" Ω");
+  $("aIq").innerHTML="<small><span class='fz'>I</span></small>"+IQ[z.iqi]+" mA";
+  $("aN").innerHTML="<small>Anzahl</small>"+z.n;
+  $("aG").innerHTML="<small>Tastgrad <span class='fz'>g</span></small>"+z.g+" %";
+  $("bNetz").setAttribute("aria-pressed",String(!z.ksq)); $("bKsq").setAttribute("aria-pressed",String(z.ksq));
+  $("gNetz").classList.toggle("aus",z.ksq); $("gKsq").classList.toggle("aus",!z.ksq);
+  $("bZeit").setAttribute("aria-pressed",String(z.zeit)); $("bZeit").disabled=(z.g>=100||z.g<=0);
+  zeichneSchaltung(w); zeichneOszi(w); zeichneKennlinie(w); zeitlupe();
+}
+
+// ---------------- Zeitlupe: Blinken mit 1 Hz statt 400 Hz ----------------
+var timer=null;
+function zeitlupe(){
+  if(timer){ clearInterval(timer); timer=null; }
+  var ruhig=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(!z.zeit||z.g>=100||z.g<=0||ruhig) return;
+  var t0=Date.now();
+  timer=setInterval(function(){ var ph=((Date.now()-t0)%1000)/1000, an=ph<z.g/100;
+    var kreise=$("schaltung").querySelectorAll("circle[fill='url(#glow)']");
+    var w=zustand(), h=w.ueber?0:Math.min(1,Math.pow(w.ion/20,1.35));
+    for(var k=0;k<kreise.length;k++) kreise[k].setAttribute("opacity",an?(0.15+0.85*h).toFixed(3):"0"); },50);
+}
+
+// ---------------- Bedienung ----------------
+function setze(f){ return function(){ f(); anzeigen(); }; }
+$("bNetz").onclick=setze(function(){ z.ksq=false; });
+$("bKsq").onclick=setze(function(){ z.ksq=true; });
+$("rU1").addEventListener("input",function(){ z.u1=+this.value; anzeigen(); });
+Array.prototype.forEach.call(document.querySelectorAll("[data-du]"),function(b){
+  b.onclick=setze(function(){ z.u1=Math.max(0,Math.min(1200,z.u1+(+b.getAttribute("data-du")))); }); });
+$("rvm").onclick=setze(function(){ z.rvi=Math.max(0,z.rvi-1); });
+$("rvp").onclick=setze(function(){ z.rvi=Math.min(RV.length-1,z.rvi+1); });
+$("iqm").onclick=setze(function(){ z.iqi=Math.max(0,z.iqi-1); });
+$("iqp").onclick=setze(function(){ z.iqi=Math.min(IQ.length-1,z.iqi+1); });
+$("nm").onclick=setze(function(){ z.n=Math.max(1,z.n-1); });
+$("np").onclick=setze(function(){ z.n=Math.min(3,z.n+1); });
+$("gm").onclick=setze(function(){ z.g=Math.max(0,z.g-5); });
+$("gp").onclick=setze(function(){ z.g=Math.min(100,z.g+5); });
+$("bZeit").onclick=setze(function(){ z.zeit=!z.zeit; });
+$("bPunkt").onclick=setze(function(){ var w=zustand(); if(w.ion>0) punkte.push([w.uf,w.ion]); });
+$("bLoesch").onclick=setze(function(){ punkte=[]; });
+$("bReset").onclick=setze(function(){ z=JSON.parse(JSON.stringify(START)); punkte=[]; });
+
+// ---------------- Prüfschnittstelle ----------------
+// __stelle({ksq, u1 (V), rv (Ω), iq (mA), n, g (%)}) setzt den Zustand wie die Knöpfe und gibt die Anzeigen zurück
+window.__stelle=function(o){
+  z.ksq=!!o.ksq; if(o.u1!==undefined) z.u1=Math.round(o.u1*100); if(o.rv!==undefined) z.rvi=RV.indexOf(o.rv);
+  if(o.iq!==undefined) z.iqi=IQ.indexOf(o.iq); if(o.n) z.n=o.n; if(o.g!==undefined) z.g=o.g; anzeigen();
+  return [$("mI").textContent,$("mUF").textContent,$("mURv").textContent,$("mUQ").textContent,$("warnung").classList.contains("an")?"Warnung":"ok"].join(" | ");
+};
+if(/[?&]pruefen\b/.test(location.search)){
+  var bericht={};
+  [1.4,1.45,1.5,1.55,1.6,1.65,1.7,1.72,1.75,1.8,2,3,12].forEach(function(u){ bericht["netz "+u+" V ohne Rv"]=window.__stelle({ksq:false,u1:u,rv:0,n:1,g:100}); });
+  RV.forEach(function(rv){ [1,2,3].forEach(function(n){ bericht["netz 12 V "+rv+" Ohm "+n+" LED"]=window.__stelle({ksq:false,u1:12,rv:rv,n:n,g:100}); }); });
+  IQ.forEach(function(iq){ [1,2,3].forEach(function(n){ [100,50,25].forEach(function(g){ bericht["ksq "+iq+" mA "+n+" LED g "+g]=window.__stelle({ksq:true,iq:iq,n:n,g:g}); }); }); });
+  z=JSON.parse(JSON.stringify(START));
+  $("pruefbericht").textContent=JSON.stringify(bericht);
+}
+anzeigen();
+})();
+</script>
+</body></html>
