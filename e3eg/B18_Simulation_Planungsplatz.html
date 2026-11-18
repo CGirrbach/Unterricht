@@ -1,0 +1,394 @@
+<!doctype html>
+<!-- E3EG B18 · Planungsplatz Beleuchtung (Neubau November 2026, Aufgabe IN der Stunde nach dem Muster E1EG B07).
+     Neu: Der Block hat keinen alten Stand. Gebaut von b18_sim_bauen.py aus dieser Vorlage; die Tabellenwerte kommen aus
+     b18_gemeinsam.py (dort am Seitenbild des Tabellenbuchs S. 235 abgeglichen).
+     Ziel-Erkenntnis (die Schüler finden sie selbst; die Seite nennt sie nicht und rechnet die Leuchtenzahl nicht vor):
+       Die nötige Leuchtenzahl hängt vom Raum ab: Je größer der Raumindex k (niedriger Raum, tief gehängte Leuchten, große
+       Grundfläche), desto größer der Raumwirkungsgrad und desto weniger Leuchten. Dunkle Wände, Decke oder Boden senken
+       den Raumwirkungsgrad: mehr Leuchten. Ein kleinerer Wartungsfaktor (mehr Verschmutzung) verlangt mehr Leuchten.
+     Vorbild: die Planungssoftware der Leuchtenhersteller (Tabellenbuch S. 233: „Berechnungen erfolgen meist mittels
+       Software der Leuchtenhersteller“). Die Schüler setzen Leuchten, bis der Wartungswert erreicht ist.
+     Rechenmodell (Wirkungsgradmethode, Tabellenbuch S. 229, 233 bis 235): h = Raumhöhe − Abhängung − Arbeitsebene;
+       k = l · b / (h · (l + b)); Tabellenwert = nächstliegender Wert aus 0,6 · 1,0 · 1,5 · 2,0 · 3,0 · 5,0 (genau in der
+       Mitte der kleinere; unter 0,6: außerhalb der Tabelle, keine Werte); ηR aus der Tabelle S. 235 (Lichtverteilung der
+       Leuchte, Spalte der Reflexionsgrade); ηB = ηLB · ηR; Neuwert der Anlage Eneu = N · z · ΦL · ηB / A;
+       Wartungswert der Anlage = WF · Eneu. „Erreicht“, wenn Wartungswert ≥ gefordert (ungerundet verglichen).
+     Anzeigen: k mit zwei Nachkommastellen, ηR in % wie die Tabelle, ηB mit drei Nachkommastellen, Beleuchtungsstärken in
+       ganzen lx (Math.round).
+     Startstellung neutral (keine Einstellung einer Aufgabe): 8,0 m × 6,0 m, Raumhöhe 3,00 m, Arbeitsebene 0,75 m, keine
+       Abhängung, Nurglasleuchte, Reflexionsgrade 0,5 / 0,3 / 0,3, 1800 lm, 1 Lampe je Leuchte, WF 0,67, gefordert 200 lx,
+       4 Leuchten in 2 Reihen.
+     Prüfmodus ?pruefen: Anzeigen der Aufgabenstellungen und Grenzfälle als JSON in #pruefbericht;
+       window.__stelle({…}) stellt ein und gibt die Anzeigen zurück. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Planungsplatz Beleuchtung (B18)</title>
+<script type="application/json" id="sim-meta">{"startwerte": {"Länge_m": 8.0, "Breite_m": 6.0, "Raumhöhe_m": 3.0, "Arbeitsebene_m": 0.75, "Abhängung_m": 0.0, "Leuchte": "Nurglasleuchte (vorwiegend direkt; breitstrahlend)", "Reflexionsgrade": [0.5, 0.3, 0.3], "Lichtstrom_lm": 1800, "Lampen_je_Leuchte": 1, "WF": 0.67, "gefordert_lx": 200, "Leuchten": 4, "Reihen": 2}, "loesungswerte": {"Aufgabe 3 a, Seminarraum (Aufgabe 2)": {"k": "1,02", "ηR": "73 %", "ηB": "0,438", "kleinste Leuchtenzahl": 20}, "Aufgabe 3 b, Leuchten 1,00 m abgehängt": {"k": "1,59", "ηR": "89 %", "kleinste Leuchtenzahl": 17}, "Aufgabe 3 b, Wände 0,3": {"k": "1,02", "ηR": "64 %", "kleinste Leuchtenzahl": 23}, "Aufgabe 3 b, WF 0,80": {"k": "1,02", "ηR": "73 %", "kleinste Leuchtenzahl": 14}}, "quelle": "Tabellenbuch Elektrotechnik S. 229 (Wartungsfaktoren), S. 233 und 234 (Wirkungsgradmethode, Formel 1 bis 5, Reflexionsgrade), S. 235 (Lichttechnische Daten von Leuchten: Leuchtenbetriebswirkungsgrad, Raumwirkungsgrad)"}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62;--blau:#2557A3;--rot:#B3261E}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:1080px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .fz{font-family:Cambria,Caladea,'Noto Serif',Georgia,serif;font-style:italic}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px;align-items:start;grid-template-areas:"messwerte" "bild" "bedienung"}
+ .bild{grid-area:bild} .messwerte{grid-area:messwerte} .bedienung{grid-area:bedienung}
+ @media(min-width:860px){.buehne{grid-template-columns:1.15fr 1fr;grid-template-areas:"messwerte messwerte" "bild bedienung"}}
+ .bild svg{width:100%;height:auto;display:block;border:1px solid var(--linie);background:#fff;margin-bottom:8px}
+ .legende{font-size:13.5px;color:var(--grau);margin:-4px 0 8px}
+ .messwerte{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:#fff}
+ .kachel{border:1.4px solid var(--ink);background:var(--hell);padding:4px 6px;text-align:center;min-width:0}
+ .kachel .name{display:block;font-size:13px;color:var(--grau);line-height:1.2;hyphens:manual;overflow-wrap:anywhere}
+ .kachel .zahl{display:block;font-variant-numeric:tabular-nums;font-size:22px;font-weight:700;white-space:nowrap}
+ .kachel .neben{display:block;font-size:12.5px;color:var(--grau);white-space:nowrap}
+ .anlage{grid-column:1 / span 3;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+ .geraet{background:#20313a;color:#dfe8ee;border-radius:6px;padding:4px 8px;text-align:center;min-width:0}
+ .geraet .name{display:block;font-size:12.5px;color:#cfe}
+ .geraet .zahl{display:block;font-variant-numeric:tabular-nums;font-size:22px;font-weight:700;color:#9BF0B4;white-space:nowrap}
+ .urteil{grid-column:1 / span 3;font-weight:700;text-align:center;padding:4px;border-radius:4px;font-size:15px}
+ .urteil.ja{background:#e3f1ea;color:var(--gruen);border:1.4px solid var(--gruen)}
+ .urteil.nein{background:#fbe9e7;color:var(--rot);border:1.4px solid var(--rot)}
+ .urteil.aus{background:var(--hell);color:var(--grau);border:1.4px solid var(--linie)}
+ input[type=range]{width:100%;height:44px;accent-color:var(--kupfer);margin:4px 0 2px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+ button{font:inherit;font-size:16px;min-height:48px;min-width:48px;padding:6px 8px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px;touch-action:manipulation}
+ button.an{background:var(--kupfer);color:#fff}
+ button:disabled{opacity:.35;cursor:not-allowed}
+ button.zurueck{border-color:var(--ink);color:var(--ink)}
+ .schritte button{flex:1 1 40px;font-weight:700;padding:6px 2px}
+ .wahl button{flex:1 1 30%;font-weight:700}
+ .wahl2 button{flex:1 1 45%}
+ .gruppe{border-top:1.4px solid var(--linie);padding-top:8px;margin-top:10px}
+ .gruppe:first-child{border-top:0;margin-top:0;padding-top:0}
+ .gruppe h2{font-size:16px;margin:0 0 4px;color:var(--kupfer)}
+ .titel{font-size:15px;font-weight:700;margin:8px 0 2px;display:flex;justify-content:space-between;gap:8px}
+ .titel .wert{font-variant-numeric:tabular-nums;color:var(--ink);background:var(--hell);border:1px solid var(--linie);padding:0 8px;border-radius:3px}
+ .tabtitel{font-size:15px;font-weight:700;margin:2px 0 2px}
+ .hinweis{font-size:14px;color:var(--grau);margin-top:6px}
+ table.tab{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums;margin-bottom:6px}
+ table.tab th,table.tab td{border:1px solid var(--linie);padding:2px 1px;text-align:center}
+ table.tab th{background:var(--hell);font-weight:700}
+ table.tab td.k{background:var(--hell);font-weight:700}
+ table.tab td.zeile,table.tab td.spalte{background:#fdf3e8}
+ table.tab td.treffer{background:var(--kupfer);color:#fff;font-weight:700}
+ table.tab th.spalte{background:#f6dcc2}
+ #pruefbericht{display:none}
+ @media(max-width:859px){.messwerte{position:sticky;top:0;z-index:5;padding:6px 0;box-shadow:0 6px 6px -6px rgba(0,0,0,.25)}}
+ @media(max-width:420px){.wrap{padding:12px 8px 18px} .kachel .zahl,.geraet .zahl{font-size:19px} .kachel .name,.geraet .name{font-size:11.5px}
+   .kachel .neben{font-size:11px} button{font-size:15px;padding:6px 4px} .anleitung{font-size:14px} table.tab{font-size:12px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E3EG · B18</div><h1>Planungsplatz: Beleuchtung eines Raums</h1></div>
+ <div class="anleitung"><b>So planen Sie:</b> Stellen Sie den Raum, die Reflexionsgrade, die Leuchte, die Lampen, den
+  Wartungsfaktor und den geforderten Wartungswert ein. Der Planungsplatz liest den Raumwirkungsgrad aus der Tabelle des
+  Tabellenbuchs ab. Setzen Sie dann Leuchten, bis der Wartungswert der Anlage den geforderten Wert erreicht.</div>
+
+ <div class="buehne">
+  <div class="messwerte" aria-live="polite">
+   <div class="kachel"><span class="name">Raumindex <span class="fz">k</span></span><span class="zahl" id="mK"></span><span class="neben" id="mKT"></span></div>
+   <div class="kachel"><span class="name">Raumwirkungs&shy;grad <span class="fz">η</span><sub>R</sub></span><span class="zahl" id="mER"></span><span class="neben" id="mERq"></span></div>
+   <div class="kachel"><span class="name">Beleuchtungs&shy;wirkungsgrad <span class="fz">η</span><sub>B</sub></span><span class="zahl" id="mEB"></span><span class="neben" id="mLB"></span></div>
+   <div class="anlage">
+    <div class="geraet"><span class="name">Leuchten</span><span class="zahl" id="mN"></span></div>
+    <div class="geraet"><span class="name">Neuwert der Anlage</span><span class="zahl" id="mEneu"></span></div>
+    <div class="geraet"><span class="name">Wartungswert der Anlage</span><span class="zahl" id="mEm"></span></div>
+   </div>
+   <div class="urteil aus" id="mUrteil"></div>
+  </div>
+
+  <div class="bild">
+   <svg viewBox="0 0 600 310" role="img" id="schnitt" data-quelle="Schnitt nach Tabellenbuch S. 234 (Bild Wirkungsgradmethode: Leuchte, Arbeitsebene, h, hr) und S. 233 (Beleuchtungsbeispiel)"
+    aria-label="Schnitt durch den Raum: Decke, Wände und Boden in der Helligkeit ihres Reflexionsgrads, die Leuchten an oder unter der Decke, die Arbeitsebene mit einem Tisch; bemaßt sind die Raumhöhe, die Abhängung, die Höhe der Arbeitsebene und die Höhe h der Leuchte über der Arbeitsebene.">
+    <g id="gS"></g></svg>
+   <div class="legende">Schnitt durch den Raum. Hell gezeichnete Flächen werfen viel Licht zurück, dunkle wenig.</div>
+   <svg viewBox="0 0 720 360" role="img" id="grundriss" data-quelle="Grundriss mit Lichtbändern nach Tabellenbuch S. 233 (Anzahl Leuchten für erforderliche Beleuchtungsstärke)"
+    aria-label="Grundriss des Raums mit Länge und Breite; die Leuchten liegen in Reihen (Lichtbändern) gleichmäßig verteilt.">
+    <g id="gG"></g></svg>
+   <div class="legende" id="legG"></div>
+   <div class="tabtitel">Tabellenbuch S. 235: Raumwirkungsgrad <span class="fz">η</span><sub>R</sub>&nbsp;in&nbsp;%</div>
+   <div class="hinweis" id="tabKopf" style="margin:0 0 4px"></div>
+   <table class="tab" id="tab"></table>
+  </div>
+
+  <div class="bedienung">
+   <div class="gruppe"><h2>Raum</h2>
+    <div class="titel"><span>Länge <span class="fz">l</span></span><span class="wert" id="aL"></span></div>
+    <input type="range" id="rL" min="2" max="30" step="0.1" aria-label="Länge in Meter">
+    <div class="knoepfe schritte"><button type="button" id="L_m1">−1</button><button type="button" id="L_m01">−0,1</button><button type="button" id="L_p01">+0,1</button><button type="button" id="L_p1">+1</button></div>
+    <div class="titel"><span>Breite <span class="fz">b</span></span><span class="wert" id="aB"></span></div>
+    <input type="range" id="rB" min="2" max="30" step="0.1" aria-label="Breite in Meter">
+    <div class="knoepfe schritte"><button type="button" id="B_m1">−1</button><button type="button" id="B_m01">−0,1</button><button type="button" id="B_p01">+0,1</button><button type="button" id="B_p1">+1</button></div>
+    <div class="titel"><span>Raumhöhe</span><span class="wert" id="aHR"></span></div>
+    <input type="range" id="rHR" min="2.4" max="8" step="0.05" aria-label="Raumhöhe in Meter">
+    <div class="knoepfe schritte"><button type="button" id="HR_m05">−0,5</button><button type="button" id="HR_m005">−0,05</button><button type="button" id="HR_p005">+0,05</button><button type="button" id="HR_p05">+0,5</button></div>
+    <div class="titel"><span>Arbeitsebene über dem Boden</span><span class="wert" id="aAE"></span></div>
+    <input type="range" id="rAE" min="0" max="1.2" step="0.05" aria-label="Höhe der Arbeitsebene in Meter">
+    <div class="knoepfe schritte"><button type="button" id="AE_m005">−0,05</button><button type="button" id="AE_p005">+0,05</button></div>
+    <div class="titel"><span>Leuchten abgehängt um</span><span class="wert" id="aABH"></span></div>
+    <input type="range" id="rABH" min="0" max="2" step="0.05" aria-label="Abhängung in Meter">
+    <div class="knoepfe schritte"><button type="button" id="ABH_m05">−0,5</button><button type="button" id="ABH_m005">−0,05</button><button type="button" id="ABH_p005">+0,05</button><button type="button" id="ABH_p05">+0,5</button></div>
+   </div>
+
+   <div class="gruppe"><h2>Reflexionsgrade <span class="fz">ϱ</span></h2>
+    <div class="titel"><span>Decke <span class="fz">&nbsp;ϱ</span><sub>1</sub></span></div>
+    <div class="knoepfe wahl"><button type="button" id="r1_08">0,8</button><button type="button" id="r1_05">0,5</button><button type="button" id="r1_03">0,3</button></div>
+    <div class="titel"><span>Wände <span class="fz">&nbsp;ϱ</span><sub>2</sub></span></div>
+    <div class="knoepfe wahl"><button type="button" id="r2_05">0,5</button><button type="button" id="r2_03">0,3</button></div>
+    <div class="titel"><span>Boden <span class="fz">&nbsp;ϱ</span><sub>3</sub></span></div>
+    <div class="knoepfe wahl"><button type="button" id="r3_03">0,3</button><button type="button" id="r3_01">0,1</button></div>
+    <div class="hinweis" id="rHinweis">Die Tabelle hat nur diese Spalten. Für die Decke 0,3 gibt es nur Wände 0,3 und Boden 0,1.</div>
+   </div>
+
+   <div class="gruppe"><h2>Leuchte</h2>
+    <div class="titel"><span>Lichtverteilung</span></div>
+    <div class="knoepfe wahl2" id="vWahl"></div>
+    <div class="titel"><span>Leuchte (Leuchtenbetriebswirkungsgrad)</span></div>
+    <div class="knoepfe wahl2" id="lWahl"></div>
+   </div>
+
+   <div class="gruppe"><h2>Lampen</h2>
+    <div class="titel"><span>Lichtstrom je Lampe <span class="fz">&nbsp;Φ</span><sub>L</sub></span><span class="wert" id="aPHI"></span></div>
+    <input type="range" id="rPHI" min="100" max="12000" step="1" aria-label="Lichtstrom je Lampe in Lumen">
+    <div class="knoepfe schritte"><button type="button" id="PHI_m1000">−1000</button><button type="button" id="PHI_m100">−100</button><button type="button" id="PHI_m10">−10</button><button type="button" id="PHI_m1">−1</button></div>
+    <div class="knoepfe schritte" style="margin-top:6px"><button type="button" id="PHI_p1">+1</button><button type="button" id="PHI_p10">+10</button><button type="button" id="PHI_p100">+100</button><button type="button" id="PHI_p1000">+1000</button></div>
+    <div class="titel"><span>Lampen je Leuchte</span></div>
+    <div class="knoepfe wahl"><button type="button" id="z_1">1</button><button type="button" id="z_2">2</button><button type="button" id="z_3">3</button><button type="button" id="z_4">4</button></div>
+   </div>
+
+   <div class="gruppe"><h2>Wartung</h2>
+    <div class="titel"><span>Wartungsfaktor <span class="fz">WF</span></span></div>
+    <div class="knoepfe wahl2"><button type="button" id="wf_080">0,80 sehr sauber</button><button type="button" id="wf_067">0,67 sauber</button><button type="button" id="wf_057">0,57 normal</button><button type="button" id="wf_050">0,50 stark verschmutzt</button></div>
+    <div class="titel"><span>geforderter Wartungswert <span class="fz">&nbsp;E</span><sub>m</sub></span><span class="wert" id="aEM"></span></div>
+    <input type="range" id="rEM" min="50" max="2000" step="10" aria-label="geforderter Wartungswert in Lux">
+    <div class="knoepfe schritte"><button type="button" id="EM_m100">−100</button><button type="button" id="EM_m10">−10</button><button type="button" id="EM_p10">+10</button><button type="button" id="EM_p100">+100</button></div>
+   </div>
+
+   <div class="gruppe"><h2>Leuchten setzen</h2>
+    <div class="titel"><span>Anzahl der Leuchten</span><span class="wert" id="aN"></span></div>
+    <div class="knoepfe schritte"><button type="button" id="N_m10">−10</button><button type="button" id="N_m1">−1</button><button type="button" id="N_p1">+1</button><button type="button" id="N_p10">+10</button></div>
+    <div class="titel"><span>Reihen (Lichtbänder)</span><span class="wert" id="aR"></span></div>
+    <div class="knoepfe schritte"><button type="button" id="R_m1">−1</button><button type="button" id="R_p1">+1</button></div>
+   </div>
+   <div class="gruppe"><h2>Neu beginnen</h2>
+    <div class="knoepfe"><button class="zurueck" id="bReset" type="button">Zurücksetzen</button></div>
+   </div>
+  </div>
+ </div>
+ <pre id="pruefbericht"></pre>
+</div>
+
+<script>
+(function(){
+"use strict";
+var SPALTEN=[[0.8, 0.5, 0.3], [0.8, 0.5, 0.1], [0.8, 0.3, 0.3], [0.8, 0.3, 0.1], [0.5, 0.5, 0.3], [0.5, 0.5, 0.1], [0.5, 0.3, 0.3], [0.5, 0.3, 0.1], [0.3, 0.3, 0.1]];
+var K_TAB=[0.6,1.0,1.5,2.0,3.0,5.0];
+var ETA_R={"A1": {"0.6": [61, 58, 54, 52, 59, 57, 53, 51, 51], "1.0": [80, 75, 73, 69, 76, 73, 70, 68, 67], "1.5": [95, 86, 88, 82, 90, 84, 84, 80, 79], "2.0": [102, 91, 96, 87, 95, 89, 91, 86, 84], "3.0": [111, 97, 106, 95, 103, 95, 99, 92, 91], "5.0": [119, 102, 115, 100, 109, 98, 106, 97, 96]}, "A2": {"0.6": [52, 49, 43, 42, 49, 48, 42, 41, 41], "1.0": [73, 67, 64, 60, 69, 65, 61, 59, 58], "1.5": [89, 81, 81, 75, 83, 78, 77, 73, 72], "2.0": [97, 86, 89, 81, 90, 83, 84, 79, 78], "3.0": [107, 94, 101, 90, 99, 91, 94, 88, 86], "5.0": [116, 100, 111, 97, 106, 96, 102, 94, 93]}, "B3": {"0.6": [41, 39, 31, 30, 37, 35, 29, 28, 27], "1.0": [59, 55, 49, 46, 52, 50, 44, 43, 41], "1.5": [74, 67, 64, 60, 66, 61, 58, 55, 52], "2.0": [83, 74, 73, 67, 73, 68, 66, 62, 59], "3.0": [95, 83, 87, 77, 83, 76, 77, 71, 68], "5.0": [106, 91, 99, 86, 91, 83, 87, 80, 76]}, "C4": {"0.6": [36, 34, 27, 26, 29, 28, 23, 22, 19], "1.0": [52, 48, 43, 40, 41, 39, 35, 33, 29], "1.5": [65, 59, 56, 52, 52, 49, 45, 43, 38], "2.0": [74, 66, 65, 59, 58, 54, 52, 49, 43], "3.0": [84, 74, 77, 68, 66, 61, 61, 57, 50], "5.0": [94, 81, 88, 77, 74, 67, 70, 64, 56]}, "E2": {"0.6": [15, 15, 9, 10, 11, 12, 6, 8, 5], "1.0": [28, 27, 20, 19, 18, 19, 13, 13, 8], "1.5": [41, 39, 31, 30, 26, 25, 20, 19, 13], "2.0": [51, 48, 41, 40, 32, 30, 26, 25, 16], "3.0": [65, 58, 55, 52, 39, 37, 34, 32, 20], "5.0": [77, 68, 70, 63, 45, 43, 42, 39, 24]}};
+var VERTEILUNG={"A1": "direkt; stark gerichtet", "A2": "direkt; tiefstrahlend", "B3": "vorwiegend direkt; breitstrahlend", "C4": "gleichförmig; allseitig strahlend", "E2": "indirekt; hochstrahlend"};
+var LEUCHTEN=[["A1a", "A1", "Spiegelraster, engstrahlend", 60], ["A1b", "A1", "Spiegelreflektor, einlampig", 80], ["A1c", "A1", "Rundreflektor", 75], ["A2a", "A2", "Wanne, prismatisch", 60], ["A2b", "A2", "Spiegelraster, breitstrahlend", 60], ["A2c", "A2", "Spiegelreflektor, mehrlampig", 75], ["B3a", "B3", "Nurglasleuchte", 70], ["B3b", "B3", "Wanne, prismatisch", 65], ["B3c", "B3", "Wanne, opal", 50], ["C4a", "C4", "freistrahlend", 90], ["C4b", "C4", "Lamellenraster", 82], ["C4c", "C4", "Opalglasleuchte", 80], ["E2a", "E2", "Kehle breit, weiß", 70], ["E2b", "E2", "Kehle schmal, weiß", 50]];
+var START={"l": 8.0, "b": 6.0, "hr": 3.0, "ae": 0.75, "abh": 0.0, "leuchte": "B3a", "rho": [0.5, 0.3, 0.3], "phi": 1800, "wf": 0.67, "em": 200, "leuchten": 4, "reihen": 2, "zl": 1};
+var z={};
+function neu(){ z=JSON.parse(JSON.stringify(START)); }
+neu();
+var $=function(id){return document.getElementById(id);};
+
+// ---------------- Rechenmodell (Wirkungsgradmethode) ----------------
+function leuchte(){ for(var i=0;i<LEUCHTEN.length;i++) if(LEUCHTEN[i][0]===z.leuchte) return LEUCHTEN[i]; return LEUCHTEN[0]; }
+function kTabelle(k){
+  if(k<0.6-1e-9) return null;
+  var best=null, d;
+  for(var i=0;i<K_TAB.length;i++){ d=Math.abs(k-K_TAB[i]); if(best===null||d<best[0]-1e-9) best=[d,K_TAB[i]]; }
+  return best[1];
+}
+function spalte(){ for(var i=0;i<SPALTEN.length;i++){ var s=SPALTEN[i]; if(s[0]===z.rho[0]&&s[1]===z.rho[1]&&s[2]===z.rho[2]) return i; } return -1; }
+function rechnen(){
+  var L=leuchte(), h=z.hr-z.abh-z.ae, k=z.l*z.b/(h*(z.l+z.b)), kt=kTabelle(k), sp=spalte();
+  var r={h:h,k:k,kt:kt,sp:sp,vert:L[1],lb:L[3]/100,er:null,eb:null,eneu:null,em:null};
+  if(kt!==null&&sp>=0){
+    r.er=ETA_R[L[1]][kt.toFixed(1)][sp]/100;
+    r.eb=r.lb*r.er;
+    var A=z.l*z.b;
+    r.eneu=z.leuchten*z.zl*z.phi*r.eb/A;
+    r.em=z.wf*r.eneu;
+  }
+  return r;
+}
+function komma(x,st){ var t=(Math.round(x*Math.pow(10,st))/Math.pow(10,st)).toFixed(st); return t.replace(".",","); }
+function gruppe(n){ var t=String(n); return t.length>4 ? t.replace(/\B(?=(\d{3})+(?!\d))/g," ") : t; }
+
+// ---------------- Zeichnungen ----------------
+var NS="http://www.w3.org/2000/svg";
+function el(n,a,t){ var e=document.createElementNS(NS,n); for(var q in a) e.setAttribute(q,a[q]); if(t!==undefined) e.textContent=t; return e; }
+function text(g,x,y,t,gr,farbe,anker,kursiv){
+  var a={x:x,y:y,"font-size":gr,fill:farbe||"#1A2530","text-anchor":anker||"start","font-family":kursiv?"Cambria,Caladea,'Noto Serif',Georgia,serif":"Arial,sans-serif"};
+  if(kursiv){ a["font-style"]="italic"; a["font-weight"]="700"; }
+  g.appendChild(el("text",a,t));
+}
+function grau(rho){ return {0.8:"#FAFAF5",0.5:"#D2D0C6",0.3:"#A8A598",0.1:"#6B685E"}[rho]; }
+function pfeil(g,x,y1,y2,farbe){
+  g.appendChild(el("line",{x1:x,y1:y1+8,x2:x,y2:y2-8,stroke:farbe,"stroke-width":2}));
+  g.appendChild(el("polygon",{points:[x,y1, x-6,y1+11, x+6,y1+11].join(" "),fill:farbe}));
+  g.appendChild(el("polygon",{points:[x,y2, x-6,y2-11, x+6,y2-11].join(" "),fill:farbe}));
+}
+function schnitt(r){
+  var g=$("gS"); while(g.firstChild) g.removeChild(g.firstChild);
+  var X0=150, X1=440, YB=282, S=244/Math.max(z.hr,4.0);   // Räume bis 4 m im selben Maßstab, höhere kleiner
+  var yd=YB-z.hr*S, ya=YB-z.ae*S, yl=yd+z.abh*S, ind=(r.vert==="E2");
+  g.appendChild(el("rect",{x:X0,y:yd,width:X1-X0,height:YB-yd,fill:"#FFFDF4"}));
+  g.appendChild(el("rect",{x:X0-14,y:yd-12,width:X1-X0+28,height:12,fill:grau(z.rho[0]),stroke:"#1A2530","stroke-width":1.5}));
+  g.appendChild(el("rect",{x:X0-14,y:yd,width:14,height:YB-yd,fill:grau(z.rho[1]),stroke:"#1A2530","stroke-width":1.5}));
+  g.appendChild(el("rect",{x:X1,y:yd,width:14,height:YB-yd,fill:grau(z.rho[1]),stroke:"#1A2530","stroke-width":1.5}));
+  g.appendChild(el("rect",{x:X0-14,y:YB,width:X1-X0+28,height:12,fill:grau(z.rho[2]),stroke:"#1A2530","stroke-width":1.5}));
+  g.appendChild(el("line",{x1:X0,y1:ya,x2:X1,y2:ya,stroke:"#2557A3","stroke-width":2.5,"stroke-dasharray":"10 6"}));
+  if(z.ae>0.05){ g.appendChild(el("rect",{x:255,y:ya,width:80,height:7,fill:"#C58A4B",stroke:"#1A2530","stroke-width":1.2}));
+    g.appendChild(el("rect",{x:262,y:ya+7,width:8,height:Math.max(0,YB-ya-7),fill:"#7a5a3a"}));
+    g.appendChild(el("rect",{x:320,y:ya+7,width:8,height:Math.max(0,YB-ya-7),fill:"#7a5a3a"})); }
+  [200,295,390].forEach(function(x){
+    if(z.abh>0) g.appendChild(el("line",{x1:x,y1:yd,x2:x,y2:yl,stroke:"#1A2530","stroke-width":1.5}));
+    if(!ind) g.appendChild(el("polygon",{points:[x-18,yl+8, x+18,yl+8, x+44,ya, x-44,ya].join(" "),fill:"#FFE27A","fill-opacity":"0.45"}));
+    else g.appendChild(el("polygon",{points:[x-18,yl, x+18,yl, x+36,yd, x-36,yd].join(" "),fill:"#FFE27A","fill-opacity":"0.55"}));
+    g.appendChild(el("rect",{x:x-18,y:yl,width:36,height:8,rx:2,fill:"#FFD23F",stroke:"#1A2530","stroke-width":1.5}));
+  });
+  pfeil(g,112,yd,YB,"#1A2530"); text(g,102,(yd+YB)/2-4,"Raum-",20,"#1A2530","end"); text(g,102,(yd+YB)/2+18,"höhe",20,"#1A2530","end");
+  text(g,102,(yd+YB)/2+42,komma(z.hr,2)+" m",20,"#1A2530","end");
+  if(YB-ya>26) pfeil(g,470,ya,YB,"#2557A3");
+  text(g,482,Math.min(YB-2,(ya+YB)/2+8),komma(z.ae,2)+" m",20,"#2557A3","start");
+  pfeil(g,470,yl+8,ya,"#A34E0E"); text(g,482,(yl+ya)/2-4,"h",30,"#A34E0E","start",true);
+  text(g,482,(yl+ya)/2+20,komma(r.h,2)+" m",20,"#A34E0E","start");
+  text(g,X0+6,ya-8,"Arbeitsebene",18,"#2557A3","start");
+  if(z.abh>0) text(g,X1-6,yd+28,"abgehängt "+komma(z.abh,2)+" m",16,"#1A2530","end");
+}
+function grundriss(){
+  var g=$("gG"); while(g.firstChild) g.removeChild(g.firstChild);
+  var W=600, H=290, s=Math.min(W/z.l,H/z.b), w=z.l*s, hh=z.b*s, x0=(720-w)/2+14, y0=14+(H-hh)/2;
+  g.appendChild(el("rect",{x:x0-8,y:y0-8,width:w+16,height:hh+16,fill:grau(z.rho[1]),stroke:"#1A2530","stroke-width":1.5}));
+  g.appendChild(el("rect",{x:x0,y:y0,width:w,height:hh,fill:grau(z.rho[2]),stroke:"#1A2530","stroke-width":1.2}));
+  var R=Math.min(z.reihen,z.leuchten), basis=Math.floor(z.leuchten/R), rest=z.leuchten%R, ind=(leuchte()[1]==="E2");
+  for(var i=0;i<R;i++){
+    var m=basis+(i<rest?1:0), yy=y0+(i+0.5)*hh/R, lang=Math.max(6,Math.min(1.25*s,0.7*w/m)), dick=Math.max(5,Math.min(0.25*s,0.5*hh/R));
+    for(var j=0;j<m;j++){
+      var xx=x0+(j+0.5)*w/m;
+      g.appendChild(el("rect",{x:xx-lang/2,y:yy-dick/2,width:lang,height:dick,rx:2,fill:ind?"#FFF3B0":"#FFD23F",stroke:"#1A2530","stroke-width":1.2}));
+    }
+  }
+  text(g,x0+w/2,y0+hh+34,"l = "+komma(z.l,1)+" m",24,"#1A2530","middle");
+  var tb=el("text",{x:x0-16,y:y0+hh/2,"font-size":24,fill:"#1A2530","text-anchor":"middle","font-family":"Arial,sans-serif",transform:"rotate(-90 "+(x0-16)+" "+(y0+hh/2)+")"},"b = "+komma(z.b,1)+" m");
+  g.appendChild(tb);
+  var verteilt=[]; for(var q=0;q<R;q++) verteilt.push(basis+(q<rest?1:0));
+  $("legG").textContent="Grundriss mit "+z.leuchten+" Leuchten in "+R+(R===1?" Reihe":" Reihen")+" ("+verteilt.join(" + ")+").";
+}
+function tabelle(r){
+  var t=$("tab"), L=leuchte(), sp=r.sp, html="<tr><th>Decke</th>";
+  SPALTEN.forEach(function(s,i){ html+="<th"+(i===sp?" class='spalte'":"")+">"+komma(s[0],1)+"</th>"; });
+  html+="</tr><tr><th>Wände</th>"; SPALTEN.forEach(function(s,i){ html+="<th"+(i===sp?" class='spalte'":"")+">"+komma(s[1],1)+"</th>"; });
+  html+="</tr><tr><th>Boden</th>"; SPALTEN.forEach(function(s,i){ html+="<th"+(i===sp?" class='spalte'":"")+">"+komma(s[2],1)+"</th>"; });
+  html+="</tr>";
+  K_TAB.forEach(function(kt){
+    var zeile=(r.kt!==null&&kt===r.kt);
+    html+="<tr><td class='k'>"+komma(kt,1)+"</td>";
+    ETA_R[L[1]][kt.toFixed(1)].forEach(function(w,i){
+      var c=(zeile&&i===sp)?"treffer":(zeile?"zeile":(i===sp?"spalte":""));
+      html+="<td"+(c?" class='"+c+"'":"")+">"+w+"</td>";
+    });
+    html+="</tr>";
+  });
+  t.innerHTML=html;
+  $("tabKopf").innerHTML="Lichtverteilung „"+VERTEILUNG[L[1]]+"“; Zeile: Raumindex <span class=\"fz\">k</span>, Spalte: Reflexionsgrade.";
+}
+
+// ---------------- Bedienung ----------------
+function knopfwahl(){
+  [["r1_08",0,0.8],["r1_05",0,0.5],["r1_03",0,0.3],["r2_05",1,0.5],["r2_03",1,0.3],["r3_03",2,0.3],["r3_01",2,0.1]].forEach(function(e){
+    var an=(z.rho[e[1]]===e[2]); $(e[0]).className=an?"an":""; $(e[0]).setAttribute("aria-pressed",an?"true":"false");
+    $(e[0]).disabled=(z.rho[0]===0.3&&e[1]>0&&!an);
+  });
+  [1,2,3,4].forEach(function(n){ var an=(z.zl===n); $("z_"+n).className=an?"an":""; $("z_"+n).setAttribute("aria-pressed",an?"true":"false"); });
+  [["wf_080",0.80],["wf_067",0.67],["wf_057",0.57],["wf_050",0.50]].forEach(function(e){ var an=(z.wf===e[1]); $(e[0]).className=an?"an":""; $(e[0]).setAttribute("aria-pressed",an?"true":"false"); });
+  var L=leuchte();
+  Array.prototype.forEach.call($("vWahl").children,function(b){ var an=(b.dataset.v===L[1]); b.className=an?"an":""; b.setAttribute("aria-pressed",an?"true":"false"); });
+  var lw=$("lWahl"); lw.innerHTML="";
+  LEUCHTEN.forEach(function(x){ if(x[1]!==L[1]) return;
+    var b=document.createElement("button"); b.type="button"; b.id="L_"+x[0]; b.textContent=x[2]+" · "+x[3]+"\u00a0%";
+    var an=(x[0]===z.leuchte); b.className=an?"an":""; b.setAttribute("aria-pressed",an?"true":"false");
+    b.onclick=function(){ z.leuchte=x[0]; auffrischen(); }; lw.appendChild(b); });
+}
+function auffrischen(){
+  var r=rechnen();
+  $("aL").textContent=komma(z.l,1)+" m"; $("rL").value=z.l;
+  $("aB").textContent=komma(z.b,1)+" m"; $("rB").value=z.b;
+  $("aHR").textContent=komma(z.hr,2)+" m"; $("rHR").value=z.hr;
+  $("aAE").textContent=komma(z.ae,2)+" m"; $("rAE").value=z.ae;
+  $("aABH").textContent=komma(z.abh,2)+" m"; $("rABH").value=z.abh;
+  $("aPHI").textContent=gruppe(z.phi)+" lm"; $("rPHI").value=z.phi;
+  $("aEM").textContent=gruppe(z.em)+" lx"; $("rEM").value=z.em;
+  $("aN").textContent=z.leuchten; $("aR").textContent=Math.min(z.reihen,z.leuchten);
+  $("mK").textContent=komma(r.k,2);
+  $("mKT").textContent=(r.kt===null)?"unter 0,6: nicht in der Tabelle":"Tabellenwert "+komma(r.kt,1);
+  $("mLB").innerHTML="<span class='fz'>η</span><sub>LB</sub> = "+Math.round(r.lb*100)+" %";
+  $("mN").textContent=z.leuchten+(z.zl>1?" · "+z.zl+" Lampen":"");
+  if(r.er===null){
+    $("mER").textContent="–"; $("mERq").textContent="Tabelle reicht nicht"; $("mEB").textContent="–";
+    $("mEneu").textContent="–"; $("mEm").textContent="–";
+    $("mUrteil").className="urteil aus"; $("mUrteil").textContent="Raumindex kleiner als 0,6: Planen Sie mit Daten des Herstellers.";
+  } else {
+    $("mER").textContent=Math.round(r.er*100)+" %"; $("mERq").textContent="Tabellenbuch S. 235";
+    $("mEB").textContent=komma(r.eb,3);
+    $("mEneu").textContent=gruppe(Math.round(r.eneu))+" lx"; $("mEm").textContent=gruppe(Math.round(r.em))+" lx";
+    var ok=(r.em>=z.em-1e-9);
+    $("mUrteil").className="urteil "+(ok?"ja":"nein");
+    $("mUrteil").textContent=(ok?"erreicht: ":"zu wenig: ")+"gefordert "+gruppe(z.em)+" lx";
+  }
+  knopfwahl(); schnitt(r); grundriss(); tabelle(r);
+}
+function begrenzen(){
+  z.l=Math.max(2,Math.min(30,Math.round(z.l*10)/10)); z.b=Math.max(2,Math.min(30,Math.round(z.b*10)/10));
+  z.hr=Math.max(2.4,Math.min(8,Math.round(z.hr*100)/100));
+  z.ae=Math.max(0,Math.min(1.2,Math.round(z.ae*100)/100)); z.abh=Math.max(0,Math.min(2,Math.round(z.abh*100)/100));
+  if(z.hr-z.ae-z.abh<0.5-1e-9) z.abh=Math.max(0,Math.round((z.hr-z.ae-0.5)*100)/100);   // Leuchte mindestens 0,5 m über der Arbeitsebene
+  if(z.hr-z.ae-z.abh<0.5-1e-9) z.ae=Math.round((z.hr-z.abh-0.5)*100)/100;
+  z.phi=Math.max(100,Math.min(12000,Math.round(z.phi))); z.em=Math.max(50,Math.min(2000,Math.round(z.em/10)*10));
+  z.leuchten=Math.max(1,Math.min(200,Math.round(z.leuchten))); z.reihen=Math.max(1,Math.min(10,Math.round(z.reihen)));
+}
+function setze(k,w){ z[k]=w; begrenzen(); auffrischen(); }
+[["rL","l"],["rB","b"],["rHR","hr"],["rAE","ae"],["rABH","abh"],["rPHI","phi"],["rEM","em"]].forEach(function(e){
+  $(e[0]).addEventListener("input",function(){ setze(e[1],+this.value); }); });
+[["L_m1","l",-1],["L_m01","l",-0.1],["L_p01","l",0.1],["L_p1","l",1],["B_m1","b",-1],["B_m01","b",-0.1],["B_p01","b",0.1],["B_p1","b",1],
+ ["HR_m05","hr",-0.5],["HR_m005","hr",-0.05],["HR_p005","hr",0.05],["HR_p05","hr",0.5],["AE_m005","ae",-0.05],["AE_p005","ae",0.05],
+ ["ABH_m05","abh",-0.5],["ABH_m005","abh",-0.05],["ABH_p005","abh",0.05],["ABH_p05","abh",0.5],
+ ["PHI_m1000","phi",-1000],["PHI_m100","phi",-100],["PHI_m10","phi",-10],["PHI_m1","phi",-1],["PHI_p1","phi",1],["PHI_p10","phi",10],["PHI_p100","phi",100],["PHI_p1000","phi",1000],
+ ["EM_m100","em",-100],["EM_m10","em",-10],["EM_p10","em",10],["EM_p100","em",100],
+ ["N_m10","leuchten",-10],["N_m1","leuchten",-1],["N_p1","leuchten",1],["N_p10","leuchten",10],["R_m1","reihen",-1],["R_p1","reihen",1]].forEach(function(e){
+  $(e[0]).onclick=function(){ setze(e[1],z[e[1]]+e[2]); }; });
+[["r1_08",0,0.8],["r1_05",0,0.5],["r1_03",0,0.3],["r2_05",1,0.5],["r2_03",1,0.3],["r3_03",2,0.3],["r3_01",2,0.1]].forEach(function(e){
+  $(e[0]).onclick=function(){ z.rho[e[1]]=e[2]; if(z.rho[0]===0.3){ z.rho[1]=0.3; z.rho[2]=0.1; } auffrischen(); }; });
+[1,2,3,4].forEach(function(n){ $("z_"+n).onclick=function(){ z.zl=n; auffrischen(); }; });
+[["wf_080",0.80],["wf_067",0.67],["wf_057",0.57],["wf_050",0.50]].forEach(function(e){ $(e[0]).onclick=function(){ z.wf=e[1]; auffrischen(); }; });
+Object.keys(VERTEILUNG).forEach(function(v){
+  var b=document.createElement("button"); b.type="button"; b.id="V_"+v; b.dataset.v=v; b.textContent=VERTEILUNG[v];
+  b.onclick=function(){ for(var i=0;i<LEUCHTEN.length;i++) if(LEUCHTEN[i][1]===v){ z.leuchte=LEUCHTEN[i][0]; break; } auffrischen(); };
+  $("vWahl").appendChild(b); });
+$("bReset").onclick=function(){ neu(); auffrischen(); };
+function anzeigen(){ return {k:$("mK").textContent, kt:$("mKT").textContent, er:$("mER").textContent, eb:$("mEB").textContent,
+  eneu:$("mEneu").textContent, em:$("mEm").textContent, urteil:$("mUrteil").textContent}; }
+window.__stelle=function(o){ neu(); for(var q in o) z[q]=o[q]; begrenzen(); auffrischen(); return anzeigen(); };
+window.__anzeigen=anzeigen;
+
+// ---------------- Prüfmodus ----------------
+if(/[?&]pruefen\b/.test(location.search)){
+  var bericht={}, SEM={"l": 10.0, "b": 4.0, "hr": 3.6, "ae": 0.8, "abh": 0.0, "leuchte": "A2a", "rho": [0.8, 0.5, 0.3], "phi": 2452, "wf": 0.57, "em": 300, "zl": 1, "reihen": 4};
+  function mit(a,b){ var o=JSON.parse(JSON.stringify(a)); for(var q in b) o[q]=b[q]; return o; }
+  [["Seminar 20",{leuchten:20}],["Seminar 19",{leuchten:19}],["abgehaengt 17",{abh:1.0,leuchten:17}],["abgehaengt 16",{abh:1.0,leuchten:16}],
+   ["Waende 23",{rho:[0.8,0.3,0.3],leuchten:23}],["Waende 22",{rho:[0.8,0.3,0.3],leuchten:22}],["WF 14",{wf:0.80,leuchten:14}],["WF 13",{wf:0.80,leuchten:13}],
+   ["klein",{l:2,b:2,hr:8,ae:0,abh:0}],["gross",{l:30,b:30,hr:2.4,ae:0.8,abh:0,leuchte:"A1a",leuchten:200}]].forEach(function(e){
+    bericht[e[0]]=window.__stelle(mit(SEM,e[1])); });
+  neu();
+  $("pruefbericht").textContent=JSON.stringify(bericht);
+}
+auffrischen();
+})();
+</script>
+</body></html>
