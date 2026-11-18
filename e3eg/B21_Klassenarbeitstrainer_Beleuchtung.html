@@ -136,6 +136,7 @@ function fest(x, d){ return rund(x, d).toFixed(d).replace(".", ","); }
 function gl(x, d){ if(d === undefined) d = stellen(x); return Math.abs(rund(x, d) - x) <= 1e-9*Math.max(1, Math.abs(x)) ? "=" : "≈"; }
 function erg(x, einheit, d){ return gl(x, d) + " " + zahl(x, d) + (einheit ? " " + einheit : ""); }
 function br(z, n){ return '<span class="bruch"><span>' + z + '</span><span>' + n + '</span></span>'; }
+var LMW = br("lm", "W");
 function zuf(a, b){ return a + Math.floor(Math.random()*(b - a + 1)); }
 function wahl(liste){ return liste[Math.floor(Math.random()*liste.length)]; }
 function mischen(a){ for(var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random()*(i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
@@ -226,16 +227,16 @@ L.push({typ: "Lichtausbeute", f: function(){
  var p = zehntel(art[1], art[2]), eta0 = zuf(art[3], art[4]), phi = Math.round(p*eta0/10)*10, eta = phi/p, klasse = eek(eta);
  var nah = [210, 185, 160, 135, 110, 85].some(function(g){ return Math.abs(eta - g) < 1.5; });
  if(nah) return null;
- return {art: "eta", p: {phi: phi, p: p}, wert: eta, einh: "lm/W",
+ return {art: "eta", p: {phi: phi, p: p}, wert: eta, einh: LMW,
   frage: "Eine " + art[0] + " nimmt die Leistung <i>P</i> = " + zahl(p, 1) + " W auf und gibt den Lichtstrom " + PHIV + " = " + zahl(phi, 0) + " lm ab. Berechnen Sie die Lichtausbeute " + ETAV + ".",
-  weg: [["Formel", ETAV + " = " + br(PHIV, "<i>P</i>")], ["Einsetzen", ETAV + " = " + br(zahl(phi, 0) + " lm", zahl(p, 1) + " W")], ["Ergebnis", ETAV + " " + erg(eta, "lm/W")]],
-  merke: "Tabellenbuch S. 227, Formel 9. Energieeffizienzklasse nach Tabellenbuch S. 242 (seit 01.09.2021): G unter 85 lm/W, dann Schritte von 25 lm/W bis B unter 210 lm/W, A ab 210 lm/W. Diese Lampe: Klasse " + klasse + "."};
+  weg: [["Formel", ETAV + " = " + br(PHIV, "<i>P</i>")], ["Einsetzen", ETAV + " = " + br(zahl(phi, 0) + " lm", zahl(p, 1) + " W")], ["Ergebnis", ETAV + " " + erg(eta, LMW)]],
+  merke: "Tabellenbuch S. 227, Formel 9. Energieeffizienzklasse nach Tabellenbuch S. 242 (seit 01.09.2021): G unter 85 lm je W, dann Schritte von 25 lm je W bis B unter 210 lm je W, A ab 210 lm je W. Diese Lampe: Klasse " + klasse + "."};
 }});
 L.push({typ: "Leistung aus Lichtstrom und Lichtausbeute", f: function(){
  var phi = zuf(25, 600)*10, eta = zuf(70, 175), p = phi/eta;
  return {art: "p_eta", p: {phi: phi, eta: eta}, wert: p, einh: "W",
-  frage: "Eine LED-Leuchte soll den Lichtstrom " + PHIV + " = " + zahl(phi, 0) + " lm abgeben. Ihre Lichtausbeute beträgt " + ETAV + " = " + zahl(eta, 0) + " lm/W. Berechnen Sie die Leistungsaufnahme <i>P</i>.",
-  weg: [["Formel", ETAV + " = " + br(PHIV, "<i>P</i>") + ", umgestellt <i>P</i> = " + br(PHIV, ETAV)], ["Einsetzen", "<i>P</i> = " + br(zahl(phi, 0) + " lm", zahl(eta, 0) + " lm/W")], ["Ergebnis", "<i>P</i> " + erg(p, "W")]],
+  frage: "Eine LED-Leuchte soll den Lichtstrom " + PHIV + " = " + zahl(phi, 0) + " lm abgeben. Ihre Lichtausbeute beträgt " + ETAV + " = " + zahl(eta, 0) + " " + LMW + ". Berechnen Sie die Leistungsaufnahme <i>P</i>.",
+  weg: [["Formel", ETAV + " = " + br(PHIV, "<i>P</i>") + ", umgestellt <i>P</i> = " + br(PHIV, ETAV)], ["Einsetzen", "<i>P</i> = " + br(zahl(phi, 0) + " lm", zahl(eta, 0) + " " + LMW)], ["Ergebnis", "<i>P</i> " + erg(p, "W")]],
   merke: "Tabellenbuch S. 227, Formel 9, nach <i>P</i> umgestellt."};
 }});
 
@@ -348,7 +349,7 @@ KK.push({typ: "Jährliche Energiekosten einer Beleuchtung", f: function(){
  var n = zuf(6, 64), pl = wahl([32, 36, 39, 49]), pv = wahl([4, 6, 7, 8, 9]), h = wahl([6, 7, 8, 9, 10]), tage = wahl([5, 6]), wo = wahl([46, 48, 50, 51, 52]), ct = zehntel(19, 46);
  var p = n*(pl + pv), t = h*tage*wo, w = p*t/1000, kosten = w*ct/100;
  return {art: "kosten", p: {n: n, pl: pl, pv: pv, h: h, tage: tage, wo: wo, ct: ct}, wert: kosten, einh: "€",
-  frage: "Eine Halle wird mit " + n + " Leuchtstofflampen zu je " + pl + " W beleuchtet; jedes Vorschaltgerät hat " + pv + " W Verluste. Die Beleuchtung brennt " + h + " Stunden am Tag, an " + tage + " Tagen in der Woche und " + wo + " Wochen im Jahr. Der Arbeitspreis beträgt " + zahl(ct, 1) + " ct/kWh. Berechnen Sie die jährlichen Energiekosten.",
+  frage: "Eine Halle wird mit " + n + " Leuchtstofflampen zu je " + pl + " W beleuchtet; jedes Vorschaltgerät hat " + pv + " W Verluste. Die Beleuchtung brennt " + h + " Stunden am Tag, an " + tage + " Tagen in der Woche und " + wo + " Wochen im Jahr. Der Arbeitspreis beträgt " + zahl(ct, 1) + " ct je kWh. Berechnen Sie die jährlichen Energiekosten.",
   weg: [["Formel", kostenFormel()],
    ["Einsetzen", "<i>P</i> = " + n + MAL + "(" + pl + " W + " + pv + " W) = " + zahl(p, 0) + " W;  <i>t</i> = " + h + " h" + MAL + tage + MAL + wo + " = " + zahl(t, 0) + " h;  <i>W</i> = " + zahl(p/1000, 3) + " kW" + MAL + zahl(t, 0) + " h " + erg(w, "kWh", 1)],
    ["Einsetzen", KA_ + " = " + zahl(w, 1) + " kWh" + MAL + fest(ct/100, 3) + " " + br("€", "kWh")], ["Ergebnis", KA_ + " " + erg(kosten, "€", 2)]],
@@ -358,7 +359,7 @@ KK.push({typ: "Einsparung beim LED-Retrofit", f: function(){
  var n = zuf(8, 72), pl = wahl([36, 49]), pv = wahl([4, 6, 7, 8, 9]), pled = pl === 49 ? wahl([24.4, 25.5]) : wahl([15.5, 18.4]), t = zuf(16, 46)*100, ct = zehntel(19, 46);
  var dp = pl + pv - pled, w = n*dp*t/1000, ers = w*ct/100;
  return {art: "ersparnis", p: {n: n, pl: pl, pv: pv, pled: pled, t: t, ct: ct}, wert: ers, einh: "€",
-  frage: "In einer Lagerhalle sollen " + n + " Leuchtstofflampen zu je " + pl + " W gegen LED-Röhren zu je " + zahl(pled, 1) + " W getauscht werden (Retrofit). Die alten Vorschaltgeräte haben je " + pv + " W Verluste; die LED-Röhren arbeiten mit LED-Starter. Die Beleuchtung brennt " + zahl(t, 0) + " Stunden im Jahr, der Arbeitspreis beträgt " + zahl(ct, 1) + " ct/kWh. Berechnen Sie die jährliche Einsparung der Energiekosten.",
+  frage: "In einer Lagerhalle sollen " + n + " Leuchtstofflampen zu je " + pl + " W gegen LED-Röhren zu je " + zahl(pled, 1) + " W getauscht werden (Retrofit). Die alten Vorschaltgeräte haben je " + pv + " W Verluste; die LED-Röhren arbeiten mit LED-Starter. Die Beleuchtung brennt " + zahl(t, 0) + " Stunden im Jahr, der Arbeitspreis beträgt " + zahl(ct, 1) + " ct je kWh. Berechnen Sie die jährliche Einsparung der Energiekosten.",
   weg: [["Formel", "Δ<i>P</i> = " + ix("P", "alt") + " − " + ix("P", "LED") + ";  Δ<i>W</i> = <i>n</i>" + MAL + "Δ<i>P</i>" + MAL + "<i>t</i>;  Δ" + KA_ + " = Δ<i>W</i>" + MAL + "<i>T</i>"],
    ["Einsetzen", ix("P", "alt") + " = " + pl + " W + " + pv + " W = " + (pl + pv) + " W;  Δ<i>P</i> = " + (pl + pv) + " W − " + zahl(pled, 1) + " W = " + zahl(dp, 1) + " W;  Δ<i>W</i> = " + n + MAL + zahl(dp/1000, 4) + " kW" + MAL + zahl(t, 0) + " h " + erg(w, "kWh", 1)],
    ["Einsetzen", "Δ" + KA_ + " = " + zahl(w, 1) + " kWh" + MAL + fest(ct/100, 3) + " " + br("€", "kWh")], ["Ergebnis", "Δ" + KA_ + " " + erg(ers, "€", 2) + " im Jahr"]],
@@ -378,17 +379,17 @@ KK.push({typ: "Amortisation eines Umbaus", f: function(){
  var ers = n*(palt - pneu)*t/1000*ct/100, kosten = zuf(8, 120)*50, jahre = kosten/ers;
  if(jahre < 0.8 || jahre > 25) return null;
  return {art: "amort", p: {n: n, palt: palt, pneu: pneu, t: t, ct: ct, kosten: kosten}, wert: jahre, einh: "Jahre",
-  frage: "Ein Betrieb ersetzt " + n + " alte Leuchten (je " + palt + " W einschließlich Vorschaltgerät) durch LED-Leuchten (je " + pneu + " W). Die Beleuchtung brennt " + zahl(t, 0) + " Stunden im Jahr, der Arbeitspreis beträgt " + zahl(ct, 1) + " ct/kWh. Der Umbau kostet " + zahl(kosten, 0) + " €. Berechnen Sie, nach wie vielen Jahren sich der Umbau durch die eingesparten Energiekosten amortisiert.",
+  frage: "Ein Betrieb ersetzt " + n + " alte Leuchten (je " + palt + " W einschließlich Vorschaltgerät) durch LED-Leuchten (je " + pneu + " W). Die Beleuchtung brennt " + zahl(t, 0) + " Stunden im Jahr, der Arbeitspreis beträgt " + zahl(ct, 1) + " ct je kWh. Der Umbau kostet " + zahl(kosten, 0) + " €. Berechnen Sie, nach wie vielen Jahren sich der Umbau durch die eingesparten Energiekosten amortisiert.",
   weg: [["Formel", "Δ" + KA_ + " = <i>n</i>" + MAL + "(" + ix("P", "alt") + " − " + ix("P", "neu") + ")" + MAL + "<i>t</i>" + MAL + "<i>T</i>;  Amortisationszeit = " + br("Kosten des Umbaus", "Einsparung je Jahr")],
    ["Einsetzen", "Δ" + KA_ + " = " + n + MAL + zahl((palt - pneu)/1000, 3) + " kW" + MAL + zahl(t, 0) + " h" + MAL + fest(ct/100, 3) + " " + br("€", "kWh") + " " + erg(ers, "€", 2)],
-   ["Einsetzen", "Amortisationszeit = " + br(zahl(kosten, 0) + " €", zahl(ers, 2) + " €/Jahr")], ["Ergebnis", erg(jahre, "Jahre")]],
+   ["Einsetzen", "Amortisationszeit = " + br(zahl(kosten, 0) + " €", zahl(ers, 2) + " € je Jahr")], ["Ergebnis", erg(jahre, "Jahre")]],
   merke: "So rechnet die Prüfungsvorbereitung (Teil 2 S. 51): Erst wenn die Einsparung die Kosten gedeckt hat, bringt der Umbau Gewinn. Wartungskosten sind hier nicht berücksichtigt."};
 }});
 KK.push({typ: "Zulässiger Mehrpreis der LED-Leuchte", f: function(){
  var paar = wahl([[59, 29], [62, 34], [64, 32], [71, 36], [74, 37], [76, 39], [86, 43]]), palt = paar[0], pled = paar[1], h = wahl([6, 7, 8, 9, 10]), tage = wahl([5, 6]), wo = wahl([46, 48, 50, 51, 52]), jahre = wahl([2, 3, 4]), ct = zehntel(21, 46);
  var t = h*tage*wo*jahre, w = (palt - pled)*t/1000, mehr = w*ct/100;
  return {art: "mehrpreis", p: {palt: palt, pled: pled, t: t, ct: ct}, wert: mehr, einh: "€",
-  frage: "Eine Leuchte mit zwei Leuchtstofflampen nimmt mit EVG " + palt + " W auf, eine gleich helle LED-Leuchte " + pled + " W. Die Leuchte brennt " + h + " Stunden am Tag, an " + tage + " Tagen in der Woche und " + wo + " Wochen im Jahr; der Arbeitspreis beträgt " + zahl(ct, 1) + " ct/kWh. Berechnen Sie, um wie viel die LED-Leuchte höchstens teurer sein darf, damit sich ihr Mehrpreis nach " + jahre + " Jahren bezahlt gemacht hat.",
+  frage: "Eine Leuchte mit zwei Leuchtstofflampen nimmt mit EVG " + palt + " W auf, eine gleich helle LED-Leuchte " + pled + " W. Die Leuchte brennt " + h + " Stunden am Tag, an " + tage + " Tagen in der Woche und " + wo + " Wochen im Jahr; der Arbeitspreis beträgt " + zahl(ct, 1) + " ct je kWh. Berechnen Sie, um wie viel die LED-Leuchte höchstens teurer sein darf, damit sich ihr Mehrpreis nach " + jahre + " Jahren bezahlt gemacht hat.",
   weg: [["Formel", "Δ<i>P</i> = " + ix("P", "alt") + " − " + ix("P", "LED") + ";  Δ<i>W</i> = Δ<i>P</i>" + MAL + "<i>t</i>;  Δ" + KA_ + " = Δ<i>W</i>" + MAL + "<i>T</i>"],
    ["Einsetzen", "Δ<i>P</i> = " + palt + " W − " + pled + " W = " + (palt - pled) + " W;  <i>t</i> = " + h + " h" + MAL + tage + MAL + wo + MAL + jahre + " = " + zahl(t, 0) + " h;  Δ<i>W</i> = " + zahl((palt - pled)/1000, 3) + " kW" + MAL + zahl(t, 0) + " h " + erg(w, "kWh", 2)],
    ["Einsetzen", "Δ" + KA_ + " = " + zahl(w, 2) + " kWh" + MAL + fest(ct/100, 3) + " " + br("€", "kWh")], ["Ergebnis", "Δ" + KA_ + " " + erg(mehr, "€", 2) + ": so viel darf die LED-Leuchte höchstens mehr kosten."]],
@@ -398,7 +399,7 @@ KK.push({typ: "Einsparung durch Lichtsteuerung", f: function(){
  var p = zehntel(1.2, 9.8), t = zuf(18, 44)*100, ct = zehntel(21, 46), proz = wahl([29, 32, 34, 36, 37, 39]);
  var kosten = p*t*ct/100, ers = kosten*proz/100;
  return {art: "steuerung", p: {p: p, t: t, ct: ct, proz: proz}, wert: ers, einh: "€",
-  frage: "Die Beleuchtung eines Bürotrakts nimmt " + zahl(p, 1) + " kW auf und brennt " + zahl(t, 0) + " Stunden im Jahr; der Arbeitspreis beträgt " + zahl(ct, 1) + " ct/kWh. Eine Konstantlichtregelung soll nach Angabe des Herstellers " + proz + " % der Energiekosten einsparen. Berechnen Sie die Einsparung im Jahr.",
+  frage: "Die Beleuchtung eines Bürotrakts nimmt " + zahl(p, 1) + " kW auf und brennt " + zahl(t, 0) + " Stunden im Jahr; der Arbeitspreis beträgt " + zahl(ct, 1) + " ct je kWh. Eine Konstantlichtregelung soll nach Angabe des Herstellers " + proz + " % der Energiekosten einsparen. Berechnen Sie die Einsparung im Jahr.",
   weg: [["Formel", kostenFormel() + ";  Einsparung = " + br("Prozentsatz" + MAL + KA_, "100 %")],
    ["Einsetzen", "<i>W</i> = " + zahl(p, 1) + " kW" + MAL + zahl(t, 0) + " h " + erg(p*t, "kWh", 0) + ";  " + KA_ + " = " + zahl(p*t, 0) + " kWh" + MAL + fest(ct/100, 3) + " " + br("€", "kWh") + " " + erg(kosten, "€", 2)],
    ["Einsetzen", "Einsparung = " + br(proz + " %" + MAL + zahl(kosten, 2) + " €", "100 %")], ["Ergebnis", "Einsparung " + erg(ers, "€", 2)]],
@@ -474,8 +475,8 @@ var BEGRIFFE = [
   optionen: ["A1: dimmbares elektronisches Vorschaltgerät mit reduzierten Verlusten", "B2: magnetisches Vorschaltgerät mit geringen Verlusten", "A3: elektronisches Vorschaltgerät"], richtig: 0,
   begruendung: "Fachkunde S. 392, Tabelle 1: Der Energieeffizienzindex EEI reicht von A1 (dimmbares EVG mit reduzierten Verlusten) über A2 und A3 (EVG) bis B1 und B2 (magnetische Vorschaltgeräte, VVG)."},
  {typ: "Energieeffizienz", frage: "Wonach richtet sich seit September 2021 die Energieeffizienzklasse einer LED-Röhre?",
-  optionen: ["nach der Lichtausbeute in lm/W: unter 85 lm/W Klasse G, ab 210 lm/W Klasse A", "nach der Leistungsaufnahme in W", "nach der Lebensdauer in Stunden"], richtig: 0,
-  begruendung: "Tabellenbuch S. 242: G unter 85 lm/W, dann in Schritten von 25 lm/W bis B unter 210 lm/W, A ab 210 lm/W. Fachkunde S. 392: Seit September 2021 gilt die Skala A bis G."}];
+  optionen: ["nach der Lichtausbeute in lm je W: unter 85 lm je W Klasse G, ab 210 lm je W Klasse A", "nach der Leistungsaufnahme in W", "nach der Lebensdauer in Stunden"], richtig: 0,
+  begruendung: "Tabellenbuch S. 242: G unter 85 lm je W, dann in Schritten von 25 lm je W bis B unter 210 lm je W, A ab 210 lm je W. Fachkunde S. 392: Seit September 2021 gilt die Skala A bis G."}];
 var V = [{typ: "", f: function(){ var b = wahl(BEGRIFFE); return {art: "begriff", mc: true, p: {}, frage: b.frage, optionen: b.optionen, richtig: b.richtig, begruendung: b.begruendung, typText: b.typ}; }}];
 
 var GEBIETE = {l: {name: "1 Lichtstrom und Lichtausbeute", liste: L}, e: {name: "2 Beleuchtungsstärke", liste: E}, w: {name: "3 Wirkungsgradmethode", liste: W},
@@ -492,11 +493,12 @@ function ziehen(){
  a.gebiet = gk; a.typ = a.typText || gen.typ; a.tol = gen.tol || 0.01;
  return a;
 }
+function festeLeerzeichen(h){ return h.replace(/(\d) (?=(lm|W|kW|kWh|lx|cd|h|m|m²|€|%|ct|sr|kg|Jahre|Stunden|Lampen|Leuchten)(?![A-Za-zäöüß]))/g, "$1&nbsp;"); }
 function zeigen(){
  var a = zustand.aufgabe;
  $("leer").hidden = true; $("inhalt").hidden = false;
  $("chips").innerHTML = '<span class="chip">' + GEBIETE[a.gebiet].name + '</span>' + (a.typ ? '<span class="chip">Prüfungstyp: ' + a.typ + '</span>' : "");
- $("frage").innerHTML = a.frage;
+ $("frage").innerHTML = festeLeerzeichen(a.frage);
  $("fb").className = "fb"; $("fb").innerHTML = "";
  $("weg").className = "weg"; $("weg").innerHTML = "";
  zustand.geprueft = false;
@@ -514,7 +516,7 @@ function neu(){ if(!zustand.gebiet) return; zustand.aufgabe = ziehen(); zeigen()
 function wegZeigen(){
  var a = zustand.aufgabe; if(!a || a.mc) return;
  if(!zustand.geprueft){ zustand.geprueft = true; werten(false); $("fb").className = "fb falsch"; $("fb").textContent = "Rechenweg angesehen: Diese Aufgabe zählt nicht als gelöst, die Folge beginnt neu."; }
- $("weg").innerHTML = a.weg.map(function(z){ return '<div class="zeile"><span class="lbl">' + z[0] + '</span> ' + z[1] + '</div>'; }).join("") + (a.merke ? '<div class="merke">' + a.merke + '</div>' : "");
+ $("weg").innerHTML = a.weg.map(function(z){ return '<div class="zeile"><span class="lbl">' + z[0] + '</span> ' + festeLeerzeichen(z[1]) + '</div>'; }).join("") + (a.merke ? '<div class="merke">' + a.merke + '</div>' : "");
  $("weg").className = "weg an";
 }
 function werten(ok){
