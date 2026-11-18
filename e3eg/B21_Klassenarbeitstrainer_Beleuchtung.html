@@ -62,7 +62,7 @@ body{font-family:"Noto Sans",system-ui,Arial,sans-serif;color:var(--ink);line-he
 .mc button.daneben{border-color:var(--rot);background:var(--rothell)}
 .stand{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--grau)}
 .stand b{color:var(--ink)}
-.bruch{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.1;margin:0 .15em;font-size:.95em}
+.bruch{display:inline-flex;flex-direction:column;align-items:stretch;text-align:center;vertical-align:middle;line-height:1.1;margin:0 .15em;font-size:.95em}
 .bruch>span{padding:0 .2em}
 .bruch>span:first-child{border-bottom:1.3px solid currentColor}
 i{font-style:italic;font-family:Cambria,"Caladea",Georgia,serif}
@@ -243,8 +243,11 @@ L.push({typ: "Leistung aus Lichtstrom und Lichtausbeute", f: function(){
 /* ---------- Thema 2: Beleuchtungsstärke ---------- */
 var E = [];
 E.push({typ: "Beleuchtungsstärke aus Lichtstrom und Beleuchtungswirkungsgrad", f: function(){
- var l = zehntel(3.5, 24), b = zehntel(2.5, Math.min(l, 16)), a = l*b, n = zuf(3, 36), z = wahl([1, 2]), phi = zuf(9, 70)*100, eb = hundertstel(0.31, 0.72);
+ var l = zehntel(3.5, 24), b = zehntel(2.5, Math.min(l, 16)), a = l*b, z = wahl([1, 2]), phi = zuf(9, 70)*100, eb = hundertstel(0.31, 0.72);
+ var n = Math.max(2, Math.round(a*hundertstel(0.04, 0.25)));        /* Leuchten je m² wie in Büros und Werkstätten */
+ if(n/a < 0.04 || n/a > 0.25) return null;
  var ev = n*z*phi*eb/a;
+ if(ev < 100 || ev > 1500) return null;                              /* übliche Wartungswerte, Tabellenbuch S. 230 */
  return {art: "ev", p: {l: l, b: b, n: n, z: z, phi: phi, eb: eb}, wert: ev, einh: "lx",
   frage: "Ein Raum ist " + zahl(l, 1) + " m lang und " + zahl(b, 1) + " m breit. An der Decke hängen " + n + (z === 2 ? " zweilampige Leuchten" : " einlampige Leuchten") + ", jede Lampe gibt " + zahl(phi, 0) + " lm ab. Der Beleuchtungswirkungsgrad beträgt " + ETAB + " = " + fest(eb, 2) + ". Berechnen Sie die Beleuchtungsstärke " + EV + ".",
   weg: [["Formel", EV + " = " + br(PHIV, "<i>A</i>") + MAL + ETAB + ",  " + PHIV + " = Zahl der Lampen" + MAL + "Lichtstrom je Lampe"],
@@ -262,6 +265,7 @@ E.push({typ: "Lichtstrom für eine geforderte Beleuchtungsstärke", f: function(
 }});
 E.push({typ: "Beleuchtungsstärke senkrecht unter der Leuchte", f: function(){
  var iv = zuf(12, 300)*10, h = zehntel(1.2, 6.5), ep = iv/(h*h);
+ if(ep < 10 || ep > 1500) return null;
  return {art: "ep0", p: {iv: iv, h: h}, wert: ep, einh: "lx",
   frage: "Eine Leuchte strahlt senkrecht nach unten mit der Lichtstärke " + IV + " = " + zahl(iv, 0) + " cd. Der Punkt P liegt <i>r</i> = " + zahl(h, 1) + " m senkrecht unter der Leuchte. Berechnen Sie die Beleuchtungsstärke " + EP + ".",
   weg: [["Formel", EP + " = " + br(IV, "<i>r</i>²") + MAL + "cos <i>α</i>,  senkrecht: <i>α</i> = 0°, cos 0° = 1"], ["Einsetzen", EP + " = " + br(zahl(iv, 0) + " cd", "(" + zahl(h, 1) + " m)²") + MAL + "1"], ["Ergebnis", EP + " " + erg(ep, "lx")]],
@@ -269,6 +273,7 @@ E.push({typ: "Beleuchtungsstärke senkrecht unter der Leuchte", f: function(){
 }});
 E.push({typ: "Beleuchtungsstärke in Punkt P (schräger Lichteinfall)", f: function(){
  var iv = zuf(12, 300)*10, r = zehntel(1.5, 7.5), al = wahl([32, 37, 43, 48, 52, 56, 63]), ep = iv/(r*r)*Math.cos(grad2rad(al));
+ if(ep < 10 || ep > 1500) return null;
  return {art: "ep", p: {iv: iv, r: r, al: al}, wert: ep, einh: "lx",
   frage: "Ein Punkt P liegt <i>r</i> = " + zahl(r, 1) + " m von einer Leuchte entfernt. Der Strahl trifft unter dem Winkel <i>α</i> = " + al + "° gegen die Senkrechte auf. In dieser Richtung strahlt die Leuchte mit der Lichtstärke " + ix("I", "α") + " = " + zahl(iv, 0) + " cd. Berechnen Sie die Beleuchtungsstärke " + EP + ".",
   weg: [["Formel", EP + " = " + br(ix("I", "α"), "<i>r</i>²") + MAL + "cos <i>α</i>"], ["Einsetzen", EP + " = " + br(zahl(iv, 0) + " cd", "(" + zahl(r, 1) + " m)²") + MAL + "cos " + al + "° = " + br(zahl(iv, 0) + " cd", zahl(r*r, 2) + " m²") + MAL + fest(Math.cos(grad2rad(al)), 4)],
@@ -363,7 +368,7 @@ KK.push({typ: "Einsparung beim LED-Retrofit", f: function(){
   weg: [["Formel", "Δ<i>P</i> = " + ix("P", "alt") + " − " + ix("P", "LED") + ";  Δ<i>W</i> = <i>n</i>" + MAL + "Δ<i>P</i>" + MAL + "<i>t</i>;  Δ" + KA_ + " = Δ<i>W</i>" + MAL + "<i>T</i>"],
    ["Einsetzen", ix("P", "alt") + " = " + pl + " W + " + pv + " W = " + (pl + pv) + " W;  Δ<i>P</i> = " + (pl + pv) + " W − " + zahl(pled, 1) + " W = " + zahl(dp, 1) + " W;  Δ<i>W</i> = " + n + MAL + zahl(dp/1000, 4) + " kW" + MAL + zahl(t, 0) + " h " + erg(w, "kWh", 1)],
    ["Einsetzen", "Δ" + KA_ + " = " + zahl(w, 1) + " kWh" + MAL + fest(ct/100, 3) + " " + br("€", "kWh")], ["Ergebnis", "Δ" + KA_ + " " + erg(ers, "€", 2) + " im Jahr"]],
-  merke: "Tabellenbuch S. 36, Formel 7 und 8. Wie in der Prüfungsvorbereitung (Teil 2 S. 72) zählt bei der LED-Röhre nur ihre Bemessungsleistung; die Verluste des Vorschaltgeräts, das mit LED-Starter in der Leuchte bleibt, werden nicht gerechnet."};
+  merke: "Tabellenbuch S. 36, Formel 7 und 8. Bei der LED-Röhre zählt nur ihre Bemessungsleistung; die kleinen Verluste des Vorschaltgeräts, das mit LED-Starter in der Leuchte bleibt, werden hier nicht gerechnet."};
 }});
 KK.push({typ: "Prozentuale Einsparung", f: function(){
  var palt = zuf(18, 160)*10, pneu = Math.round(palt*hundertstel(0.18, 0.62)), proz = 100*(palt - pneu)/palt;
@@ -383,7 +388,7 @@ KK.push({typ: "Amortisation eines Umbaus", f: function(){
   weg: [["Formel", "Δ" + KA_ + " = <i>n</i>" + MAL + "(" + ix("P", "alt") + " − " + ix("P", "neu") + ")" + MAL + "<i>t</i>" + MAL + "<i>T</i>;  Amortisationszeit = " + br("Kosten des Umbaus", "Einsparung je Jahr")],
    ["Einsetzen", "Δ" + KA_ + " = " + n + MAL + zahl((palt - pneu)/1000, 3) + " kW" + MAL + zahl(t, 0) + " h" + MAL + fest(ct/100, 3) + " " + br("€", "kWh") + " " + erg(ers, "€", 2)],
    ["Einsetzen", "Amortisationszeit = " + br(zahl(kosten, 0) + " €", zahl(ers, 2) + " € je Jahr")], ["Ergebnis", erg(jahre, "Jahre")]],
-  merke: "So rechnet die Prüfungsvorbereitung (Teil 2 S. 51): Erst wenn die Einsparung die Kosten gedeckt hat, bringt der Umbau Gewinn. Wartungskosten sind hier nicht berücksichtigt."};
+  merke: "Erst wenn die Einsparung die Kosten gedeckt hat, bringt der Umbau Gewinn. Wartungskosten sind hier nicht berücksichtigt."};
 }});
 KK.push({typ: "Zulässiger Mehrpreis der LED-Leuchte", f: function(){
  var paar = wahl([[59, 29], [62, 34], [64, 32], [71, 36], [74, 37], [76, 39], [86, 43]]), palt = paar[0], pled = paar[1], h = wahl([6, 7, 8, 9, 10]), tage = wahl([5, 6]), wo = wahl([46, 48, 50, 51, 52]), jahre = wahl([2, 3, 4]), ct = zehntel(21, 46);
@@ -393,7 +398,7 @@ KK.push({typ: "Zulässiger Mehrpreis der LED-Leuchte", f: function(){
   weg: [["Formel", "Δ<i>P</i> = " + ix("P", "alt") + " − " + ix("P", "LED") + ";  Δ<i>W</i> = Δ<i>P</i>" + MAL + "<i>t</i>;  Δ" + KA_ + " = Δ<i>W</i>" + MAL + "<i>T</i>"],
    ["Einsetzen", "Δ<i>P</i> = " + palt + " W − " + pled + " W = " + (palt - pled) + " W;  <i>t</i> = " + h + " h" + MAL + tage + MAL + wo + MAL + jahre + " = " + zahl(t, 0) + " h;  Δ<i>W</i> = " + zahl((palt - pled)/1000, 3) + " kW" + MAL + zahl(t, 0) + " h " + erg(w, "kWh", 2)],
    ["Einsetzen", "Δ" + KA_ + " = " + zahl(w, 2) + " kWh" + MAL + fest(ct/100, 3) + " " + br("€", "kWh")], ["Ergebnis", "Δ" + KA_ + " " + erg(mehr, "€", 2) + ": so viel darf die LED-Leuchte höchstens mehr kosten."]],
-  merke: "Muster wie Prüfungsvorbereitung Teil 2 S. 49: Der Mehrpreis ist bezahlt, wenn ihn die eingesparten Energiekosten decken; danach spart der Betrieb."};
+  merke: "Der Mehrpreis ist bezahlt, wenn ihn die eingesparten Energiekosten decken; danach spart der Betrieb."};
 }});
 KK.push({typ: "Einsparung durch Lichtsteuerung", f: function(){
  var p = zehntel(1.2, 9.8), t = zuf(18, 44)*100, ct = zehntel(21, 46), proz = wahl([29, 32, 34, 36, 37, 39]);
@@ -409,73 +414,73 @@ KK.push({typ: "Einsparung durch Lichtsteuerung", f: function(){
 /* ---------- Thema 5: Verständnis ---------- */
 var BEGRIFFE = [
  {typ: "Lichtfarbe und Farbwiedergabe", frage: "Auf einer LED-Röhre steht die Farbkennzeichnung 865. Was gibt die erste Ziffer an?",
-  optionen: ["den Farbwiedergabeindex: 8 heißt <i>Ra</i> 80 bis 89, Farbwiedergabestufe 1B", "die Lichtfarbe: 8 heißt warmweiß", "die Leistung der Röhre"], richtig: 0,
+  optionen: ["den Farbwiedergabeindex: 8 heißt <i>Ra</i> 80 bis 89", "die Lichtfarbe: Eine 8 steht für warmweißes Licht", "die Bauform: Eine 8 steht für eine Röhre in Stabform"], richtig: 0,
   begruendung: "Die 1. Kennziffer kennzeichnet die Farbwiedergabe, die 2. und 3. die Lichtfarbe: 865 heißt <i>Ra</i> 80 bis 89 (Stufe 1B) und 6500 K, tageslichtweiß (Tabellenbuch S. 231)."},
  {typ: "Lichtfarbe und Farbwiedergabe", frage: "Welche Lichtfarbe hat eine Lampe mit der Kennzeichnung 927, und wie wirkt ihr Licht?",
-  optionen: ["warmweiß (2700 K): behaglich, gemütlich, wohnlich", "tageslichtweiß (9270 K): kühl, konzentrationsfördernd", "neutralweiß (4000 K): sachlich, klar"], richtig: 0,
-  begruendung: "27 steht für 2700 K, das liegt im Bereich warmweiß (2700 K bis 3300 K); die 9 heißt <i>Ra</i> 90 bis 100, Stufe 1A (Tabellenbuch S. 231)."},
+  optionen: ["warmweiß: behaglich, gemütlich, wohnlich", "tageslichtweiß: kühl, konzentrationsfördernd", "neutralweiß: sachlich, klar, nüchtern"], richtig: 0,
+  begruendung: "27 steht für 2700 K, das liegt im Bereich warmweiß (bis 3300 K); die 9 heißt <i>Ra</i> 90 bis 100, Stufe 1A (Tabellenbuch S. 231)."},
  {typ: "Lichtfarbe und Farbwiedergabe", frage: "In einem Raum sollen Farben möglichst echt wirken. Worauf achten Sie bei der Lampe?",
-  optionen: ["auf einen hohen Farbwiedergabeindex <i>Ra</i>; in Innenräumen mindestens 80", "auf eine möglichst hohe Farbtemperatur", "auf eine möglichst große Leistung"], richtig: 0,
+  optionen: ["auf einen hohen Farbwiedergabeindex <i>Ra</i>", "auf eine möglichst hohe Farbtemperatur", "auf eine möglichst große Leistungsaufnahme"], richtig: 0,
   begruendung: "Je höher der Farbwiedergabeindex <i>Ra</i>, desto echter werden die Farben wiedergegeben. In Innenräumen ist mindestens <i>Ra</i> 80 zu verwenden (Tabellenbuch S. 231). Die Farbtemperatur beschreibt nur die Lichtfarbe."},
  {typ: "Lichtfarbe und Farbwiedergabe", frage: "Welche Lichtfarbe hat eine Lampe mit der Farbtemperatur 4000 K?",
-  optionen: ["neutralweiß (3300 K bis 5300 K)", "warmweiß", "tageslichtweiß"], richtig: 0,
-  begruendung: "Warmweiß reicht bis 3300 K, neutralweiß von 3300 K bis 5300 K, darüber kaltweiß oder tageslichtweiß (Tabellenbuch S. 231)."},
+  optionen: ["neutralweiß", "warmweiß, wie eine Glühlampe", "tageslichtweiß, wie Sonnenlicht"], richtig: 0,
+  begruendung: "Warmweiß reicht bis 3300 K, neutralweiß von 3300 K bis 5300 K, darüber tageslichtweiß (Tabellenbuch S. 231)."},
  {typ: "Lampenarten", frage: "Warum braucht eine Leuchtstofflampe ein Vorschaltgerät?",
-  optionen: ["Sie ist eine Gasentladungslampe: Zum Zünden braucht sie eine hohe Spannung, im Betrieb muss der Strom begrenzt werden.", "Sie leuchtet nur mit Gleichspannung.", "Sie würde sonst zu wenig Wärme abgeben."], richtig: 0,
+  optionen: ["Sie braucht zum Zünden eine hohe Spannung und im Betrieb eine Strombegrenzung.", "Sie leuchtet nur mit Gleichspannung; das Vorschaltgerät richtet die Spannung gleich.", "Ohne Vorschaltgerät würde sie zu wenig Wärme abgeben und schlecht anlaufen."], richtig: 0,
   begruendung: "Gasentladungslampen werden über ein Vorschaltgerät betrieben: beim KVG oder VVG Drosselspule mit Starter, beim EVG ohne Starter. Das Vorschaltgerät zündet die Lampe und begrenzt den Strom (Tabellenbuch S. 238)."},
  {typ: "Lampenarten", frage: "Was unterscheidet einen Temperaturstrahler von einer Gasentladungslampe?",
-  optionen: ["Im Temperaturstrahler (z. B. Halogenglühlampe) glüht ein Draht; den größten Teil der Leistung gibt er als Wärme ab. In der Gasentladungslampe entsteht das Licht durch eine Entladung im Gas.", "Der Temperaturstrahler braucht immer ein Vorschaltgerät.", "Gasentladungslampen werden beim Betrieb heißer als Temperaturstrahler."], richtig: 0,
-  begruendung: "Tabellenbuch S. 236 teilt die Lampen in Temperaturstrahler und Gasentladungslampen. Temperaturstrahler haben eine kleine Lichtausbeute, weil der glühende Draht vor allem Wärme abgibt."},
+  optionen: ["Im Temperaturstrahler glüht ein Draht, in der Gasentladungslampe leuchtet ein Gas.", "Der Temperaturstrahler braucht immer ein Vorschaltgerät, die Gasentladungslampe nie.", "Die Gasentladungslampe gibt mehr Wärme ab als der Temperaturstrahler."], richtig: 0,
+  begruendung: "Tabellenbuch S. 236 teilt die Lampen in Temperaturstrahler und Gasentladungslampen. Temperaturstrahler (z. B. Halogenglühlampe) haben eine kleine Lichtausbeute, weil der glühende Draht vor allem Wärme abgibt; in der Gasentladungslampe entsteht das Licht durch eine Entladung im Gas."},
  {typ: "Lampenarten", frage: "Was stimmt beim Vergleich eines elektronischen Vorschaltgeräts (EVG) mit einem konventionellen Vorschaltgerät (KVG)?",
-  optionen: ["Das EVG hat geringere Verluste, braucht keinen Starter und betreibt die Lampe flackerfrei mit hoher Frequenz.", "Das KVG hat geringere Verluste als das EVG.", "Das EVG braucht zusätzlich einen Kondensator zur Kompensation."], richtig: 0,
-  begruendung: "EVG betreiben die Lampe mit einer hohen Frequenz, haben geringere Verluste, brauchen keinen Starter und keinen Kondensator zur Blindleistungskompensation (Tabellenbuch S. 238; Prüfungsvorbereitung Teil 2 S. 71)."},
+  optionen: ["Das EVG hat geringere Verluste und braucht keinen Starter.", "Das KVG hat geringere Verluste und braucht keinen Starter.", "Das EVG braucht einen Starter und einen Kondensator zur Kompensation."], richtig: 0,
+  begruendung: "EVG betreiben die Lampe flackerfrei mit einer hohen Frequenz, haben geringere Verluste, brauchen keinen Starter und keinen Kondensator zur Blindleistungskompensation (Tabellenbuch S. 238)."},
  {typ: "LED und Betriebsgeräte", frage: "Eine Leuchtstofflampe in einer Leuchte mit KVG soll durch eine LED-Röhre ersetzt werden. Was ist zu tun?",
-  optionen: ["Leuchte ausschalten, Leuchtstofflampe und Starter entfernen, Ersatzstarter (LED-Starter) und LED-Röhre einsetzen; nicht umverdrahten, einen Hinweis in der Leuchte anbringen.", "Starter in der Leuchte lassen und nur die Röhre tauschen.", "Die Leuchte immer umverdrahten und das KVG ausbauen."], richtig: 0,
+  optionen: ["Starter gegen LED-Starter tauschen, LED-Röhre einsetzen, Hinweis anbringen; nicht umverdrahten.", "Den Starter in der Leuchte lassen und nur die Leuchtstofflampe gegen die LED-Röhre tauschen.", "Das KVG gegen ein EVG tauschen und den alten Starter in der Leuchte stecken lassen."], richtig: 0,
   begruendung: "Bei Fassungen mit KVG oder VVG wird der Starter durch einen Dummy-Starter (LED-Starter, Starterbrücke) ersetzt; keine Umverdrahtung. Ein Hinweis in der Leuchte verhindert, dass später wieder eine Leuchtstoffröhre eingesetzt wird (Tabellenbuch S. 239)."},
  {typ: "LED und Betriebsgeräte", frage: "Eine Leuchte mit EVG soll LED-Röhren erhalten, die nicht für den Betrieb am EVG geeignet sind. Was ist zu tun?",
-  optionen: ["Das EVG ausbauen und die Leuchte umverdrahten; die LED-Röhre wird direkt an 230 V angeschlossen.", "Nur den Starter tauschen.", "Nichts, jede LED-Röhre passt in jede Leuchte."], richtig: 0,
-  begruendung: "Bei Fassungen mit EVG muss die Leuchte umverdrahtet werden. Eine LED-Röhre benötigt kein Vorschaltgerät und kann direkt an 230 V angeschlossen werden; es gibt aber auch Röhren, die direkt am EVG arbeiten (Tabellenbuch S. 239)."},
+  optionen: ["EVG ausbauen, Leuchte umverdrahten, LED-Röhre direkt an 230 V.", "Nur den Starter gegen einen LED-Starter tauschen, sonst nichts.", "Nichts weiter: Jede LED-Röhre arbeitet an jedem Vorschaltgerät."], richtig: 0,
+  begruendung: "Bei Fassungen mit EVG muss die Leuchte umverdrahtet werden, wenn die LED-Röhre nicht für das EVG gemacht ist. Eine LED-Röhre benötigt kein Vorschaltgerät und kann direkt an 230 V angeschlossen werden; es gibt aber auch kompatible Röhren, die direkt in Leuchten mit EVG arbeiten (Tabellenbuch S. 239)."},
  {typ: "LED und Betriebsgeräte", frage: "Warum darf eine LED nicht ohne Strombegrenzung an eine Spannungsquelle angeschlossen werden?",
-  optionen: ["Schon wenig mehr Spannung als die Durchlassspannung lässt den Strom stark steigen; die LED wird zerstört. Deshalb Vorwiderstand oder Konstantstromquelle.", "Weil sie sonst zu dunkel leuchtet.", "Weil LEDs nur an Wechselspannung arbeiten."], richtig: 0,
+  optionen: ["Über der Durchlassspannung steigt der Strom steil an und zerstört die LED.", "Ohne Begrenzung leuchtet sie zu dunkel, weil die Spannung zu klein ist.", "LEDs arbeiten nur an Wechselspannung; die Begrenzung richtet gleich."], richtig: 0,
   begruendung: "Der Strom durch die LED steigt oberhalb der Durchlassspannung steil an. Sie braucht deshalb eine Strombegrenzung, z. B. einen Vorwiderstand oder eine Konstantstromquelle (Tabellenbuch S. 240)."},
  {typ: "LED und Betriebsgeräte", frage: "Was bedeutet Retrofit bei Leuchtmitteln?",
-  optionen: ["Austausch alter Leuchtmittel, z. B. Leuchtstofflampen, gegen LED-Leuchtmittel in der vorhandenen Leuchte, möglichst ohne Umverdrahtung", "Neubau der ganzen Beleuchtungsanlage mit neuen Leuchten", "Rückbau einer Beleuchtung"], richtig: 0,
+  optionen: ["altes Leuchtmittel in der vorhandenen Leuchte gegen LED tauschen", "die ganze Beleuchtungsanlage mit neuen LED-Leuchten neu bauen", "eine alte Beleuchtung zurückbauen und fachgerecht entsorgen"], richtig: 0,
   begruendung: "Tabellenbuch S. 242: „Retrofit: Austausch alter Leuchtstofflampen ohne Umverdrahtung“; Fachkunde S. 392: retrofit (engl.) = Nachrüstung. Die LED-Retrofitlösung wird statt des bisherigen Leuchtmittels in die bestehende Leuchte eingesetzt."},
  {typ: "LED und Betriebsgeräte", frage: "Welchen Nachteil kann eine LED-Retrofitlösung haben?",
-  optionen: ["Wird die Wärme in der alten Leuchte schlecht abgeführt, sinkt die Lebensdauer der LED-Lampe erheblich.", "Sie braucht mehr Energie als die alte Lampe.", "Die ganze Leuchte muss entsorgt werden."], richtig: 0,
+  optionen: ["Die alte Leuchte führt die Wärme oft schlecht ab; die LED altert schneller.", "Die LED-Lampe braucht mehr Energie als das alte Leuchtmittel in der Leuchte.", "Nach dem Umbau muss die alte Leuchte als Sondermüll entsorgt werden."], richtig: 0,
   begruendung: "Fachkunde S. 399 nennt als Nachteile: schlechte Wärmeableitung in der Leuchte, eine andere Ausleuchtung als ursprünglich geplant, Schäden bei unsachgemäßer Prüfung der Betriebsgeräte. Als Vorteile: geringeres Verbrauchsentgelt, weniger Elektroschrott, längere Lebensdauer."},
  {typ: "Lichtsteuerung und DALI", frage: "Was macht eine Konstantlichtregelung?",
-  optionen: ["Ein Lichtsensor misst die Beleuchtungsstärke; die Leuchten werden so gedimmt, dass mit dem Tageslicht zusammen der eingestellte Sollwert erreicht wird.", "Sie schaltet das Licht ein, sobald sich jemand bewegt.", "Sie hält die Leistungsaufnahme der Leuchten immer gleich."], richtig: 0,
-  begruendung: "Bei der Konstantlichtregelung dimmt der Konstantlichtregler die Leuchten nach dem Tageslicht; fensternahe Leuchten werden stärker gedimmt (Fachkunde S. 403). So spart sie Energie."},
+  optionen: ["Ein Lichtsensor misst die Helligkeit; die Leuchten werden bis zum Sollwert gedimmt.", "Ein Bewegungsmelder schaltet das Licht ein, sobald sich jemand im Raum bewegt.", "Sie hält die Leistungsaufnahme aller Leuchten den ganzen Tag gleich groß."], richtig: 0,
+  begruendung: "Bei der Konstantlichtregelung dimmt der Konstantlichtregler die Leuchten nach dem Tageslicht, sodass mit dem Tageslicht zusammen der eingestellte Sollwert erreicht wird; fensternahe Leuchten werden stärker gedimmt (Fachkunde S. 403). So spart sie Energie."},
  {typ: "Lichtsteuerung und DALI", frage: "Wie viele Betriebsgeräte können an einer DALI-Linie einzeln angesprochen werden?",
-  optionen: ["64", "16", "256"], richtig: 0,
+  optionen: ["64", "16", "8"], richtig: 0,
   begruendung: "An einer DALI-Linie arbeiten bis zu 64 Betriebsgeräte mit eigener Adresse; sie lassen sich in 16 Gruppen zusammenfassen, dazu kommen 16 Lichtszenen (Tabellenbuch S. 155; Fachkunde S. 403)."},
  {typ: "Lichtsteuerung und DALI", frage: "Wofür steht DALI?",
-  optionen: ["Digital Addressable Lighting Interface: digitale, adressierbare Schnittstelle für die Beleuchtung", "Dimmbare Anlage für Licht und Installation", "Direkt angeschlossene Leuchten-Installation"], richtig: 0,
+  optionen: ["Digital Addressable Lighting Interface: digitale, adressierbare Schnittstelle", "Dimmable Analog Light Installation: analoge Dimmung über eine Steuerspannung", "Direct Access Lamp Interconnect: Leuchten direkt am Netz schalten und dimmen"], richtig: 0,
   begruendung: "DALI, Abk. für: Digital Addressable Lighting Interface (engl.). Das Steuergerät spricht die Betriebsgeräte über eine Steuerleitung einzeln, in Gruppen oder alle zusammen an (Tabellenbuch S. 155)."},
  {typ: "Lichtsteuerung und DALI", frage: "Warum spart eine Präsenzsteuerung Energie?",
-  optionen: ["Sie schaltet die Beleuchtung aus, wenn nach Ablauf der Nachlaufzeit niemand mehr im Raum ist.", "Sie erhöht die Lichtausbeute der Lampen.", "Sie senkt den Arbeitspreis."], richtig: 0,
-  begruendung: "Der Präsenzmelder erkennt, ob jemand im Raum ist. Ist der Raum leer, schaltet er das Licht nach der eingestellten Zeit aus (Fachkunde S. 403: Präsenzsteuerung spart rund 9 % der Energiekosten)."},
+  optionen: ["Sie schaltet das Licht aus, wenn niemand mehr im Raum ist.", "Sie erhöht die Lichtausbeute, weil die Lampen seltener schalten.", "Sie senkt den Arbeitspreis, weil der Versorger Melder fördert."], richtig: 0,
+  begruendung: "Der Präsenzmelder erkennt, ob jemand im Raum ist. Ist der Raum leer, schaltet er das Licht nach der eingestellten Nachlaufzeit aus (Fachkunde S. 403: Präsenzsteuerung spart rund 9 % der Energiekosten)."},
  {typ: "Lichtsteuerung und DALI", frage: "Wie viel Energiekosten spart Lichtsteuerung nach den Richtwerten der Fachkunde?",
-  optionen: ["Zentral-AUS 18 %, Konstantlichtregelung 17 %, Präsenzsteuerung 9 %", "jede Lichtsteuerung mehr als die Hälfte", "nichts, weil die Steuerung selbst Energie braucht"], richtig: 0,
+  optionen: ["Zentral-AUS 18 %, Konstantlichtregelung 17 %, Präsenzsteuerung 9 %", "Jede Lichtsteuerung spart mehr als die Hälfte der Energiekosten ein.", "Gar nichts, weil die Steuerung selbst mehr Energie braucht, als sie spart."], richtig: 0,
   begruendung: "Fachkunde S. 403: Lichtsteuerung reduziert die Energiekosten durch Zentral-AUS um 18 %, durch Konstantlichtregelung um 17 %, durch Präsenzsteuerung um 9 %. Über das ganze Jahr ist es weniger als in einer hellen Mittagsstunde, weil morgens, abends und im Winter wenig Tageslicht einfällt."},
  {typ: "Kennzeichnung und Schutzarten", frage: "Eine Leuchte trägt die Angabe IP 66. Was bedeutet das?",
-  optionen: ["staubdicht und geschützt gegen starkes Strahlwasser", "Schutzklasse 6", "geschützt gegen Fremdkörper ab 12,5 mm und gegen Tropfwasser"], richtig: 0,
+  optionen: ["staubdicht und geschützt gegen starkes Strahlwasser", "Schutzklasse 6: doppelte Isolierung mit Schutzleiter", "Schutz gegen Fremdkörper ab 12,5 mm und gegen Tropfwasser"], richtig: 0,
   begruendung: "Erste Kennziffer 6: Drahtschutz, staubdicht. Zweite Kennziffer 6: Schutz gegen starkes Strahlwasser (Tabellenbuch S. 345)."},
  {typ: "Kennzeichnung und Schutzarten", frage: "Was bedeutet das Zeichen „Quadrat im Quadrat“ auf einer Leuchte?",
-  optionen: ["Schutzklasse II: doppelte oder verstärkte Isolierung, kein Schutzleiteranschluss", "Schutzklasse I: Schutzmaßnahme mit Schutzleiter", "Schutzklasse III: Schutzkleinspannung"], richtig: 0,
-  begruendung: "Tabellenbuch S. 104: Schutzklasse I Zeichen Erde im Kreis (mit Schutzleiter), Schutzklasse II Quadrat im Quadrat (doppelte oder verstärkte Isolierung), Schutzklasse III Raute mit III (SELV, PELV)."},
+  optionen: ["Schutzklasse II: doppelte oder verstärkte Isolierung", "Schutzklasse I: Schutzmaßnahme mit Schutzleiter", "Schutzklasse III: Betrieb mit Schutzkleinspannung"], richtig: 0,
+  begruendung: "Tabellenbuch S. 104: Schutzklasse I Zeichen Erde im Kreis (mit Schutzleiter), Schutzklasse II Quadrat im Quadrat (doppelte oder verstärkte Isolierung, kein Schutzleiteranschluss), Schutzklasse III Raute mit III (SELV, PELV)."},
  {typ: "Kennzeichnung und Schutzarten", frage: "Was bescheinigt das CE-Zeichen auf einer Leuchte?",
-  optionen: ["Der Hersteller bescheinigt, dass sie den EU-Richtlinien entspricht; eine unabhängige Prüfstelle hat sie damit nicht geprüft.", "Eine unabhängige Prüfstelle hat die Leuchte geprüft.", "Die Leuchte ist für Leuchtstofflampen geeignet."], richtig: 0,
-  begruendung: "Tabellenbuch S. 104: CE ist die Bescheinigung des Herstellers für die Übereinstimmung mit EU-Richtlinien. Eine Zertifizierung durch ein unabhängiges Institut zeigt z. B. das ENEC-Zeichen (S. 345)."},
+  optionen: ["Der Hersteller erklärt selbst, dass sie den EU-Richtlinien entspricht.", "Eine unabhängige Prüfstelle hat die Leuchte geprüft und zertifiziert.", "Die Leuchte ist für Leuchtstofflampen und für LED-Röhren geeignet."], richtig: 0,
+  begruendung: "Tabellenbuch S. 104: CE ist die Bescheinigung des Herstellers für die Übereinstimmung mit EU-Richtlinien; eine unabhängige Prüfstelle hat die Leuchte damit nicht geprüft. Eine Zertifizierung durch ein unabhängiges Institut zeigt z. B. das ENEC-Zeichen (S. 345)."},
  {typ: "Kennzeichnung und Schutzarten", frage: "Welche zweite Kennziffer der Schutzart braucht eine Leuchte, die aus allen Richtungen mit einem Wasserstrahl gereinigt wird?",
-  optionen: ["mindestens 5: Schutz gegen Strahlwasser", "1: Schutz gegen senkrecht fallendes Tropfwasser", "0: kein Wasserschutz"], richtig: 0,
+  optionen: ["mindestens 5: Schutz gegen Strahlwasser", "1: Schutz gegen senkrecht fallendes Tropfwasser", "0: kein Schutz gegen Wasser, nur gegen Staub"], richtig: 0,
   begruendung: "Tabellenbuch S. 345: zweite Kennziffer 4 Spritzwasser, 5 Strahlwasser, 6 starkes Strahlwasser."},
  {typ: "Energieeffizienz", frage: "Welches Vorschaltgerät für Leuchtstofflampen hat den besten Energieeffizienzindex?",
-  optionen: ["A1: dimmbares elektronisches Vorschaltgerät mit reduzierten Verlusten", "B2: magnetisches Vorschaltgerät mit geringen Verlusten", "A3: elektronisches Vorschaltgerät"], richtig: 0,
+  optionen: ["A1: dimmbares EVG mit reduzierten Verlusten", "B2: magnetisches Vorschaltgerät mit sehr geringen Verlusten", "A3: elektronisches Vorschaltgerät, nicht dimmbar"], richtig: 0,
   begruendung: "Fachkunde S. 392, Tabelle 1: Der Energieeffizienzindex EEI reicht von A1 (dimmbares EVG mit reduzierten Verlusten) über A2 und A3 (EVG) bis B1 und B2 (magnetische Vorschaltgeräte, VVG)."},
  {typ: "Energieeffizienz", frage: "Wonach richtet sich seit September 2021 die Energieeffizienzklasse einer LED-Röhre?",
-  optionen: ["nach der Lichtausbeute in lm je W: unter 85 lm je W Klasse G, ab 210 lm je W Klasse A", "nach der Leistungsaufnahme in W", "nach der Lebensdauer in Stunden"], richtig: 0,
+  optionen: ["nach der Lichtausbeute: je mehr Lumen je Watt, desto besser", "nach der Leistungsaufnahme: je weniger Watt, desto besser", "nach der Lebensdauer: je mehr Betriebsstunden, desto besser"], richtig: 0,
   begruendung: "Tabellenbuch S. 242: G unter 85 lm je W, dann in Schritten von 25 lm je W bis B unter 210 lm je W, A ab 210 lm je W. Fachkunde S. 392: Seit September 2021 gilt die Skala A bis G."}];
 var V = [{typ: "", f: function(){ var b = wahl(BEGRIFFE); return {art: "begriff", mc: true, p: {}, frage: b.frage, optionen: b.optionen, richtig: b.richtig, begruendung: b.begruendung, typText: b.typ}; }}];
 
@@ -598,7 +603,7 @@ window.kaprobe = function(n){
  });
  return {frage: frage, weg: weg};
 };
-window.mcprobe = function(){ return BEGRIFFE.map(function(b){ return {frage: plain(b.frage), optionen: b.optionen.map(plain), begruendung: plain(b.begruendung), zahlenFrage: zahlenIn(b.frage), zahlenRest: zahlenIn(b.optionen.join(" ") + " " + b.begruendung)}; }); };
+window.mcprobe = function(){ return BEGRIFFE.map(function(b){ return {frage: plain(b.frage), optionen: b.optionen.map(plain), richtig: b.richtig, begruendung: plain(b.begruendung), zahlenFrage: zahlenIn(b.frage), zahlenRest: zahlenIn(b.optionen.join(" ") + " " + b.begruendung)}; }); };
 /* nur lesend, für den Klickweg von außen: der Sollwert der angezeigten Aufgabe (die Eingabe läuft über echte Tasten) */
 window.__soll = function(){ var a = zustand.aufgabe; return a ? {wert: a.wert, mc: !!a.mc, richtig: a.richtig, art: a.art} : null; };
 window.tabellen = {ETA_R: ETA_R, SPALTEN: SPALTEN, LEUCHTEN: LEUCHTEN, KA: KA, ERLAUBT_MC: ERLAUBT_MC, ERLAUBT_WEG: ERLAUBT_WEG};
