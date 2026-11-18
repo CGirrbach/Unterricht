@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>B04 Messplatz: Motor und Kondensator am Netz</title>
+<!-- lehrmaterial -->
+<!-- materialtyp: simulation -->
+<!-- sim_bearbeitung: pflicht -->
+<script type="application/json" id="sim-meta">
+{"startwerte": {"Q1": "aus", "Q2": "aus", "C_uF": 35, "Zange": "Zuleitung"},
+ "loesungswerte": {"Q1": "ein", "Q2": "ein", "C_uF": 55, "Zange": ["Zuleitung", "Motor", "Kondensator"]},
+ "bereich": {"C_uF": [15, 65], "Schritt_uF": 10},
+ "gekoppelt": "B04_Arbeitsblatt.docx, Aufgabe 1 und 2",
+ "ziel_erkenntnis": "Der Motor nimmt mit und ohne Kondensator dieselbe Blindleistung auf. Der Kondensator nimmt keine Wirkleistung auf; seine Blindleistung ist kapazitiv. In der Zuleitung bleibt nur die Differenz der beiden Blindleistungen, die Stromstaerke dort sinkt; den Rest der Blindleistung des Motors liefert der Kondensator."}
+</script>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:"Noto Sans",system-ui,Arial,sans-serif;color:var(--ink);background:var(--hell);line-height:1.3}
+.wrap{max-width:1000px;margin:0 auto;padding:0 10px 18px}
+header{border-top:5px solid var(--kupfer);background:#fff;border-bottom:1px solid var(--ink);padding:5px 10px 5px;margin:0 -10px 8px}
+header .reihe{font-size:11px;letter-spacing:.14em;color:var(--kupfer);font-weight:700}
+header h1{font-size:17px;margin:1px 0 0}
+.karte{background:#fff;border:1.3px solid var(--ink);padding:6px 9px;margin:0 0 8px}
+.karte h2{font-size:12px;letter-spacing:.08em;color:var(--kupfer);margin:0 0 4px}
+.ort{font-size:14px;margin:0 0 5px}
+.ort b{color:var(--kupfer)}
+.geraete{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+.geraet{border:1.6px solid var(--ink);background:var(--hell);padding:3px 2px 2px;text-align:center;min-width:0}
+.geraet .name{font-size:12px;color:var(--grau);font-weight:700}
+.geraet .wert{font-family:"DejaVu Sans Mono",ui-monospace,monospace;font-size:clamp(17px,5vw,25px);font-weight:700;white-space:nowrap}
+.geraet .art{font-size:13px;color:var(--kupfer);font-weight:700;min-height:16px}
+.geraet.breit{grid-column:span 2}
+.bedienung{display:grid;grid-template-columns:1fr;gap:6px}
+.titel{font-size:13px;font-weight:700;margin:0 0 2px}
+.schalter{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+button{appearance:none;border:1.6px solid var(--ink);background:#fff;color:var(--ink);font-size:15px;font-weight:700;
+ min-height:44px;border-radius:6px;cursor:pointer;touch-action:manipulation;padding:3px 5px}
+button[aria-pressed="true"]{background:var(--kupfer);color:#fff;border-color:var(--kupfer)}
+.kap{display:grid;grid-template-columns:auto 48px 1fr 48px;gap:6px;align-items:center}
+.kap .titel{margin:0}
+.kap button{font-size:22px}
+.kap output{font-family:"DejaVu Sans Mono",ui-monospace,monospace;font-size:21px;color:var(--kupfer);text-align:center;font-weight:700}
+.zange{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.zange button{font-size:14px}
+button.reset{font-size:14px;min-height:40px;border-color:var(--kupfer);color:var(--kupfer);width:100%}
+.hinweis{font-size:12px;color:var(--grau);margin:6px 0 0}
+svg{display:block;width:100%;height:auto;max-height:170px}
+svg text{font-family:"Noto Sans",Arial,sans-serif;fill:var(--ink)}
+@media(min-width:760px){.zwei{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+ svg{max-height:none}header h1{font-size:20px}}
+@media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important}}
+</style></head>
+<body><div class="wrap">
+<header><div class="reihe">E3EG · B04 · Messplatz</div>
+<h1>Motor und Kondensator am Netz</h1></header>
+
+<div class="zwei">
+<div class="karte">
+ <h2>Schaltung des Messplatzes</h2>
+ <svg id="schaltung" viewBox="0 0 480 236" role="img" aria-label="Netz 230 V, Zuleitung, parallel ein Motor mit Schalter Q1 und ein Kondensator mit Schalter Q2; die Stromzange umfasst einen der drei Leiter"
+  data-quelle="eigene Zeichnung nach Europa-Rechenbuch Elektrotechnik, 20. Auflage, S. 132, Bild 1 (Parallelkompensation eines Motors) und Europa Fachkunde Elektrotechnik S. 164, Bild 1 (Versuchsschaltung mit zuschaltbarem Kondensator); Messgeraet: Netzanalysator (Fachkunde S. 311, Bild 1) mit Stromzange (Fachkunde S. 481)">
+  <g stroke="#1A2530" stroke-width="2.4" fill="none">
+   <line x1="38" y1="40" x2="440" y2="40"/>
+   <line x1="38" y1="200" x2="440" y2="200"/>
+   <!-- Abzweig Motor -->
+   <line x1="270" y1="40" x2="270" y2="66"/>
+   <line id="q1zu" x1="270" y1="66" x2="270" y2="96"/>
+   <line id="q1auf" x1="270" y1="96" x2="252" y2="70"/>
+   <line x1="270" y1="96" x2="270" y2="126"/>
+   <circle cx="270" cy="150" r="24" fill="#fff"/>
+   <line x1="270" y1="174" x2="270" y2="200"/>
+   <!-- Abzweig Kondensator -->
+   <line x1="400" y1="40" x2="400" y2="66"/>
+   <line id="q2zu" x1="400" y1="66" x2="400" y2="96"/>
+   <line id="q2auf" x1="400" y1="96" x2="382" y2="70"/>
+   <line x1="400" y1="96" x2="400" y2="142"/>
+   <line x1="382" y1="142" x2="418" y2="142" stroke-width="3.4"/>
+   <line x1="382" y1="152" x2="418" y2="152" stroke-width="3.4"/>
+   <line x1="400" y1="152" x2="400" y2="200"/>
+  </g>
+  <g fill="#1A2530"><circle cx="270" cy="40" r="4"/><circle cx="270" cy="200" r="4"/>
+   <circle cx="400" cy="40" r="4"/><circle cx="400" cy="200" r="4"/></g>
+  <!-- Stromzange: Ring um den gewaehlten Leiter -->
+  <g id="zangeZ"><ellipse cx="150" cy="40" rx="11" ry="20" fill="none" stroke="#A34E0E" stroke-width="5"/></g>
+  <g id="zangeM"><ellipse cx="270" cy="113" rx="20" ry="10" fill="none" stroke="#A34E0E" stroke-width="5"/></g>
+  <g id="zangeK"><ellipse cx="400" cy="118" rx="20" ry="10" fill="none" stroke="#A34E0E" stroke-width="5"/></g>
+  <text x="150" y="78" text-anchor="middle" font-size="14" fill="#5A666F">Zuleitung</text>
+  <text x="270" y="150" text-anchor="middle" font-size="19" font-weight="700">M</text>
+  <text x="270" y="167" text-anchor="middle" font-size="12">1~</text>
+  <text x="240" y="88" text-anchor="end" font-size="15" font-weight="700">Q1</text>
+  <text x="370" y="88" text-anchor="end" font-size="15" font-weight="700">Q2</text>
+  <text x="426" y="152" font-size="17" font-style="italic" font-family="Caladea,Cambria,serif">C</text>
+  <text x="270" y="224" text-anchor="middle" font-size="13" fill="#5A666F">Motor</text>
+  <text x="400" y="224" text-anchor="middle" font-size="13" fill="#5A666F">Kondensator</text>
+  <text x="24" y="46" text-anchor="middle" font-size="16" font-weight="700">L</text>
+  <text x="24" y="206" text-anchor="middle" font-size="16" font-weight="700">N</text>
+  <text x="44" y="126" font-size="14">~ 50 Hz</text>
+  <text x="44" y="145" font-size="14">230 V</text>
+ </svg>
+</div>
+
+<div>
+ <div class="karte">
+  <h2>Anzeige des Netzanalysators</h2>
+  <p class="ort">Stromzange an: <b id="aOrt">Zuleitung</b></p>
+  <div class="geraete">
+   <div class="geraet"><div class="name">Spannung <i>U</i></div><div class="wert" id="aU">230 V</div><div class="art"></div></div>
+   <div class="geraet"><div class="name">Stromstärke <i>I</i></div><div class="wert" id="aI">0,00 A</div><div class="art"></div></div>
+   <div class="geraet"><div class="name">Wirkleistung <i>P</i></div><div class="wert" id="aP">0 W</div><div class="art"></div></div>
+   <div class="geraet"><div class="name">Blindleistung <i>Q</i></div><div class="wert" id="aQ">0 var</div><div class="art" id="aQart"></div></div>
+   <div class="geraet breit"><div class="name">Wirkfaktor cos&nbsp;<i>φ</i></div><div class="wert" id="aC">kein Strom</div><div class="art" id="aCart"></div></div>
+  </div>
+ </div>
+ <div class="karte">
+  <h2>Schalten und messen</h2>
+  <div class="bedienung">
+   <div class="schalter">
+     <button type="button" id="q1" aria-pressed="false">Motor Q1: aus</button>
+     <button type="button" id="q2" aria-pressed="false">Kondensator Q2: aus</button>
+   </div>
+   <div class="kap"><p class="titel">Kapazität <i>C</i></p><button type="button" id="cm" aria-label="Kapazität kleiner">&minus;</button>
+     <output id="oc">35 µF</output>
+     <button type="button" id="cp" aria-label="Kapazität größer">+</button></div>
+   <div><p class="titel">Stromzange an</p>
+    <div class="zange">
+     <button type="button" id="zZ" aria-pressed="true">Zuleitung</button>
+     <button type="button" id="zM" aria-pressed="false">Motor</button>
+     <button type="button" id="zK" aria-pressed="false">Kondensator</button>
+    </div></div>
+   <button type="button" class="reset" id="reset">Zurücksetzen auf die Startstellung</button>
+  </div>
+  <p class="hinweis">Motor: Wechselstrommotor eines Kompressors, fest belastet. Kondensatoren 15&nbsp;µF bis 65&nbsp;µF in Schritten von 10&nbsp;µF. Kupferner Ring im Schaltbild: Stromzange des Netzanalysators; die Spannung misst das Gerät zwischen Außenleiter und Neutralleiter.</p>
+ </div>
+</div>
+</div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var META = JSON.parse(document.getElementById('sim-meta').textContent);
+var START = META.startwerte;
+var U = 230, F = 50, P_M = 1200, Q_M = 1600;   /* Motor: Wirkleistung 1200 W, Blindleistung 1600 var (Wirkfaktor 0,6) */
+var C_MIN = 15, C_MAX = 65, C_SCHRITT = 10;
+var zustand = {q1: false, q2: false, c: 35, zange: 'Zuleitung'};
+
+/* Runden wie DIN 1333 (kaufmaennisch); die Werte liegen nie auf einer Rundungsgrenze (alle Stellungen nachgerechnet) */
+function rund(x, stellen){ var f = Math.pow(10, stellen); return Math.round(x * f + 1e-9) / f; }
+function komma(x, stellen){ return rund(x, stellen).toFixed(stellen).replace('.', ','); }
+
+/* Rechenmodell (Tabellenbuch S. 40, Formel 1 und 3; S. 37, Formel 1, 5, 8, 11): Kondensator an U: Strom U / X_C mit
+   X_C = 1 / (2 pi f C), Blindleistung U^2 / X_C (kapazitiv, im Modell negativ). Zuleitung: Wirkleistungen und
+   Blindleistungen mit Vorzeichen addiert, Scheinleistung aus beiden, Strom = Scheinleistung / U, Wirkfaktor = P / S.
+   Die Seite zeigt weder eine Formel noch die Scheinleistung. */
+function messwerte(){
+  var w = 2 * Math.PI * F, C = zustand.c * 1e-6;
+  var motor = zustand.q1 ? {P: P_M, Q: Q_M} : {P: 0, Q: 0};
+  var kond = zustand.q2 ? {P: 0, Q: -U * U * w * C} : {P: 0, Q: 0};
+  var stelle = zustand.zange === 'Motor' ? motor :
+               zustand.zange === 'Kondensator' ? kond : {P: motor.P + kond.P, Q: motor.Q + kond.Q};
+  var S = Math.sqrt(stelle.P * stelle.P + stelle.Q * stelle.Q);
+  return {P: stelle.P, Q: stelle.Q, S: S, I: S / U, cos: S > 0 ? stelle.P / S : null};
+}
+
+function art(q){ return q > 0.5 ? 'induktiv' : (q < -0.5 ? 'kapazitiv' : ''); }
+
+function anzeigen(){
+  var m = messwerte();
+  document.getElementById('aOrt').textContent = zustand.zange;
+  document.getElementById('aI').textContent = komma(m.I, 2) + ' A';
+  document.getElementById('aP').textContent = Math.round(m.P) + ' W';
+  document.getElementById('aQ').textContent = Math.round(Math.abs(m.Q)) + ' var';
+  document.getElementById('aQart').textContent = art(m.Q);
+  if(m.cos === null){ document.getElementById('aC').textContent = 'kein Strom'; document.getElementById('aCart').textContent = ''; }
+  else { document.getElementById('aC').textContent = komma(m.cos, 2); document.getElementById('aCart').textContent = art(m.Q); }
+  document.getElementById('oc').textContent = zustand.c + ' µF';
+  var q1 = document.getElementById('q1'), q2 = document.getElementById('q2');
+  q1.setAttribute('aria-pressed', zustand.q1); q1.textContent = 'Motor Q1: ' + (zustand.q1 ? 'ein' : 'aus');
+  q2.setAttribute('aria-pressed', zustand.q2); q2.textContent = 'Kondensator Q2: ' + (zustand.q2 ? 'ein' : 'aus');
+  document.getElementById('q1zu').style.display = zustand.q1 ? '' : 'none';
+  document.getElementById('q1auf').style.display = zustand.q1 ? 'none' : '';
+  document.getElementById('q2zu').style.display = zustand.q2 ? '' : 'none';
+  document.getElementById('q2auf').style.display = zustand.q2 ? 'none' : '';
+  [['Zuleitung', 'zZ', 'zangeZ'], ['Motor', 'zM', 'zangeM'], ['Kondensator', 'zK', 'zangeK']].forEach(function(t){
+    var an = zustand.zange === t[0];
+    document.getElementById(t[1]).setAttribute('aria-pressed', an);
+    document.getElementById(t[2]).style.display = an ? '' : 'none';
+  });
+}
+
+function setze(s){
+  zustand.q1 = s.Q1 === 'ein'; zustand.q2 = s.Q2 === 'ein'; zustand.c = s.C_uF; zustand.zange = s.Zange; anzeigen();
+}
+document.getElementById('q1').addEventListener('click', function(){ zustand.q1 = !zustand.q1; anzeigen(); });
+document.getElementById('q2').addEventListener('click', function(){ zustand.q2 = !zustand.q2; anzeigen(); });
+document.getElementById('cm').addEventListener('click', function(){ zustand.c = Math.max(C_MIN, zustand.c - C_SCHRITT); anzeigen(); });
+document.getElementById('cp').addEventListener('click', function(){ zustand.c = Math.min(C_MAX, zustand.c + C_SCHRITT); anzeigen(); });
+document.getElementById('zZ').addEventListener('click', function(){ zustand.zange = 'Zuleitung'; anzeigen(); });
+document.getElementById('zM').addEventListener('click', function(){ zustand.zange = 'Motor'; anzeigen(); });
+document.getElementById('zK').addEventListener('click', function(){ zustand.zange = 'Kondensator'; anzeigen(); });
+document.getElementById('reset').addEventListener('click', function(){ setze(START); });
+
+/* Die Seite oeffnet aus den STARTWERTEN, nie aus den Loesungswerten. */
+setze(START);
+})();
+</script>
+</body></html>
