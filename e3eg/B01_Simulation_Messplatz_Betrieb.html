@@ -7,10 +7,10 @@
 <!-- sim_bearbeitung: pflicht -->
 <script type="application/json" id="sim-meta">
 {"startwerte": {"n": 30, "cosphi": 0.65},
- "loesungswerte": {"n": 20, "cosphi": 0.5},
- "weitere_loesungswerte": {"n": [20, 26, 27, 48, 49], "cosphi": [1.0, 0.7, 0.5, 0.9]},
+ "loesungswerte": {"n": 24, "cosphi": 0.5},
+ "weitere_loesungswerte": {"n": [24, 26, 27, 48, 49, 20], "cosphi": [1.0, 0.7, 0.5, 0.9]},
  "bereich": {"n": [0, 60], "cosphi": [0.3, 1.0]},
- "gekoppelt": "B01_Arbeitsblatt.docx, Aufgabe 2, 3 und 4",
+ "gekoppelt": "B01_Arbeitsblatt.docx, Aufgabe 2 und 3; Probe zu Aufgabe 4 an der Tafel",
  "ziel_erkenntnis": "Bei gleicher Wirkleistung ist die Stromstaerke in der Zuleitung umso groesser, je kleiner der Wirkfaktor ist; der Leitungsschutzschalter laesst deshalb bei kleinem Wirkfaktor weniger Leuchten zu."}
 </script>
 <style>
@@ -72,7 +72,7 @@ svg text{font-family:"Noto Sans",Arial,sans-serif;fill:var(--ink)}
    <p class="titel">Stromstärke <i>I</i> in der Zuleitung</p>
    <div class="skala"><div class="fuell" id="fuell"></div><div class="marke" id="marke"></div></div>
    <div class="zahlen" id="zahlen"></div>
-   <p class="hinweis" style="margin-top:4px">Senkrechter Strich: Bemessungsstrom des Leitungsschutzschalters F1, 16&nbsp;A.</p>
+   <p class="hinweis" style="margin-top:4px">Senkrechter Strich: Bemessungsstrom 16&nbsp;A des Leitungsschutzschalters, der die Zuleitung schützt.</p>
   </div>
  </div>
  <div class="karte">
@@ -93,14 +93,12 @@ svg text{font-family:"Noto Sans",Arial,sans-serif;fill:var(--ink)}
 </div>
 <div class="karte">
  <h2>Schaltung des Messplatzes</h2>
- <svg id="schaltung" viewBox="0 0 495 300" role="img" aria-label="Messschaltung: Leitungsschutzschalter, Strommesser, Leistungsmesser und Spannungsmesser vor den Leuchten"
-  data-quelle="eigene Zeichnung nach Europa-Rechenbuch Elektrotechnik, 20. Auflage, S. 121, Bild 2 (Messschaltung mit Strommesser, Leistungsmesser und Spannungsmesser vor dem Verbraucher); ergänzt um den Leitungsschutzschalter vor dem Strommesser und die Leuchten als Verbraucher">
+ <svg id="schaltung" viewBox="0 0 495 300" role="img" aria-label="Messschaltung: Strommesser, Leistungsmesser und Spannungsmesser vor den Leuchten"
+  data-quelle="eigene Zeichnung nach Europa-Rechenbuch Elektrotechnik, 20. Auflage, S. 121, Bild 2 (Messschaltung mit Strommesser, Leistungsmesser und Spannungsmesser vor dem Verbraucher); Verbraucher: die Leuchten">
   <g stroke="#1A2530" stroke-width="2.4" fill="none">
    <!-- Außenleiter L oben, Neutralleiter N unten -->
    <line x1="40" y1="60" x2="400" y2="60"/>
    <line x1="40" y1="250" x2="400" y2="250"/>
-   <!-- Leitungsschutzschalter -->
-   <rect x="70" y="44" width="44" height="32" fill="#fff"/>
    <!-- Strommesser -->
    <circle cx="160" cy="60" r="18" fill="#fff"/>
    <!-- Leistungsmesser: Strompfad im Leiter, Spannungspfad nach N -->
@@ -130,12 +128,10 @@ svg text{font-family:"Noto Sans",Arial,sans-serif;fill:var(--ink)}
   <text x="310" y="162" text-anchor="middle" font-size="20" font-weight="700">V</text>
   <text x="26" y="66" text-anchor="middle" font-size="17" font-weight="700">L</text>
   <text x="26" y="256" text-anchor="middle" font-size="17" font-weight="700">N</text>
-  <text x="92" y="66" text-anchor="middle" font-size="15" font-weight="700">F1</text>
-  <text x="92" y="36" text-anchor="middle" font-size="15">16 A</text>
   <text x="403" y="160" font-size="15" id="sn">30 Leuchten</text>
   <text x="40" y="290" font-size="15">~ 50 Hz  230 V</text>
  </svg>
- <p class="hinweis">Der Leitungsschutzschalter schützt die Zuleitung. Der Strommesser und der Strompfad des Leistungsmessers liegen im Außenleiter, der Spannungsmesser liegt zwischen Außenleiter und Neutralleiter.</p>
+ <p class="hinweis">Der Strommesser und der Strompfad des Leistungsmessers liegen im Außenleiter, der Spannungsmesser liegt zwischen Außenleiter und Neutralleiter.</p>
 </div>
 </div>
 </div>
