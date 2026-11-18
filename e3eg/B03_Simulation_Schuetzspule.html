@@ -98,7 +98,7 @@ svg{display:block;width:100%;height:auto}
    <text id="tI" x="0" y="0" fill="#FF6FAE" font-size="24" font-weight="700" font-style="italic" font-family="Georgia,'DejaVu Serif',serif">i</text>
    <g id="zeitachse" font-family="Arial,sans-serif" font-size="19" fill="#1A2530" text-anchor="middle"></g>
   </svg>
-  <p class="kanal"><b class="k1">Kanal 1: <i>u</i>, 100 V/Div</b> · <b class="k2">Kanal 2: <i>i</i> (Stromzange), <span id="kb2">0,2 A/Div</span></b> · <b>Zeitbasis: 2 ms/Div</b> · Trigger: <i>u</i>, steigend</p>
+  <p class="kanal"><b class="k1">Kanal 1: <i>u</i>, 100 V je Kästchen</b> · <b class="k2">Kanal 2: <i>i</i> (Stromzange), <span id="kb2">0,2 A je Kästchen</span></b> · <b>Zeitbasis: 2 ms je Kästchen</b> · Trigger: <i>u</i>, steigend</p>
  </div>
  <div class="karte">
   <h2>Messplatz</h2>
@@ -183,7 +183,7 @@ function raster(){
 function kurven(m){
   var pu = [], pi = [], uh = U * Math.SQRT2, ih = m.i * Math.SQRT2;
   var bereich = (an && frei) ? 0.02 : 0.2;             /* Kanal 2: Messbereich der Stromzange in A je Div */
-  document.getElementById('kb2').textContent = (bereich === 0.2) ? '0,2 A/Div' : '20 mA/Div';
+  document.getElementById('kb2').textContent = (bereich === 0.2) ? '0,2 A je Kästchen' : '20 mA je Kästchen';
   for(var k = 0; k <= 500; k++){
     var t = k / 500 * 0.020, w = 2 * Math.PI * f * t;
     var yu = an ? uh * Math.sin(w) / 100 : 0, yi = an ? ih * Math.sin(w - m.phi) / bereich : 0;
