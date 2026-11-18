@@ -7,10 +7,13 @@
        fensternahe Leuchte stärker als die an der Wand; reicht das Tageslicht, ist die Leuchte aus. Ohne Regelung brennen
        alle Leuchten voll und nehmen mehr Leistung auf. Der Präsenzmelder schaltet das Licht erst nach der eingestellten
        Nachlaufzeit aus; kommt vorher jemand zurück, beginnt die Zeit nach dem nächsten Verlassen von neuem.
-       Teil 2 DALI: Ein nicht adressiertes Betriebsgerät reagiert nur auf Befehle an alle (Broadcast). Nach dem
-       Adressieren reagiert jedes Betriebsgerät auf seine Kurzadresse, auf seine Gruppen und auf Befehle an alle; Szenen
-       ruft jedes Betriebsgerät mit dem Wert ab, den es selbst gespeichert hat. Kurzadressen 0 bis 63, Gruppen 0 bis 15,
-       Szenen 0 bis 15.
+       Teil 2 DALI (Digital Addressable Lighting Interface): Ein nicht adressiertes Betriebsgerät reagiert nur auf
+       Befehle an alle (Broadcast). Kurzadresse, Gruppen und Szenenwerte programmiert man am Steuergerät und überträgt
+       sie über die Steuerleitung ins Betriebsgerät, das sie speichert (berichtigt 18.11.2026 nach dem Prüfer: vorher
+       wurden sie „am Betriebsgerät eingestellt“; Tabellenbuch S. 155 „Die Programmierung erfolgt menügeführt bzgl.
+       Lichtszenen, Gruppenzuordnungen“ an den Steuergeräten; DALI-Handbuch S. 5, 10, 78). Danach reagiert jedes
+       Betriebsgerät auf seine Kurzadresse, auf seine Gruppen und auf Befehle an alle; Szenen ruft jedes Betriebsgerät mit
+       dem Wert ab, den es gespeichert hat. Kurzadressen 0 bis 63, Gruppen 0 bis 15, Szenen 0 bis 15.
      Vorlagen: Fachkunde S. 403 (12.1.13 Lichtmanagementsysteme: Bild 1 Raum mit Lichtsteuerung, Leuchten E1 bis E3,
        Lichtsensor am Fenster; Bild 2 Raum mit Präsenzmelder; Bild 3 Lichtmanagementsystem DALI mit Steuergerät,
        Betriebsgeräten, Lichtgruppen, 16 Lichtszenen); Fachkunde S. 106 (Bewegungsmelder: einstellbare Zeit, die immer
@@ -35,12 +38,12 @@
        Nachlaufzeit 1 min, Person im Raum; DALI: alle Betriebsgeräte ohne Kurzadresse, ohne Gruppe, ohne Szenenwert, aus.
      Grenzfälle: Sollwert 100 bis 1000 lx (bei 1000 lx und Dunkelheit reicht die Leuchte nicht: 100 %, 500 lx);
        Uhrzeit 6:00 bis 20:00; Kurzadresse 64 und Szene oder Gruppe 16 werden abgewiesen; zwei Betriebsgeräte mit
-       derselben Kurzadresse reagieren beide.
+       derselben Kurzadresse reagieren beide; Programmiertes, das nicht übertragen ist, wirkt nicht.
      Prüfmodus ?pruefen: Anzeigen der Aufgabenstellungen als JSON in #pruefbericht; window.__stelle(…) stellt ein. -->
 <html lang="de"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Messplatz Lichtsteuerung (B19)</title>
-<script type="application/json" id="sim-meta">{"startwerte":{"Uhrzeit":"6:00","Beleuchtung":"aus","Konstantlichtregelung":"aus","Sollwert_lx":300,"Praesenzmelder":"aus","Nachlaufzeit_min":1,"Person":"im Raum","DALI":"ohne Kurzadresse, ohne Gruppe, ohne Szenenwert"},"loesungswerte":{"Aufgabe 1, Sollwert 500 lx, 8:00":{"E1":"94 %","E3":"40 %","Wandplatz":"500 lx","Fensterplatz":"500 lx","Leistung":"108 W"},"Aufgabe 1, 11:00":{"E1":"78 %","E3":"aus","Wandplatz":"500 lx","Fensterplatz":"1100 lx","Leistung":"56 W"},"Aufgabe 1, 11:00 ohne Regelung":{"Wandplatz":"610 lx","Fensterplatz":"1600 lx","Leistung":"150 W"},"Aufgabe 2, Nachlaufzeit 5 min":{"geht 10:00":"aus 10:05","kommt 10:10, geht 10:12, kommt 10:14, geht 10:15":"aus 10:20"},"Aufgabe 5":{"Kurzadressen":"0 bis 63","Gruppen":"0 bis 15","Szenen":"0 bis 15"}},"quelle":"Fachkunde S. 403 Bild 1 bis 3, S. 106; Tabellenbuch S. 155, S. 375; DALI-Handbuch (Tridonic) S. 5, 6, 38, 58, 85"}</script>
+<script type="application/json" id="sim-meta">{"startwerte":{"Uhrzeit":"6:00","Beleuchtung":"aus","Konstantlichtregelung":"aus","Sollwert_lx":300,"Praesenzmelder":"aus","Nachlaufzeit_min":1,"Person":"im Raum","DALI":"ohne Kurzadresse, ohne Gruppe, ohne Szenenwert"},"loesungswerte":{"Aufgabe 1, Sollwert 500 lx, 8:00":{"E1":"94 %","E3":"40 %","Wandplatz":"500 lx","Fensterplatz":"500 lx","Leistung":"108 W"},"Aufgabe 1, 11:00":{"E1":"78 %","E3":"aus","Wandplatz":"500 lx","Fensterplatz":"1100 lx","Leistung":"56 W"},"Aufgabe 2, Nachlaufzeit 5 min":{"geht 10:00":"aus 10:05","kommt 10:10, geht 10:12, kommt 10:14, geht 10:15":"aus 10:20"},"Aufgabe 5":{"Zeile 1":"alle aus","Zeile 2":"alle 100 %","Zeile 3":"nur E3 100 %","Zeile 4":"E1, E2 50 %, E3 100 %","Zeile 5":"E1 bis E3 30 %, E4 100 %","Kurzadressen":"0 bis 63","Gruppen":"0 bis 15"}},"quelle":"Fachkunde S. 403 Bild 1 bis 3, S. 106; Tabellenbuch S. 155, S. 375; DALI-Handbuch (Tridonic) S. 5, 6, 10, 38, 58, 78, 85"}</script>
 <style>
  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
  :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62;--blau:#2557A3}
@@ -94,6 +97,11 @@
  .zahl button{font-size:24px;font-weight:700}
  .chips{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin-top:4px}
  .chips button{min-width:0;min-height:44px;padding:2px 0;font-weight:700;font-size:16px}
+ .speicher{width:100%;border-collapse:collapse;font-size:15px;margin-top:6px;font-variant-numeric:tabular-nums}
+ .speicher th,.speicher td{border:1px solid var(--linie);padding:4px 5px;text-align:center}
+ .speicher th{background:var(--hell);font-size:13px}
+ .offen{color:#B00020;font-weight:700;font-size:14px;min-height:20px}
+ button.uebertragen{background:var(--blau);border-color:var(--blau);color:#fff;font-weight:700;flex:1 1 100%}
  .meldung{min-height:22px;color:#B00020;font-weight:700;font-size:14px}
  .protokoll{font-size:14px;color:var(--grau);min-height:20px}
  .led{display:inline-block;width:14px;height:14px;border-radius:50%;background:#9AA5AE;border:1px solid #1A2530;vertical-align:middle;margin-right:5px}
@@ -111,7 +119,7 @@
  <div class="anleitung"><b>So arbeiten Sie:</b> Ein Seminarraum mit Fensterfront rechts. Über jedem der drei Arbeitsplätze
   hängt eine Leuchte (E1 an der Wand, E2 in der Mitte, E3 am Fenster), an der Tafel die Tafelleuchte E4. Auf jedem Platz
   liegt der Messfühler eines Luxmeters. Im Teil <b>Lichtsteuerung</b> stellen Sie die Uhrzeit und die Steuerung ein, im Teil
-  <b>DALI</b> nehmen Sie die Betriebsgeräte der Leuchten in Betrieb.</div>
+  <b>DALI</b> (Digital Addressable Lighting Interface) nehmen Sie die Betriebsgeräte der Leuchten in Betrieb.</div>
 
  <div class="reiter">
   <button type="button" id="tabS">Lichtsteuerung</button>
@@ -231,17 +239,48 @@
      <div class="protokoll" id="protokoll"></div>
     </div>
 
-    <div class="titel" style="margin-top:14px">Betriebsgeräte einstellen</div>
-    <div class="block" style="margin-top:4px">
-     <div class="kopfz">SZENE BEARBEITEN</div>
-     <div class="zahl" style="margin-top:6px">
+    <div class="block">
+     <div class="kopfz">STEUERGERÄT: PROGRAMMIEREN</div>
+     <div class="titel">Betriebsgerät</div>
+     <div class="knoepfe wahl" id="geraet">
+      <button type="button" data-e="0">E1</button><button type="button" data-e="1">E2</button>
+      <button type="button" data-e="2">E3</button><button type="button" data-e="3">E4</button>
+     </div>
+     <div class="protokoll">Die gewählte Leuchte ist im Bild blau umrandet.</div>
+     <div class="titel">Kurzadresse</div>
+     <div class="zahl">
+      <button type="button" id="pAm" aria-label="Kurzadresse kleiner">−</button>
+      <input id="pAdr" type="text" inputmode="numeric" aria-label="Kurzadresse">
+      <button type="button" id="pAp" aria-label="Kurzadresse größer">+</button>
+     </div>
+     <div class="meldung" id="pAMeld"></div>
+     <div class="titel">Gruppen (antippen: gehört dazu)</div>
+     <div class="chips" id="pGrp"></div>
+     <div class="titel">Szene</div>
+     <div class="zahl">
       <button type="button" id="szm" aria-label="Szene kleiner">−</button>
-      <input id="szNr" type="text" inputmode="numeric" aria-label="Nummer der Szene, die Sie bearbeiten">
+      <input id="szNr" type="text" inputmode="numeric" aria-label="Nummer der Szene">
       <button type="button" id="szp" aria-label="Szene größer">+</button>
      </div>
      <div class="meldung" id="szMeld"></div>
+     <div class="titel">Szenenwert dieser Szene</div>
+     <div class="zahl">
+      <button type="button" id="swm" aria-label="Szenenwert kleiner">−</button>
+      <span class="anz" id="szw"></span>
+      <button type="button" id="swp" aria-label="Szenenwert größer">+</button>
+     </div>
+     <div class="knoepfe" style="margin-top:8px"><button type="button" class="uebertragen" id="uebertragen">Übertragen</button></div>
+     <div class="offen" id="offen"></div>
+     <div class="protokoll" id="pProt"></div>
     </div>
-    <div id="karten"></div>
+
+    <div class="block">
+     <div class="kopfz">GESPEICHERT IN DEN BETRIEBSGERÄTEN</div>
+     <table class="speicher" aria-live="polite">
+      <thead><tr><th>Leuchte</th><th>Kurz&shy;adresse</th><th>Gruppen</th><th>Szene <span id="spSz"></span></th></tr></thead>
+      <tbody id="spKoerper"></tbody>
+     </table>
+    </div>
     <div class="titel">Neu beginnen</div>
     <div class="knoepfe"><button class="zurueck" id="resetD" type="button">Zurücksetzen</button></div>
    </div>
@@ -250,9 +289,10 @@
 
  <div class="hinweis" id="hinweisS">Jede Leuchte beleuchtet ihren Arbeitsplatz. Das Luxmeter misst Tageslicht und Kunstlicht
   zusammen. Grob mit dem Schieber, genau mit den Tasten einstellen.</div>
- <div class="hinweis" id="hinweisD" hidden>Jede Leuchte hat ein DALI-Betriebsgerät. Kurzadresse, Gruppen und Szenenwerte
-  stellen Sie unten am Betriebsgerät ein, Befehle schickt das Steuergerät. Eine Zahl tippen Sie ins Feld oder stellen sie
-  mit − und + ein.</div>
+ <div class="hinweis" id="hinweisD" hidden>DALI: Digital Addressable Lighting Interface. Jede Leuchte hat ein
+  DALI-Betriebsgerät. Am Steuergerät programmieren Sie Kurzadresse, Gruppen und Szenenwerte eines Betriebsgeräts; erst
+  „Übertragen“ schickt sie über die Steuerleitung ins Betriebsgerät. Befehle sendet das Steuergerät ebenfalls über die
+  Steuerleitung. Eine Zahl tippen Sie ins Feld oder stellen sie mit − und + ein.</div>
  <pre id="pruefbericht"></pre>
 </div>
 
@@ -269,9 +309,19 @@ var START={t:360, schalter:false, regel:false, soll:300, praes:false, nach:1, pe
 var z={}, d={};
 function startS(){ for(var k in START) z[k]=START[k]; }
 function startD(){
+  // adr, grp, sz: Speicher der Betriebsgeräte; e: Eingaben am Steuergerät (noch nicht übertragen) für Gerät d.gw
   d={adr:[null,null,null,null], grp:[[],[],[],[]], sz:[], lvl:[0,0,0,0], zielArt:"adresse", zielNr:0, bef:"ein",
-     dimm:50, szNr:0, bearb:0, log:""};
+     dimm:50, szNr:0, bearb:0, log:"", plog:"", gw:0, e:null};
   for(var i=0;i<4;i++){ var a=[]; for(var s=0;s<16;s++) a.push(null); d.sz.push(a); }
+  ladeEingabe();
+}
+function ladeEingabe(){ d.e={adr:d.adr[d.gw], grp:d.grp[d.gw].slice(), sz:d.sz[d.gw].slice()}; }
+function eingabeOffen(){
+  var e=d.e, i=d.gw;
+  if(e.adr!==d.adr[i]) return true;
+  if(e.grp.slice().sort().join()!==d.grp[i].slice().sort().join()) return true;
+  for(var s=0;s<16;s++) if(e.sz[s]!==d.sz[i][s]) return true;
+  return false;
 }
 startS(); startD();
 var tab="S";
@@ -315,7 +365,7 @@ function text(g,x,y,t,gr,farbe,anker,fett){
 }
 var XL=[175,365,555];                         // Leuchten E1 bis E3 über den Plätzen; Tafelleuchte E4 an der Wand
 var YD=50, YB=262, YT=208;                     // Decke, Boden, Tischplatte
-function raum(stufen, zeigeSensoren){
+function raum(stufen, zeigeSensoren, gewaehlt){
   var g=$("rg"); while(g.firstChild) g.removeChild(g.firstChild);
   var a=aussen(z.t), hell=Math.min(1,a/12000);
   // Himmel im Fenster
@@ -362,6 +412,11 @@ function raum(stufen, zeigeSensoren){
       g.appendChild(el("line",{x1:px,y1:182,x2:px-22,y2:203,stroke:"#A34E0E","stroke-width":5}));
     }
   }
+  if(gewaehlt!==undefined && gewaehlt!==null){            // am Steuergerät gewähltes Betriebsgerät
+    var r4 = gewaehlt===3 ? [16,90,38,30] : [XL[gewaehlt]-62,58,124,29];
+    g.appendChild(el("rect",{x:r4[0],y:r4[1],width:r4[2],height:r4[3],fill:"none",stroke:"#2557A3","stroke-width":4,
+      "stroke-dasharray":"8 5",rx:4}));
+  }
   text(g,702,342,"Fenster",28,"#1A2530","end",false);
   text(g,22,342,"Tafel",28,"#1A2530","start",false);
 }
@@ -402,40 +457,19 @@ $("perGeht").onclick=function(){ if(z.person){ z.person=false; z.tGeht=z.t; } au
 $("resetS").onclick=function(){ startS(); auffrischenS(); };
 
 // ---------------- Teil DALI ----------------
-function karten(){
-  var k=$("karten"); k.innerHTML="";
-  for(var i=0;i<4;i++){
-    var c=document.createElement("div"); c.className="karte";
-    var h="<div class='kname'>Betriebsgerät der Leuchte "+NAME[i]+" ("+ORT[i]+")</div>"+
-      "<div class='titel'>Kurzadresse</div><div class='zahl'><button type='button' data-a='m' data-i='"+i+"' aria-label='Kurzadresse kleiner'>−</button>"+
-      "<input type='text' inputmode='numeric' id='adr"+i+"' aria-label='Kurzadresse "+NAME[i]+"'>"+
-      "<button type='button' data-a='p' data-i='"+i+"' aria-label='Kurzadresse größer'>+</button></div><div class='meldung' id='am"+i+"'></div>"+
-      "<div class='titel'>Gruppen (antippen: gehört dazu)</div><div class='chips' id='gr"+i+"'>";
-    for(var g=0;g<16;g++) h+="<button type='button' data-g='"+g+"' data-i='"+i+"'>"+g+"</button>";
-    h+="</div><div class='titel'>Szenenwert für Szene <span class='szAnz'></span></div><div class='zahl'>"+
-      "<button type='button' data-s='m' data-i='"+i+"' aria-label='Szenenwert kleiner'>−</button><span class='anz' id='szw"+i+"'></span>"+
-      "<button type='button' data-s='p' data-i='"+i+"' aria-label='Szenenwert größer'>+</button></div>";
-    c.innerHTML=h; k.appendChild(c);
-  }
-  Array.prototype.forEach.call(k.querySelectorAll("button[data-a]"),function(b){ b.onclick=function(){
-    var i=+b.getAttribute("data-i"), a=d.adr[i];
-    if(b.getAttribute("data-a")==="p") a=(a===null?0:Math.min(63,a+1)); else a=(a===null||a===0?null:a-1);
-    d.adr[i]=a; $("am"+i).textContent=""; auffrischenD(); }; });
-  Array.prototype.forEach.call(k.querySelectorAll("input[id^=adr]"),function(inp){
-    inp.addEventListener("change",function(){
-      var i=+inp.id.slice(3), t=inp.value.trim();
-      if(t===""||t==="—"){ d.adr[i]=null; $("am"+i).textContent=""; }
-      else if(/^\d+$/.test(t) && +t<=63){ d.adr[i]=+t; $("am"+i).textContent=""; }
-      else { $("am"+i).textContent="Kurzadresse "+t+" nicht möglich."; }
-      auffrischenD(); }); });
-  Array.prototype.forEach.call(k.querySelectorAll("button[data-g]"),function(b){ b.onclick=function(){
-    var i=+b.getAttribute("data-i"), g=+b.getAttribute("data-g"), l=d.grp[i], p=l.indexOf(g);
-    if(p<0) l.push(g); else l.splice(p,1);
-    auffrischenD(); }; });
-  Array.prototype.forEach.call(k.querySelectorAll("button[data-s]"),function(b){ b.onclick=function(){
-    var i=+b.getAttribute("data-i"), w=d.sz[i][d.bearb];
-    if(b.getAttribute("data-s")==="p") w=(w===null?0:Math.min(100,w+10)); else w=(w===null||w===0?null:w-10);
-    d.sz[i][d.bearb]=w; auffrischenD(); }; });
+function gruppenChips(){
+  var k=$("pGrp"); k.innerHTML="";
+  for(var g=0;g<16;g++){ var b=document.createElement("button"); b.type="button"; b.textContent=String(g);
+    b.setAttribute("data-g",String(g)); k.appendChild(b);
+    b.onclick=(function(g){ return function(){ var l=d.e.grp, p=l.indexOf(g); if(p<0) l.push(g); else l.splice(p,1);
+      auffrischenD(); }; })(g); }
+}
+function uebertragen(){
+  var i=d.gw, e=d.e;
+  d.adr[i]=e.adr; d.grp[i]=e.grp.slice().sort(function(a,b){return a-b;}); d.sz[i]=e.sz.slice();
+  var gz=d.grp[i].length?d.grp[i].join(", "):"keine";
+  d.plog="Übertragen an "+NAME[i]+": Kurzadresse "+(e.adr===null?"keine":e.adr)+", Gruppen "+gz;
+  auffrischenD();
 }
 function zielText(){
   if(d.zielArt==="alle") return "alle";
@@ -459,14 +493,23 @@ function senden(){
   auffrischenD();
 }
 function auffrischenD(){
-  for(var i=0;i<4;i++){
-    $("mL"+(i+1)).textContent=d.lvl[i]>0?d.lvl[i]+" %":"aus";
-    var inp=$("adr"+i); if(document.activeElement!==inp) inp.value=d.adr[i]===null?"—":String(d.adr[i]);
-    Array.prototype.forEach.call($("gr"+i).children,function(b){ setze(b,d.grp[i].indexOf(+b.getAttribute("data-g"))>=0); });
-    var w=d.sz[i][d.bearb]; $("szw"+i).textContent=w===null?"—":w+" %";
-  }
-  Array.prototype.forEach.call(document.querySelectorAll(".szAnz"),function(s){ s.textContent=d.bearb; });
+  for(var i=0;i<4;i++) $("mL"+(i+1)).textContent=d.lvl[i]>0?d.lvl[i]+" %":"aus";
+  Array.prototype.forEach.call($("geraet").children,function(b){ setze(b,+b.getAttribute("data-e")===d.gw); });
+  var inp=$("pAdr"); if(document.activeElement!==inp) inp.value=d.e.adr===null?"—":String(d.e.adr);
+  Array.prototype.forEach.call($("pGrp").children,function(b){ setze(b,d.e.grp.indexOf(+b.getAttribute("data-g"))>=0); });
   var zi=$("szNr"); if(document.activeElement!==zi) zi.value=String(d.bearb);
+  var w=d.e.sz[d.bearb]; $("szw").textContent=w===null?"—":w+" %";
+  $("uebertragen").textContent="Übertragen an "+NAME[d.gw];
+  $("offen").textContent=eingabeOffen()?"Noch nicht übertragen.":"";
+  $("pProt").textContent=d.plog;
+  $("spSz").textContent=String(d.bearb);
+  var h="";
+  for(var j=0;j<4;j++){
+    var sw=d.sz[j][d.bearb];
+    h+="<tr><td><b>"+NAME[j]+"</b></td><td>"+(d.adr[j]===null?"—":d.adr[j])+"</td><td>"+
+       (d.grp[j].length?d.grp[j].join(", "):"—")+"</td><td>"+(sw===null?"—":sw+" %")+"</td></tr>";
+  }
+  $("spKoerper").innerHTML=h;
   Array.prototype.forEach.call($("zielArt").children,function(b){ setze(b,b.getAttribute("data-z")===d.zielArt); });
   Array.prototype.forEach.call($("befehl").children,function(b){ setze(b,b.getAttribute("data-b")===d.bef); });
   $("zielNrZeile").hidden=(d.zielArt==="alle");
@@ -475,8 +518,9 @@ function auffrischenD(){
   $("bWert").textContent=d.bef==="dimm"?d.dimm+" %":"Szene "+d.szNr;
   $("senden").textContent="Senden: "+zielText()+": "+befText();
   $("protokoll").textContent=d.log;
-  raum([d.lvl[0]/100,d.lvl[1]/100,d.lvl[2]/100,d.lvl[3]/100],false);
-  $("legende").textContent="Schnitt durch den Seminarraum. Gelb: Licht der Leuchten.";
+  raum([d.lvl[0]/100,d.lvl[1]/100,d.lvl[2]/100,d.lvl[3]/100],false,d.gw);
+  $("legende").textContent="Schnitt durch den Seminarraum. Gelb: Licht der Leuchten. Blau umrandet: das Betriebsgerät, "+
+    "das Sie am Steuergerät programmieren.";
 }
 function zielGrenze(){ return d.zielArt==="adresse"?63:15; }
 $("zNm").onclick=function(){ d.zielNr=Math.max(0,d.zielNr-1); $("zMeld").textContent=""; auffrischenD(); };
@@ -492,6 +536,19 @@ Array.prototype.forEach.call($("befehl").children,function(b){ b.onclick=functio
 $("bWm").onclick=function(){ if(d.bef==="dimm") d.dimm=Math.max(10,d.dimm-10); else d.szNr=Math.max(0,d.szNr-1); auffrischenD(); };
 $("bWp").onclick=function(){ if(d.bef==="dimm") d.dimm=Math.min(100,d.dimm+10); else d.szNr=Math.min(15,d.szNr+1); auffrischenD(); };
 $("senden").onclick=senden;
+Array.prototype.forEach.call($("geraet").children,function(b){ b.onclick=function(){
+  d.gw=+b.getAttribute("data-e"); ladeEingabe(); $("pAMeld").textContent=""; auffrischenD(); }; });
+$("pAm").onclick=function(){ var a=d.e.adr; d.e.adr=(a===null||a===0)?null:a-1; $("pAMeld").textContent=""; auffrischenD(); };
+$("pAp").onclick=function(){ var a=d.e.adr; d.e.adr=(a===null)?0:Math.min(63,a+1); $("pAMeld").textContent=""; auffrischenD(); };
+$("pAdr").addEventListener("change",function(){
+  var t=this.value.trim();
+  if(t===""||t==="—"){ d.e.adr=null; $("pAMeld").textContent=""; }
+  else if(/^\d+$/.test(t) && +t<=63){ d.e.adr=+t; $("pAMeld").textContent=""; }
+  else $("pAMeld").textContent="Kurzadresse "+t+" nicht möglich.";
+  auffrischenD(); });
+$("swm").onclick=function(){ var w=d.e.sz[d.bearb]; d.e.sz[d.bearb]=(w===null||w===0)?null:w-10; auffrischenD(); };
+$("swp").onclick=function(){ var w=d.e.sz[d.bearb]; d.e.sz[d.bearb]=(w===null)?0:Math.min(100,w+10); auffrischenD(); };
+$("uebertragen").onclick=uebertragen;
 $("szm").onclick=function(){ d.bearb=Math.max(0,d.bearb-1); $("szMeld").textContent=""; auffrischenD(); };
 $("szp").onclick=function(){ d.bearb=Math.min(15,d.bearb+1); $("szMeld").textContent=""; auffrischenD(); };
 $("szNr").addEventListener("change",function(){
@@ -499,7 +556,7 @@ $("szNr").addEventListener("change",function(){
   if(/^\d+$/.test(t) && +t<=15){ d.bearb=+t; $("szMeld").textContent=""; }
   else $("szMeld").textContent="Szene "+t+" nicht möglich.";
   auffrischenD(); });
-$("resetD").onclick=function(){ startD(); ["zMeld","szMeld","am0","am1","am2","am3"].forEach(function(id){ $(id).textContent=""; }); auffrischenD(); };
+$("resetD").onclick=function(){ startD(); ["zMeld","szMeld","pAMeld"].forEach(function(id){ $(id).textContent=""; }); auffrischenD(); };
 
 // ---------------- Reiter ----------------
 function zeigeTab(t){
@@ -511,7 +568,7 @@ function zeigeTab(t){
 }
 $("tabS").onclick=function(){ zeigeTab("S"); };
 $("tabD").onclick=function(){ zeigeTab("D"); };
-karten();
+gruppenChips();
 
 // ---------------- Prüfmodus ----------------
 function anzeigeS(){
