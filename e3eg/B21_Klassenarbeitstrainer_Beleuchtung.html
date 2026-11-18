@@ -1,0 +1,604 @@
+<!-- lehrmaterial -->
+<!-- materialtyp: simulation -->
+<!-- sim_bearbeitung: freiwillig -->
+<!-- E3EG B21, Klassenarbeitstrainer Einheit 2 Beleuchtungstechnik (18.11.2026, material_office/E3EG-B21; gebaut von
+ b21_trainer_bauen.py aus b21_trainer_vorlage.html). Bauart wie der Klassenarbeitstrainer von Block 10 (Einheit 1):
+ Zufallsaufgaben je Thema nach den Aufgabentypen der Prüfungen, Prüfung der Eingabe mit Toleranz, danach der volle
+ Rechenweg (Formel, Einsetzen mit Einheiten, Ergebnis), Verständnisfragen mit Musterlösung. Keine Niveaustufen.
+ Formeln wie im Unterricht: Tabellenbuch S. 227 (Formel 1, 2, 3, 9; Lichtstärkeverteilung unter Formel 1), S. 229
+ (Wartungsfaktoren), S. 230 (Wartungswerte), S. 234 (Formel 1, 3, 4, 5; Reflexionsgrade), S. 235 (Raumwirkungsgrade,
+ Leuchtenbetriebswirkungsgrade; Werte am Seitenbild abgeglichen in Block 18), S. 36 (Formel 7 und 8), S. 20 (Formel 9),
+ S. 242 (Energieeffizienzklassen nach der Lichtausbeute). Verständnisfragen nach Tabellenbuch S. 104, 155, 231, 238,
+ 239, 240, 242, 345 und Fachkunde S. 392, 398, 399, 403.
+ Keine Zahl aus den Quellen der Klassenarbeit 2 (Aufgaben Prüfung.pdf samt Lösungen, Beleuchtung_Prüfung_Übung.docx,
+ Ordner Klassenarbeiten; Liste KA aus b21_ka_zahlen.py): Jede gezogene Aufgabe wird vor dem Anzeigen geprüft; enthält
+ ihre Aufgabenstellung eine Zahl der Klassenarbeit (ausgenommen 230 V, 400 V, 50 Hz und ganze Zahlen bis 10) oder ihr
+ Rechenweg eine solche Zahl mit drei oder mehr geltenden Ziffern, wird neu gezogen. window.probe(n), window.kaprobe(n)
+ und window.mcprobe() liefern alles für die Prüfung von außen (b21_trainer_pruefen.py). -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Klassenarbeitstrainer: Beleuchtungstechnik</title>
+<script type="application/json" id="sim-meta">
+{"block": "E3EG-B21", "thema": "Klassenarbeitstrainer Beleuchtungstechnik", "startwerte": {"aufgabe": "keine, erst nach Wahl des Themas"}, "loesungswerte": {"aufgabe": "zufällig"}}
+</script>
+<style>
+:root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--rot:#B23A33;--rothell:#F6E4E2;--gruen:#2F7D62;--gruenhell:#EAF3EC;
+ --linie:#9AA5AE;--grau:#5A666F;--hell:#F3F1EC}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;padding:0}
+body{font-family:"Noto Sans",system-ui,Arial,sans-serif;color:var(--ink);line-height:1.45;background:#f4f6f8;padding:14px;max-width:760px;margin:0 auto;font-size:16px}
+.kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0 10px;margin-bottom:12px}
+.kopf .reihe{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--kupfer)}
+.kopf h1{font-size:22px;margin:4px 0 2px}
+.kopf .sub{color:var(--grau);font-size:14px}
+.box{background:#fff;border:1.4px solid var(--linie);padding:12px 14px;margin:12px 0}
+.box .cap{display:block;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--kupfer);margin-bottom:6px}
+.anleitung{background:var(--kupferhell);border-color:var(--kupfer)}
+.anleitung p{margin:6px 0}
+.wahl{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
+.wbtn{font:inherit;font-weight:700;border:1.4px solid var(--linie);background:#fff;color:var(--ink);padding:9px 12px;cursor:pointer;min-height:44px}
+.wbtn[aria-pressed="true"]{border-color:var(--kupfer);background:var(--kupferhell);color:var(--kupfer)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.chip{font-size:12px;font-weight:700;border:1px solid var(--linie);padding:2px 8px;color:var(--grau);background:var(--hell)}
+.frage{font-size:17px;margin:4px 0 10px}
+.eingabe{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.eingabe input{font:inherit;font-size:18px;padding:9px 10px;border:1.4px solid var(--ink);width:170px;max-width:60%}
+.eingabe .einh{font-weight:700;font-size:17px}
+.knopf{font:inherit;font-weight:700;border:1.4px solid var(--kupfer);background:var(--kupfer);color:#fff;padding:10px 16px;cursor:pointer;min-height:44px}
+.knopf.leise{background:#fff;color:var(--ink);border-color:var(--linie)}
+.knoepfe{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.fb{margin-top:12px;padding:9px 12px;font-weight:700;display:none}
+.fb.ok{display:block;border-left:5px solid var(--gruen);background:var(--gruenhell);color:var(--gruen)}
+.fb.falsch{display:block;border-left:5px solid var(--rot);background:var(--rothell);color:var(--rot)}
+.weg{display:none;margin-top:10px;border-top:1px dashed var(--linie);padding-top:8px;overflow-x:auto}
+.weg.an{display:block}
+.weg .zeile{margin:6px 0}
+.weg .lbl{display:inline-block;min-width:88px;color:var(--grau);font-size:14px}
+.weg .merke{margin-top:8px;color:var(--grau);font-size:14px}
+.mc{display:flex;flex-direction:column;gap:8px}
+.mc button{font:inherit;text-align:left;border:1.4px solid var(--linie);background:#fff;color:var(--ink);padding:10px 12px;cursor:pointer;min-height:44px}
+.mc button.richtig{border-color:var(--gruen);background:var(--gruenhell)}
+.mc button.daneben{border-color:var(--rot);background:var(--rothell)}
+.stand{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--grau)}
+.stand b{color:var(--ink)}
+.bruch{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.1;margin:0 .15em;font-size:.95em}
+.bruch>span{padding:0 .2em}
+.bruch>span:first-child{border-bottom:1.3px solid currentColor}
+i{font-style:italic;font-family:Cambria,"Caladea",Georgia,serif}
+.leer{color:var(--grau)}
+@media (max-width:420px){body{padding:10px}.kopf h1{font-size:20px}.frage{font-size:16px}.weg .lbl{display:block;min-width:0}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+
+<div class="kopf">
+ <div class="reihe">E3EG · LF&nbsp;10 · Einheit&nbsp;2 · Beleuchtungstechnik · B21</div>
+ <h1>Klassenarbeitstrainer Beleuchtungstechnik</h1>
+ <div class="sub">1 Lichtstrom und Lichtausbeute · 2 Beleuchtungsstärke · 3 Wirkungsgradmethode · 4 Energiekosten und Retrofit · 5 Verständnis</div>
+</div>
+
+<div class="box anleitung">
+ <span class="cap">So üben Sie mit dem Trainer</span>
+ <p>Der Trainer stellt Ihnen Aufgaben, wie sie in den Abschlussprüfungen zur Beleuchtungstechnik vorkommen, jedes Mal mit neuen Zahlen. Das Etikett an der Aufgabe nennt den Aufgabentyp. Wählen Sie unten ein <b>Thema</b>.</p>
+ <p>Rechnen Sie auf Papier mit vollem Rechenweg: <b>Formel, Einsetzen mit Einheiten, Ergebnis</b>. Tragen Sie nur das Ergebnis in der angegebenen Einheit ein (Komma oder Punkt). Ihr Ergebnis gilt als richtig, wenn es höchstens 1&nbsp;% abweicht. Werte aus Tabellen (Raumwirkungsgrad) und Anzahlen von Lampen geben Sie genau an. Danach zeigt der Trainer den Rechenweg.</p>
+ <p><b>Hilfsmittel</b> wie in der Klassenarbeit: Taschenrechner CALCOOM IQ-S1 (Winkel in Grad) und Tabellenbuch (Lichttechnik S. 227 bis 235). <b>Fertig, wenn</b> Sie in jedem der fünf Themen fünf Aufgaben hintereinander richtig gelöst haben.</p>
+</div>
+
+<div class="box">
+ <span class="cap">Thema</span>
+ <div class="wahl" id="wGebiet">
+  <button class="wbtn" type="button" data-g="l" aria-pressed="false">1 Lichtstrom und Lichtausbeute</button>
+  <button class="wbtn" type="button" data-g="e" aria-pressed="false">2 Beleuchtungsstärke</button>
+  <button class="wbtn" type="button" data-g="w" aria-pressed="false">3 Wirkungsgradmethode</button>
+  <button class="wbtn" type="button" data-g="k" aria-pressed="false">4 Energiekosten und Retrofit</button>
+  <button class="wbtn" type="button" data-g="v" aria-pressed="false">5 Verständnis</button>
+  <button class="wbtn" type="button" data-g="alle" aria-pressed="false">alle gemischt</button>
+ </div>
+ <div class="stand" id="stand"></div>
+</div>
+
+<div class="box" id="karte">
+ <span class="cap">Aufgabe</span>
+ <p class="leer" id="leer">Wählen Sie oben ein Thema, dann erscheint die erste Aufgabe.</p>
+ <div id="inhalt" hidden>
+  <div class="chips" id="chips"></div>
+  <div class="frage" id="frage"></div>
+  <div class="eingabe" id="eingabe"><input id="ein" type="text" inputmode="decimal" autocomplete="off" aria-label="Ihr Ergebnis"><span class="einh" id="einh"></span></div>
+  <div class="mc" id="mc" hidden></div>
+  <div class="knoepfe">
+   <button class="knopf" type="button" id="bPruefen">Prüfen</button>
+   <button class="knopf leise" type="button" id="bWeg">Rechenweg zeigen</button>
+   <button class="knopf leise" type="button" id="bNeu">Neue Aufgabe</button>
+  </div>
+  <div class="fb" id="fb"></div>
+  <div class="weg" id="weg"></div>
+ </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var $ = function(id){ return document.getElementById(id); };
+
+/* ---------- Darstellung ---------- */
+function stellen(x){ if(x === 0) return 0; return Math.max(0, 3 - Math.floor(Math.log10(Math.abs(x)) + 1e-12)); }
+function rund(x, d){ var f = Math.pow(10, d); return Math.round(x*f + (x >= 0 ? 1e-9 : -1e-9))/f; }
+function zahl(x, d){
+ if(d === undefined) d = stellen(x);
+ var s = rund(x, d).toFixed(d);
+ if(s.indexOf(".") >= 0) s = s.replace(/0+$/, "").replace(/\.$/, "");
+ var teile = s.split("."), g = teile[0], vz = "";
+ if(g.charAt(0) === "-"){ vz = "−"; g = g.slice(1); }
+ if(g.length > 4) g = g.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+ return vz + g + (teile[1] ? "," + teile[1] : "");
+}
+function fest(x, d){ return rund(x, d).toFixed(d).replace(".", ","); }
+function gl(x, d){ if(d === undefined) d = stellen(x); return Math.abs(rund(x, d) - x) <= 1e-9*Math.max(1, Math.abs(x)) ? "=" : "≈"; }
+function erg(x, einheit, d){ return gl(x, d) + " " + zahl(x, d) + (einheit ? " " + einheit : ""); }
+function br(z, n){ return '<span class="bruch"><span>' + z + '</span><span>' + n + '</span></span>'; }
+function zuf(a, b){ return a + Math.floor(Math.random()*(b - a + 1)); }
+function wahl(liste){ return liste[Math.floor(Math.random()*liste.length)]; }
+function mischen(a){ for(var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random()*(i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function zehntel(a, b){ return zuf(Math.round(a*10), Math.round(b*10))/10; }
+function hundertstel(a, b){ return zuf(Math.round(a*100), Math.round(b*100))/100; }
+var MAL = " · ";
+function ix(gr, i){ return "<i>" + gr + "</i><sub>" + i + "</sub>"; }
+var PHIV = ix("Φ", "v"), IV = ix("I", "v"), EV = ix("E", "v"), EP = ix("E", "p"), ETAV = ix("η", "v"), ETAB = ix("η", "B"),
+ ETAR = ix("η", "R"), ETALB = ix("η", "LB"), ENEU = ix("E", "neu"), EM = ix("E", "m"), KA_ = ix("K", "A");
+function grad2rad(a){ return a*Math.PI/180; }
+
+/* ---------- Zahlen der Klassenarbeit 2 (b21_ka_zahlen.py) ---------- */
+var KA = [0,0.2,0.22,0.25,0.3,0.329,0.35,0.352,0.42,0.451,0.48,0.4843,0.5,0.5265,0.53,0.57,0.6,0.62,0.65,0.67,0.68,0.7,0.7349,0.75,0.78,0.8,0.8058,0.81,0.82,0.83,0.85,0.88,0.89,0.9,0.922,0.94,0.95,0.98,1,1.1,1.2,1.3,1.33,1.4,1.5,1.51,1.73,1.74,2,2.07,2.1,2.12,2.13,2.5,2.8,2.98,3,3.1,3.2,3.3,3.4,3.42,3.58,4,4.1,4.2,4.3,4.48,4.5,4.75,4.94,4.95,5,5.1,5.13,5.2,5.3,5.35,5.4,5.5,5.6,6,6.2,7,7.1,7.17,7.2,7.3,7.4,7.5,7.6,8,8.7,8.97,9,9.56,10,11,12,12.2,12.3,12.6,12.75,13,13.026,13.14,13.2,13.5,14,15,16,16.36,16.96,17,17.5,17.88,18,18.9,19,20,21,21.74,22,22.5,23,24,25,26,27,27.07,28,29.71,30,31,31.5,33,34.02,34.1,34.92,35,36.31,36.86,38,40,41,41.2,42,44,45,47,50,52.3,53,54,55,55.2,57,58,60,61,65,67,68,69,70,72,73,75,77,78,80,80.2,81,82,87,89,89.13,89.7,90,92,93,94,94.5,99,100,120,120.5,133,134,135,137.8,140.8,156.6,160,164.43,187,187.8,190,200,206,212,230,280,298,306,312,360,365,400,410.83,435,450,451,500,501,530,600,607,613,680,690,700,730,796,826,830,840,877.2,965,1000,1300,1500,1550,2006,2009,2012,2013,2014,2015,2016,2018,2094,2200,2540,2950,3000,3300,3350,4450,4500,5200,5400,6500,8000,8415,8986,10658.7,12464,18407,20000,23813,24765,30360,33338,36000,37313.4,37782,38100,44768,50489,54001,54500,56098,56832,57150,58408,59690,60556,61603,61707,61912,61913,64860,66357,66612,66992,69204,75565,80010,80328,92075,97472,103822,107950,109391,132715,142875,155924,159998,161107,163297,165490,170180,170569,178248,185420,192923,196211,202925,229920,239578,245521,266817,266818,268605,280987,283210,285115,305945,314325,534296,831021,839153,1.10958e+06,1.11187e+06,1.29281e+06,1.30175e+06,1.34302e+06,1.43809e+06,1.52136e+06,1.59214e+06,1.69418e+06,1.73292e+06,1.82182e+06,1.86118e+06,1.9095e+06,2.06248e+06,2.07582e+06,2.08705e+06,2.26287e+06,2.35313e+06,2.38605e+06,2.49047e+06,2.62748e+06,2.77559e+06,2.99593e+06,3.09913e+06,3.11639e+06,3.12683e+06,3.33026e+06,3.35724e+06,3.44869e+06,3.6049e+06,3.82302e+06,3.9043e+06,4.2889e+06,4.59105e+06,4.80007e+06,4.99886e+06,5.02444e+06,5.30066e+06,5.49042e+06,5.59054e+06,5.70516e+06,5.83248e+06,5.95312e+06,6.06266e+06];
+function kaZahl(x){
+ if(Math.abs(x - Math.round(x)) < 1e-9 && x <= 10) return false;      /* ganze Zahlen bis 10 */
+ if(x === 230 || x === 400 || x === 50) return false;                 /* Netzspannung, Frequenz */
+ for(var i = 0; i < KA.length; i++) if(Math.abs(KA[i] - x) < 1e-9) return true;
+ return false;
+}
+/* Zahlen eines Textes (ohne Seiten- und Formelangaben des Tabellenbuchs, ohne Hochzahlen) */
+function zahlenIn(html){
+ var t = html.replace(/<sup>[^<]*<\/sup>/g, " ").replace(/<sub>[^<]*<\/sub>/g, " ").replace(/<[^>]+>/g, " ")
+  .replace(/S\. \d+( (und|bis) \d+)?/g, " ").replace(/Formel \d+( (und|bis) \d+)?/g, " ").replace(/&[a-z]+;/g, " ");
+ var aus = [], re = /(\d{1,3}(?: \d{3})+|\d+)(?:,(\d+))?/g, m;
+ while((m = re.exec(t)) !== null){ aus.push(m[1].replace(/ /g, "") + (m[2] ? "," + m[2] : "")); }
+ return aus;
+}
+function geltend(s){ var d = s.replace(",", "").replace(/^0+/, ""); if(s.indexOf(",") < 0) d = d.replace(/0+$/, ""); return d.length; }
+function wertVon(s){ return parseFloat(s.replace(",", ".")); }
+function sauber(a){
+ var f = zahlenIn(a.frage), i;
+ for(i = 0; i < f.length; i++) if(kaZahl(wertVon(f[i]))) return false;                 /* Aufgabenstellung: streng */
+ var o = zahlenIn(a.optionen ? a.optionen.join(" ") : "");
+ for(i = 0; i < o.length; i++) if(kaZahl(wertVon(o[i])) && ERLAUBT_MC.indexOf(o[i]) < 0) return false;
+ var w = zahlenIn((a.weg ? a.weg.map(function(z){ return z[1]; }).join(" ") : "") + " " + (a.merke || "") + " " + (a.begruendung || ""));
+ for(i = 0; i < w.length; i++) if(geltend(w[i]) >= 3 && kaZahl(wertVon(w[i])) && ERLAUBT_WEG.indexOf(w[i]) < 0) return false;
+ return true;
+}
+/* Werte aus Tabellenbuch und Fachkunde, die in Musterlösungen und Antwortmöglichkeiten der Verständnisfragen stehen und
+   zufällig auch in der Klassenarbeit vorkommen (Seiten in b21_trainer_pruefen.py) */
+var ERLAUBT_MC = ["16", "18", "17", "9", "80", "89", "90", "100", "3300", "6500", "1", "12,5", "60", "15", "2", "4", "5", "6"];
+var ERLAUBT_WEG = ["1000", "500", "750", "1500", "300", "200", "100", "3300", "6500"];
+
+/* ---------- Tabellenbuch S. 235 (Werte aus Block 18, am Seitenbild abgeglichen) ---------- */
+var SPALTEN = [[0.8, 0.5, 0.3], [0.8, 0.5, 0.1], [0.8, 0.3, 0.3], [0.8, 0.3, 0.1], [0.5, 0.5, 0.3], [0.5, 0.5, 0.1], [0.5, 0.3, 0.3], [0.5, 0.3, 0.1], [0.3, 0.3, 0.1]];          /* (Decke, Wände, Boden) */
+var K_TAB = [0.6, 1.0, 1.5, 2.0, 3.0, 5.0];
+var ETA_R = {"A1": {"0.6": [61, 58, 54, 52, 59, 57, 53, 51, 51], "1": [80, 75, 73, 69, 76, 73, 70, 68, 67], "1.5": [95, 86, 88, 82, 90, 84, 84, 80, 79], "2": [102, 91, 96, 87, 95, 89, 91, 86, 84], "3": [111, 97, 106, 95, 103, 95, 99, 92, 91], "5": [119, 102, 115, 100, 109, 98, 106, 97, 96]}, "A2": {"0.6": [52, 49, 43, 42, 49, 48, 42, 41, 41], "1": [73, 67, 64, 60, 69, 65, 61, 59, 58], "1.5": [89, 81, 81, 75, 83, 78, 77, 73, 72], "2": [97, 86, 89, 81, 90, 83, 84, 79, 78], "3": [107, 94, 101, 90, 99, 91, 94, 88, 86], "5": [116, 100, 111, 97, 106, 96, 102, 94, 93]}, "B3": {"0.6": [41, 39, 31, 30, 37, 35, 29, 28, 27], "1": [59, 55, 49, 46, 52, 50, 44, 43, 41], "1.5": [74, 67, 64, 60, 66, 61, 58, 55, 52], "2": [83, 74, 73, 67, 73, 68, 66, 62, 59], "3": [95, 83, 87, 77, 83, 76, 77, 71, 68], "5": [106, 91, 99, 86, 91, 83, 87, 80, 76]}, "C4": {"0.6": [36, 34, 27, 26, 29, 28, 23, 22, 19], "1": [52, 48, 43, 40, 41, 39, 35, 33, 29], "1.5": [65, 59, 56, 52, 52, 49, 45, 43, 38], "2": [74, 66, 65, 59, 58, 54, 52, 49, 43], "3": [84, 74, 77, 68, 66, 61, 61, 57, 50], "5": [94, 81, 88, 77, 74, 67, 70, 64, 56]}, "E2": {"0.6": [15, 15, 9, 10, 11, 12, 6, 8, 5], "1": [28, 27, 20, 19, 18, 19, 13, 13, 8], "1.5": [41, 39, 31, 30, 26, 25, 20, 19, 13], "2": [51, 48, 41, 40, 32, 30, 26, 25, 16], "3": [65, 58, 55, 52, 39, 37, 34, 32, 20], "5": [77, 68, 70, 63, 45, 43, 42, 39, 24]}};                /* Lichtverteilung -> {k -> [ηR in % je Spalte]} */
+var VERTEILUNG = {"A1": "direkt; stark gerichtet", "A2": "direkt; tiefstrahlend", "B3": "vorwiegend direkt; breitstrahlend", "C4": "gleichförmig; allseitig strahlend", "E2": "indirekt; hochstrahlend"};
+var LEUCHTEN = [["A1a", "A1", "Spiegelraster, engstrahlend", 60], ["A1b", "A1", "Spiegelreflektor, einlampig", 80], ["A1c", "A1", "Rundreflektor", 75], ["A2a", "A2", "Wanne, prismatisch", 60], ["A2b", "A2", "Spiegelraster, breitstrahlend", 60], ["A2c", "A2", "Spiegelreflektor, mehrlampig", 75], ["B3a", "B3", "Nurglasleuchte", 70], ["B3b", "B3", "Wanne, prismatisch", 65], ["B3c", "B3", "Wanne, opal", 50], ["C4a", "C4", "freistrahlend", 90], ["C4b", "C4", "Lamellenraster", 82], ["C4c", "C4", "Opalglasleuchte", 80], ["E2a", "E2", "Kehle breit, weiß", 70], ["E2b", "E2", "Kehle schmal, weiß", 50]];        /* [Kennung, Lichtverteilung, Leuchte, ηLB in %] */
+function kTabelle(k){ var best = null; K_TAB.forEach(function(kt){ var d = Math.abs(k - kt); if(best === null || d < best[0] - 1e-9) best = [d, kt]; }); return best[1]; }
+function grenznah(k){ var m = [0.8, 1.25, 1.75, 2.5, 4.0]; return m.some(function(x){ return Math.abs(k - x) < 0.03; }) || k < 0.62 || k > 6.5; }
+/* Reflexionsgrade nach Tabellenbuch S. 234 (Bereich in %) und der nächstliegende Spaltenwert der Tabelle S. 235 */
+var DECKE = [["weiß", "70 … 80", 0.8], ["gelb", "65 … 75", 0.8], ["Mörtel, hell", "40 … 50", 0.5], ["hellgrün", "45 … 50", 0.5], ["hellblau", "40 … 45", 0.5]];
+var WAENDE = [["weiß", "70 … 80", 0.5], ["gelb", "65 … 75", 0.5], ["hellgrün", "45 … 50", 0.5], ["hellblau", "40 … 45", 0.5], ["Mörtel, hell", "40 … 50", 0.5],
+ ["beige", "25 … 35", 0.3], ["ockergelb", "25 … 35", 0.3], ["mittelgrau", "20 … 25", 0.3], ["Beton", "15 … 25", 0.3]];
+var BODEN = [["hellbraun", "25 … 35", 0.3], ["beige", "25 … 35", 0.3], ["Holzplatte, hell", "40 … 50", 0.3], ["mittelgrau", "20 … 25", 0.3],
+ ["dunkelgrün", "10 … 15", 0.1], ["dunkelblau", "10 … 15", 0.1]];
+/* Wartungswerte Tabellenbuch S. 230 (Auswahl) und Wartungsfaktoren S. 229 */
+var RAEUME = [["ein Büro (Schreiben, Lesen, Datenverarbeitung)", 500], ["ein Büro (Ablegen, Kopieren)", 300], ["ein Büro (Technisches Zeichnen)", 750],
+ ["einen Konferenzraum", 500], ["eine Kantine", 200], ["ein Archiv", 200], ["einen Unterrichtsraum", 300], ["einen Hörsaal", 500],
+ ["eine Lehrwerkstatt", 500], ["eine Werkstatt (Montagearbeiten grob)", 300], ["eine Werkstatt (Montagearbeiten mittelfein)", 500],
+ ["eine Werkstatt (Montagearbeiten fein)", 750], ["einen Prüfplatz (Prüfen, Justieren)", 1500], ["eine Werkstatt (Schweißen)", 300],
+ ["einen Pausenraum", 100], ["eine Bibliothek (Lesebereich)", 500]];
+var VERSCHMUTZUNG = [["sehr sauberer Raum", 0.80, "Der Raum ist sehr sauber."], ["sauberer Raum", 0.67, "Der Raum ist sauber."],
+ ["normale Verschmutzung", 0.57, "Es ist mit normaler Verschmutzung zu rechnen."], ["starke Verschmutzung", 0.50, "Es ist mit starker Verschmutzung zu rechnen."]];
+
+/* ---------- Thema 1: Lichtstrom, Lichtstärke, Lichtausbeute ---------- */
+var L = [];
+L.push({typ: "Lichtstärke aus Lichtstrom und Raumwinkel", f: function(){
+ var phi = zuf(18, 380)*10, om = zehntel(0.3, 6.2), iv = phi/om;
+ return {art: "iv", p: {phi: phi, om: om}, wert: iv, einh: "cd",
+  frage: "Ein Strahler gibt den Lichtstrom " + PHIV + " = " + zahl(phi, 0) + " lm gleichmäßig in den Raumwinkel <i>Ω</i> = " + zahl(om, 1) + " sr ab. Berechnen Sie die Lichtstärke " + IV + ".",
+  weg: [["Formel", IV + " = " + br(PHIV, "<i>Ω</i>")], ["Einsetzen", IV + " = " + br(zahl(phi, 0) + " lm", zahl(om, 1) + " sr")], ["Ergebnis", IV + " " + erg(iv, "cd")]],
+  merke: "Tabellenbuch S. 227, Formel 1. Einheit: lm durch sr ist Candela (cd)."};
+}});
+L.push({typ: "Lichtstärke aus der Lichtstärkeverteilungskurve", f: function(){
+ var lv = zuf(12, 95)*5, phi = zuf(16, 480)*10, iv = lv*phi/1000;
+ return {art: "iv_lv", p: {lv: lv, phi: phi}, wert: iv, einh: "cd",
+  frage: "Aus der Lichtstärkeverteilungskurve einer Leuchte liest man für eine Richtung den Wert <i>LV</i> = " + zahl(lv, 0) + " " + br("cd", "klm") + " ab. Die Lampe der Leuchte gibt den Lichtstrom " + PHIV + " = " + zahl(phi, 0) + " lm ab. Berechnen Sie die Lichtstärke " + IV + " in dieser Richtung.",
+  weg: [["Formel", PHIV + " = " + br(IV, "<i>LV</i>") + ", umgestellt " + IV + " = <i>LV</i>" + MAL + PHIV],
+   ["Einsetzen", PHIV + " = " + zahl(phi, 0) + " lm = " + zahl(phi/1000, 3) + " klm;  " + IV + " = " + zahl(lv, 0) + " " + br("cd", "klm") + MAL + zahl(phi/1000, 3) + " klm"],
+   ["Ergebnis", IV + " " + erg(iv, "cd")]],
+  merke: "Tabellenbuch S. 227, unter Formel 1: [<i>LV</i>] = cd durch klm. Die Kurve gilt für 1000 lm; deshalb den Lichtstrom in klm einsetzen."};
+}});
+function eek(eta){ var g = [[210, "A"], [185, "B"], [160, "C"], [135, "D"], [110, "E"], [85, "F"]]; for(var i = 0; i < g.length; i++) if(eta >= g[i][0]) return g[i][1]; return "G"; }
+L.push({typ: "Lichtausbeute", f: function(){
+ var art = wahl([["LED-Röhre", 9, 36, 96, 178], ["LED-Lampe mit Sockel E27", 4.5, 15, 88, 150], ["Leuchtstofflampe", 14, 58, 66, 104], ["Halogenglühlampe", 20, 105, 12, 26]]);
+ var p = zehntel(art[1], art[2]), eta0 = zuf(art[3], art[4]), phi = Math.round(p*eta0/10)*10, eta = phi/p, klasse = eek(eta);
+ var nah = [210, 185, 160, 135, 110, 85].some(function(g){ return Math.abs(eta - g) < 1.5; });
+ if(nah) return null;
+ return {art: "eta", p: {phi: phi, p: p}, wert: eta, einh: "lm/W",
+  frage: "Eine " + art[0] + " nimmt die Leistung <i>P</i> = " + zahl(p, 1) + " W auf und gibt den Lichtstrom " + PHIV + " = " + zahl(phi, 0) + " lm ab. Berechnen Sie die Lichtausbeute " + ETAV + ".",
+  weg: [["Formel", ETAV + " = " + br(PHIV, "<i>P</i>")], ["Einsetzen", ETAV + " = " + br(zahl(phi, 0) + " lm", zahl(p, 1) + " W")], ["Ergebnis", ETAV + " " + erg(eta, "lm/W")]],
+  merke: "Tabellenbuch S. 227, Formel 9. Energieeffizienzklasse nach Tabellenbuch S. 242 (seit 01.09.2021): G unter 85 lm/W, dann Schritte von 25 lm/W bis B unter 210 lm/W, A ab 210 lm/W. Diese Lampe: Klasse " + klasse + "."};
+}});
+L.push({typ: "Leistung aus Lichtstrom und Lichtausbeute", f: function(){
+ var phi = zuf(25, 600)*10, eta = zuf(70, 175), p = phi/eta;
+ return {art: "p_eta", p: {phi: phi, eta: eta}, wert: p, einh: "W",
+  frage: "Eine LED-Leuchte soll den Lichtstrom " + PHIV + " = " + zahl(phi, 0) + " lm abgeben. Ihre Lichtausbeute beträgt " + ETAV + " = " + zahl(eta, 0) + " lm/W. Berechnen Sie die Leistungsaufnahme <i>P</i>.",
+  weg: [["Formel", ETAV + " = " + br(PHIV, "<i>P</i>") + ", umgestellt <i>P</i> = " + br(PHIV, ETAV)], ["Einsetzen", "<i>P</i> = " + br(zahl(phi, 0) + " lm", zahl(eta, 0) + " lm/W")], ["Ergebnis", "<i>P</i> " + erg(p, "W")]],
+  merke: "Tabellenbuch S. 227, Formel 9, nach <i>P</i> umgestellt."};
+}});
+
+/* ---------- Thema 2: Beleuchtungsstärke ---------- */
+var E = [];
+E.push({typ: "Beleuchtungsstärke aus Lichtstrom und Beleuchtungswirkungsgrad", f: function(){
+ var l = zehntel(3.5, 24), b = zehntel(2.5, Math.min(l, 16)), a = l*b, n = zuf(3, 36), z = wahl([1, 2]), phi = zuf(9, 70)*100, eb = hundertstel(0.31, 0.72);
+ var ev = n*z*phi*eb/a;
+ return {art: "ev", p: {l: l, b: b, n: n, z: z, phi: phi, eb: eb}, wert: ev, einh: "lx",
+  frage: "Ein Raum ist " + zahl(l, 1) + " m lang und " + zahl(b, 1) + " m breit. An der Decke hängen " + n + (z === 2 ? " zweilampige Leuchten" : " einlampige Leuchten") + ", jede Lampe gibt " + zahl(phi, 0) + " lm ab. Der Beleuchtungswirkungsgrad beträgt " + ETAB + " = " + fest(eb, 2) + ". Berechnen Sie die Beleuchtungsstärke " + EV + ".",
+  weg: [["Formel", EV + " = " + br(PHIV, "<i>A</i>") + MAL + ETAB + ",  " + PHIV + " = Zahl der Lampen" + MAL + "Lichtstrom je Lampe"],
+   ["Einsetzen", "<i>A</i> = " + zahl(l, 1) + " m" + MAL + zahl(b, 1) + " m " + erg(a, "m²", 2) + ";  " + PHIV + " = " + (n*z) + MAL + zahl(phi, 0) + " lm = " + zahl(n*z*phi, 0) + " lm;  " + EV + " = " + br(zahl(n*z*phi, 0) + " lm", zahl(a, 2) + " m²") + MAL + fest(eb, 2)],
+   ["Ergebnis", EV + " " + erg(ev, "lx")]],
+  merke: "Tabellenbuch S. 227, Formel 2. Lux ist Lumen je Quadratmeter. Zweilampige Leuchten: doppelt so viele Lampen wie Leuchten."};
+}});
+E.push({typ: "Lichtstrom für eine geforderte Beleuchtungsstärke", f: function(){
+ var l = zehntel(3.5, 24), b = zehntel(2.5, Math.min(l, 16)), a = l*b, ev = zuf(12, 95)*10, eb = hundertstel(0.31, 0.72), phi = ev*a/eb;
+ return {art: "phi_ev", p: {l: l, b: b, ev: ev, eb: eb}, wert: phi, einh: "lm",
+  frage: "Auf der Arbeitsfläche eines Raums von " + zahl(l, 1) + " m mal " + zahl(b, 1) + " m soll die Beleuchtungsstärke " + EV + " = " + zahl(ev, 0) + " lx erreicht werden. Der Beleuchtungswirkungsgrad beträgt " + ETAB + " = " + fest(eb, 2) + ". Berechnen Sie den Lichtstrom " + PHIV + ", den alle Lampen zusammen abgeben müssen.",
+  weg: [["Formel", EV + " = " + br(PHIV, "<i>A</i>") + MAL + ETAB + ", umgestellt " + PHIV + " = " + br(EV + MAL + "<i>A</i>", ETAB)],
+   ["Einsetzen", "<i>A</i> " + erg(a, "m²", 2) + ";  " + PHIV + " = " + br(zahl(ev, 0) + " lx" + MAL + zahl(a, 2) + " m²", fest(eb, 2))], ["Ergebnis", PHIV + " " + erg(phi, "lm")]],
+  merke: "Tabellenbuch S. 227, Formel 2, nach " + PHIV + " umgestellt: lx · m² = lm."};
+}});
+E.push({typ: "Beleuchtungsstärke senkrecht unter der Leuchte", f: function(){
+ var iv = zuf(12, 300)*10, h = zehntel(1.2, 6.5), ep = iv/(h*h);
+ return {art: "ep0", p: {iv: iv, h: h}, wert: ep, einh: "lx",
+  frage: "Eine Leuchte strahlt senkrecht nach unten mit der Lichtstärke " + IV + " = " + zahl(iv, 0) + " cd. Der Punkt P liegt <i>r</i> = " + zahl(h, 1) + " m senkrecht unter der Leuchte. Berechnen Sie die Beleuchtungsstärke " + EP + ".",
+  weg: [["Formel", EP + " = " + br(IV, "<i>r</i>²") + MAL + "cos <i>α</i>,  senkrecht: <i>α</i> = 0°, cos 0° = 1"], ["Einsetzen", EP + " = " + br(zahl(iv, 0) + " cd", "(" + zahl(h, 1) + " m)²") + MAL + "1"], ["Ergebnis", EP + " " + erg(ep, "lx")]],
+  merke: "Tabellenbuch S. 227, Formel 3. Doppelter Abstand: ein Viertel der Beleuchtungsstärke (die Entfernung geht im Quadrat ein)."};
+}});
+E.push({typ: "Beleuchtungsstärke in Punkt P (schräger Lichteinfall)", f: function(){
+ var iv = zuf(12, 300)*10, r = zehntel(1.5, 7.5), al = wahl([32, 37, 43, 48, 52, 56, 63]), ep = iv/(r*r)*Math.cos(grad2rad(al));
+ return {art: "ep", p: {iv: iv, r: r, al: al}, wert: ep, einh: "lx",
+  frage: "Ein Punkt P liegt <i>r</i> = " + zahl(r, 1) + " m von einer Leuchte entfernt. Der Strahl trifft unter dem Winkel <i>α</i> = " + al + "° gegen die Senkrechte auf. In dieser Richtung strahlt die Leuchte mit der Lichtstärke " + ix("I", "α") + " = " + zahl(iv, 0) + " cd. Berechnen Sie die Beleuchtungsstärke " + EP + ".",
+  weg: [["Formel", EP + " = " + br(ix("I", "α"), "<i>r</i>²") + MAL + "cos <i>α</i>"], ["Einsetzen", EP + " = " + br(zahl(iv, 0) + " cd", "(" + zahl(r, 1) + " m)²") + MAL + "cos " + al + "° = " + br(zahl(iv, 0) + " cd", zahl(r*r, 2) + " m²") + MAL + fest(Math.cos(grad2rad(al)), 4)],
+   ["Ergebnis", EP + " " + erg(ep, "lx")]],
+  merke: "Tabellenbuch S. 227, Formel 3. Rechner im Gradmodus (im Display D)."};
+}});
+
+/* ---------- Thema 3: Wirkungsgradmethode ---------- */
+function raum(){
+ var l, b, hr, ae, abh, h, k;
+ do {
+  l = zehntel(4, 28); b = zehntel(3, Math.min(l, 18)); hr = wahl([2.7, 2.9, 3.1, 3.3, 3.5, 3.7, 3.9, 4.2, 4.6, 5.2]);
+  ae = wahl([0.72, 0.74, 0.76, 0.86]); abh = wahl([0, 0, 0, 0.4, 0.45, 0.55, 1.15]); h = hr - abh - ae; k = l*b/(h*(l + b));
+ } while(grenznah(k) || kaZahl(l) || kaZahl(b) || kaZahl(hr));
+ return {l: l, b: b, hr: hr, ae: ae, abh: abh, h: h, k: k, kt: kTabelle(k)};
+}
+function raumText(r){
+ return "Ein Raum ist " + zahl(r.l, 1) + " m lang, " + zahl(r.b, 1) + " m breit und " + fest(r.hr, 2) + " m hoch. Die Arbeitsebene liegt " + fest(r.ae, 2) + " m über dem Boden. Die Leuchten sind " + (r.abh ? fest(r.abh, 2) + " m von der Decke abgehängt." : "direkt an der Decke montiert.");
+}
+function kWeg(r){
+ return [["Höhe", "<i>h</i> = " + fest(r.hr, 2) + " m" + (r.abh ? " − " + fest(r.abh, 2) + " m" : "") + " − " + fest(r.ae, 2) + " m = " + fest(r.h, 2) + " m  (Leuchte über der Arbeitsebene)"],
+  ["Formel", "<i>k</i> = " + br("<i>l</i>" + MAL + "<i>b</i>", "<i>h</i>" + MAL + "(<i>l</i> + <i>b</i>)")],
+  ["Einsetzen", "<i>k</i> = " + br(zahl(r.l, 1) + " m" + MAL + zahl(r.b, 1) + " m", fest(r.h, 2) + " m" + MAL + "(" + zahl(r.l, 1) + " m + " + zahl(r.b, 1) + " m)")],
+  ["Ergebnis", "<i>k</i> " + erg(r.k, "", 2)]];
+}
+var W = [];
+W.push({typ: "Raumindex", f: function(){
+ var r = raum();
+ return {art: "k", p: r, wert: r.k, einh: "",
+  frage: raumText(r) + " Berechnen Sie den Raumindex <i>k</i> (zwei Stellen nach dem Komma).",
+  weg: kWeg(r), merke: "Tabellenbuch S. 234, Formel 1; <i>h</i> ist die Höhe der Leuchte über der Arbeitsebene, nicht die Raumhöhe."};
+}});
+function farben(){ return {d: wahl(DECKE), w: wahl(WAENDE), bo: wahl(BODEN)}; }
+function etaR(vert, kt, f){ return ETA_R[vert][String(kt)][SPALTEN.findIndex(function(s){ return s[0] === f.d[2] && s[1] === f.w[2] && s[2] === f.bo[2]; })]; }
+function reflexWeg(f){ return "Decke " + f.d[0] + " (" + f.d[1] + " %): <i>ϱ</i><sub>1</sub> = " + fest(f.d[2], 1) + ";  Wände " + f.w[0] + " (" + f.w[1] + " %): <i>ϱ</i><sub>2</sub> = " + fest(f.w[2], 1) + ";  Boden " + f.bo[0] + " (" + f.bo[1] + " %): <i>ϱ</i><sub>3</sub> = " + fest(f.bo[2], 1); }
+function leuchteDirekt(){ return wahl(LEUCHTEN.filter(function(x){ return x[1] !== "E2"; })); }
+W.push({typ: "Raumwirkungsgrad aus der Tabelle", f: function(){
+ var r = raum(), f = farben(), le = leuchteDirekt(), er = etaR(le[1], r.kt, f);
+ var weg = kWeg(r);
+ weg.push(["Tabelle", "Tabellenwert <i>k</i> = " + fest(r.kt, 1) + ";  " + reflexWeg(f)]);
+ weg.push(["Ergebnis", "Leuchte „" + le[2] + "“: " + VERTEILUNG[le[1]] + ";  " + ETAR + " = " + er + " %"]);
+ return {art: "etaR", p: {r: r, vert: le[1], rho: [f.d[2], f.w[2], f.bo[2]]}, wert: er, einh: "%", tolAbs: 0.5,
+  frage: raumText(r) + " Oberflächen: Decke " + f.d[0] + "; Wände " + f.w[0] + "; Boden " + f.bo[0] + ". Vorgesehen sind Leuchten der Bauart „" + le[2] + "“ mit der Lichtverteilung „" + VERTEILUNG[le[1]] + "“. Ermitteln Sie den Raumwirkungsgrad " + ETAR + " in Prozent.",
+  weg: weg, merke: "Tabellenbuch S. 234 (Reflexionsgrade) und S. 235 (Raumwirkungsgrade). Raumindex und Reflexionsgrade auf den nächstliegenden Wert der Tabelle runden."};
+}});
+W.push({typ: "Neuwert der Beleuchtungsstärke", f: function(){
+ var ra = wahl(RAEUME), vs = wahl(VERSCHMUTZUNG), eneu = ra[1]/vs[1];
+ return {art: "eneu", p: {em: ra[1], wf: vs[1]}, wert: eneu, einh: "lx",
+  frage: "Für " + ra[0] + " wird eine Beleuchtung geplant. " + vs[2] + " Ermitteln Sie den Wartungswert " + EM + " und berechnen Sie den Neuwert " + ENEU + " der Beleuchtungsstärke.",
+  weg: [["Tabelle", EM + " = " + ra[1] + " lx (Tabellenbuch S. 230);  <i>WF</i> = " + fest(vs[1], 2) + " (" + vs[0] + ", S. 229)"], ["Formel", ENEU + " = " + br(EM, "<i>WF</i>")], ["Einsetzen", ENEU + " = " + br(ra[1] + " lx", fest(vs[1], 2))], ["Ergebnis", ENEU + " " + erg(eneu, "lx")]],
+  merke: "Tabellenbuch S. 234, Formel 4. Der Wartungswert darf nicht unterschritten werden; die neue Anlage muss deshalb heller sein."};
+}});
+W.push({typ: "Anzahl der Lampen (Wirkungsgradmethode)", f: function(){
+ var r, f, le, er, ra, vs, z, phi, eb, a, eneu, nn;
+ var versuche = 0;
+ do {
+  r = raum(); f = farben(); le = leuchteDirekt(); er = etaR(le[1], r.kt, f); ra = wahl(RAEUME.filter(function(x){ return x[1] >= 200; })); vs = wahl(VERSCHMUTZUNG);
+  z = wahl([1, 2]); phi = zuf(11, 62)*100; eb = le[3]/100*er/100; a = r.l*r.b; eneu = ra[1]/vs[1]; nn = eneu*a/(phi*eb);
+  versuche++;
+ } while((nn < 4 || nn > 140 || Math.abs(nn - Math.round(nn)) < 0.06 || kaZahl(phi)) && versuche < 200);
+ var lampen = Math.ceil(nn - 1e-9);
+ var weg = kWeg(r).slice(0, 4);
+ weg[3] = ["Raumindex", "<i>k</i> " + erg(r.k, "", 2) + ", Tabellenwert " + fest(r.kt, 1)];
+ weg.push(["Tabellen", reflexWeg(f) + ";  „" + le[2] + "“ (" + VERTEILUNG[le[1]] + "): " + ETALB + " = " + le[3] + " %, " + ETAR + " = " + er + " %"]);
+ weg.push(["Formel", ETAB + " = " + ETALB + MAL + ETAR + ";  " + ENEU + " = " + br(EM, "<i>WF</i>") + ";  <i>n</i> = " + br(ENEU + MAL + "<i>A</i>", ix("Φ", "L") + MAL + ETAB)]);
+ weg.push(["Einsetzen", ETAB + " = " + fest(le[3]/100, 2) + MAL + fest(er/100, 2) + " " + erg(eb, "", 4) + ";  " + EM + " = " + ra[1] + " lx, <i>WF</i> = " + fest(vs[1], 2) + ";  " + ENEU + " = " + br(ra[1] + " lx", fest(vs[1], 2)) + " " + erg(eneu, "lx", 1)]);
+ weg.push(["Einsetzen", "<i>A</i> = " + zahl(r.l, 1) + " m" + MAL + zahl(r.b, 1) + " m " + erg(a, "m²", 2) + ";  <i>n</i> = " + br(zahl(eneu, 1) + " lx" + MAL + zahl(a, 2) + " m²", zahl(phi, 0) + " lm" + MAL + fest(eb, 4)) + " " + erg(nn, "", 2)]);
+ weg.push(["Ergebnis", "aufgerundet <i>n</i> = " + lampen + " Lampen" + (z === 2 ? " (in " + Math.ceil(lampen/2) + " zweilampigen Leuchten)" : "")]);
+ return {art: "n", p: {r: r, vert: le[1], etalb: le[3], rho: [f.d[2], f.w[2], f.bo[2]], em: ra[1], wf: vs[1], phi: phi}, wert: lampen, einh: "Lampen", tolAbs: 0,
+  frage: raumText(r) + " Geplant wird für " + ra[0] + ". " + vs[2] + " Oberflächen: Decke " + f.d[0] + "; Wände " + f.w[0] + "; Boden " + f.bo[0] + ". Vorgesehen sind " + (z === 2 ? "zweilampige" : "einlampige") + " Leuchten der Bauart „" + le[2] + "“ mit der Lichtverteilung „" + VERTEILUNG[le[1]] + "“, jede Lampe gibt " + zahl(phi, 0) + " lm ab. Berechnen Sie die Anzahl der Lampen (aufgerundet).",
+  weg: weg, merke: "Tabellenbuch S. 229 (Wartungsfaktor), S. 230 (Wartungswert), S. 234 (Formel 1, 3, 4, 5; Reflexionsgrade), S. 235 (" + ETALB + ", " + ETAR + "). Wie im Beispiel des Tabellenbuchs S. 234 wird der Lichtstrom einer Lampe eingesetzt; dann zählt <i>n</i> die Lampen. Immer aufrunden."};
+}});
+
+/* ---------- Thema 4: Energiekosten und Retrofit ---------- */
+function kostenFormel(){ return "<i>W</i> = <i>P</i>" + MAL + "<i>t</i>;  " + KA_ + " = <i>W</i>" + MAL + "<i>T</i>"; }
+var KK = [];
+KK.push({typ: "Jährliche Energiekosten einer Beleuchtung", f: function(){
+ var n = zuf(6, 64), pl = wahl([32, 36, 39, 49]), pv = wahl([4, 6, 7, 8, 9]), h = wahl([6, 7, 8, 9, 10]), tage = wahl([5, 6]), wo = wahl([46, 48, 50, 51, 52]), ct = zehntel(19, 46);
+ var p = n*(pl + pv), t = h*tage*wo, w = p*t/1000, kosten = w*ct/100;
+ return {art: "kosten", p: {n: n, pl: pl, pv: pv, h: h, tage: tage, wo: wo, ct: ct}, wert: kosten, einh: "€",
+  frage: "Eine Halle wird mit " + n + " Leuchtstofflampen zu je " + pl + " W beleuchtet; jedes Vorschaltgerät hat " + pv + " W Verluste. Die Beleuchtung brennt " + h + " Stunden am Tag, an " + tage + " Tagen in der Woche und " + wo + " Wochen im Jahr. Der Arbeitspreis beträgt " + zahl(ct, 1) + " ct/kWh. Berechnen Sie die jährlichen Energiekosten.",
+  weg: [["Formel", kostenFormel()],
+   ["Einsetzen", "<i>P</i> = " + n + MAL + "(" + pl + " W + " + pv + " W) = " + zahl(p, 0) + " W;  <i>t</i> = " + h + " h" + MAL + tage + MAL + wo + " = " + zahl(t, 0) + " h;  <i>W</i> = " + zahl(p/1000, 3) + " kW" + MAL + zahl(t, 0) + " h " + erg(w, "kWh", 1)],
+   ["Einsetzen", KA_ + " = " + zahl(w, 1) + " kWh" + MAL + fest(ct/100, 3) + " " + br("€", "kWh")], ["Ergebnis", KA_ + " " + erg(kosten, "€", 2)]],
+  merke: "Tabellenbuch S. 36, Formel 7 und 8 (<i>T</i>: tariflicher Preis je kWh, in Aufgaben auch Arbeitspreis). Die Verluste des Vorschaltgeräts zählen mit. 100 ct = 1 €."};
+}});
+KK.push({typ: "Einsparung beim LED-Retrofit", f: function(){
+ var n = zuf(8, 72), pl = wahl([36, 49]), pv = wahl([4, 6, 7, 8, 9]), pled = pl === 49 ? wahl([29, 32, 34]) : wahl([29, 32]), t = zuf(16, 46)*100, ct = zehntel(19, 46);
+ var dp = pl + pv - pled, w = n*dp*t/1000, ers = w*ct/100;
+ return {art: "ersparnis", p: {n: n, pl: pl, pv: pv, pled: pled, t: t, ct: ct}, wert: ers, einh: "€",
+  frage: "In einer Lagerhalle sollen " + n + " Leuchtstofflampen zu je " + pl + " W gegen LED-Röhren zu je " + pled + " W getauscht werden (Retrofit). Die alten Vorschaltgeräte haben je " + pv + " W Verluste; die LED-Röhren arbeiten mit LED-Starter. Die Beleuchtung brennt " + zahl(t, 0) + " Stunden im Jahr, der Arbeitspreis beträgt " + zahl(ct, 1) + " ct/kWh. Berechnen Sie die jährliche Einsparung der Energiekosten.",
+  weg: [["Formel", "Δ<i>P</i> = " + ix("P", "alt") + " − " + ix("P", "LED") + ";  Δ<i>W</i> = <i>n</i>" + MAL + "Δ<i>P</i>" + MAL + "<i>t</i>;  Δ" + KA_ + " = Δ<i>W</i>" + MAL + "<i>T</i>"],
+   ["Einsetzen", ix("P", "alt") + " = " + pl + " W + " + pv + " W = " + (pl + pv) + " W;  Δ<i>P</i> = " + (pl + pv) + " W − " + pled + " W = " + dp + " W;  Δ<i>W</i> = " + n + MAL + zahl(dp/1000, 3) + " kW" + MAL + zahl(t, 0) + " h " + erg(w, "kWh", 1)],
+   ["Einsetzen", "Δ" + KA_ + " = " + zahl(w, 1) + " kWh" + MAL + fest(ct/100, 3) + " " + br("€", "kWh")], ["Ergebnis", "Δ" + KA_ + " " + erg(ers, "€", 2) + " im Jahr"]],
+  merke: "Tabellenbuch S. 36, Formel 7 und 8. Wie in der Prüfungsvorbereitung (Teil 2 S. 72) zählt bei der LED-Röhre nur ihre Bemessungsleistung; die Verluste des Vorschaltgeräts, das mit LED-Starter in der Leuchte bleibt, werden nicht gerechnet."};
+}});
+KK.push({typ: "Prozentuale Einsparung", f: function(){
+ var palt = zuf(18, 160)*10, pneu = Math.round(palt*hundertstel(0.18, 0.62)), proz = 100*(palt - pneu)/palt;
+ return {art: "prozent", p: {palt: palt, pneu: pneu}, wert: proz, einh: "%",
+  frage: "Die alte Beleuchtung eines Verkaufsraums nimmt " + zahl(palt, 0) + " W auf, die neue LED-Beleuchtung nur noch " + zahl(pneu, 0) + " W. Berechnen Sie, um wie viel Prozent die Leistungsaufnahme sinkt.",
+  weg: [["Formel", "Prozentsatz = " + br("100 %" + MAL + "Prozentwert", "Grundwert") + ";  Prozentwert = " + ix("P", "alt") + " − " + ix("P", "neu") + ", Grundwert = " + ix("P", "alt")],
+   ["Einsetzen", "Prozentsatz = " + br("100 %" + MAL + "(" + zahl(palt, 0) + " W − " + zahl(pneu, 0) + " W)", zahl(palt, 0) + " W") + " = " + br("100 %" + MAL + zahl(palt - pneu, 0) + " W", zahl(palt, 0) + " W")],
+   ["Ergebnis", "Prozentsatz " + erg(proz, "%", 1)]],
+  merke: "Tabellenbuch S. 20, Formel 9. Grundwert ist immer der alte Wert, auf den sich die Einsparung bezieht."};
+}});
+KK.push({typ: "Amortisation eines Umbaus", f: function(){
+ var n = zuf(10, 60), palt = wahl([64, 66, 71, 74, 76, 79, 86]), pneu = wahl([29, 32, 34, 37, 39, 43]), t = zuf(16, 42)*100, ct = zehntel(21, 46);
+ var ers = n*(palt - pneu)*t/1000*ct/100, kosten = zuf(8, 120)*50, jahre = kosten/ers;
+ if(jahre < 0.8 || jahre > 25) return null;
+ return {art: "amort", p: {n: n, palt: palt, pneu: pneu, t: t, ct: ct, kosten: kosten}, wert: jahre, einh: "Jahre",
+  frage: "Ein Betrieb ersetzt " + n + " alte Leuchten (je " + palt + " W einschließlich Vorschaltgerät) durch LED-Leuchten (je " + pneu + " W). Die Beleuchtung brennt " + zahl(t, 0) + " Stunden im Jahr, der Arbeitspreis beträgt " + zahl(ct, 1) + " ct/kWh. Der Umbau kostet " + zahl(kosten, 0) + " €. Berechnen Sie, nach wie vielen Jahren sich der Umbau durch die eingesparten Energiekosten amortisiert.",
+  weg: [["Formel", "Δ" + KA_ + " = <i>n</i>" + MAL + "(" + ix("P", "alt") + " − " + ix("P", "neu") + ")" + MAL + "<i>t</i>" + MAL + "<i>T</i>;  Amortisationszeit = " + br("Kosten des Umbaus", "Einsparung je Jahr")],
+   ["Einsetzen", "Δ" + KA_ + " = " + n + MAL + zahl((palt - pneu)/1000, 3) + " kW" + MAL + zahl(t, 0) + " h" + MAL + fest(ct/100, 3) + " " + br("€", "kWh") + " " + erg(ers, "€", 2)],
+   ["Einsetzen", "Amortisationszeit = " + br(zahl(kosten, 0) + " €", zahl(ers, 2) + " €/Jahr")], ["Ergebnis", erg(jahre, "Jahre")]],
+  merke: "So rechnet die Prüfungsvorbereitung (Teil 2 S. 51): Erst wenn die Einsparung die Kosten gedeckt hat, bringt der Umbau Gewinn. Wartungskosten sind hier nicht berücksichtigt."};
+}});
+KK.push({typ: "Zulässiger Mehrpreis der LED-Leuchte", f: function(){
+ var paar = wahl([[59, 29], [62, 34], [64, 32], [71, 36], [74, 37], [76, 39], [86, 43]]), palt = paar[0], pled = paar[1], h = wahl([6, 7, 8, 9, 10]), tage = wahl([5, 6]), wo = wahl([46, 48, 50, 51, 52]), jahre = wahl([2, 3, 4]), ct = zehntel(21, 46);
+ var t = h*tage*wo*jahre, w = (palt - pled)*t/1000, mehr = w*ct/100;
+ return {art: "mehrpreis", p: {palt: palt, pled: pled, t: t, ct: ct}, wert: mehr, einh: "€",
+  frage: "Eine Leuchte mit zwei Leuchtstofflampen nimmt mit EVG " + palt + " W auf, eine gleich helle LED-Leuchte " + pled + " W. Die Leuchte brennt " + h + " Stunden am Tag, an " + tage + " Tagen in der Woche und " + wo + " Wochen im Jahr; der Arbeitspreis beträgt " + zahl(ct, 1) + " ct/kWh. Berechnen Sie, um wie viel die LED-Leuchte höchstens teurer sein darf, damit sich ihr Mehrpreis nach " + jahre + " Jahren bezahlt gemacht hat.",
+  weg: [["Formel", "Δ<i>P</i> = " + ix("P", "alt") + " − " + ix("P", "LED") + ";  Δ<i>W</i> = Δ<i>P</i>" + MAL + "<i>t</i>;  Δ" + KA_ + " = Δ<i>W</i>" + MAL + "<i>T</i>"],
+   ["Einsetzen", "Δ<i>P</i> = " + palt + " W − " + pled + " W = " + (palt - pled) + " W;  <i>t</i> = " + h + " h" + MAL + tage + MAL + wo + MAL + jahre + " = " + zahl(t, 0) + " h;  Δ<i>W</i> = " + zahl((palt - pled)/1000, 3) + " kW" + MAL + zahl(t, 0) + " h " + erg(w, "kWh", 2)],
+   ["Einsetzen", "Δ" + KA_ + " = " + zahl(w, 2) + " kWh" + MAL + fest(ct/100, 3) + " " + br("€", "kWh")], ["Ergebnis", "Δ" + KA_ + " " + erg(mehr, "€", 2) + ": so viel darf die LED-Leuchte höchstens mehr kosten."]],
+  merke: "Muster wie Prüfungsvorbereitung Teil 2 S. 49: Der Mehrpreis ist bezahlt, wenn ihn die eingesparten Energiekosten decken; danach spart der Betrieb."};
+}});
+KK.push({typ: "Einsparung durch Lichtsteuerung", f: function(){
+ var p = zehntel(1.2, 9.8), t = zuf(18, 44)*100, ct = zehntel(21, 46), proz = wahl([29, 32, 34, 36, 37, 39]);
+ var kosten = p*t*ct/100, ers = kosten*proz/100;
+ return {art: "steuerung", p: {p: p, t: t, ct: ct, proz: proz}, wert: ers, einh: "€",
+  frage: "Die Beleuchtung eines Bürotrakts nimmt " + zahl(p, 1) + " kW auf und brennt " + zahl(t, 0) + " Stunden im Jahr; der Arbeitspreis beträgt " + zahl(ct, 1) + " ct/kWh. Eine Konstantlichtregelung soll nach Angabe des Herstellers " + proz + " % der Energiekosten einsparen. Berechnen Sie die Einsparung im Jahr.",
+  weg: [["Formel", kostenFormel() + ";  Einsparung = " + br("Prozentsatz" + MAL + KA_, "100 %")],
+   ["Einsetzen", "<i>W</i> = " + zahl(p, 1) + " kW" + MAL + zahl(t, 0) + " h " + erg(p*t, "kWh", 0) + ";  " + KA_ + " = " + zahl(p*t, 0) + " kWh" + MAL + fest(ct/100, 3) + " " + br("€", "kWh") + " " + erg(kosten, "€", 2)],
+   ["Einsetzen", "Einsparung = " + br(proz + " %" + MAL + zahl(kosten, 2) + " €", "100 %")], ["Ergebnis", "Einsparung " + erg(ers, "€", 2)]],
+  merke: "Tabellenbuch S. 36, Formel 7 und 8; S. 20, Formel 9 (Prozentwert). Die Fachkunde S. 403 nennt als Richtwerte für die Lichtsteuerung: Zentral-AUS 18 %, Konstantlichtregelung 17 %, Präsenzsteuerung 9 %."};
+}});
+
+/* ---------- Thema 5: Verständnis ---------- */
+var BEGRIFFE = [
+ {typ: "Lichtfarbe und Farbwiedergabe", frage: "Auf einer LED-Röhre steht die Farbkennzeichnung 865. Was gibt die erste Ziffer an?",
+  optionen: ["den Farbwiedergabeindex: 8 heißt <i>Ra</i> 80 bis 89, Farbwiedergabestufe 1B", "die Lichtfarbe: 8 heißt warmweiß", "die Leistung der Röhre"], richtig: 0,
+  begruendung: "Die 1. Kennziffer kennzeichnet die Farbwiedergabe, die 2. und 3. die Lichtfarbe: 865 heißt <i>Ra</i> 80 bis 89 (Stufe 1B) und 6500 K, tageslichtweiß (Tabellenbuch S. 231)."},
+ {typ: "Lichtfarbe und Farbwiedergabe", frage: "Welche Lichtfarbe hat eine Lampe mit der Kennzeichnung 927, und wie wirkt ihr Licht?",
+  optionen: ["warmweiß (2700 K): behaglich, gemütlich, wohnlich", "tageslichtweiß (9270 K): kühl, konzentrationsfördernd", "neutralweiß (4000 K): sachlich, klar"], richtig: 0,
+  begruendung: "27 steht für 2700 K, das liegt im Bereich warmweiß (2700 K bis 3300 K); die 9 heißt <i>Ra</i> 90 bis 100, Stufe 1A (Tabellenbuch S. 231)."},
+ {typ: "Lichtfarbe und Farbwiedergabe", frage: "In einem Raum sollen Farben möglichst echt wirken. Worauf achten Sie bei der Lampe?",
+  optionen: ["auf einen hohen Farbwiedergabeindex <i>Ra</i>; in Innenräumen mindestens 80", "auf eine möglichst hohe Farbtemperatur", "auf eine möglichst große Leistung"], richtig: 0,
+  begruendung: "Je höher der Farbwiedergabeindex <i>Ra</i>, desto echter werden die Farben wiedergegeben. In Innenräumen ist mindestens <i>Ra</i> 80 zu verwenden (Tabellenbuch S. 231). Die Farbtemperatur beschreibt nur die Lichtfarbe."},
+ {typ: "Lichtfarbe und Farbwiedergabe", frage: "Welche Lichtfarbe hat eine Lampe mit der Farbtemperatur 4000 K?",
+  optionen: ["neutralweiß (3300 K bis 5300 K)", "warmweiß", "tageslichtweiß"], richtig: 0,
+  begruendung: "Warmweiß reicht bis 3300 K, neutralweiß von 3300 K bis 5300 K, darüber kaltweiß oder tageslichtweiß (Tabellenbuch S. 231)."},
+ {typ: "Lampenarten", frage: "Warum braucht eine Leuchtstofflampe ein Vorschaltgerät?",
+  optionen: ["Sie ist eine Gasentladungslampe: Zum Zünden braucht sie eine hohe Spannung, im Betrieb muss der Strom begrenzt werden.", "Sie leuchtet nur mit Gleichspannung.", "Sie würde sonst zu wenig Wärme abgeben."], richtig: 0,
+  begruendung: "Gasentladungslampen werden über ein Vorschaltgerät betrieben: beim KVG oder VVG Drosselspule mit Starter, beim EVG ohne Starter. Das Vorschaltgerät zündet die Lampe und begrenzt den Strom (Tabellenbuch S. 238)."},
+ {typ: "Lampenarten", frage: "Was unterscheidet einen Temperaturstrahler von einer Gasentladungslampe?",
+  optionen: ["Im Temperaturstrahler (z. B. Halogenglühlampe) glüht ein Draht; den größten Teil der Leistung gibt er als Wärme ab. In der Gasentladungslampe entsteht das Licht durch eine Entladung im Gas.", "Der Temperaturstrahler braucht immer ein Vorschaltgerät.", "Gasentladungslampen werden beim Betrieb heißer als Temperaturstrahler."], richtig: 0,
+  begruendung: "Tabellenbuch S. 236 teilt die Lampen in Temperaturstrahler und Gasentladungslampen. Temperaturstrahler haben eine kleine Lichtausbeute, weil der glühende Draht vor allem Wärme abgibt."},
+ {typ: "Lampenarten", frage: "Was stimmt beim Vergleich eines elektronischen Vorschaltgeräts (EVG) mit einem konventionellen Vorschaltgerät (KVG)?",
+  optionen: ["Das EVG hat geringere Verluste, braucht keinen Starter und betreibt die Lampe flackerfrei mit hoher Frequenz.", "Das KVG hat geringere Verluste als das EVG.", "Das EVG braucht zusätzlich einen Kondensator zur Kompensation."], richtig: 0,
+  begruendung: "EVG betreiben die Lampe mit einer hohen Frequenz, haben geringere Verluste, brauchen keinen Starter und keinen Kondensator zur Blindleistungskompensation (Tabellenbuch S. 238; Prüfungsvorbereitung Teil 2 S. 71)."},
+ {typ: "LED und Betriebsgeräte", frage: "Eine Leuchtstofflampe in einer Leuchte mit KVG soll durch eine LED-Röhre ersetzt werden. Was ist zu tun?",
+  optionen: ["Leuchte ausschalten, Leuchtstofflampe und Starter entfernen, Ersatzstarter (LED-Starter) und LED-Röhre einsetzen; nicht umverdrahten, einen Hinweis in der Leuchte anbringen.", "Starter in der Leuchte lassen und nur die Röhre tauschen.", "Die Leuchte immer umverdrahten und das KVG ausbauen."], richtig: 0,
+  begruendung: "Bei Fassungen mit KVG oder VVG wird der Starter durch einen Dummy-Starter (LED-Starter, Starterbrücke) ersetzt; keine Umverdrahtung. Ein Hinweis in der Leuchte verhindert, dass später wieder eine Leuchtstoffröhre eingesetzt wird (Tabellenbuch S. 239)."},
+ {typ: "LED und Betriebsgeräte", frage: "Eine Leuchte mit EVG soll LED-Röhren erhalten, die nicht für den Betrieb am EVG geeignet sind. Was ist zu tun?",
+  optionen: ["Das EVG ausbauen und die Leuchte umverdrahten; die LED-Röhre wird direkt an 230 V angeschlossen.", "Nur den Starter tauschen.", "Nichts, jede LED-Röhre passt in jede Leuchte."], richtig: 0,
+  begruendung: "Bei Fassungen mit EVG muss die Leuchte umverdrahtet werden. Eine LED-Röhre benötigt kein Vorschaltgerät und kann direkt an 230 V angeschlossen werden; es gibt aber auch Röhren, die direkt am EVG arbeiten (Tabellenbuch S. 239)."},
+ {typ: "LED und Betriebsgeräte", frage: "Warum darf eine LED nicht ohne Strombegrenzung an eine Spannungsquelle angeschlossen werden?",
+  optionen: ["Schon wenig mehr Spannung als die Durchlassspannung lässt den Strom stark steigen; die LED wird zerstört. Deshalb Vorwiderstand oder Konstantstromquelle.", "Weil sie sonst zu dunkel leuchtet.", "Weil LEDs nur an Wechselspannung arbeiten."], richtig: 0,
+  begruendung: "Der Strom durch die LED steigt oberhalb der Durchlassspannung steil an. Sie braucht deshalb eine Strombegrenzung, z. B. einen Vorwiderstand oder eine Konstantstromquelle (Tabellenbuch S. 240)."},
+ {typ: "LED und Betriebsgeräte", frage: "Was bedeutet Retrofit bei Leuchtmitteln?",
+  optionen: ["Austausch alter Leuchtmittel, z. B. Leuchtstofflampen, gegen LED-Leuchtmittel in der vorhandenen Leuchte, möglichst ohne Umverdrahtung", "Neubau der ganzen Beleuchtungsanlage mit neuen Leuchten", "Rückbau einer Beleuchtung"], richtig: 0,
+  begruendung: "Tabellenbuch S. 242: „Retrofit: Austausch alter Leuchtstofflampen ohne Umverdrahtung“; Fachkunde S. 392: retrofit (engl.) = Nachrüstung. Die LED-Retrofitlösung wird statt des bisherigen Leuchtmittels in die bestehende Leuchte eingesetzt."},
+ {typ: "LED und Betriebsgeräte", frage: "Welchen Nachteil kann eine LED-Retrofitlösung haben?",
+  optionen: ["Wird die Wärme in der alten Leuchte schlecht abgeführt, sinkt die Lebensdauer der LED-Lampe erheblich.", "Sie braucht mehr Energie als die alte Lampe.", "Die ganze Leuchte muss entsorgt werden."], richtig: 0,
+  begruendung: "Fachkunde S. 399 nennt als Nachteile: schlechte Wärmeableitung in der Leuchte, eine andere Ausleuchtung als ursprünglich geplant, Schäden bei unsachgemäßer Prüfung der Betriebsgeräte. Als Vorteile: geringeres Verbrauchsentgelt, weniger Elektroschrott, längere Lebensdauer."},
+ {typ: "Lichtsteuerung und DALI", frage: "Was macht eine Konstantlichtregelung?",
+  optionen: ["Ein Lichtsensor misst die Beleuchtungsstärke; die Leuchten werden so gedimmt, dass mit dem Tageslicht zusammen der eingestellte Sollwert erreicht wird.", "Sie schaltet das Licht ein, sobald sich jemand bewegt.", "Sie hält die Leistungsaufnahme der Leuchten immer gleich."], richtig: 0,
+  begruendung: "Bei der Konstantlichtregelung dimmt der Konstantlichtregler die Leuchten nach dem Tageslicht; fensternahe Leuchten werden stärker gedimmt (Fachkunde S. 403). So spart sie Energie."},
+ {typ: "Lichtsteuerung und DALI", frage: "Wie viele Betriebsgeräte können an einer DALI-Linie einzeln angesprochen werden?",
+  optionen: ["64", "16", "256"], richtig: 0,
+  begruendung: "An einer DALI-Linie arbeiten bis zu 64 Betriebsgeräte mit eigener Adresse; sie lassen sich in 16 Gruppen zusammenfassen, dazu kommen 16 Lichtszenen (Tabellenbuch S. 155; Fachkunde S. 403)."},
+ {typ: "Lichtsteuerung und DALI", frage: "Wofür steht DALI?",
+  optionen: ["Digital Addressable Lighting Interface: digitale, adressierbare Schnittstelle für die Beleuchtung", "Dimmbare Anlage für Licht und Installation", "Direkt angeschlossene Leuchten-Installation"], richtig: 0,
+  begruendung: "DALI, Abk. für: Digital Addressable Lighting Interface (engl.). Das Steuergerät spricht die Betriebsgeräte über eine Steuerleitung einzeln, in Gruppen oder alle zusammen an (Tabellenbuch S. 155)."},
+ {typ: "Lichtsteuerung und DALI", frage: "Warum spart eine Präsenzsteuerung Energie?",
+  optionen: ["Sie schaltet die Beleuchtung aus, wenn nach Ablauf der Nachlaufzeit niemand mehr im Raum ist.", "Sie erhöht die Lichtausbeute der Lampen.", "Sie senkt den Arbeitspreis."], richtig: 0,
+  begruendung: "Der Präsenzmelder erkennt, ob jemand im Raum ist. Ist der Raum leer, schaltet er das Licht nach der eingestellten Zeit aus (Fachkunde S. 403: Präsenzsteuerung spart rund 9 % der Energiekosten)."},
+ {typ: "Lichtsteuerung und DALI", frage: "Wie viel Energiekosten spart Lichtsteuerung nach den Richtwerten der Fachkunde?",
+  optionen: ["Zentral-AUS 18 %, Konstantlichtregelung 17 %, Präsenzsteuerung 9 %", "jede Lichtsteuerung mehr als die Hälfte", "nichts, weil die Steuerung selbst Energie braucht"], richtig: 0,
+  begruendung: "Fachkunde S. 403: Lichtsteuerung reduziert die Energiekosten durch Zentral-AUS um 18 %, durch Konstantlichtregelung um 17 %, durch Präsenzsteuerung um 9 %. Über das ganze Jahr ist es weniger als in einer hellen Mittagsstunde, weil morgens, abends und im Winter wenig Tageslicht einfällt."},
+ {typ: "Kennzeichnung und Schutzarten", frage: "Eine Leuchte trägt die Angabe IP 66. Was bedeutet das?",
+  optionen: ["staubdicht und geschützt gegen starkes Strahlwasser", "Schutzklasse 6", "geschützt gegen Fremdkörper ab 12,5 mm und gegen Tropfwasser"], richtig: 0,
+  begruendung: "Erste Kennziffer 6: Drahtschutz, staubdicht. Zweite Kennziffer 6: Schutz gegen starkes Strahlwasser (Tabellenbuch S. 345)."},
+ {typ: "Kennzeichnung und Schutzarten", frage: "Was bedeutet das Zeichen „Quadrat im Quadrat“ auf einer Leuchte?",
+  optionen: ["Schutzklasse II: doppelte oder verstärkte Isolierung, kein Schutzleiteranschluss", "Schutzklasse I: Schutzmaßnahme mit Schutzleiter", "Schutzklasse III: Schutzkleinspannung"], richtig: 0,
+  begruendung: "Tabellenbuch S. 104: Schutzklasse I Zeichen Erde im Kreis (mit Schutzleiter), Schutzklasse II Quadrat im Quadrat (doppelte oder verstärkte Isolierung), Schutzklasse III Raute mit III (SELV, PELV)."},
+ {typ: "Kennzeichnung und Schutzarten", frage: "Was bescheinigt das CE-Zeichen auf einer Leuchte?",
+  optionen: ["Der Hersteller bescheinigt, dass sie den EU-Richtlinien entspricht; eine unabhängige Prüfstelle hat sie damit nicht geprüft.", "Eine unabhängige Prüfstelle hat die Leuchte geprüft.", "Die Leuchte ist für Leuchtstofflampen geeignet."], richtig: 0,
+  begruendung: "Tabellenbuch S. 104: CE ist die Bescheinigung des Herstellers für die Übereinstimmung mit EU-Richtlinien. Eine Zertifizierung durch ein unabhängiges Institut zeigt z. B. das ENEC-Zeichen (S. 345)."},
+ {typ: "Kennzeichnung und Schutzarten", frage: "Welche zweite Kennziffer der Schutzart braucht eine Leuchte, die aus allen Richtungen mit einem Wasserstrahl gereinigt wird?",
+  optionen: ["mindestens 5: Schutz gegen Strahlwasser", "1: Schutz gegen senkrecht fallendes Tropfwasser", "0: kein Wasserschutz"], richtig: 0,
+  begruendung: "Tabellenbuch S. 345: zweite Kennziffer 4 Spritzwasser, 5 Strahlwasser, 6 starkes Strahlwasser."},
+ {typ: "Energieeffizienz", frage: "Welches Vorschaltgerät für Leuchtstofflampen hat den besten Energieeffizienzindex?",
+  optionen: ["A1: dimmbares elektronisches Vorschaltgerät mit reduzierten Verlusten", "B2: magnetisches Vorschaltgerät mit geringen Verlusten", "A3: elektronisches Vorschaltgerät"], richtig: 0,
+  begruendung: "Fachkunde S. 392, Tabelle 1: Der Energieeffizienzindex EEI reicht von A1 (dimmbares EVG mit reduzierten Verlusten) über A2 und A3 (EVG) bis B1 und B2 (magnetische Vorschaltgeräte, VVG)."},
+ {typ: "Energieeffizienz", frage: "Wonach richtet sich seit September 2021 die Energieeffizienzklasse einer LED-Röhre?",
+  optionen: ["nach der Lichtausbeute in lm/W: unter 85 lm/W Klasse G, ab 210 lm/W Klasse A", "nach der Leistungsaufnahme in W", "nach der Lebensdauer in Stunden"], richtig: 0,
+  begruendung: "Tabellenbuch S. 242: G unter 85 lm/W, dann in Schritten von 25 lm/W bis B unter 210 lm/W, A ab 210 lm/W. Fachkunde S. 392: Seit September 2021 gilt die Skala A bis G."}];
+var V = [{typ: "", f: function(){ var b = wahl(BEGRIFFE); return {art: "begriff", mc: true, p: {}, frage: b.frage, optionen: b.optionen, richtig: b.richtig, begruendung: b.begruendung, typText: b.typ}; }}];
+
+var GEBIETE = {l: {name: "1 Lichtstrom und Lichtausbeute", liste: L}, e: {name: "2 Beleuchtungsstärke", liste: E}, w: {name: "3 Wirkungsgradmethode", liste: W},
+ k: {name: "4 Energiekosten und Retrofit", liste: KK}, v: {name: "5 Verständnis", liste: V}};
+var zustand = {gebiet: null, aufgabe: null, geprueft: false, richtig: 0, gesamt: 0, folge: {l: 0, e: 0, w: 0, k: 0, v: 0}};
+
+function ziehenAus(gen){
+ for(var i = 0; i < 5000; i++){ var a = gen.f(); if(a && sauber(a)){ window.__versuche = (window.__versuche || {}); var s = window.__versuche[gen.typ] = window.__versuche[gen.typ] || [0, 0]; s[0]++; s[1] += i + 1; return a; } }
+ throw new Error("keine saubere Aufgabe: " + gen.typ);
+}
+function ziehen(){
+ var gk = zustand.gebiet === "alle" ? wahl(["l", "e", "w", "k", "v"]) : zustand.gebiet;
+ var gen = wahl(GEBIETE[gk].liste), a = ziehenAus(gen);
+ a.gebiet = gk; a.typ = a.typText || gen.typ; a.tol = gen.tol || 0.01;
+ return a;
+}
+function zeigen(){
+ var a = zustand.aufgabe;
+ $("leer").hidden = true; $("inhalt").hidden = false;
+ $("chips").innerHTML = '<span class="chip">' + GEBIETE[a.gebiet].name + '</span>' + (a.typ ? '<span class="chip">Prüfungstyp: ' + a.typ + '</span>' : "");
+ $("frage").innerHTML = a.frage;
+ $("fb").className = "fb"; $("fb").innerHTML = "";
+ $("weg").className = "weg"; $("weg").innerHTML = "";
+ zustand.geprueft = false;
+ if(a.mc){
+  $("eingabe").hidden = true; $("mc").hidden = false; $("bPruefen").hidden = true; $("bWeg").hidden = true;
+  var reihe = mischen(a.optionen.map(function(o, i){ return i; }));
+  $("mc").innerHTML = reihe.map(function(i){ return '<button type="button" data-i="' + i + '">' + a.optionen[i] + '</button>'; }).join("");
+  Array.prototype.forEach.call($("mc").querySelectorAll("button"), function(b){ b.addEventListener("click", function(){ mcWahl(+b.getAttribute("data-i")); }); });
+ } else {
+  $("eingabe").hidden = false; $("mc").hidden = true; $("bPruefen").hidden = false; $("bWeg").hidden = false;
+  $("ein").value = ""; $("einh").innerHTML = a.einh || "(ohne Einheit)";
+ }
+}
+function neu(){ if(!zustand.gebiet) return; zustand.aufgabe = ziehen(); zeigen(); }
+function wegZeigen(){
+ var a = zustand.aufgabe; if(!a || a.mc) return;
+ if(!zustand.geprueft){ zustand.geprueft = true; werten(false); $("fb").className = "fb falsch"; $("fb").textContent = "Rechenweg angesehen: Diese Aufgabe zählt nicht als gelöst, die Folge beginnt neu."; }
+ $("weg").innerHTML = a.weg.map(function(z){ return '<div class="zeile"><span class="lbl">' + z[0] + '</span> ' + z[1] + '</div>'; }).join("") + (a.merke ? '<div class="merke">' + a.merke + '</div>' : "");
+ $("weg").className = "weg an";
+}
+function werten(ok){
+ zustand.gesamt++; if(ok) zustand.richtig++;
+ var g = zustand.aufgabe.gebiet; zustand.folge[g] = ok ? zustand.folge[g] + 1 : 0;
+ stand();
+}
+function richtigText(a){
+ if(a.art === "n") return a.wert + " Lampen";
+ if(a.art === "etaR") return a.wert + " %";
+ if(a.art === "k") return fest(a.wert, 2);
+ return zahl(a.wert, a.einh === "€" ? 2 : undefined) + (a.einh ? " " + a.einh : "");
+}
+function pruefen(){
+ var a = zustand.aufgabe; if(!a || a.mc || zustand.geprueft) return;
+ var roh = $("ein").value.trim().replace(/\s/g, "").replace(",", ".").replace("−", "-");
+ if(roh === "" || isNaN(+roh)){ $("fb").className = "fb falsch"; $("fb").textContent = "Bitte eine Zahl eingeben, zum Beispiel 12,5."; return; }
+ var x = +roh, soll = a.wert;
+ var ok = Math.abs(x - soll) <= (a.tolAbs !== undefined ? a.tolAbs : a.tol*Math.abs(soll)) + 1e-9;
+ zustand.geprueft = true; werten(ok);
+ $("fb").className = ok ? "fb ok" : "fb falsch";
+ $("fb").innerHTML = ok ? "Richtig. Vergleichen Sie Ihren Rechenweg mit dem unten." : "Noch nicht richtig. Richtig ist " + richtigText(a) + ". Sehen Sie sich den Rechenweg an.";
+ wegZeigen();
+}
+function mcWahl(i){
+ var a = zustand.aufgabe; if(zustand.geprueft) return;
+ var ok = i === a.richtig; zustand.geprueft = true; werten(ok);
+ Array.prototype.forEach.call($("mc").querySelectorAll("button"), function(b){
+  var k = +b.getAttribute("data-i");
+  if(k === a.richtig) b.classList.add("richtig"); else if(k === i) b.classList.add("daneben");
+ });
+ $("fb").className = ok ? "fb ok" : "fb falsch";
+ $("fb").innerHTML = (ok ? "Richtig. " : "Nicht richtig. ") + '<span style="font-weight:400;color:var(--ink)"><b>Musterlösung:</b> ' + a.begruendung + "</span>";
+}
+function stand(){
+ var f = zustand.folge, fertig = f.l >= 5 && f.e >= 5 && f.w >= 5 && f.k >= 5 && f.v >= 5;
+ $("stand").innerHTML = "<span>Richtig: <b>" + zustand.richtig + "</b> von <b>" + zustand.gesamt + "</b></span>" +
+  "<span>In Folge richtig: Thema 1 <b>" + f.l + "</b>, Thema 2 <b>" + f.e + "</b>, Thema 3 <b>" + f.w + "</b>, Thema 4 <b>" + f.k + "</b>, Thema 5 <b>" + f.v + "</b></span>" +
+  (fertig ? '<span style="color:var(--gruen);font-weight:700">Fertig: in allen fünf Themen fünf in Folge richtig.</span>' : "");
+}
+function knoepfe(gruppe, attr, feld){
+ Array.prototype.forEach.call($(gruppe).querySelectorAll("button"), function(b){
+  b.addEventListener("click", function(){
+   Array.prototype.forEach.call($(gruppe).querySelectorAll("button"), function(x){ x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+   zustand[feld] = b.getAttribute(attr); neu();
+   /* Am Handy liegt die Aufgabe nach der Wahl unter dem sichtbaren Bereich: dorthin springen (wie Block 10) */
+   var karte = $("karte"), r = karte.getBoundingClientRect();
+   if(r.top < 0 || r.top > window.innerHeight*0.35){
+    var ruhig = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    karte.scrollIntoView({block: "start", behavior: ruhig ? "auto" : "smooth"});
+   }
+  });
+ });
+}
+knoepfe("wGebiet", "data-g", "gebiet");
+$("bPruefen").addEventListener("click", pruefen);
+$("bWeg").addEventListener("click", wegZeigen);
+$("bNeu").addEventListener("click", neu);
+$("ein").addEventListener("keydown", function(ev){ if(ev.key === "Enter") pruefen(); });
+stand();
+
+/* ---------- Prüfhilfen für die Nachrechnung von außen ---------- */
+function plain(h){ return h.replace(/<sub>([^<]*)<\/sub>/g, "_$1").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(); }
+window.probe = function(n){
+ var aus = [];
+ ["l", "e", "w", "k"].forEach(function(gk){
+  GEBIETE[gk].liste.forEach(function(gen, k){
+   for(var i = 0; i < n; i++){ var a = ziehenAus(gen); aus.push({gebiet: gk, gen: k, typ: gen.typ, tol: gen.tol || 0.01, tolAbs: a.tolAbs, art: a.art, p: a.p, wert: a.wert, frage: plain(a.frage), frageHtml: a.frage,
+    weg: a.weg.map(function(z){ return z[0] + ": " + plain(z[1]); }).join(" | "), merke: plain(a.merke || ""), richtigText: richtigText(a)}); }
+  });
+ });
+ return aus;
+};
+window.kaprobe = function(n){
+ var frage = {}, weg = {};
+ window.probe(n).forEach(function(a){
+  zahlenIn(a.frageHtml).forEach(function(z){ frage[z] = (frage[z] || 0) + 1; });
+  zahlenIn(a.weg + " " + a.merke).forEach(function(z){ weg[z] = (weg[z] || 0) + 1; });
+ });
+ return {frage: frage, weg: weg};
+};
+window.mcprobe = function(){ return BEGRIFFE.map(function(b){ return {frage: plain(b.frage), optionen: b.optionen.map(plain), begruendung: plain(b.begruendung), zahlenFrage: zahlenIn(b.frage), zahlenRest: zahlenIn(b.optionen.join(" ") + " " + b.begruendung)}; }); };
+/* nur lesend, für den Klickweg von außen: der Sollwert der angezeigten Aufgabe (die Eingabe läuft über echte Tasten) */
+window.__soll = function(){ var a = zustand.aufgabe; return a ? {wert: a.wert, mc: !!a.mc, richtig: a.richtig, art: a.art} : null; };
+window.tabellen = {ETA_R: ETA_R, SPALTEN: SPALTEN, LEUCHTEN: LEUCHTEN, KA: KA, ERLAUBT_MC: ERLAUBT_MC, ERLAUBT_WEG: ERLAUBT_WEG};
+})();
+</script>
