@@ -8,8 +8,9 @@
        den Raumwirkungsgrad: mehr Leuchten. Ein kleinerer Wartungsfaktor (mehr Verschmutzung) verlangt mehr Leuchten.
      Vorbild: die Planungssoftware der Leuchtenhersteller (Tabellenbuch S. 233: „Berechnungen erfolgen meist mittels
        Software der Leuchtenhersteller“). Die Schüler setzen Leuchten, bis der Wartungswert erreicht ist.
-     Rechenmodell (Wirkungsgradmethode, Tabellenbuch S. 229, 233 bis 235): h = Raumhöhe − Abhängung − Arbeitsebene;
-       k = l · b / (h · (l + b)); Tabellenwert = nächstliegender Wert aus 0,6 · 1,0 · 1,5 · 2,0 · 3,0 · 5,0 (genau in der
+     Rechenmodell (Wirkungsgradmethode, Tabellenbuch S. 229, 233 bis 235): direkt: h = Raumhöhe − Abhängung −
+       Arbeitsebene, k = l · b / (h · (l + b)) (Formel 1); indirekt (Lichtverteilung E2, Kehle): hr = Raumhöhe −
+       Arbeitsebene, ki = 3 · l · b / (2 · hr · (l + b)) (Formel 2, Prüfer 18.11.2026); Tabellenwert = nächstliegender Wert aus 0,6 · 1,0 · 1,5 · 2,0 · 3,0 · 5,0 (genau in der
        Mitte der kleinere; unter 0,6: außerhalb der Tabelle, keine Werte); ηR aus der Tabelle S. 235 (Lichtverteilung der
        Leuchte, Spalte der Reflexionsgrade); ηB = ηLB · ηR; Neuwert der Anlage Eneu = N · z · ΦL · ηB / A;
        Wartungswert der Anlage = WF · Eneu. „Erreicht“, wenn Wartungswert ≥ gefordert (ungerundet verglichen).
@@ -90,7 +91,7 @@
 
  <div class="buehne">
   <div class="messwerte" aria-live="polite">
-   <div class="kachel"><span class="name">Raumindex <span class="fz">k</span></span><span class="zahl" id="mK"></span><span class="neben" id="mKT"></span></div>
+   <div class="kachel"><span class="name" id="nK">Raumindex <span class="fz">k</span></span><span class="zahl" id="mK"></span><span class="neben" id="mKT"></span></div>
    <div class="kachel"><span class="name">Raumwirkungs&shy;grad <span class="fz">η</span><sub>R</sub></span><span class="zahl" id="mER"></span><span class="neben" id="mERq"></span></div>
    <div class="kachel"><span class="name">Beleuchtungs&shy;wirkungsgrad <span class="fz">η</span><sub>B</sub></span><span class="zahl" id="mEB"></span><span class="neben" id="mLB"></span></div>
    <div class="anlage">
@@ -206,8 +207,11 @@ function kTabelle(k){
 }
 function spalte(){ for(var i=0;i<SPALTEN.length;i++){ var s=SPALTEN[i]; if(s[0]===z.rho[0]&&s[1]===z.rho[1]&&s[2]===z.rho[2]) return i; } return -1; }
 function rechnen(){
-  var L=leuchte(), h=z.hr-z.abh-z.ae, k=z.l*z.b/(h*(z.l+z.b)), kt=kTabelle(k), sp=spalte();
-  var r={h:h,k:k,kt:kt,sp:sp,vert:L[1],lb:L[3]/100,er:null,eb:null,eneu:null,em:null};
+  var L=leuchte(), ind=(L[1]==="E2"), h, k;
+  if(ind){ h=z.hr-z.ae; k=3*z.l*z.b/(2*h*(z.l+z.b)); }      // indirekt: Formel 2 mit hr (Decke ab Arbeitsebene)
+  else { h=z.hr-z.abh-z.ae; k=z.l*z.b/(h*(z.l+z.b)); }      // direkt: Formel 1 mit h (Leuchte ab Arbeitsebene)
+  var kt=kTabelle(k), sp=spalte();
+  var r={h:h,k:k,kt:kt,sp:sp,vert:L[1],ind:ind,lb:L[3]/100,er:null,eb:null,eneu:null,em:null};
   if(kt!==null&&sp>=0){
     r.er=ETA_R[L[1]][kt.toFixed(1)][sp]/100;
     r.eb=r.lb*r.er;
@@ -257,10 +261,13 @@ function schnitt(r){
   text(g,102,(yd+YB)/2+42,komma(z.hr,2)+" m",20,"#1A2530","end");
   if(YB-ya>26) pfeil(g,470,ya,YB,"#2557A3");
   text(g,482,Math.min(YB-2,(ya+YB)/2+8),komma(z.ae,2)+" m",20,"#2557A3","start");
-  pfeil(g,470,yl+8,ya,"#A34E0E"); text(g,482,(yl+ya)/2-4,"h",30,"#A34E0E","start",true);
-  text(g,482,(yl+ya)/2+20,komma(r.h,2)+" m",20,"#A34E0E","start");
+  if(!ind){ pfeil(g,470,yl+8,ya,"#A34E0E"); text(g,482,(yl+ya)/2-4,"h",30,"#A34E0E","start",true); }
+  else { pfeil(g,470,yd,ya,"#A34E0E");
+    var th=el("text",{x:482,y:(yd+ya)/2-4,"font-size":30,fill:"#A34E0E","font-family":"Cambria,Caladea,'Noto Serif',Georgia,serif","font-style":"italic","font-weight":"700"},"h");
+    th.appendChild(el("tspan",{"font-size":18,dy:6},"r")); g.appendChild(th); }
+  text(g,482,(ind?(yd+ya):(yl+ya))/2+20,komma(r.h,2)+" m",20,"#A34E0E","start");
   text(g,X0+6,ya-8,"Arbeitsebene",18,"#2557A3","start");
-  if(z.abh>0) text(g,X1-6,yd+28,"abgehängt "+komma(z.abh,2)+" m",16,"#1A2530","end");
+  if(z.abh>0) text(g,X1+14,yd-18,"Leuchten abgehängt "+komma(z.abh,2)+" m",16,"#1A2530","end");   // über der Decke, frei von den Leuchten
 }
 function grundriss(){
   var g=$("gG"); while(g.firstChild) g.removeChild(g.firstChild);
@@ -327,6 +334,7 @@ function auffrischen(){
   $("aEM").textContent=gruppe(z.em)+" lx"; $("rEM").value=z.em;
   $("aN").textContent=z.leuchten; $("aR").textContent=Math.min(z.reihen,z.leuchten);
   $("mK").textContent=komma(r.k,2);
+  $("nK").innerHTML=r.ind?"Raumindex <span class='fz'>k</span><sub>i</sub> (indirekt)":"Raumindex <span class='fz'>k</span>";
   $("mKT").textContent=(r.kt===null)?"unter 0,6: nicht in der Tabelle":"Tabellenwert "+komma(r.kt,1);
   $("mLB").innerHTML="<span class='fz'>η</span><sub>LB</sub> = "+Math.round(r.lb*100)+" %";
   $("mN").textContent=z.leuchten+(z.zl>1?" · "+z.zl+" Lampen":"");
