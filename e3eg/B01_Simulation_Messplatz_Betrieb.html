@@ -7,10 +7,10 @@
 <!-- sim_bearbeitung: pflicht -->
 <script type="application/json" id="sim-meta">
 {"startwerte": {"n": 30, "cosphi": 0.65},
- "loesungswerte": {"n": 24, "cosphi": 0.5},
- "weitere_loesungswerte": {"n": [24, 26, 27, 48, 49, 20], "cosphi": [1.0, 0.7, 0.5, 0.9]},
- "bereich": {"n": [0, 60], "cosphi": [0.3, 1.0]},
- "gekoppelt": "B01_Arbeitsblatt.docx, Aufgabe 2 und 3; Probe zu Aufgabe 4 an der Tafel",
+ "loesungswerte": {"n": 13, "cosphi": 0.5},
+ "weitere_loesungswerte": {"n": [13, 17, 18, 31, 32], "cosphi": [1.0, 0.7, 0.5, 0.9]},
+ "bereich": {"n": [0, 40], "cosphi": [0.3, 1.0]},
+ "gekoppelt": "B01_Arbeitsblatt.docx, Aufgabe 2 und 3",
  "ziel_erkenntnis": "Bei gleicher Wirkleistung ist die Stromstaerke in der Zuleitung umso groesser, je kleiner der Wirkfaktor ist; der Leitungsschutzschalter laesst deshalb bei kleinem Wirkfaktor weniger Leuchten zu."}
 </script>
 <style>
@@ -65,14 +65,14 @@ svg text{font-family:"Noto Sans",Arial,sans-serif;fill:var(--ink)}
   <h2>Anzeigen der Messgeräte</h2>
   <div class="geraete">
    <div class="geraet"><div class="name">Spannungsmesser</div><div class="wert" id="aU">230 V</div><div class="zeichen"><i>U</i></div></div>
-   <div class="geraet"><div class="name">Strommesser</div><div class="wert" id="aI">13,85 A</div><div class="zeichen"><i>I</i></div></div>
-   <div class="geraet"><div class="name">Leistungsmesser</div><div class="wert" id="aP">2070 W</div><div class="zeichen"><i>P</i></div></div>
+   <div class="geraet"><div class="name">Strommesser</div><div class="wert" id="aI">13,04 A</div><div class="zeichen"><i>I</i></div></div>
+   <div class="geraet"><div class="name">Leistungsmesser</div><div class="wert" id="aP">1950 W</div><div class="zeichen"><i>P</i></div></div>
   </div>
   <div class="strom">
    <p class="titel">Stromstärke <i>I</i> in der Zuleitung</p>
    <div class="skala"><div class="fuell" id="fuell"></div><div class="marke" id="marke"></div></div>
    <div class="zahlen" id="zahlen"></div>
-   <p class="hinweis" style="margin-top:4px">Senkrechter Strich: Bemessungsstrom 16&nbsp;A des Leitungsschutzschalters, der die Zuleitung schützt.</p>
+   <p class="hinweis" style="margin-top:4px">Senkrechter Strich: Bemessungsstrom 10&nbsp;A des Leitungsschutzschalters, der die Zuleitung schützt.</p>
   </div>
  </div>
  <div class="karte">
@@ -80,7 +80,7 @@ svg text{font-family:"Noto Sans",Arial,sans-serif;fill:var(--ink)}
   <div class="regler">
    <div class="zeile"><label for="rn"><span>Zahl der Leuchten <i>n</i></span><output id="on">30</output></label>
     <div class="bedien"><button type="button" id="nm" aria-label="eine Leuchte weniger">&minus;</button>
-    <input type="range" id="rn" min="0" max="60" step="1" value="30" aria-label="Zahl der Leuchten">
+    <input type="range" id="rn" min="0" max="40" step="1" value="30" aria-label="Zahl der Leuchten">
     <button type="button" id="np" aria-label="eine Leuchte mehr">+</button></div></div>
    <div class="zeile"><label for="rc"><span>Wirkfaktor cos <i>φ</i> der Leuchten</span><output id="oc">0,65</output></label>
     <div class="bedien"><button type="button" id="cm" aria-label="Wirkfaktor kleiner">&minus;</button>
@@ -88,7 +88,7 @@ svg text{font-family:"Noto Sans",Arial,sans-serif;fill:var(--ink)}
     <button type="button" id="cp" aria-label="Wirkfaktor größer">+</button></div></div>
    <button type="button" class="reset" id="reset">Zurücksetzen auf die Startstellung</button>
   </div>
-  <p class="hinweis">Jede Leuchte: Leuchtstofflampe 58 W mit Vorschaltgerät 11 W.</p>
+  <p class="hinweis">Jede Leuchte: Leuchtstofflampe 58&nbsp;W mit verlustarmem Vorschaltgerät 7&nbsp;W.</p>
  </div>
 </div>
 <div class="karte">
@@ -141,12 +141,13 @@ svg text{font-family:"Noto Sans",Arial,sans-serif;fill:var(--ink)}
 "use strict";
 var META = JSON.parse(document.getElementById('sim-meta').textContent);
 var START = META.startwerte;
-var U = 230, P_LAMPE = 58, P_VG = 11, I_N = 16, I_SKALA = 60;
+var U = 230, P_LAMPE = 58, P_VG = 7, I_N = 10, I_SKALA = 40;
 var rn = document.getElementById('rn'), rc = document.getElementById('rc');
 
 function komma(x, stellen){ return x.toFixed(stellen).replace('.', ','); }
 
-/* Rechenmodell: Wirkleistung je Leuchte 58 W + 11 W (Europa Fachkunde S. 143, Beispiel);
+/* Rechenmodell: Wirkleistung je Leuchte 58 W + 7 W (verlustarmes Vorschaltgeraet; Pruefungsvorbereitung aktuell,
+   Abschlusspruefung Teil 2, Elektroniker/-in fuer Betriebstechnik, Loesungen, S. 54, Aufgabe 1.4);
    Wirkleistung P = n mal Leistung je Leuchte; Scheinleistung S = P / cos phi (Tabellenbuch S. 37, Formel 5 umgestellt);
    Stromstaerke I = S / U (Tabellenbuch S. 37, neben Formel 1). Die Seite zeigt weder S noch eine Formel. */
 function modell(){
@@ -156,11 +157,11 @@ function modell(){
 }
 
 var zahlen = document.getElementById('zahlen');
-[0, 10, 20, 30, 40, 50, 60].forEach(function(a){
+[0, 10, 20, 30, 40].forEach(function(a){
   var s = document.createElement('span'); s.style.left = (a / I_SKALA * 100) + '%';
-  s.textContent = a + (a === 60 ? ' A' : '');
+  s.textContent = a + (a === I_SKALA ? ' A' : '');
   if(a === 0) s.style.transform = 'none';
-  if(a === 60) s.style.transform = 'translateX(-100%)';
+  if(a === I_SKALA) s.style.transform = 'translateX(-100%)';
   zahlen.appendChild(s);
 });
 document.getElementById('marke').style.left = (I_N / I_SKALA * 100) + '%';
