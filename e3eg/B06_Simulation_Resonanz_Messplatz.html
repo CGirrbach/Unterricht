@@ -1,0 +1,418 @@
+<!doctype html>
+<!-- E3EG B06 · Messplatz Resonanz bei der Kompensation (Umbau 13.11.2026, Carlo: „geh mehr auf die Gefahr des
+     Resonanzfalles ein, erzeuge dazu eine Simulation“; zweite Fassung: Messwerte im Schaltbild, Zeigerbilder für
+     Ströme UND Spannungen in beiden Schaltungen; dritte Fassung: Vielfache unter den Messwerten, von Carlo mit
+     „mach mal fertig“ freigegeben). Einziger Messplatz des Blocks (der Kipppunkt entfällt).
+     20.11.2026 vor dem Hochladen: Formelzeichen nach Tabellenbuch S. 40, 41 und 328 und nach dem roten Faden der
+       Einheit (Block 3 und 4): Wirkspannung U_w (Lampe), induktive Blindspannung U_bL (Drossel), kapazitive
+       Blindspannung U_bC und kapazitiver Blindstrom I_bC (Kondensator); I_L bleibt der Strom durch Drossel L und Lampe
+       (kein reiner Blindstrom). Rechenmodell, Anzeigen, Schaltbild, Zeigerbilder und Vielfache unverändert.
+     Fall: Leuchtstofflampe mit Vorschaltgerät aus der Prüfung Winter 2017/18 SE 7 (Aufgabe 7 und Hausaufgabe 3):
+       230 V, 50 Hz, ohne Kondensator 0,25 A bei cos φ = 0,45 induktiv. Ersatzschaltung: Wirkwiderstand R (Lampe mit
+       den Verlusten des Vorschaltgeräts) in Reihe mit der Induktivität L der Drossel.
+       Z = 230 V / 0,25 A = 920 Ω; R = Z · cos φ = 414 Ω; X_L = Z · sin φ = 821,59 Ω.
+     Was die Schüler selbst sehen sollen (die Seite nennt es nicht):
+       (1) Kondensator parallel: cos φ ab 0,900 bei 2,34 µF, 0,980 bei 2,77 µF, 1,000 ab 3,05 µF (genau 3,09 µF):
+           das letzte Zehntel kostet viel Kapazität und senkt den Strom kaum. Bei cos φ = 1 ist der Strom in der
+           Zuleitung am kleinsten (0,113 A), Strom im Kondensator (0,220 bis 0,226 A) und durch Drossel und Lampe
+           (0,250 A) je etwa doppelt so groß: Stromüberhöhung. Strom und Spannungen an Lampe und Drossel bleiben
+           1,0-fach. Mit 5,00 µF überkompensiert: 0,632 kapazitiv, 0,178 A.
+       (2) Kondensator in Reihe: Bei C = 3,87 µF heben sich X_L und X_C auf; nur R begrenzt den Strom: 0,556 A statt
+           0,25 A, Wirkleistung 127,8 W statt 25,9 W, an Drossel und Kondensator je rund 456 V, fast die doppelte
+           Netzspannung, an der Lampe die ganze Netzspannung 230 V statt 104 V: Spannungsüberhöhung.
+     Fachliche Einordnung (für den Verlaufsplan, nicht auf der Seite): Bei Parallelkompensation an einem starren Netz
+       ist die Resonanz bei 50 Hz für die Bauteile unschädlich; die Gefahren der Parallelkompensation liegen bei
+       Überkompensation (Spannung steigt an, Fachkunde S. 472) und bei Oberschwingungen (Resonanz mit der
+       Netzinduktivität, Fachkunde S. 167, Block 9).
+     Vorlagen: Fachkunde S. 164 Bild 1 (Versuch Leuchtstofflampe mit Kondensator), S. 165, S. 151 bis 153 (Reihen- und
+       Parallelschwingkreis); Tabellenbuch S. 40 und 41 (Resonanz X_L = X_C), S. 328 (Reihenkompensation:
+       Spannungsüberhöhung an den Bauteilen); Prüfung Winter 2017/18 SE 7 (Werte der Lampe).
+     Gefahrenanzeige (dritte Fassung, Carlo 13.11.: „die Probleme zeigen, wenn cos φ 1 ist, nicht schon lange davor“):
+       In Reihe gilt I = U · cos φ / R; Strom, Lampen- und Drosselspannung wachsen im Verhältnis von cos φ, die
+       Wirkleistung mit cos² φ. Unter I_L, U_w, U_bL und P steht deshalb das Vielfache des Werts ohne Kondensator
+       (0,25 A; 104 V; 205 V; 25,9 W). I_L, U_w und U_bL rot, sobald die Anzeige „2,0-fach“ oder mehr zeigt (ab
+       1,95-fach; die Leistung, das Quadrat davon, nur als Angabe): Lampe und Drossel werden dann rund viermal so
+       heiß. In Reihe ist das ab cos φ ≈ 0,88 (C 3,04 bis 5,34 µF), Höchstwert bei cos φ = 1: 2,2-fach (Leistung
+       4,9-fach). Keine Warnung an U_bC: Ihr Höchstwert liegt nicht bei der Resonanz, sondern bei 3,09 µF
+       (511 V, X_C = Z² / X_L); bei der Resonanz 457 V.
+     Anzeigen: Ströme in A mit drei Nachkommastellen, cos φ mit drei (dazu induktiv oder kapazitiv, bei 1,000 keine
+       Angabe), Wirkleistung in W mit einer, Spannungen in V ganzzahlig, Vielfache mit einer Nachkommastelle.
+     Zeigerbilder: Bezug bei Parallelschaltung die gemeinsame Spannung U (waagerecht), bei Reihenschaltung der
+       gemeinsame Strom I (waagerecht). Maßstab in beiden Schaltungen gleich: Kästchen 0,05 A und 50 V; Kreise mit
+       dem Halbmesser 0,25 A (ohne Kondensator, grau), 0,50 A (das Doppelte, rot) und 230 V (Netzspannung).
+     Einstellbereich: C 0 bis 8,00 µF in Schritten von 0,01 µF, Schaltung parallel oder in Reihe.
+       Grenzfälle: parallel C = 0 (ohne Kondensator), parallel 3,09 µF, in Reihe 3,87 µF, in Reihe C = 0 (Stromkreis
+       offen, kein Strom, ganze Netzspannung am Kondensator).
+     Startstellung neutral: parallel, C = 0,50 µF (keine Einstellung einer Aufgabe).
+     Prüfmodus ?pruefen: Anzeigen der Grenzfälle als JSON in #pruefbericht. -->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messplatz Resonanz (B06)</title>
+<script type="application/json" id="sim-meta">{"startwerte":{"schaltung":"parallel","C_uF":0.5},"loesungswerte":{"parallel, kleinste C mit cos φ ab 0,900 induktiv":{"C":"2,34 µF","I":"0,125 A"},"parallel, kleinste C mit cos φ ab 0,980 induktiv":{"C":"2,77 µF","I":"0,115 A"},"parallel, kleinste C mit cos φ = 1,000":{"C":"3,05 µF","I":"0,113 A","I_bC":"0,220 A","I_L":"0,250 A (1,0-fach)","U_w":"104 V (1,0-fach)","U_bL":"205 V (1,0-fach)","U_bC":"230 V"},"parallel, 5,00 µF":{"cos":"0,632 kapazitiv","I":"0,178 A"},"parallel, 1,00 µF (Prüfung Winter 2017/18 SE 7)":{"cos":"0,597 induktiv","I":"0,188 A"},"Reihe, größter Strom":{"C":"3,85 bis 3,90 µF","I":"0,556 A (2,2-fach)","P":"127,8 W (4,9-fach)","U_w":"230 V (2,2-fach)","U_bL":"456 V (2,2-fach)","U_bC":"453 bis 459 V"},"Reihe, rot":{"C":"3,04 bis 5,34 µF","cos":"ab 0,88"}},"quelle":"Tabellenbuch Elektrotechnik S. 40, 41 und 328; Prüfung Winter 2017/18 SE 7"}</script>
+<style>
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ :root{--ink:#1A2530;--kupfer:#A34E0E;--kupferhell:#F5EBDF;--hell:#F4F6F8;--linie:#9AA5AE;--grau:#5A666F;--gruen:#2F7D62;--blau:#2557A3;--rot:#B3261E;--rothell:#FBE9E7}
+ html,body{margin:0;padding:0}
+ body{font-family:'Noto Sans',system-ui,Arial,sans-serif;color:var(--ink);background:#eef2f5;font-size:16px;line-height:1.45;padding:14px 10px 40px}
+ .wrap{max-width:1100px;margin:0 auto;background:#fff;border:1px solid var(--linie);padding:16px 18px 22px}
+ .kopf{border-top:4px solid var(--kupfer);border-bottom:1px solid var(--ink);padding:8px 0;margin-bottom:12px}
+ .kopf .reihe{font-size:12px;letter-spacing:.06em;color:var(--kupfer);font-weight:700}
+ .kopf h1{font-size:22px;margin:3px 0 0}
+ .anleitung{background:var(--kupferhell);border:1.2px solid var(--ink);padding:9px 12px;font-size:15px;margin-bottom:12px}
+ .fz{font-family:Cambria,Caladea,'Noto Serif',Georgia,serif;font-style:italic}
+ .buehne{display:grid;grid-template-columns:1fr;gap:12px;align-items:start;
+         grid-template-areas:"messwerte" "bedienung" "bilder"}
+ .bilder{grid-area:bilder} .messwerte{grid-area:messwerte} .bedienung{grid-area:bedienung}
+ @media(min-width:900px){.buehne{grid-template-columns:1.2fr 1fr;grid-template-rows:auto 1fr;grid-template-areas:"bilder messwerte" "bilder bedienung"} .bedienung{align-self:start}}
+ .bilder svg{width:100%;height:auto;display:block;border:1px solid var(--linie);background:#fff}
+ .bilder .stapel{display:grid;grid-template-columns:1fr;gap:10px}
+ .zeiger{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+ .legende{font-size:13.5px;color:var(--grau);margin:2px 0 4px}
+ .messwerte{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;background:#fff}
+ .kachel{border:1.4px solid var(--ink);background:var(--hell);padding:4px 5px;text-align:center;min-width:0}
+ .kachel.warn{border-color:var(--rot);background:var(--rothell)}
+ .kachel .name{display:block;font-size:16px;font-weight:700;color:var(--ink)}
+ .kachel .ort{display:block;font-size:12px;color:var(--grau);line-height:1.2;min-height:29px}
+ .kachel .zahl{display:block;font-variant-numeric:tabular-nums;font-size:22px;font-weight:700;white-space:nowrap}
+ .kachel .art{display:block;font-size:12.5px;font-weight:700;color:var(--kupfer);min-height:17px;line-height:1.25}
+ .kachel.warn .art{color:var(--rot)}
+ .lcd{background:#20313a;color:#9BF0B4;font-variant-numeric:tabular-nums;font-size:28px;font-weight:700;padding:6px 12px;border-radius:4px;text-align:right}
+ .lcd small{font-size:16px;color:#cfe;font-weight:400;float:left;margin-top:8px}
+ input[type=range]{width:100%;height:44px;accent-color:var(--kupfer);margin:6px 0 2px}
+ .knoepfe{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+ button{font:inherit;font-size:16px;min-height:48px;min-width:48px;padding:6px 8px;border:1.4px solid var(--kupfer);background:#fff;color:var(--kupfer);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+ button.wahl{flex:1 1 140px;font-weight:700}
+ button.wahl[aria-pressed="true"]{background:var(--kupfer);color:#fff}
+ button.zurueck{border-color:var(--ink);color:var(--ink)}
+ .schritte button{flex:1 1 44px;font-weight:700;padding:6px 2px}
+ .titel{font-size:15px;font-weight:700;margin:10px 0 4px}
+ .titel:first-child{margin-top:0}
+ .hinweis{font-size:14px;color:var(--grau);margin-top:12px}
+ #pruefbericht{display:none}
+ @media(max-width:899px){.messwerte{position:sticky;top:0;z-index:5;padding:6px 0;box-shadow:0 6px 6px -6px rgba(0,0,0,.25)}}
+ @media(max-width:560px){.zeiger{grid-template-columns:1fr}}
+ @media(max-width:420px){.wrap{padding:12px 8px 18px} .messwerte{gap:4px} .kachel{padding:3px 2px} .kachel .zahl{font-size:16.5px}
+   .kachel .name{font-size:14px} .kachel .ort{font-size:10px;min-height:24px} .kachel .art{font-size:10.5px;min-height:14px}
+   .lcd{font-size:24px} button{font-size:15px} .anleitung{font-size:14px}}
+ @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+ <div class="kopf"><div class="reihe">E3EG · B06</div><h1>Messplatz: Kondensator und Drossel einer Leuchtstofflampe</h1></div>
+ <div class="anleitung"><b>So messen Sie:</b> Eine Leuchtstofflampe mit Vorschaltgerät liegt am Netz 230 V, 50 Hz.
+  Ohne Kondensator nimmt sie 0,25 A bei cos <span class="fz">φ</span> = 0,45 auf. Schalten Sie einen Kondensator
+  parallel oder in Reihe zu Lampe und Drossel und stellen Sie seine Kapazität <span class="fz">C</span> ein. Lesen Sie
+  die Messgeräte ab. Unter einigen Werten steht, das Wievielfache des Werts ohne Kondensator es ist; rot heißt:
+  mindestens das Doppelte.</div>
+
+ <div class="buehne">
+  <div class="bilder"><div class="stapel">
+   <svg viewBox="0 0 640 330" role="img" id="schaltbild"
+    data-quelle="Ersatzschaltung der Leuchtstofflampe mit Vorschaltgerät (Wirkwiderstand und Drossel in Reihe), Kondensator parallel oder in Reihe nach Tabellenbuch S. 328"
+    aria-label="Schaltplan mit Messwerten, je nach Wahl: Netz 230 V, 50 Hz; Strommesser in der Zuleitung; Lampe als Wirkwiderstand in Reihe mit der Drossel des Vorschaltgeräts; Kondensator parallel zu beiden oder in Reihe davor; Spannungsmesser an Kondensator, Drossel und Lampe.">
+    <g id="sb"></g>
+   </svg>
+   <div class="zeiger">
+    <div><svg viewBox="0 0 320 320" role="img" id="zbI" aria-label="Zeigerbild der Ströme"><g id="gI"></g></svg>
+     <div class="legende" id="lgI"></div></div>
+    <div><svg viewBox="0 0 320 320" role="img" id="zbU" aria-label="Zeigerbild der Spannungen"><g id="gU"></g></svg>
+     <div class="legende" id="lgU"></div></div>
+   </div>
+   <svg viewBox="0 0 640 300" role="img" id="kurve"
+    aria-label="Diagramm: Strom in der Zuleitung über der Kapazität des Kondensators für die gewählte Schaltung; ein Punkt markiert die Einstellung.">
+    <g id="kv"></g>
+   </svg>
+   <div class="legende">Strom <span class="fz">I</span> in der Zuleitung über der Kapazität <span class="fz">C</span> für die
+    gewählte Schaltung; der Punkt ist Ihre Einstellung.</div>
+  </div></div>
+
+  <div class="messwerte" aria-live="polite">
+   <div class="kachel" id="kI"><span class="name"><span class="fz">I</span></span><span class="ort">Strom in der Zuleitung</span><span class="zahl" id="mI"></span><span class="art"></span></div>
+   <div class="kachel" id="kCos"><span class="name">cos <span class="fz">φ</span></span><span class="ort">Wirkfaktor am Netz</span><span class="zahl" id="mCos"></span><span class="art" id="mCosArt"></span></div>
+   <div class="kachel" id="kP"><span class="name"><span class="fz">P</span></span><span class="ort">Wirkleistung</span><span class="zahl" id="mP"></span><span class="art" id="mPArt"></span></div>
+   <div class="kachel" id="kIC"><span class="name"><span class="fz">I</span><sub>bC</sub></span><span class="ort">Strom im Kondensator</span><span class="zahl" id="mIC"></span><span class="art"></span></div>
+   <div class="kachel" id="kIL"><span class="name"><span class="fz">I</span><sub>L</sub></span><span class="ort">Strom durch Drossel und Lampe</span><span class="zahl" id="mIL"></span><span class="art" id="mILArt"></span></div>
+   <div class="kachel" id="kUR"><span class="name"><span class="fz">U</span><sub>w</sub></span><span class="ort">Spannung an der Lampe</span><span class="zahl" id="mUR"></span><span class="art" id="mURArt"></span></div>
+   <div class="kachel" id="kUL"><span class="name"><span class="fz">U</span><sub>bL</sub></span><span class="ort">Spannung an der Drossel</span><span class="zahl" id="mUL"></span><span class="art" id="mULArt"></span></div>
+   <div class="kachel" id="kUC"><span class="name"><span class="fz">U</span><sub>bC</sub></span><span class="ort">Spannung am Kondensator</span><span class="zahl" id="mUC"></span><span class="art"></span></div>
+  </div>
+
+  <div class="bedienung">
+   <div class="titel">Schaltung des Kondensators</div>
+   <div class="knoepfe">
+    <button type="button" class="wahl" id="bPar" aria-pressed="true">parallel</button>
+    <button type="button" class="wahl" id="bRei" aria-pressed="false">in Reihe</button>
+   </div>
+   <div class="titel">Kapazität des Kondensators</div>
+   <div class="lcd" id="aC" aria-live="polite"></div>
+   <input type="range" id="rc" min="0" max="8" step="0.01" value="0.5" aria-label="Kapazität in Mikrofarad">
+   <div class="knoepfe schritte">
+    <button type="button" id="c1m" aria-label="1 Mikrofarad weniger">◀ 1</button>
+    <button type="button" id="c01m" aria-label="0,1 Mikrofarad weniger">◀ 0,1</button>
+    <button type="button" id="c001m" aria-label="0,01 Mikrofarad weniger">◀ 0,01</button>
+    <button type="button" id="c001p" aria-label="0,01 Mikrofarad mehr">0,01 ▶</button>
+    <button type="button" id="c01p" aria-label="0,1 Mikrofarad mehr">0,1 ▶</button>
+    <button type="button" id="c1p" aria-label="1 Mikrofarad mehr">1 ▶</button>
+   </div>
+   <div class="titel">Neu beginnen</div>
+   <div class="knoepfe"><button class="zurueck" id="bReset" type="button">Zurücksetzen</button></div>
+  </div>
+ </div>
+
+ <div class="hinweis">Die Netzspannung ist fest 230 V. Die Lampe ist mit den Verlusten des Vorschaltgeräts als
+  Wirkwiderstand <span class="fz">R</span> dargestellt, die Drossel als Induktivität <span class="fz">L</span>.
+  Grob mit dem Schieber, genau mit den Tasten einstellen.</div>
+ <pre id="pruefbericht"></pre>
+</div>
+
+<script>
+(function(){
+"use strict";
+var U=230, F=50, W=2*Math.PI*F;                 // Netz
+var Z0=U/0.25, COS0=0.45;                       // Lampe mit Vorschaltgerät ohne Kondensator
+var R=Z0*COS0, XL=Z0*Math.sqrt(1-COS0*COS0);    // 414 Ω; 821,59 Ω
+var I0=0.25, UR0=I0*R, UL0=I0*XL, P0=I0*I0*R;  // Werte ohne Kondensator: 0,25 A; 103,5 V; 205,4 V; 25,9 W
+var START={par:true,c:0.5};                     // parallel, µF
+var z={par:START.par,c:START.c};
+var $=function(id){return document.getElementById(id);};
+
+// ---------------- Rechenmodell (komplexe Wechselstromrechnung, Zeiger als [re, im]) ----------------
+// Parallel: Bezug U = [230, 0]. Reihe: Bezug I waagerecht.
+function zustand(s){
+  var c=s.c*1e-6, b=W*c;                         // Blindleitwert des Kondensators in S
+  if(s.par){
+    var zz=R*R+XL*XL, gL=R/zz, bL=-XL/zz;        // Leitwert des Zweigs Drossel und Lampe
+    var iL=[U*gL,U*bL], iC=[0,U*b], i=[iL[0]+iC[0],iL[1]+iC[1]];
+    var I=Math.hypot(i[0],i[1]), IL=Math.hypot(iL[0],iL[1]);
+    var eL=[iL[0]/IL,iL[1]/IL];                  // Richtung von I_L
+    return {par:true,I:I,IL:IL,IC:U*b,UL:IL*XL,UR:IL*R,UC:U,P:IL*IL*R,
+            cos:I>0?i[0]/I:null,ind:i[1]<0,
+            zI:{iL:iL,iC:iC,i:i},
+            zU:{ur:[IL*R*eL[0],IL*R*eL[1]],ul:[-IL*XL*eL[1],IL*XL*eL[0]],u:[U,0]}};
+  }
+  if(b===0) return {par:false,I:0,IL:0,IC:0,UL:0,UR:0,UC:U,P:0,cos:null,ind:false,offen:true};
+  var xc=1/b, x=XL-xc, Zb=Math.hypot(R,x), I2=U/Zb;
+  return {par:false,I:I2,IL:I2,IC:I2,UL:I2*XL,UR:I2*R,UC:I2*xc,P:I2*I2*R,cos:R/Zb,ind:x>0,
+          zI:{i:[I2,0]},
+          zU:{ur:[I2*R,0],ul:[0,I2*XL],uc:[0,-I2*xc],u:[I2*R,I2*x]}};
+}
+function zahl(x,st,einheit){
+  var s=(Math.round(x*Math.pow(10,st)+1e-9)/Math.pow(10,st)).toFixed(st);
+  if(/^-0[.,]?0*$/.test(s)) s=s.slice(1);
+  return s.replace("-","−").replace(".",",")+(einheit?" "+einheit:"");
+}
+function anzeigen(s){
+  var w=zustand(s), a={};
+  a.I=zahl(w.I,3,"A"); a.IL=zahl(w.IL,3,"A"); a.IC=zahl(w.IC,3,"A");
+  a.UR=zahl(w.UR,0,"V"); a.UL=zahl(w.UL,0,"V"); a.UC=zahl(w.UC,0,"V"); a.P=zahl(w.P,1,"W");
+  if(w.cos===null){ a.cos=""; a.cosArt="kein Strom"; }
+  else { a.cos=zahl(w.cos,3,""); a.cosArt=a.cos==="1,000"?"":(w.ind?"induktiv":"kapazitiv"); }
+  // Vielfache des Werts ohne Kondensator; Strom und Spannungen rot ab dem angezeigten Doppelten, Leistung nur Angabe
+  var fI=w.IL/I0, fP=w.P/P0, f=function(x){ return zahl(x,1,"")+"-fach"; };
+  a.fI=f(fI); a.fUR=f(w.UR/UR0); a.fUL=f(w.UL/UL0); a.fP=f(fP);
+  a.rot=(Math.round(fI*10+1e-9)>=20);           // rot, sobald die Anzeige „2,0-fach“ oder mehr zeigt
+  return a;
+}
+
+// ---------------- Zeichnen ----------------
+var NS="http://www.w3.org/2000/svg", ROT="#B3261E";
+function el(n,a,t){ var e=document.createElementNS(NS,n); for(var k in a) e.setAttribute(k,a[k]); if(t!==undefined) e.textContent=t; return e; }
+function leer(g){ while(g.firstChild) g.removeChild(g.firstChild); }
+function linie(g,pts,farbe,b,strich){ var e=el("polyline",{points:pts,fill:"none",stroke:farbe||"#1A2530","stroke-width":b||2.4,"stroke-linecap":"round","stroke-linejoin":"round"}); if(strich) e.setAttribute("stroke-dasharray",strich); g.appendChild(e); }
+function punkt(g,x,y){ g.appendChild(el("circle",{cx:x,cy:y,r:4.3,fill:"#1A2530"})); }
+function text(g,x,y,t,gr,anker,farbe,fett){ g.appendChild(el("text",{x:x,y:y,"font-size":gr||20,"font-family":"Arial,sans-serif","text-anchor":anker||"start",fill:farbe||"#1A2530","font-weight":fett?"700":"400"},t)); }
+function wert(g,x,y,t,anker,warn){ g.appendChild(el("text",{x:x,y:y,"font-size":19,"font-family":"Arial,sans-serif","font-weight":"700","text-anchor":anker||"start",fill:warn?ROT:"#A34E0E"},t)); }
+function fz(g,x,y,haupt,index,farbe,anker,gr){
+  var t=el("text",{x:x,y:y,"font-size":gr||24,"font-family":"Cambria,Caladea,'Noto Serif',Georgia,serif","font-style":"italic","font-weight":"700",fill:farbe||"#A34E0E","text-anchor":anker||"start"},haupt);
+  if(index){ t.appendChild(el("tspan",{"font-size":Math.round((gr||24)*0.7),"font-style":"normal","font-family":"Arial,sans-serif",dy:"6"},index)); }
+  g.appendChild(t);
+}
+function kondS(g,x,y1,y2){ var m=(y1+y2)/2; linie(g,[x,y1,x,m-6]); linie(g,[x,m+6,x,y2]);
+  linie(g,[x-16,m-6,x+16,m-6],null,3.2); linie(g,[x-16,m+6,x+16,m+6],null,3.2); }
+function kondW(g,x1,x2,y){ var m=(x1+x2)/2; linie(g,[x1,y,m-6,y]); linie(g,[m+6,y,x2,y]);
+  linie(g,[m-6,y-16,m-6,y+16],null,3.2); linie(g,[m+6,y-16,m+6,y+16],null,3.2); }
+function drosselS(g,x,y1,y2){ var h=(y2-y1-48)/2, a=y1+h; linie(g,[x,y1,x,a]); linie(g,[x,a+48,x,y2]);
+  var d="M "+x+" "+a; for(var k=0;k<4;k++) d+=" a 6 6 0 0 1 0 12"; g.appendChild(el("path",{d:d,fill:"none",stroke:"#1A2530","stroke-width":2.4})); }
+function drosselW(g,x1,x2,y){ var w=(x2-x1-48)/2, a=x1+w; linie(g,[x1,y,a,y]); linie(g,[a+48,y,x2,y]);
+  var d="M "+a+" "+y; for(var k=0;k<4;k++) d+=" a 6 6 0 0 1 12 0"; g.appendChild(el("path",{d:d,fill:"none",stroke:"#1A2530","stroke-width":2.4})); }
+function widerS(g,x,y1,y2){ var m=(y1+y2)/2; linie(g,[x,y1,x,m-26]); linie(g,[x,m+26,x,y2]);
+  g.appendChild(el("rect",{x:x-11,y:m-26,width:22,height:52,fill:"#fff",stroke:"#1A2530","stroke-width":2.4})); }
+function messer(g,x,y,b){ g.appendChild(el("circle",{cx:x,cy:y,r:16,fill:"#fff",stroke:"#1A2530","stroke-width":2.4}));
+  text(g,x,y+7,b,20,"middle","#1A2530",true); }
+
+function schaltbild(){
+  var g=$("sb"), a=anzeigen(z); leer(g);
+  text(g,14,68,"L",22,"start","#1A2530",true); text(g,14,308,"N",22,"start","#1A2530",true);
+  text(g,14,170,"230 V",20,"start","#5A666F"); text(g,14,195,"50 Hz",20,"start","#5A666F");
+  linie(g,[38,60,84,60]); messer(g,100,60,"A"); fz(g,94,34,"I","","#A34E0E","start",22);
+  wert(g,100,102,a.I,"middle",!z.par&&a.rot);
+  if(z.par){
+    linie(g,[116,60,364,60]); linie(g,[396,60,470,60]); linie(g,[38,300,470,300]);
+    punkt(g,250,60); punkt(g,250,300);
+    // Zweig Kondensator x = 250
+    linie(g,[250,60,250,94]); messer(g,250,110,"A"); fz(g,228,116,"I","bC","#2557A3","end",22); wert(g,228,140,a.IC,"end");
+    kondS(g,250,126,300); fz(g,228,222,"C","","#2557A3","end");
+    linie(g,[250,166,330,166,330,197],"#1A2530",1.6); messer(g,330,213,"V"); linie(g,[330,229,330,260,250,260],"#1A2530",1.6);
+    fz(g,354,206,"U","bC","#2557A3",null,22); wert(g,354,230,a.UC,"start");
+    // Zweig Drossel und Lampe x = 470
+    messer(g,380,60,"A"); fz(g,374,34,"I","L","#A34E0E","start",22); wert(g,380,102,a.IL,"middle",a.rot);
+    drosselS(g,470,60,190); widerS(g,470,190,300);
+    linie(g,[470,82,560,82,560,109],"#1A2530",1.6); messer(g,560,125,"V"); linie(g,[560,141,560,170,470,170],"#1A2530",1.6);
+    fz(g,584,122,"U","bL","#A34E0E",null,22); wert(g,584,146,a.UL,"start",a.rot);
+    fz(g,452,132,"L","","#1A2530","end",22); text(g,452,156,"Vorschalt-",15,"end","#5A666F"); text(g,452,174,"gerät",15,"end","#5A666F");
+    linie(g,[470,206,560,206,560,229],"#1A2530",1.6); messer(g,560,245,"V"); linie(g,[560,261,560,284,470,284],"#1A2530",1.6);
+    fz(g,584,242,"U","w","#1A2530",null,22); wert(g,584,266,a.UR,"start",a.rot);
+    fz(g,452,252,"R","","#1A2530","end",22); text(g,452,276,"Lampe",15,"end","#5A666F");
+  } else {
+    linie(g,[116,60,140,60]); kondW(g,140,240,60); fz(g,190,34,"C","","#2557A3","middle");
+    linie(g,[150,60,150,120,174,120],"#1A2530",1.6); messer(g,190,120,"V"); linie(g,[206,120,230,120,230,60],"#1A2530",1.6);
+    fz(g,190,166,"U","bC","#2557A3","middle",22); wert(g,190,190,a.UC,"middle");
+    linie(g,[240,60,290,60]); drosselW(g,290,410,60); fz(g,350,34,"L","","#1A2530","middle",22);
+    linie(g,[300,60,300,120,334,120],"#1A2530",1.6); messer(g,350,120,"V"); linie(g,[366,120,400,120,400,60],"#1A2530",1.6);
+    fz(g,350,166,"U","bL","#A34E0E","middle",22); wert(g,350,190,a.UL,"middle",a.rot);
+    text(g,350,236,"Vorschaltgerät",15,"middle","#5A666F");
+    linie(g,[410,60,560,60]); widerS(g,560,60,300);
+    linie(g,[560,96,486,96,486,164],"#1A2530",1.6); messer(g,486,180,"V"); linie(g,[486,196,486,264,560,264],"#1A2530",1.6);
+    fz(g,462,184,"U","w","#1A2530","end",22); wert(g,462,208,a.UR,"end",a.rot);
+    fz(g,584,186,"R","","#1A2530","start",22); text(g,584,208,"Lampe",15,"start","#5A666F");
+    linie(g,[38,300,560,300]);
+  }
+}
+
+// Zeigerbilder: gleicher Maßstab in beiden Schaltungen
+var SI=360, SU=0.32;                             // px je A (0,05 A = 18 px); px je V (50 V = 16 px)
+function pfeil(g,x1,y1,x2,y2,farbe,breite){
+  var l=Math.hypot(x2-x1,y2-y1); if(l<2) return;
+  var ux=(x2-x1)/l, uy=(y2-y1)/l, s=Math.min(14,l*0.45);
+  g.appendChild(el("line",{x1:x1,y1:y1,x2:x2-ux*s*0.8,y2:y2-uy*s*0.8,stroke:farbe,"stroke-width":breite,"stroke-linecap":"round"}));
+  g.appendChild(el("polygon",{points:[x2,y2, x2-ux*s-uy*s*0.45,y2-uy*s+ux*s*0.45, x2-ux*s+uy*s*0.45,y2-uy*s-ux*s*0.45].join(" "),fill:farbe}));
+}
+function raster(g,x0,y0,schritt){
+  for(var x=x0%schritt;x<=320;x+=schritt) linie(g,[x,0,x,320],"#E9EDF0",1);
+  for(var y=y0%schritt;y<=320;y+=schritt) linie(g,[0,y,320,y],"#E9EDF0",1);
+}
+function kreis(g,x,y,r,farbe,beschr,bx,by){
+  g.appendChild(el("circle",{cx:x,cy:y,r:r,fill:"none",stroke:farbe,"stroke-width":1.4,"stroke-dasharray":"4 4"}));
+  text(g,bx,by,beschr,14,"start",farbe);
+}
+function bezug(g,y0,haupt){
+  linie(g,[6,y0,314,y0],"#5A666F",1.4,"7 5"); if(haupt) fz(g,314,y0-8,haupt,"","#5A666F","end",20);
+}
+function lim(v){ return Math.max(4,Math.min(316,v)); }
+function zeigerStroeme(w){
+  var g=$("gI"); leer(g);
+  var X0=110,Y0=z.par?205:160;
+  raster(g,X0,Y0,18); kreis(g,X0,Y0,I0*SI,"#5A666F","",0,0); text(g,X0-I0*SI*0.72-4,Y0-I0*SI*0.72-4,"0,25 A",14,"end","#5A666F");
+  kreis(g,X0,Y0,2*I0*SI,ROT,"",0,0); text(g,X0+2*I0*SI*0.87+4,Y0+2*I0*SI*0.5+16,"0,50 A",14,"start",ROT);
+  if(z.par){
+    bezug(g,Y0,"U");
+    var t=w.zI, ax=X0+t.iL[0]*SI, ay=lim(Y0-t.iL[1]*SI), ex=X0+t.i[0]*SI, ey=lim(Y0-t.i[1]*SI);
+    pfeil(g,X0,Y0,ax,ay,"#A34E0E",4);
+    pfeil(g,ax+8,ay,ax+8,lim(ay-t.iC[1]*SI),"#2557A3",4);
+    pfeil(g,X0,Y0,ex,ey,"#2F7D62",4.5);
+    fz(g,(X0+ax)/2-10,(Y0+ay)/2+12,"I","L","#A34E0E","end",22);
+    fz(g,ax+18,(ay+lim(ay-t.iC[1]*SI))/2+8,"I","bC","#2557A3","start",22);
+    fz(g,(X0+ex)/2+(ey<Y0-20?-10:0),(ey<Y0-20?(Y0+ey)/2:Y0-10),"I","","#2F7D62",ey<Y0-20?"end":"middle",22);
+    $("lgI").innerHTML="Ströme, Bezug ist die gemeinsame Spannung <span class='fz'>U</span>. Kästchen 0,05 A; grauer Kreis: 0,25 A wie ohne Kondensator, roter Kreis: das Doppelte.";
+  } else {
+    bezug(g,Y0,"I");
+    if(!w.offen){
+      // Richtung der Netzspannung (eilt dem Strom bei induktiver Last voraus)
+      var ph=Math.atan2(w.zU.u[1],w.zU.u[0]);
+      linie(g,[X0,Y0,X0+150*Math.cos(ph),Y0-150*Math.sin(ph)],"#2F7D62",1.6,"6 5");
+      var klein=Math.abs(ph)<0.2, lx=X0+(klein?60:120*Math.cos(ph))+8, ly=klein?Y0-16:Y0-120*Math.sin(ph)+8;
+      fz(g,Math.max(10,Math.min(300,lx)),Math.max(22,Math.min(312,ly)),"U","","#2F7D62","start",20);
+      pfeil(g,X0,Y0,X0+w.I*SI,Y0,"#A34E0E",4.5);
+      fz(g,X0+w.I*SI/2,Y0+30,"I","","#A34E0E","middle",22);
+    } else text(g,X0+10,Y0+34,"kein Strom",16,"start","#5A666F");
+    $("lgI").innerHTML="Strom, derselbe in allen Bauteilen; gestrichelt die Richtung der Netzspannung <span class='fz'>U</span>. Kästchen 0,05 A; grauer Kreis: 0,25 A wie ohne Kondensator, roter Kreis: das Doppelte.";
+  }
+}
+function zeigerSpannungen(w){
+  var g=$("gU"); leer(g);
+  var X0=z.par?110:70,Y0=z.par?175:180;
+  raster(g,X0,Y0,16); kreis(g,X0,Y0,U*SU,"#5A666F","230 V",X0+U*SU*0.72+4,Y0+U*SU*0.72+14);
+  if(z.par){
+    bezug(g,Y0,"");
+    var t=w.zU, rx=X0+t.ur[0]*SU, ry=Y0-t.ur[1]*SU, ex=X0+t.u[0]*SU;
+    pfeil(g,X0,Y0,rx,ry,"#1A2530",4);
+    pfeil(g,rx,ry,ex,Y0,"#A34E0E",4);
+    pfeil(g,X0,Y0-7,ex,Y0-7,"#2F7D62",4.5);
+    fz(g,(X0+rx)/2-8,(Y0+ry)/2+12,"U","w","#1A2530","end",22);
+    fz(g,(rx+ex)/2+12,(ry+Y0)/2+16,"U","bL","#A34E0E","start",22);
+    fz(g,X0-8,Y0-12,"U = U","bC","#2F7D62","end",20);
+    $("lgU").innerHTML="Spannungen, Bezug ist die gemeinsame Spannung <span class='fz'>U</span> = <span class='fz'>U</span><sub>bC</sub>. Kästchen 50 V; grauer Kreis: Netzspannung 230 V.";
+  } else {
+    bezug(g,Y0,"I");
+    if(!w.offen){
+      var u=w.zU, xr=X0+u.ur[0]*SU, yl=lim(Y0-u.ul[1]*SU), ye=lim(Y0-u.u[1]*SU);
+      pfeil(g,X0,Y0,xr,Y0,"#1A2530",4);
+      pfeil(g,xr,Y0,xr,yl,"#A34E0E",4);
+      pfeil(g,xr+9,yl,xr+9,ye,"#2557A3",4);
+      pfeil(g,X0,Y0,xr,ye,"#2F7D62",4.5);
+      // Beschriftung an Stellen, die sich auch bei kurzen Zeigern nicht überdecken
+      var unten=ye>Y0+26;                         // Zeiger U zeigt nach unten: U_R-Beschriftung über die Linie
+      if(xr-X0>=34) fz(g,(X0+xr)/2,unten?Y0-10:Y0+28,"U","w","#1A2530","middle",22); else fz(g,X0-6,Y0+7,"U","w","#1A2530","end",22);
+      fz(g,xr-10,(Y0-yl>60)?yl+(Y0-yl)*0.15+10:Math.max(20,yl-4),"U","bL","#A34E0E","end",22);
+      fz(g,xr+22,(yl+ye)/2+8,"U","bC","#2557A3","start",22);
+      if(Math.abs(ye-Y0)<26) fz(g,(X0+xr)/2,Y0-10,"U","","#2F7D62","middle",22);
+      else if(ye>Y0) fz(g,(X0+xr)/2-10,(Y0+ye)/2+12,"U","","#2F7D62","end",22);
+      else fz(g,(X0+xr)/2-6,(Y0+ye)/2-6,"U","","#2F7D62","end",22);
+    } else { pfeil(g,X0,Y0,X0,Y0-U*SU,"#2557A3",4); fz(g,X0+12,Y0-U*SU/2,"U","bC","#2557A3","start",22); }
+    $("lgU").innerHTML="Spannungen, Bezug ist der gemeinsame Strom <span class='fz'>I</span>. Kästchen 50 V; grauer Kreis: Netzspannung 230 V.";
+  }
+}
+
+// Kurve I über C für die gewählte Schaltung
+var KX0=70, KX1=610, KY0=250, KY1=24, CMAX=8, IMAX=0.6;
+function kx(c){ return KX0+(KX1-KX0)*c/CMAX; } function ky(i){ return KY0-(KY0-KY1)*Math.min(i,IMAX)/IMAX; }
+function kurve(){
+  var g=$("kv"); leer(g);
+  for(var c=0;c<=CMAX;c++){ linie(g,[kx(c),KY1,kx(c),KY0],"#E3E8EC",1); text(g,kx(c),KY0+22,String(c),16,"middle","#5A666F"); }
+  for(var k=0;k<=6;k++){ var i=k/10; linie(g,[KX0,ky(i),KX1,ky(i)],"#E3E8EC",1); text(g,KX0-8,ky(i)+5,zahl(i,1,""),16,"end","#5A666F"); }
+  linie(g,[KX0,ky(I0),KX1,ky(I0)],"#5A666F",1.4,"7 5"); text(g,KX1-4,ky(I0)-6,"0,25 A ohne Kondensator",15,"end","#5A666F");
+  linie(g,[KX0,ky(2*I0),KX1,ky(2*I0)],ROT,1.4,"7 5"); text(g,KX1-4,ky(2*I0)-6,"0,50 A, das Doppelte",15,"end",ROT);
+  linie(g,[KX0,KY0,KX1+14,KY0],"#1A2530",1.8); linie(g,[KX0,KY0,KX0,KY1-12],"#1A2530",1.8);
+  g.appendChild(el("polygon",{points:[KX1+20,KY0,KX1+8,KY0-5,KX1+8,KY0+5].join(" "),fill:"#1A2530"}));
+  g.appendChild(el("polygon",{points:[KX0,KY1-18,KX0-5,KY1-6,KX0+5,KY1-6].join(" "),fill:"#1A2530"}));
+  text(g,KX1-2,KY0+44,"in µF",16,"end","#1A2530"); fz(g,KX1-50,KY0+44,"C","","#1A2530","end",20);
+  fz(g,KX0+10,KY1-2,"I","","#1A2530","start",20); text(g,KX0+22,KY1-2,"in A",16,"start","#1A2530");
+  var pts=[]; for(var n=0;n<=400;n++){ var cc=CMAX*n/400; pts.push(kx(cc),ky(zustand({par:z.par,c:cc}).I)); }
+  linie(g,pts,"#A34E0E",3);
+  var w=zustand(z); g.appendChild(el("circle",{cx:kx(z.c),cy:ky(w.I),r:8,fill:"#2557A3",stroke:"#fff","stroke-width":2}));
+}
+
+// ---------------- Bedienung ----------------
+function kachel(id,warn){ $(id).classList.toggle("warn",!!warn); }
+function auffrischen(){
+  var a=anzeigen(z), w=zustand(z);
+  $("mI").textContent=a.I; $("mCos").textContent=a.cos; $("mCosArt").textContent=a.cosArt; $("mP").textContent=a.P;
+  $("mIC").textContent=a.IC; $("mIL").textContent=a.IL; $("mUR").textContent=a.UR; $("mUL").textContent=a.UL; $("mUC").textContent=a.UC;
+  $("mILArt").textContent=a.fI; $("mURArt").textContent=a.fUR; $("mULArt").textContent=a.fUL; $("mPArt").textContent=a.fP;
+  kachel("kIL",a.rot); kachel("kUR",a.rot); kachel("kUL",a.rot);
+  $("aC").innerHTML="<small><span class='fz'>C</span></small>"+zahl(z.c,2,"µF"); $("rc").value=z.c;
+  $("bPar").setAttribute("aria-pressed",z.par?"true":"false"); $("bRei").setAttribute("aria-pressed",z.par?"false":"true");
+  schaltbild(); zeigerStroeme(w); zeigerSpannungen(w); kurve();
+}
+function setzeC(c){ z.c=Math.max(0,Math.min(8,Math.round(c*100)/100)); auffrischen(); }
+$("rc").addEventListener("input",function(){ setzeC(+this.value); });
+[["c1m",-1],["c01m",-0.1],["c001m",-0.01],["c001p",0.01],["c01p",0.1],["c1p",1]].forEach(function(e){
+  $(e[0]).onclick=function(){ setzeC(z.c+e[1]); }; });
+$("bPar").onclick=function(){ z.par=true; auffrischen(); };
+$("bRei").onclick=function(){ z.par=false; auffrischen(); };
+$("bReset").onclick=function(){ z={par:START.par,c:START.c}; auffrischen(); };
+window.__stelle=function(par,c){ z={par:par,c:c}; auffrischen(); var a=anzeigen(z);
+  return [a.I,(a.cos+" "+a.cosArt).trim(),a.P+" "+a.fP,a.IC,a.IL+" "+a.fI+(a.rot?" (rot)":""),a.UR+" "+a.fUR,a.UL+" "+a.fUL,a.UC].join(" | "); };
+
+// ---------------- Prüfmodus ----------------
+if(/[?&]pruefen\b/.test(location.search)){
+  var bericht={};
+  [[true,0],[true,0.5],[true,1],[true,3.08],[true,3.09],[true,3.10],[true,8],
+   [false,0],[false,0.5],[false,1.94],[false,3.03],[false,3.04],[false,3.09],[false,3.86],[false,3.87],[false,3.88],[false,5.34],[false,5.35],[false,8]].forEach(function(e){
+    bericht[(e[0]?"parallel":"Reihe")+", C "+zahl(e[1],2,"µF")]=window.__stelle(e[0],e[1]); });
+  z={par:START.par,c:START.c};
+  $("pruefbericht").textContent=JSON.stringify(bericht);
+}
+auffrischen();
+})();
+</script>
+</body></html>
